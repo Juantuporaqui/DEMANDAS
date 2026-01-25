@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="24" fill="#0f172a"/>
+  <path d="M48 60h96v12H60v30h72v12H60v30h84v12H48V60z" fill="#2563eb"/>
+  <circle cx="144" cy="72" r="8" fill="#10b981"/>
+  <text x="96" y="170" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="16">CHALADITA</text>
+</svg>
