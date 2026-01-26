@@ -11,3 +11,4 @@ export {
   TimelineChart,
   MoneyFlowChart,
 } from './Charts';
+export { DesgloseHechos } from './DesgloseHechos';

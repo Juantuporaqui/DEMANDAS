@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Scale, Clock, FileWarning, Users, CheckSquare, Banknote } from 'lucide-react';
+import { Scale, Clock, FileWarning, Users, CheckSquare, Banknote, ListChecks } from 'lucide-react';
 import {
   Header,
   Card,
@@ -9,13 +9,15 @@ import {
   SalaryComparisonChart,
   ComparisonTable,
   MoneyFlowChart,
+  DesgloseHechos,
 } from '../components';
 import { procedimientos, checklistAudienciaPrevia, comparativaDoc25 } from '../data/procedimientos';
 import { nominas, ventaArturPiera } from '../data/finanzas';
 
-type TabId = 'prescripcion' | 'nominas' | 'doc25' | 'checklist' | 'artur';
+type TabId = 'desglose' | 'prescripcion' | 'nominas' | 'doc25' | 'checklist' | 'artur';
 
 const tabs = [
+  { id: 'desglose' as TabId, label: 'Desglose', icon: ListChecks },
   { id: 'prescripcion' as TabId, label: 'Prescripción', icon: Clock },
   { id: 'nominas' as TabId, label: 'Nóminas', icon: Banknote },
   { id: 'doc25' as TabId, label: 'Doc. 25', icon: FileWarning },
@@ -24,7 +26,7 @@ const tabs = [
 ];
 
 export function PicassentPage() {
-  const [activeTab, setActiveTab] = useState<TabId>('prescripcion');
+  const [activeTab, setActiveTab] = useState<TabId>('desglose');
   const procedimiento = procedimientos.find(p => p.id === 'picassent')!;
 
   return (
@@ -89,6 +91,7 @@ export function PicassentPage() {
 
         {/* Tab content */}
         <div className="animate-fadeIn">
+          {activeTab === 'desglose' && <DesgloseHechos />}
           {activeTab === 'prescripcion' && <PrescripcionTab />}
           {activeTab === 'nominas' && <NominasTab />}
           {activeTab === 'doc25' && <Doc25Tab />}
