@@ -12,3 +12,4 @@ export {
   MoneyFlowChart,
 } from './Charts';
 export { DesgloseHechos } from './DesgloseHechos';
+export { AudienciaPrevia } from './AudienciaPrevia';
