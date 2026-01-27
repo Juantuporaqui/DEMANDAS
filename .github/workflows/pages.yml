@@ -26,21 +26,18 @@ jobs:
         with:
           node-version: "20"
           cache: 'npm'
-          # Apuntamos al archivo de bloqueo correcto
           cache-dependency-path: case-ops/package-lock.json
 
       - name: Install dependencies
         working-directory: case-ops
-        run: npm ci
+        run: npm install   # <--- ¡AQUÍ ESTÁ EL CAMBIO!
 
       - name: Build
         working-directory: case-ops
         env:
-          # Esto es vital para que Vite sepa dónde está
           VITE_BASE_PATH: /DEMANDAS/
         run: |
           npm run build
-          # Truco para evitar el error 404 en GitHub Pages
           cp dist/index.html dist/404.html
 
       - name: Upload artifact
