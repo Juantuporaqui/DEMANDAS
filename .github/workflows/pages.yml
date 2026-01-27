@@ -1,8 +1,8 @@
-name: Despliegue Case-Ops (Seguro)
+name: Deploy Case-Ops
 
 on:
   push:
-    branches: ["main"] # Se activa al subir cambios a main
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -18,28 +18,32 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Preparar Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          # Quitamos el caché por si acaso estaba corrupto
+          cache: 'npm'
+          # Apuntamos al archivo de bloqueo correcto
+          cache-dependency-path: case-ops/package-lock.json
 
-      - name: Instalar dependencias (Modo Seguro)
+      - name: Install dependencies
         working-directory: case-ops
-        run: npm install # 'install' es más capaz de corregir errores que 'ci'
+        run: npm ci
 
-      - name: Construir sitio web
+      - name: Build
         working-directory: case-ops
         env:
+          # Esto es vital para que Vite sepa dónde está
           VITE_BASE_PATH: /DEMANDAS/
         run: |
           npm run build
+          # Truco para evitar el error 404 en GitHub Pages
           cp dist/index.html dist/404.html
 
-      - name: Subir resultados
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: case-ops/dist
@@ -51,6 +55,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Publicar en GitHub Pages
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
