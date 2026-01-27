@@ -28,6 +28,7 @@ import { MorePage } from '../features/dashboard/MorePage';
 import { SettingsPage } from '../features/dashboard/SettingsPage';
 import { CasesPage } from '../features/cases/CasesPage';
 import { CaseDetailPage } from '../features/cases/CaseDetailPage';
+import { AnalyticsDashboard } from '../features/analytics/AnalyticsDashboard';
 
 export const router = createBrowserRouter(
   [
@@ -141,6 +142,10 @@ export const router = createBrowserRouter(
       {
         path: 'tasks',
         element: <TasksPage />,
+      },
+      {
+        path: 'analytics',
+        element: <AnalyticsDashboard />,
       },
       // Backup
       {
