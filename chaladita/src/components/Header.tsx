@@ -1,6 +1,7 @@
 import { ArrowLeft, Scale, Moon, Sun } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useLitigationStore } from '../store/litigationStore';
 
 interface HeaderProps {
   title?: string;
@@ -10,7 +11,10 @@ interface HeaderProps {
 export function Header({ title = 'Chaladita.net', showBack = false }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [modoJuicio, setModoJuicio] = useState(false);
+
+  // Usar store para persistencia del modo juicio
+  const modoJuicio = useLitigationStore((state) => state.config.modoJuicio);
+  const toggleModoJuicio = useLitigationStore((state) => state.toggleModoJuicio);
 
   useEffect(() => {
     if (modoJuicio) {
@@ -45,7 +49,7 @@ export function Header({ title = 'Chaladita.net', showBack = false }: HeaderProp
         </div>
 
         <button
-          onClick={() => setModoJuicio(!modoJuicio)}
+          onClick={toggleModoJuicio}
           className={`
             flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all
             ${modoJuicio
