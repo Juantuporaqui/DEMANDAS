@@ -114,10 +114,10 @@ export function ProcedureCard({ procedimiento }: ProcedureCardProps) {
       )}
 
       {/* Estrategias activas */}
-      {procedimiento.estrategias.length > 0 && (
+      {procedimiento.estrategias && procedimiento.estrategias.length > 0 && (
         <div className="mt-3 flex items-center gap-2">
           <span className="text-xs text-slate-500">
-            {procedimiento.estrategias.filter(e => e.estado === 'activo').length} estrategias activas
+            {procedimiento.estrategias.filter((e) => e.estado === 'activo').length} estrategias activas
           </span>
         </div>
       )}

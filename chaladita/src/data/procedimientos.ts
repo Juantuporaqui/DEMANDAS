@@ -9,6 +9,7 @@ export const procedimientos: Procedimiento[] = [
     tipo: 'ordinario',
     cuantia: 212677.08,
     estado: 'activo',
+    fechaInicio: '2024-06-15',
     color: 'blue',
     icon: 'Scale',
     proximoHito: {
@@ -45,6 +46,7 @@ export const procedimientos: Procedimiento[] = [
     tipo: 'ejecucion',
     cuantia: 2400.00,
     estado: 'activo',
+    fechaInicio: '2025-01-05',
     color: 'amber',
     icon: 'Receipt',
     proximoHito: {
@@ -81,6 +83,7 @@ export const procedimientos: Procedimiento[] = [
     tipo: 'verbal',
     cuantia: 6945.41,
     estado: 'activo',
+    fechaInicio: '2025-02-01',
     color: 'purple',
     icon: 'Shield',
     proximoHito: {
@@ -108,6 +111,7 @@ export const procedimientos: Procedimiento[] = [
     tipo: 'ordinario',
     cuantia: 0,
     estado: 'activo',
+    fechaInicio: '2024-01-01',
     color: 'slate',
     icon: 'Database',
     estrategias: [],
