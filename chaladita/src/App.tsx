@@ -3,7 +3,7 @@ import { HomePage, PicassentPage, QuartPage, MislataPage, OtrosPage } from './pa
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/DEMANDAS">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/picassent" element={<PicassentPage />} />
