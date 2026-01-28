@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // GitHub Pages sirve la app bajo "/<repo>/". En local/Netlify normalmente es "/".
@@ -11,6 +12,8 @@ export default defineConfig({
   base,
   plugins: [
     react(),
+    // Tailwind v4 (plugin oficial para Vite)
+    tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'pwa-192x192.svg', 'pwa-512x512.svg'],
@@ -69,5 +72,17 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Visor PDF (pesado)
+          pdfjs: ['pdfjs-dist'],
+          // Analytics
+          recharts: ['recharts'],
+          // Iconos
+          lucide: ['lucide-react'],
+        },
+      },
+    },
   },
 });
