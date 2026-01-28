@@ -12,6 +12,12 @@ if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
   ).toString()
 }
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js', {
+    updateViaCache: 'none',
+  })
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

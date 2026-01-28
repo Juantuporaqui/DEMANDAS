@@ -3,9 +3,8 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// GitHub Pages sirve la app bajo "/<repo>/". En local/Netlify normalmente es "/".
-// VITE_BASE_PATH lo inyecta el workflow de Pages.
-const base = process.env.VITE_BASE_PATH || '/';
+// GitHub Pages sirve la app bajo "/case-ops/" en producción.
+const base = process.env.NODE_ENV === 'production' ? '/case-ops/' : '/';
 
 // https://vite.dev/config/
 export default defineConfig({
