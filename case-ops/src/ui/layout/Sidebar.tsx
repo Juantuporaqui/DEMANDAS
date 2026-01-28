@@ -15,6 +15,7 @@ type NavItem = { label: string; path: string };
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Procedimientos', path: 'cases' },
+  { label: 'Herramientas', path: 'tools' },
   { label: 'Documentos', path: 'documents' },
   { label: 'Ajustes', path: 'settings' },
 ];

@@ -8,14 +8,19 @@ import {
   settingsRepo,
   counterRepo,
   casesRepo,
+  claimsRepo,
   documentsRepo,
   docFilesRepo,
   spansRepo,
   factsRepo,
   partidasRepo,
   eventsRepo,
+  timelineEventsRepo,
+  audienciaPhasesRepo,
   strategiesRepo,
   tasksRepo,
+  jurisprudenceRepo,
+  docRequestsRepo,
   linksRepo,
   auditRepo,
 } from '../db/repositories';
@@ -40,6 +45,7 @@ export interface ImportResult {
   errors: string[];
   stats: {
     casesImported: number;
+    claimsImported: number;
     documentsImported: number;
     filesImported: number;
     filesSkipped: number;
@@ -47,8 +53,12 @@ export interface ImportResult {
     factsImported: number;
     partidasImported: number;
     eventsImported: number;
+    timelineEventsImported: number;
+    audienciaPhasesImported: number;
     strategiesImported: number;
     tasksImported: number;
+    jurisprudenceImported: number;
+    docRequestsImported: number;
     linksImported: number;
   };
 }
@@ -72,13 +82,18 @@ export async function exportToZip(
   const settings = await settingsRepo.get();
   const counters = await counterRepo.getAll();
   const cases = await casesRepo.getAll();
+  const claims = await claimsRepo.getAll();
   const documents = await documentsRepo.getAll();
   const spans = await spansRepo.getAll();
   const facts = await factsRepo.getAll();
   const partidas = await partidasRepo.getAll();
   const events = await eventsRepo.getAll();
+  const timelineEvents = await timelineEventsRepo.getAll();
+  const audienciaPhases = await audienciaPhasesRepo.getAll();
   const strategies = await strategiesRepo.getAll();
   const tasks = await tasksRepo.getAll();
+  const jurisprudence = await jurisprudenceRepo.getAll();
+  const docRequests = await docRequestsRepo.getAll();
   const links = await linksRepo.getAll();
   const auditLogs = await auditRepo.getAll();
   const analyticsMeta = await db.analytics_meta.toArray();
@@ -95,13 +110,18 @@ export async function exportToZip(
     settings: settings!,
     counters,
     cases,
+    claims,
     documents,
     spans,
     facts,
     partidas,
     events,
+    timelineEvents,
+    audienciaPhases,
     strategies,
     tasks,
+    jurisprudence,
+    docRequests,
     links,
     auditLogs,
     analyticsMeta,
@@ -143,14 +163,19 @@ export async function exportToZip(
     deviceName: settings?.deviceName || 'unknown',
     counts: {
       cases: cases.length,
+      claims: claims.length,
       documents: documents.length,
       docFiles: docFiles.length,
       spans: spans.length,
       facts: facts.length,
       partidas: partidas.length,
       events: events.length,
+      timelineEvents: timelineEvents.length,
+      audienciaPhases: audienciaPhases.length,
       strategies: strategies.length,
       tasks: tasks.length,
+      jurisprudence: jurisprudence.length,
+      docRequests: docRequests.length,
       links: links.length,
       analyticsMeta: analyticsMeta.length,
     },
@@ -196,6 +221,7 @@ export async function importFromZip(
     errors: [],
     stats: {
       casesImported: 0,
+      claimsImported: 0,
       documentsImported: 0,
       filesImported: 0,
       filesSkipped: 0,
@@ -203,8 +229,12 @@ export async function importFromZip(
       factsImported: 0,
       partidasImported: 0,
       eventsImported: 0,
+      timelineEventsImported: 0,
+      audienciaPhasesImported: 0,
       strategiesImported: 0,
       tasksImported: 0,
+      jurisprudenceImported: 0,
+      docRequestsImported: 0,
       linksImported: 0,
     },
   };
@@ -269,6 +299,15 @@ export async function importFromZip(
       }
     }
 
+    // Import claims
+    for (const item of importData.claims ?? []) {
+      const existing = await db.claims.get(item.id);
+      if (!existing || item.updatedAt > existing.updatedAt) {
+        await db.claims.put(item);
+        result.stats.claimsImported++;
+      }
+    }
+
     // Import documents
     for (const item of importData.documents) {
       const existing = await db.documents.get(item.id);
@@ -314,6 +353,24 @@ export async function importFromZip(
       }
     }
 
+    // Import timeline events
+    for (const item of importData.timelineEvents ?? []) {
+      const existing = await db.timelineEvents.get(item.id);
+      if (!existing || item.updatedAt > existing.updatedAt) {
+        await db.timelineEvents.put(item);
+        result.stats.timelineEventsImported++;
+      }
+    }
+
+    // Import audiencia phases
+    for (const item of importData.audienciaPhases ?? []) {
+      const existing = await db.audienciaPhases.get(item.id);
+      if (!existing || item.updatedAt > existing.updatedAt) {
+        await db.audienciaPhases.put(item);
+        result.stats.audienciaPhasesImported++;
+      }
+    }
+
     // Import strategies
     for (const item of importData.strategies) {
       const existing = await db.strategies.get(item.id);
@@ -329,6 +386,24 @@ export async function importFromZip(
       if (!existing || item.updatedAt > existing.updatedAt) {
         await db.tasks.put(item);
         result.stats.tasksImported++;
+      }
+    }
+
+    // Import jurisprudence
+    for (const item of importData.jurisprudence ?? []) {
+      const existing = await db.jurisprudence.get(item.id);
+      if (!existing || item.updatedAt > existing.updatedAt) {
+        await db.jurisprudence.put(item);
+        result.stats.jurisprudenceImported++;
+      }
+    }
+
+    // Import doc requests
+    for (const item of importData.docRequests ?? []) {
+      const existing = await db.docRequests.get(item.id);
+      if (!existing || item.updatedAt > existing.updatedAt) {
+        await db.docRequests.put(item);
+        result.stats.docRequestsImported++;
       }
     }
 

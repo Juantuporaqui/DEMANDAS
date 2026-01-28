@@ -13,8 +13,13 @@ import type {
   Fact,
   Partida,
   Event,
+  TimelineEvent,
+  AudienciaPhase,
   Strategy,
   Task,
+  Claim,
+  Jurisprudence,
+  DocRequest,
   Link,
   AuditLog,
   EntityType,
@@ -68,8 +73,13 @@ const ID_PREFIXES: Record<string, string> = {
   facts: 'H',
   partidas: 'P',
   events: 'E',
+  timelineEvents: 'TL',
+  audienciaPhases: 'AP',
   strategies: 'W',
   tasks: 'T',
+  claims: 'R',
+  jurisprudence: 'J',
+  docRequests: 'DR',
 };
 
 export const counterRepo = {
@@ -158,6 +168,53 @@ export const casesRepo = {
           c.tags.some((t) => t.toLowerCase().includes(lower))
       )
       .toArray();
+  },
+};
+
+// ============================================
+// Claims Repository
+// ============================================
+
+export const claimsRepo = {
+  async getAll(): Promise<Claim[]> {
+    return db.claims.orderBy('updatedAt').reverse().toArray();
+  },
+
+  async getByCaseId(caseId: string): Promise<Claim[]> {
+    return db.claims.where('caseId').equals(caseId).toArray();
+  },
+
+  async getById(id: string): Promise<Claim | undefined> {
+    return db.claims.get(id);
+  },
+
+  async create(data: Omit<Claim, 'id' | 'createdAt' | 'updatedAt'>): Promise<Claim> {
+    return db.transaction('rw', db.counters, db.claims, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('claims');
+      const now = Date.now();
+      const claim: Claim = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.claims.add(claim);
+      await auditRepo.log('create', 'claim', id);
+      return claim;
+    });
+  },
+
+  async update(id: string, updates: Partial<Claim>): Promise<void> {
+    await db.claims.update(id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+    await auditRepo.log('update', 'claim', id);
+  },
+
+  async delete(id: string): Promise<void> {
+    await db.claims.delete(id);
+    await auditRepo.log('delete', 'claim', id);
   },
 };
 
@@ -586,6 +643,104 @@ export const eventsRepo = {
 };
 
 // ============================================
+// Timeline Events Repository
+// ============================================
+
+export const timelineEventsRepo = {
+  async getAll(): Promise<TimelineEvent[]> {
+    return db.timelineEvents.orderBy('dateISO').toArray();
+  },
+
+  async getByCaseId(caseId: string): Promise<TimelineEvent[]> {
+    return db.timelineEvents.where('caseId').equals(caseId).toArray();
+  },
+
+  async getById(id: string): Promise<TimelineEvent | undefined> {
+    return db.timelineEvents.get(id);
+  },
+
+  async create(
+    data: Omit<TimelineEvent, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<TimelineEvent> {
+    return db.transaction('rw', db.counters, db.timelineEvents, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('timelineEvents');
+      const now = Date.now();
+      const item: TimelineEvent = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.timelineEvents.add(item);
+      await auditRepo.log('create', 'timeline_event', id);
+      return item;
+    });
+  },
+
+  async update(id: string, updates: Partial<TimelineEvent>): Promise<void> {
+    await db.timelineEvents.update(id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+    await auditRepo.log('update', 'timeline_event', id);
+  },
+
+  async delete(id: string): Promise<void> {
+    await db.timelineEvents.delete(id);
+    await auditRepo.log('delete', 'timeline_event', id);
+  },
+};
+
+// ============================================
+// Audiencia Previa Repository
+// ============================================
+
+export const audienciaPhasesRepo = {
+  async getAll(): Promise<AudienciaPhase[]> {
+    return db.audienciaPhases.orderBy('updatedAt').reverse().toArray();
+  },
+
+  async getByCaseId(caseId: string): Promise<AudienciaPhase[]> {
+    return db.audienciaPhases.where('caseId').equals(caseId).toArray();
+  },
+
+  async getById(id: string): Promise<AudienciaPhase | undefined> {
+    return db.audienciaPhases.get(id);
+  },
+
+  async create(
+    data: Omit<AudienciaPhase, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<AudienciaPhase> {
+    return db.transaction('rw', db.counters, db.audienciaPhases, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('audienciaPhases');
+      const now = Date.now();
+      const item: AudienciaPhase = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.audienciaPhases.add(item);
+      await auditRepo.log('create', 'event', id);
+      return item;
+    });
+  },
+
+  async update(id: string, updates: Partial<AudienciaPhase>): Promise<void> {
+    await db.audienciaPhases.update(id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+    await auditRepo.log('update', 'event', id);
+  },
+
+  async delete(id: string): Promise<void> {
+    await db.audienciaPhases.delete(id);
+    await auditRepo.log('delete', 'event', id);
+  },
+};
+
+// ============================================
 // Strategies Repository
 // ============================================
 
@@ -702,6 +857,100 @@ export const tasksRepo = {
           t.title.toLowerCase().includes(lower) || t.notes.toLowerCase().includes(lower)
       )
       .toArray();
+  },
+};
+
+// ============================================
+// Jurisprudence Repository
+// ============================================
+
+export const jurisprudenceRepo = {
+  async getAll(): Promise<Jurisprudence[]> {
+    return db.jurisprudence.orderBy('dateISO').reverse().toArray();
+  },
+
+  async getById(id: string): Promise<Jurisprudence | undefined> {
+    return db.jurisprudence.get(id);
+  },
+
+  async create(
+    data: Omit<Jurisprudence, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<Jurisprudence> {
+    return db.transaction('rw', db.counters, db.jurisprudence, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('jurisprudence');
+      const now = Date.now();
+      const item: Jurisprudence = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.jurisprudence.add(item);
+      await auditRepo.log('create', 'jurisprudence', id);
+      return item;
+    });
+  },
+
+  async update(id: string, updates: Partial<Jurisprudence>): Promise<void> {
+    await db.jurisprudence.update(id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+    await auditRepo.log('update', 'jurisprudence', id);
+  },
+
+  async delete(id: string): Promise<void> {
+    await db.jurisprudence.delete(id);
+    await auditRepo.log('delete', 'jurisprudence', id);
+  },
+};
+
+// ============================================
+// Document Requests Repository
+// ============================================
+
+export const docRequestsRepo = {
+  async getAll(): Promise<DocRequest[]> {
+    return db.docRequests.orderBy('updatedAt').reverse().toArray();
+  },
+
+  async getByCaseId(caseId: string): Promise<DocRequest[]> {
+    return db.docRequests.where('caseId').equals(caseId).toArray();
+  },
+
+  async getById(id: string): Promise<DocRequest | undefined> {
+    return db.docRequests.get(id);
+  },
+
+  async create(
+    data: Omit<DocRequest, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<DocRequest> {
+    return db.transaction('rw', db.counters, db.docRequests, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('docRequests');
+      const now = Date.now();
+      const item: DocRequest = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.docRequests.add(item);
+      await auditRepo.log('create', 'doc_request', id);
+      return item;
+    });
+  },
+
+  async update(id: string, updates: Partial<DocRequest>): Promise<void> {
+    await db.docRequests.update(id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+    await auditRepo.log('update', 'doc_request', id);
+  },
+
+  async delete(id: string): Promise<void> {
+    await db.docRequests.delete(id);
+    await auditRepo.log('delete', 'doc_request', id);
   },
 };
 
@@ -838,27 +1087,88 @@ export const auditRepo = {
 
 export const globalSearch = async (query: string): Promise<{
   cases: Case[];
+  claims: Claim[];
   documents: Document[];
   spans: Span[];
   facts: Fact[];
   partidas: Partida[];
   events: Event[];
+  timelineEvents: TimelineEvent[];
+  audienciaPhases: AudienciaPhase[];
   strategies: Strategy[];
   tasks: Task[];
+  jurisprudence: Jurisprudence[];
+  docRequests: DocRequest[];
 }> => {
-  const [cases, documents, spans, facts, partidas, events, strategies, tasks] =
+  const [
+    cases,
+    claims,
+    documents,
+    spans,
+    facts,
+    partidas,
+    events,
+    timelineEvents,
+    audienciaPhases,
+    strategies,
+    tasks,
+    jurisprudence,
+    docRequests,
+  ] =
     await Promise.all([
       casesRepo.search(query),
+      claimsRepo.getAll(),
       documentsRepo.search(query),
       spansRepo.search(query),
       factsRepo.search(query),
       partidasRepo.search(query),
       eventsRepo.search(query),
+      timelineEventsRepo.getAll(),
+      audienciaPhasesRepo.getAll(),
       strategiesRepo.search(query),
       tasksRepo.search(query),
+      jurisprudenceRepo.getAll(),
+      docRequestsRepo.getAll(),
     ]);
 
-  return { cases, documents, spans, facts, partidas, events, strategies, tasks };
+  const lowered = query.toLowerCase();
+  return {
+    cases,
+    claims: claims.filter(
+      (claim) =>
+        claim.title.toLowerCase().includes(lowered) ||
+        claim.summaryShort.toLowerCase().includes(lowered) ||
+        claim.summaryLong.toLowerCase().includes(lowered)
+    ),
+    documents,
+    spans,
+    facts,
+    partidas,
+    events,
+    timelineEvents: timelineEvents.filter(
+      (item) =>
+        item.title.toLowerCase().includes(lowered) ||
+        item.description.toLowerCase().includes(lowered)
+    ),
+    audienciaPhases: audienciaPhases.filter(
+      (phase) =>
+        phase.phase.toLowerCase().includes(lowered) ||
+        phase.items.some((item) => item.title.toLowerCase().includes(lowered))
+    ),
+    strategies,
+    tasks,
+    jurisprudence: jurisprudence.filter(
+      (item) =>
+        item.ref.toLowerCase().includes(lowered) ||
+        item.summaryShort.toLowerCase().includes(lowered) ||
+        item.summaryLong.toLowerCase().includes(lowered)
+    ),
+    docRequests: docRequests.filter(
+      (item) =>
+        item.title.toLowerCase().includes(lowered) ||
+        item.purpose.toLowerCase().includes(lowered)
+    ),
+  };
 };
 
 // ============================================

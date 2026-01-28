@@ -5,13 +5,17 @@
 // Entity Types for Links
 export type EntityType =
   | 'case'
+  | 'claim'
   | 'fact'
   | 'partida'
   | 'document'
   | 'span'
   | 'event'
+  | 'timeline_event'
   | 'strategy'
-  | 'task';
+  | 'task'
+  | 'jurisprudence'
+  | 'doc_request';
 
 // Link Role Types
 export type LinkRole = 'evidence' | 'supports' | 'mentions' | 'contradicts' | 'related';
@@ -36,6 +40,18 @@ export type TaskPriority = 'alta' | 'media' | 'baja';
 
 // Task Status
 export type TaskStatus = 'pendiente' | 'en_progreso' | 'completada' | 'cancelada';
+
+// Claim Win Chance
+export type ClaimWinChance = 'alta' | 'media' | 'baja';
+
+// Claim Importance
+export type ClaimImportance = 'alta' | 'media' | 'baja';
+
+// Doc Request Status
+export type DocRequestStatus = 'pendiente' | 'solicitado' | 'recibido';
+
+// Doc Request Priority
+export type DocRequestPriority = 'alta' | 'media' | 'baja';
 
 // Case Status
 export type CaseStatus = 'activo' | 'suspendido' | 'archivado' | 'cerrado';
@@ -134,9 +150,31 @@ export interface Case {
   autosNumber: string;
   type: CaseType;
   status: CaseStatus;
+  amountTotal: number;
+  nextMilestone: string;
+  nextDate: string;
+  themeColor: string;
   notes: string;
   tags: string[];
   parentCaseId?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Claim {
+  id: string; // R001
+  caseId: string;
+  shortLabel: string;
+  title: string;
+  amount: number;
+  winChance: ClaimWinChance;
+  importance: ClaimImportance;
+  summaryShort: string;
+  summaryLong: string;
+  defenseShort: string;
+  defenseLong: string;
+  linkedFactIds: string[];
+  linkedDocIds: string[];
   createdAt: number;
   updatedAt: number;
 }
@@ -226,6 +264,36 @@ export interface Event {
   updatedAt: number;
 }
 
+export interface TimelineEvent {
+  id: string; // TL001
+  caseId?: string;
+  dateISO: string;
+  title: string;
+  description: string;
+  importance: ClaimImportance;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface AudienciaItem {
+  id: string;
+  title: string;
+  importance: ClaimImportance;
+  linkedClaimIds: string[];
+  linkedDocIds: string[];
+}
+
+export interface AudienciaPhase {
+  id: string; // AP001
+  caseId: string;
+  phase: string;
+  importance: ClaimImportance;
+  script: string;
+  items: AudienciaItem[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface Strategy {
   id: string; // W001
   caseId: string;
@@ -248,6 +316,30 @@ export interface Task {
   status: TaskStatus;
   notes: string;
   links: string[]; // Array of entity IDs
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Jurisprudence {
+  id: string; // J001
+  ref: string;
+  court: string;
+  dateISO: string;
+  summaryShort: string;
+  summaryLong: string;
+  linkedClaimIds: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface DocRequest {
+  id: string; // DR001
+  caseId: string;
+  title: string;
+  source: string;
+  purpose: string;
+  priority: DocRequestPriority;
+  status: DocRequestStatus;
   createdAt: number;
   updatedAt: number;
 }
@@ -287,14 +379,19 @@ export interface ExportManifest {
   deviceName: string;
   counts: {
     cases: number;
+    claims: number;
     documents: number;
     docFiles: number;
     spans: number;
     facts: number;
     partidas: number;
     events: number;
+    timelineEvents: number;
+    audienciaPhases: number;
     strategies: number;
     tasks: number;
+    jurisprudence: number;
+    docRequests: number;
     links: number;
     analyticsMeta: number;
   };
@@ -305,13 +402,18 @@ export interface ExportData {
   settings: Settings;
   counters: Counter[];
   cases: Case[];
+  claims: Claim[];
   documents: Document[];
   spans: Span[];
   facts: Fact[];
   partidas: Partida[];
   events: Event[];
+  timelineEvents: TimelineEvent[];
+  audienciaPhases: AudienciaPhase[];
   strategies: Strategy[];
   tasks: Task[];
+  jurisprudence: Jurisprudence[];
+  docRequests: DocRequest[];
   links: Link[];
   auditLogs: AuditLog[];
   analyticsMeta: AnalyticsMeta[];
