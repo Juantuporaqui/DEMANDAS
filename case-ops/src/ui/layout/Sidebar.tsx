@@ -1,106 +1,83 @@
 import { NavLink } from 'react-router-dom';
-import { router } from '../../app/router';
-import {
-  border,
-  card,
-  radius,
-  sidebarWidth,
-  textMuted,
-  textPrimary,
-  hover,
-  active,
-} from '../tokens';
+import * as tokens from '../tokens'; // Importamos los estilos que definimos al principio
 
-type NavItem = { label: string; path: string };
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Procedimientos', path: 'cases' },
-  { label: 'Documentos', path: 'documents' },
-  { label: 'Ajustes', path: 'settings' },
+// Definimos los enlaces de navegación
+const NAV_ITEMS = [
+  { to: '/dashboard', label: 'Panel de Control', icon: '📊' },
+  { to: '/cases', label: 'Procedimientos', icon: '⚖️' },
+  { to: '/warroom', label: 'War Room', icon: '🛡️' },
+  { to: '/documents', label: 'Documentos', icon: '📂' },
+  { to: '/tasks', label: 'Tareas', icon: '✅' },
 ];
 
-function getAvailablePaths(): Set<string> {
-  const rootRoutes =
-    (router as { routes?: { path?: string; children?: { path?: string }[] }[] })
-      .routes ?? [];
-  const childRoutes = rootRoutes.flatMap((route) => route.children ?? []);
-  return new Set(
-    childRoutes
-      .map((route) => route.path)
-      .filter((path): path is string => Boolean(path)),
-  );
-}
-
-export default function Sidebar() {
-  const availablePaths = getAvailablePaths();
-  const enabledItems = NAV_ITEMS.filter((item) => availablePaths.has(item.path));
-  const primaryItems = enabledItems.filter((item) => item.path !== 'settings');
-  const settingsItem = enabledItems.find((item) => item.path === 'settings');
-
+export function Sidebar() {
   return (
     <aside
-      className="hidden min-h-screen flex-col gap-6 px-4 py-6 lg:flex border-r border-slate-800/50"
-      style={{ width: sidebarWidth }}
+      className="hidden lg:flex flex-col fixed inset-y-0 left-0 z-50"
+      style={{
+        width: tokens.sidebarWidth,
+        backgroundColor: '#020617', // Slate 950 "Hardcoded" para seguridad
+        borderRight: '1px solid #1e293b', // Slate 800
+      }}
     >
-      <div className="flex items-center gap-3 px-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-sm font-bold text-white shadow-inner">
-          CO
-        </div>
-        <div>
-          <div className={`text-sm font-bold ${textPrimary} tracking-tight`}>
-            Case Ops
+      {/* LOGO / TÍTULO */}
+      <div className="flex h-16 items-center px-6 border-b border-slate-800/50">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-black font-bold shadow-lg shadow-amber-500/20">
+            J
           </div>
-          <div className={`text-[10px] uppercase tracking-wider font-medium ${textMuted}`}>
-            Legal Suite
+          <div>
+            <h1 className="text-sm font-bold text-slate-100 tracking-tight leading-none">
+              JUANTU
+            </h1>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">
+              LEGAL OPS
+            </p>
           </div>
         </div>
       </div>
 
-      <div
-        className={`flex flex-1 flex-col gap-4 ${card} ${border} p-3`}
-        style={{ borderRadius: radius }}
-      >
-        <div className={`px-2 text-[10px] font-bold uppercase tracking-[0.2em] ${textMuted}`}>
-          Principal
-        </div>
-        <nav className="flex flex-col gap-1">
-          {primaryItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={`/${item.path}`}
-              className={({ isActive }) =>
-                `flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                  isActive ? active : `${textPrimary} ${hover}`
-                }`
+      {/* NAVEGACIÓN */}
+      <nav className="flex-1 space-y-1 px-3 py-6 overflow-y-auto">
+        {NAV_ITEMS.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) => {
+              // Base styles
+              let classes = "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ";
+              
+              if (isActive) {
+                // Estilo Activo (War Room style)
+                classes += "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-bold translate-x-1";
+              } else {
+                // Estilo Inactivo
+                classes += "text-slate-400 hover:text-slate-100 hover:bg-slate-800/50";
               }
-            >
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-          {primaryItems.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-700 px-3 py-2 text-xs text-slate-500">
-              Sin navegación disponible
-            </div>
-          ) : null}
-        </nav>
+              return classes;
+            }}
+          >
+            <span className="text-lg">{item.icon}</span>
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
 
-        {settingsItem ? (
-          <div className="mt-auto flex flex-col gap-2 pt-4 border-t border-slate-700/30">
-            <div className={`px-2 text-[10px] font-bold uppercase tracking-[0.2em] ${textMuted}`}>
-              Sistema
-            </div>
-            <NavLink
-              to={`/${settingsItem.path}`}
-              className={({ isActive }) =>
-                `flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                  isActive ? active : `${textPrimary} ${hover}`
-                }`
-              }
-            >
-              <span>{settingsItem.label}</span>
-            </NavLink>
+      {/* PIE DE PÁGINA (Usuario) */}
+      <div className="border-t border-slate-800/50 p-4">
+        <div className="flex items-center gap-3 rounded-xl bg-slate-900/50 p-3 border border-slate-800">
+          <div className="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center text-xs text-slate-300 font-bold">
+            JP
           </div>
-        ) : null}
+          <div className="overflow-hidden">
+            <p className="truncate text-xs font-medium text-slate-200">
+              Juan Tu
+            </p>
+            <p className="truncate text-[10px] text-slate-500">
+              Socio Director
+            </p>
+          </div>
+        </div>
       </div>
     </aside>
   );
