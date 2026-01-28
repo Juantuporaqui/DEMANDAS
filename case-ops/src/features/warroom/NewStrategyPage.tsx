@@ -1,84 +1,142 @@
-import { NavLink } from 'react-router-dom';
-import * as tokens from '../tokens'; // Importamos los estilos que definimos al principio
+import { useState, type FormEvent } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { strategiesRepo } from '../../db/repositories';
+import { nanoid } from 'nanoid';
+import Card from '../../ui/components/Card';
 
-// Definimos los enlaces de navegación
-const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Panel de Control', icon: '📊' },
-  { to: '/cases', label: 'Procedimientos', icon: '⚖️' },
-  { to: '/warroom', label: 'War Room', icon: '🛡️' },
-  { to: '/documents', label: 'Documentos', icon: '📂' },
-  { to: '/tasks', label: 'Tareas', icon: '✅' },
-];
+export function NewStrategyPage() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  
+  // Estado del formulario
+  const [formData, setFormData] = useState({
+    attack: '',
+    rebuttal: '',
+    risk: 'medio' as 'alto' | 'medio' | 'bajo',
+    status: 'draft' as 'active' | 'draft' | 'discarded',
+    tags: ''
+  });
 
-export function Sidebar() {
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await strategiesRepo.create({
+        id: nanoid(),
+        caseId: '', // General por defecto
+        attack: formData.attack,
+        rebuttal: formData.rebuttal,
+        risk: formData.risk,
+        status: formData.status,
+        tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+        updatedAt: Date.now(),
+      });
+      navigate('/warroom');
+    } catch (error) {
+      console.error('Error creating strategy:', error);
+      alert('Error al guardar la estrategia');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <aside
-      className="hidden lg:flex flex-col fixed inset-y-0 left-0 z-50"
-      style={{
-        width: tokens.sidebarWidth,
-        backgroundColor: '#020617', // Slate 950 "Hardcoded" para seguridad
-        borderRight: '1px solid #1e293b', // Slate 800
-      }}
-    >
-      {/* LOGO / TÍTULO */}
-      <div className="flex h-16 items-center px-6 border-b border-slate-800/50">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-black font-bold shadow-lg shadow-amber-500/20">
-            J
-          </div>
-          <div>
-            <h1 className="text-sm font-bold text-slate-100 tracking-tight leading-none">
-              JUANTU
-            </h1>
-            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">
-              LEGAL OPS
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-6 pb-20">
+      {/* CABECERA */}
+      <header>
+        <Link 
+          to="/warroom" 
+          className="mb-4 inline-flex items-center text-xs font-semibold uppercase tracking-widest text-slate-400 hover:text-amber-400"
+        >
+          ← Cancelar y Volver
+        </Link>
+        <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
+          Nueva Línea de Defensa
+        </h1>
+        <p className="text-sm text-slate-400">
+          Define un posible ataque contrario y nuestra respuesta.
+        </p>
+      </header>
 
-      {/* NAVEGACIÓN */}
-      <nav className="flex-1 space-y-1 px-3 py-6 overflow-y-auto">
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) => {
-              // Base styles
-              let classes = "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ";
-              
-              if (isActive) {
-                // Estilo Activo (War Room style)
-                classes += "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-bold translate-x-1";
-              } else {
-                // Estilo Inactivo
-                classes += "text-slate-400 hover:text-slate-100 hover:bg-slate-800/50";
-              }
-              return classes;
-            }}
-          >
-            <span className="text-lg">{item.icon}</span>
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-      </nav>
+      {/* FORMULARIO */}
+      <Card className="p-0 overflow-hidden bg-slate-900/50 border-slate-800">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          
+          {/* SECCIÓN 1: EL ATAQUE */}
+          <div className="space-y-3">
+            <label className="block text-xs font-bold uppercase tracking-wider text-rose-500">
+              Tesis Contraria (Ataque)
+            </label>
+            <textarea
+              required
+              rows={3}
+              className="w-full rounded-xl bg-slate-950 border border-slate-800 p-4 text-slate-100 placeholder-slate-600 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all resize-none"
+              placeholder="Ej: Alegarán que la transferencia de 2024 es un error subsanable..."
+              value={formData.attack}
+              onChange={e => setFormData({...formData, attack: e.target.value})}
+            />
+          </div>
 
-      {/* PIE DE PÁGINA (Usuario) */}
-      <div className="border-t border-slate-800/50 p-4">
-        <div className="flex items-center gap-3 rounded-xl bg-slate-900/50 p-3 border border-slate-800">
-          <div className="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center text-xs text-slate-300 font-bold">
-            JP
+          {/* SECCIÓN 2: NUESTRA DEFENSA */}
+          <div className="space-y-3">
+            <label className="block text-xs font-bold uppercase tracking-wider text-emerald-500">
+              Nuestra Respuesta (Defensa)
+            </label>
+            <textarea
+              required
+              rows={4}
+              className="w-full rounded-xl bg-slate-950 border border-slate-800 p-4 text-slate-100 placeholder-slate-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all resize-none"
+              placeholder="Ej: Invocaremos la doctrina de los actos propios y la imposibilidad material..."
+              value={formData.rebuttal}
+              onChange={e => setFormData({...formData, rebuttal: e.target.value})}
+            />
           </div>
-          <div className="overflow-hidden">
-            <p className="truncate text-xs font-medium text-slate-200">
-              Juan Tu
-            </p>
-            <p className="truncate text-[10px] text-slate-500">
-              Socio Director
-            </p>
+
+          {/* METADATOS (Riesgo y Etiquetas) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-800/50">
+            <div className="space-y-3">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                Nivel de Riesgo
+              </label>
+              <select
+                className="w-full rounded-xl bg-slate-950 border border-slate-800 p-3 text-slate-100 focus:border-amber-500 outline-none"
+                value={formData.risk}
+                onChange={e => setFormData({...formData, risk: e.target.value as any})}
+              >
+                <option value="alto">🔴 Alto (Crítico)</option>
+                <option value="medio">🟠 Medio (Gestionable)</option>
+                <option value="bajo">🟢 Bajo (Irrelevante)</option>
+              </select>
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                Etiquetas (Separadas por comas)
+              </label>
+              <input
+                type="text"
+                className="w-full rounded-xl bg-slate-950 border border-slate-800 p-3 text-slate-100 placeholder-slate-600 focus:border-amber-500 outline-none"
+                placeholder="Ej: procesal, prescripción, prueba"
+                value={formData.tags}
+                onChange={e => setFormData({...formData, tags: e.target.value})}
+              />
+            </div>
           </div>
-        </div>
-      </div>
-    </aside>
+
+          {/* BOTÓN DE ACCIÓN */}
+          <div className="pt-6">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 py-4 text-sm font-bold text-white shadow-lg shadow-rose-900/20 hover:from-rose-500 hover:to-rose-400 active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              {loading ? 'Guardando...' : '🛡️ Registrar Estrategia'}
+            </button>
+          </div>
+
+        </form>
+      </Card>
+    </div>
   );
 }
