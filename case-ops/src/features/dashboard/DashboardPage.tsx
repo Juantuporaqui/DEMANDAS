@@ -5,6 +5,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import {
   casesRepo,
   documentsRepo,
   factsRepo,
@@ -13,6 +21,10 @@ import {
 } from '../../db/repositories';
 import { formatCurrency } from '../../utils/validators';
 import type { Case, Fact, Partida } from '../../types';
+import Card from '../../ui/components/Card';
+import EmptyState from '../../ui/components/EmptyState';
+import SectionTitle from '../../ui/components/SectionTitle';
+import Stat from '../../ui/components/Stat';
 
 export function DashboardPage() {
   const [stats, setStats] = useState({
@@ -78,160 +90,224 @@ export function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="page">
-        <div className="loading-overlay">
-          <div className="spinner" />
-        </div>
+      <div className="flex min-h-[320px] items-center justify-center">
+        <div className="spinner" />
       </div>
     );
   }
 
   return (
-    <div className="page">
-      <div className="page-header">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="page-title">Case Ops</h1>
-          <p className="page-subtitle">Panel de control</p>
+          <h1 className="text-2xl font-semibold text-zinc-900">Dashboard</h1>
+          <p className="text-sm text-zinc-500">Panel de control ejecutivo</p>
         </div>
-        <Link to="/settings" className="btn btn-ghost btn-icon">
-          ⚙️
+        <Link
+          to="/settings"
+          className="rounded-full border border-zinc-200/70 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+        >
+          Ajustes
         </Link>
       </div>
 
-      {/* Active Case */}
-      {activeCase && (
-        <section className="section">
-          <div className="section-header">
-            <h2 className="section-title">Caso Activo</h2>
-            <Link to="/cases" className="btn btn-ghost btn-sm">
-              Ver todos
-            </Link>
-          </div>
-          <Link to={`/cases/${activeCase.id}`} className="card" style={{ display: 'block', textDecoration: 'none' }}>
-            <div className="card-body">
-              <div className="flex items-center gap-md">
-                <div
-                  className="list-item-icon"
-                  style={{ backgroundColor: 'rgba(37, 99, 235, 0.1)' }}
-                >
-                  ⚖️
-                </div>
-                <div>
-                  <h3 className="list-item-title">{activeCase.title}</h3>
-                  <p className="list-item-subtitle">
-                    {activeCase.court} - {activeCase.autosNumber}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Link>
-        </section>
-      )}
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Link to="/documents" className="block">
+          <Card className="p-5">
+            <Stat label="Documentos" value={stats.documents} />
+          </Card>
+        </Link>
+        <Link to="/facts" className="block">
+          <Card className="p-5">
+            <Stat label="Hechos controvertidos" value={stats.factsControvertidos} />
+          </Card>
+        </Link>
+        <Link to="/partidas" className="block">
+          <Card className="p-5">
+            <Stat label="Partidas" value={stats.partidas} />
+          </Card>
+        </Link>
+        <Card className="p-5">
+          <Stat label="Total económico" value={formatCurrency(stats.totalAmount)} />
+        </Card>
+      </section>
 
-      {/* Stats Grid */}
-      <section className="section">
-        <h2 className="section-title">Resumen</h2>
-        <div className="grid grid-2" style={{ marginTop: 'var(--spacing-md)' }}>
-          <Link to="/documents" className="stat-card" style={{ textDecoration: 'none' }}>
-            <div className="stat-value">{stats.documents}</div>
-            <div className="stat-label">Documentos</div>
-          </Link>
-          <Link to="/facts" className="stat-card" style={{ textDecoration: 'none' }}>
-            <div className="stat-value">{stats.factsControvertidos}</div>
-            <div className="stat-label">Hechos controvertidos</div>
-          </Link>
-          <Link to="/partidas" className="stat-card" style={{ textDecoration: 'none' }}>
-            <div className="stat-value">{stats.partidas}</div>
-            <div className="stat-label">Partidas</div>
-          </Link>
-          <div className="stat-card">
-            <div className="stat-value">{formatCurrency(stats.totalAmount)}</div>
-            <div className="stat-label">Total económico</div>
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <Card className="p-6">
+          <SectionTitle
+            title="Tendencias"
+            subtitle="Volumen operativo consolidado"
+          />
+          <div className="mt-6 h-64">
+            <ResponsiveContainer>
+              <BarChart
+                data={[
+                  { name: 'Casos', value: stats.cases },
+                  { name: 'Docs', value: stats.documents },
+                  { name: 'Hechos', value: stats.factsControvertidos },
+                  { name: 'Partidas', value: stats.partidas },
+                ]}
+              >
+                <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#0f172a" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
+        </Card>
+
+        <div className="space-y-4">
+          <Card className="p-5">
+            <SectionTitle
+              title="Caso activo"
+              action={
+                <Link
+                  to="/cases"
+                  className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500"
+                >
+                  Ver todos
+                </Link>
+              }
+            />
+            <div className="mt-4">
+              {activeCase ? (
+                <Link
+                  to={`/cases/${activeCase.id}`}
+                  className="flex items-center gap-3 rounded-xl border border-zinc-200/70 bg-zinc-50 px-3 py-3 text-sm text-zinc-800"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-900 text-white">
+                    ⚖️
+                  </span>
+                  <div className="min-w-0">
+                    <div className="truncate font-semibold">{activeCase.title}</div>
+                    <div className="truncate text-xs text-zinc-500">
+                      {activeCase.court} · {activeCase.autosNumber}
+                    </div>
+                  </div>
+                </Link>
+              ) : (
+                <EmptyState
+                  title="Sin caso activo"
+                  description="Carga un expediente para destacarlo aquí."
+                />
+              )}
+            </div>
+          </Card>
+
+          <Card className="p-5">
+            <SectionTitle title="Alertas" subtitle="Últimas novedades operativas" />
+            <div className="mt-4 space-y-3">
+              {alerts.length > 0 ? (
+                alerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className="flex items-start gap-3 rounded-xl border border-zinc-200/70 bg-white px-3 py-3"
+                  >
+                    <span className="mt-1 text-lg">
+                      {alert.type === 'warning' ? '⚠️' : 'ℹ️'}
+                    </span>
+                    <div>
+                      <div className="text-sm font-semibold text-zinc-800">
+                        {alert.title}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        {alert.description}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <EmptyState
+                  title="Sin alertas recientes"
+                  description="Todo está bajo control por ahora."
+                />
+              )}
+            </div>
+          </Card>
         </div>
       </section>
 
-      {/* Alerts */}
-      {alerts.length > 0 && (
-        <section className="section">
-          <h2 className="section-title">Alertas</h2>
-          <div className="flex flex-col gap-sm" style={{ marginTop: 'var(--spacing-md)' }}>
-            {alerts.map((alert) => (
-              <div
-                key={alert.id}
-                className={`alert alert-${alert.type === 'warning' ? 'warning' : 'info'}`}
+      <section className="grid gap-6 lg:grid-cols-2">
+        <Card className="p-6">
+          <SectionTitle
+            title="Hechos a probar"
+            subtitle="Prioridades jurídicas en curso"
+            action={
+              <Link
+                to="/facts"
+                className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500"
               >
-                <span className="alert-icon">
-                  {alert.type === 'warning' ? '⚠️' : 'ℹ️'}
-                </span>
-                <div className="alert-content">
-                  <div className="alert-title">{alert.title}</div>
-                  <div className="alert-description">{alert.description}</div>
-                </div>
-              </div>
-            ))}
+                Ver todos
+              </Link>
+            }
+          />
+          <div className="mt-4 space-y-3">
+            {recentFacts.length > 0 ? (
+              recentFacts.map((fact) => (
+                <Link
+                  key={fact.id}
+                  to={`/facts/${fact.id}`}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200/70 bg-zinc-50 px-3 py-3 text-sm text-zinc-800"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${
+                        fact.risk === 'alto'
+                          ? 'bg-slate-700'
+                          : fact.risk === 'medio'
+                          ? 'bg-slate-500'
+                          : 'bg-slate-300'
+                      }`}
+                    />
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold">{fact.title}</div>
+                      <div className="truncate text-xs text-zinc-500">
+                        {fact.status} · {fact.burden}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-sm text-zinc-400">›</span>
+                </Link>
+              ))
+            ) : (
+              <EmptyState
+                title="Sin hechos pendientes"
+                description="No hay hechos controvertidos para revisar."
+              />
+            )}
           </div>
-        </section>
-      )}
+        </Card>
 
-      {/* Recent Controversial Facts */}
-      {recentFacts.length > 0 && (
-        <section className="section">
-          <div className="section-header">
-            <h2 className="section-title">Hechos a probar</h2>
-            <Link to="/facts" className="btn btn-ghost btn-sm">
-              Ver todos
+        <Card className="p-6">
+          <SectionTitle title="Acciones rápidas" subtitle="Atajos operativos" />
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Link
+              to="/documents/new"
+              className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-white px-4 py-3 text-sm font-semibold text-zinc-800"
+            >
+              Nuevo documento <span className="text-zinc-400">↗</span>
+            </Link>
+            <Link
+              to="/facts/new"
+              className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-white px-4 py-3 text-sm font-semibold text-zinc-800"
+            >
+              Nuevo hecho <span className="text-zinc-400">↗</span>
+            </Link>
+            <Link
+              to="/partidas/new"
+              className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-white px-4 py-3 text-sm font-semibold text-zinc-800"
+            >
+              Nueva partida <span className="text-zinc-400">↗</span>
+            </Link>
+            <Link
+              to="/search"
+              className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-zinc-900 px-4 py-3 text-sm font-semibold text-white"
+            >
+              Buscar <span className="text-white/70">↗</span>
             </Link>
           </div>
-          <div className="card">
-            {recentFacts.map((fact) => (
-              <Link
-                key={fact.id}
-                to={`/facts/${fact.id}`}
-                className="list-item"
-                style={{ textDecoration: 'none' }}
-              >
-                <div
-                  className="status-dot"
-                  style={{
-                    backgroundColor:
-                      fact.risk === 'alto'
-                        ? 'var(--color-danger)'
-                        : fact.risk === 'medio'
-                        ? 'var(--color-warning)'
-                        : 'var(--color-success)',
-                  }}
-                />
-                <div className="list-item-content">
-                  <div className="list-item-title">{fact.title}</div>
-                  <div className="list-item-subtitle">
-                    {fact.id} · {fact.status} · {fact.burden}
-                  </div>
-                </div>
-                <span className="list-item-action">›</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Quick Actions */}
-      <section className="section">
-        <h2 className="section-title">Acciones rápidas</h2>
-        <div className="grid grid-2" style={{ marginTop: 'var(--spacing-md)' }}>
-          <Link to="/documents/new" className="btn btn-secondary btn-block">
-            📄 Nuevo documento
-          </Link>
-          <Link to="/facts/new" className="btn btn-secondary btn-block">
-            📋 Nuevo hecho
-          </Link>
-          <Link to="/partidas/new" className="btn btn-secondary btn-block">
-            💰 Nueva partida
-          </Link>
-          <Link to="/search" className="btn btn-primary btn-block">
-            🔍 Buscar
-          </Link>
-        </div>
+        </Card>
       </section>
     </div>
   );

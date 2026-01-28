@@ -3,8 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// GitHub Pages sirve la app bajo "/<repo>/". En local/Netlify normalmente es "/".
-// VITE_BASE_PATH lo inyecta el workflow de Pages.
+// GitHub Pages sirve la app bajo un subpath. VITE_BASE_PATH lo define el workflow.
 const base = process.env.VITE_BASE_PATH || '/';
 
 // https://vite.dev/config/
