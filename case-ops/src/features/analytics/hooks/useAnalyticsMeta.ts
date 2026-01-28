@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db/schema';
 import type { AnalyticsMeta } from '../../../types';
@@ -36,7 +36,11 @@ async function ensureAnalyticsMeta(): Promise<AnalyticsMeta> {
 }
 
 export function useAnalyticsMeta() {
-  const meta = useLiveQuery(async () => ensureAnalyticsMeta(), []);
+  const meta = useLiveQuery(async () => db.analytics_meta.get('global'), []);
+
+  useEffect(() => {
+    void ensureAnalyticsMeta();
+  }, []);
 
   const saveMeta = useCallback(async (next: AnalyticsMeta) => {
     const payload = {
