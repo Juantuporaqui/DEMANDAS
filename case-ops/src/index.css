@@ -1,3 +1,4 @@
+@import "tailwindcss";
 /* ============================================
    CASE OPS - Global Styles
    Mobile-first, one-hand operation
@@ -91,6 +92,10 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.modo-juicio {
+  filter: contrast(1.15) saturate(1.05);
 }
 
 /* App container */
