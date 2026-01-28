@@ -33,15 +33,15 @@ export function AppShell() {
   const location = useLocation();
   const isOnline = useOnlineStatus();
   const navigate = useNavigate();
-  const location = useLocation();
+  const routerLocation = useLocation();
 
   const [modoJuicio, setModoJuicio] = useState<boolean>(() => readModoJuicio());
 
   // Rutas donde NO tiene sentido el “volver” (ajusta a tu gusto)
   const showBack = useMemo(() => {
-    const path = location.pathname;
+    const path = routerLocation.pathname;
     return !['/dashboard', '/'].includes(path);
-  }, [location.pathname]);
+  }, [routerLocation.pathname]);
 
   // Aplica una clase global para alto contraste sin depender aún de Tailwind
   useEffect(() => {
