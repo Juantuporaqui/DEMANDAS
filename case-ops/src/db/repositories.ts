@@ -74,15 +74,19 @@ const ID_PREFIXES: Record<string, string> = {
 
 export const counterRepo = {
   async getNextId(tableName: string): Promise<string> {
+    return db.transaction('rw', db.counters, async () =>
+      counterRepo.getNextIdInTransaction(tableName)
+    );
+  },
+
+  async getNextIdInTransaction(tableName: string): Promise<string> {
     const prefix = ID_PREFIXES[tableName];
     if (!prefix) throw new Error(`Unknown table: ${tableName}`);
 
-    return db.transaction('rw', db.counters, async () => {
-      const counter = await db.counters.get(tableName);
-      const next = (counter?.current ?? 0) + 1;
-      await db.counters.put({ id: tableName, prefix, current: next });
-      return `${prefix}${String(next).padStart(3, '0')}`;
-    });
+    const counter = await db.counters.get(tableName);
+    const next = (counter?.current ?? 0) + 1;
+    await db.counters.put({ id: tableName, prefix, current: next });
+    return `${prefix}${String(next).padStart(3, '0')}`;
   },
 
   async setCounter(tableName: string, value: number): Promise<void> {
@@ -115,17 +119,19 @@ export const casesRepo = {
   },
 
   async create(data: Omit<Case, 'id' | 'createdAt' | 'updatedAt'>): Promise<Case> {
-    const id = await counterRepo.getNextId('cases');
-    const now = Date.now();
-    const caseData: Case = {
-      ...data,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    await db.cases.add(caseData);
-    await auditRepo.log('create', 'case', id);
-    return caseData;
+    return db.transaction('rw', db.counters, db.cases, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('cases');
+      const now = Date.now();
+      const caseData: Case = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.cases.add(caseData);
+      await auditRepo.log('create', 'case', id);
+      return caseData;
+    });
   },
 
   async update(id: string, updates: Partial<Case>): Promise<void> {
@@ -177,17 +183,19 @@ export const documentsRepo = {
   },
 
   async create(data: Omit<Document, 'id' | 'createdAt' | 'updatedAt'>): Promise<Document> {
-    const id = await counterRepo.getNextId('documents');
-    const now = Date.now();
-    const doc: Document = {
-      ...data,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    await db.documents.add(doc);
-    await auditRepo.log('create', 'document', id);
-    return doc;
+    return db.transaction('rw', db.counters, db.documents, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('documents');
+      const now = Date.now();
+      const doc: Document = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.documents.add(doc);
+      await auditRepo.log('create', 'document', id);
+      return doc;
+    });
   },
 
   async update(id: string, updates: Partial<Document>): Promise<void> {
@@ -261,6 +269,60 @@ export const docFilesRepo = {
 };
 
 // ============================================
+// Claim Files Repository (Reclamaciones Attachments)
+// ============================================
+
+type ClaimFileLink = {
+  id: string;
+  claimId: string;
+  fileId: string;
+  filename: string;
+  size: number;
+  mime: string;
+  createdAt: number;
+};
+
+const CLAIM_FILES_STORAGE_KEY = 'case-ops:claim-files';
+
+const readClaimFileLinks = (): ClaimFileLink[] => {
+  if (typeof localStorage === 'undefined') return [];
+  const raw = localStorage.getItem(CLAIM_FILES_STORAGE_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as ClaimFileLink[];
+  } catch {
+    return [];
+  }
+};
+
+const writeClaimFileLinks = (links: ClaimFileLink[]) => {
+  if (typeof localStorage === 'undefined') return;
+  localStorage.setItem(CLAIM_FILES_STORAGE_KEY, JSON.stringify(links));
+};
+
+export const claimFilesRepo = {
+  async getByClaimId(claimId: string): Promise<ClaimFileLink[]> {
+    return readClaimFileLinks().filter((link) => link.claimId === claimId);
+  },
+
+  async addForClaim(data: Omit<ClaimFileLink, 'id' | 'createdAt'>): Promise<ClaimFileLink> {
+    const link: ClaimFileLink = {
+      ...data,
+      id: generateUUID(),
+      createdAt: Date.now(),
+    };
+    const links = readClaimFileLinks();
+    writeClaimFileLinks([...links, link]);
+    return link;
+  },
+
+  async remove(id: string): Promise<void> {
+    const links = readClaimFileLinks();
+    writeClaimFileLinks(links.filter((link) => link.id !== id));
+  },
+};
+
+// ============================================
 // Spans Repository
 // ============================================
 
@@ -282,17 +344,19 @@ export const spansRepo = {
   },
 
   async create(data: Omit<Span, 'id' | 'createdAt' | 'updatedAt'>): Promise<Span> {
-    const id = await counterRepo.getNextId('spans');
-    const now = Date.now();
-    const span: Span = {
-      ...data,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    await db.spans.add(span);
-    await auditRepo.log('create', 'span', id);
-    return span;
+    return db.transaction('rw', db.counters, db.spans, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('spans');
+      const now = Date.now();
+      const span: Span = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.spans.add(span);
+      await auditRepo.log('create', 'span', id);
+      return span;
+    });
   },
 
   async update(id: string, updates: Partial<Span>): Promise<void> {
@@ -348,17 +412,19 @@ export const factsRepo = {
   },
 
   async create(data: Omit<Fact, 'id' | 'createdAt' | 'updatedAt'>): Promise<Fact> {
-    const id = await counterRepo.getNextId('facts');
-    const now = Date.now();
-    const fact: Fact = {
-      ...data,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    await db.facts.add(fact);
-    await auditRepo.log('create', 'fact', id);
-    return fact;
+    return db.transaction('rw', db.counters, db.facts, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('facts');
+      const now = Date.now();
+      const fact: Fact = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.facts.add(fact);
+      await auditRepo.log('create', 'fact', id);
+      return fact;
+    });
   },
 
   async update(id: string, updates: Partial<Fact>): Promise<void> {
@@ -414,17 +480,19 @@ export const partidasRepo = {
   },
 
   async create(data: Omit<Partida, 'id' | 'createdAt' | 'updatedAt'>): Promise<Partida> {
-    const id = await counterRepo.getNextId('partidas');
-    const now = Date.now();
-    const partida: Partida = {
-      ...data,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    await db.partidas.add(partida);
-    await auditRepo.log('create', 'partida', id);
-    return partida;
+    return db.transaction('rw', db.counters, db.partidas, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('partidas');
+      const now = Date.now();
+      const partida: Partida = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.partidas.add(partida);
+      await auditRepo.log('create', 'partida', id);
+      return partida;
+    });
   },
 
   async update(id: string, updates: Partial<Partida>): Promise<void> {
@@ -476,17 +544,19 @@ export const eventsRepo = {
   },
 
   async create(data: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>): Promise<Event> {
-    const id = await counterRepo.getNextId('events');
-    const now = Date.now();
-    const event: Event = {
-      ...data,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    await db.events.add(event);
-    await auditRepo.log('create', 'event', id);
-    return event;
+    return db.transaction('rw', db.counters, db.events, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('events');
+      const now = Date.now();
+      const event: Event = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.events.add(event);
+      await auditRepo.log('create', 'event', id);
+      return event;
+    });
   },
 
   async update(id: string, updates: Partial<Event>): Promise<void> {
@@ -533,17 +603,19 @@ export const strategiesRepo = {
   },
 
   async create(data: Omit<Strategy, 'id' | 'createdAt' | 'updatedAt'>): Promise<Strategy> {
-    const id = await counterRepo.getNextId('strategies');
-    const now = Date.now();
-    const strategy: Strategy = {
-      ...data,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    await db.strategies.add(strategy);
-    await auditRepo.log('create', 'strategy', id);
-    return strategy;
+    return db.transaction('rw', db.counters, db.strategies, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('strategies');
+      const now = Date.now();
+      const strategy: Strategy = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.strategies.add(strategy);
+      await auditRepo.log('create', 'strategy', id);
+      return strategy;
+    });
   },
 
   async update(id: string, updates: Partial<Strategy>): Promise<void> {
@@ -594,17 +666,19 @@ export const tasksRepo = {
   },
 
   async create(data: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Promise<Task> {
-    const id = await counterRepo.getNextId('tasks');
-    const now = Date.now();
-    const task: Task = {
-      ...data,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    await db.tasks.add(task);
-    await auditRepo.log('create', 'task', id);
-    return task;
+    return db.transaction('rw', db.counters, db.tasks, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('tasks');
+      const now = Date.now();
+      const task: Task = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.tasks.add(task);
+      await auditRepo.log('create', 'task', id);
+      return task;
+    });
   },
 
   async update(id: string, updates: Partial<Task>): Promise<void> {

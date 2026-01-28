@@ -25,6 +25,7 @@ export function AnalyticsDashboardPage() {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     document.documentElement.classList.toggle('modo-juicio', modoJuicio);
+    localStorage.setItem('case-ops:modo-juicio', String(modoJuicio));
   }, [modoJuicio]);
 
   const casesData = Object.entries(casesByStatus).map(([status, count]) => ({
@@ -44,7 +45,7 @@ export function AnalyticsDashboardPage() {
           <button
             type="button"
             onClick={() => setModoJuicio((prev) => !prev)}
-            className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
+            className="rounded-full border border-slate-800/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
           >
             Modo Juicio {modoJuicio ? 'ON' : 'OFF'}
           </button>
@@ -114,35 +115,35 @@ export function AnalyticsDashboardPage() {
             <button
               type="button"
               onClick={() => navigate('/analytics/hechos')}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
+              className="rounded-xl border border-slate-800/70 bg-slate-900/40 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
             >
               Desglose de hechos
             </button>
             <button
               type="button"
               onClick={() => navigate('/analytics/prescripcion')}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
+              className="rounded-xl border border-slate-800/70 bg-slate-900/40 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
             >
               Prescripción estratégica
             </button>
             <button
               type="button"
               onClick={() => navigate('/cases')}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
+              className="rounded-xl border border-slate-800/70 bg-slate-900/40 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
             >
               Ir a casos
             </button>
             <button
               type="button"
               onClick={() => navigate('/documents')}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
+              className="rounded-xl border border-slate-800/70 bg-slate-900/40 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
             >
               Documentos clave
             </button>
             <button
               type="button"
               onClick={() => navigate('/partidas')}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
+              className="rounded-xl border border-slate-800/70 bg-slate-900/40 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
             >
               Partidas económicas
             </button>
@@ -163,7 +164,7 @@ export function AnalyticsDashboardPage() {
                   cursor={{ fill: 'rgba(15,23,42,0.6)' }}
                   contentStyle={{
                     background: '#0f172a',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(148,163,184,0.18)',
                     borderRadius: 12,
                     color: '#e2e8f0',
                   }}
@@ -185,7 +186,7 @@ export function AnalyticsDashboardPage() {
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-white/10 p-4 text-sm text-slate-400">
+          <div className="rounded-xl border border-dashed border-slate-800/70 p-4 text-sm text-slate-400">
             No hay casos registrados todavía.
           </div>
         )}

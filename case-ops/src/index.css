@@ -55,14 +55,14 @@
   --color-slate-700: oklch(37.2% .044 257.287);
   --color-slate-800: oklch(27.9% .041 260.031);
   --color-slate-900: oklch(20.8% .042 265.755); /* Deep Dark Blue/Grey */
-
-  --color-white: #fff;
+  --color-slate-950: oklch(15.4% .035 264.8);
 
   /* App Specific Variables */
   /* Recuperamos el fondo oscuro basándonos en tu paleta Slate */
-  --color-fondo: var(--color-slate-900);
-  --color-text-main: #f1f5f9;
-  --color-border: var(--color-slate-700);
+  --color-fondo: var(--color-slate-950);
+  --color-text-main: #e2e8f0;
+  --color-border: var(--color-slate-800);
+  --color-accent: var(--color-amber-500);
 
   /* Spacing & Sizing */
   --spacing: .25rem;
@@ -111,12 +111,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-slate-600);
+  background: var(--color-slate-700);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-slate-500);
+  background: var(--color-slate-600);
 }
 
 ::-webkit-scrollbar-track {
@@ -129,8 +129,9 @@ body {
 
 /* High contrast mode fallback (Modo Juicio support) */
 .modo-juicio {
-  --color-fondo: #000000;
+  --color-fondo: #050505;
   --color-text-main: #fbbf24; /* Amber 400 */
+  --color-border: #1f2937;
 }
 
 *, :after, :before, ::backdrop {
