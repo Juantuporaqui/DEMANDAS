@@ -35,19 +35,11 @@ export function AnalyticsDashboardPage() {
   }));
 
   const activeCases = casesByStatus.activo ?? 0;
-  const primaryCourt = meta?.courts?.[0]?.title ?? 'Picassent';
-  const audienciaLabel = meta?.audienciaFecha
-    ? `Audiencia previa · ${meta.audienciaFecha}`
-    : 'Audiencia previa pendiente';
-  const audienciaDetail =
-    meta?.diasHastaVista !== null && meta?.diasHastaVista !== undefined
-      ? `En ${meta.diasHastaVista} días`
-      : 'Configura la fecha de audiencia';
 
   return (
     <AnalyticsLayout
-      title="Chaladita.net"
-      subtitle="Sistema de Soporte a Litigios"
+      title="Dashboard Ejecutivo"
+      subtitle="Panel estratégico inspirado en Chaladita"
       actions={
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -67,48 +59,29 @@ export function AnalyticsDashboardPage() {
         </div>
       }
     >
-      <section className="rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent px-5 py-3 text-sm text-amber-100 shadow-[0_0_30px_rgba(245,158,11,0.15)]">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-amber-400/40 bg-amber-500/20 text-amber-200">
-            ⚠️
-          </span>
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200">
-              {audienciaLabel} · {primaryCourt}
-            </div>
-            <div className="text-xs text-amber-100/80">{audienciaDetail}</div>
-          </div>
-        </div>
-      </section>
-
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="Procedimientos activos"
           value={formatNumber(activeCases || totalCases)}
           helper={`${totalCases} casos en Dexie`}
-          valueClassName="text-sky-300"
-          labelClassName="text-slate-400"
           onClick={() => navigate(activeCases ? '/cases?status=activo' : '/cases')}
         />
         <KpiCard
           label="Total reclamado"
           value={formatMoney(meta?.totalReclamado)}
           helper="Meta configurable"
-          valueClassName="text-rose-300"
           onClick={() => navigate('/analytics/admin')}
         />
         <KpiCard
           label="Estrategias activas"
           value={formatNumber(meta?.estrategiasActivas)}
           helper="Meta configurable"
-          valueClassName="text-emerald-300"
           onClick={() => navigate('/analytics/admin')}
         />
         <KpiCard
           label="Días hasta vista"
           value={formatNumber(meta?.diasHastaVista)}
           helper={meta?.audienciaFecha ? `Audiencia: ${meta.audienciaFecha}` : 'Configurable'}
-          valueClassName="text-amber-300"
           onClick={() => navigate('/analytics/admin')}
         />
       </section>
@@ -122,33 +95,6 @@ export function AnalyticsDashboardPage() {
             <CourtCard
               key={court.slug}
               court={court}
-              icon={
-                court.slug === 'picassent'
-                  ? '⚖️'
-                  : court.slug === 'quart'
-                  ? '💼'
-                  : court.slug === 'mislata'
-                  ? '🛡️'
-                  : '📁'
-              }
-              className={
-                court.slug === 'picassent'
-                  ? 'border-sky-400/40 bg-gradient-to-br from-sky-950/70 via-sky-900/60 to-slate-950/80'
-                  : court.slug === 'quart'
-                  ? 'border-amber-400/40 bg-gradient-to-br from-amber-950/40 via-amber-900/30 to-slate-950/80'
-                  : court.slug === 'mislata'
-                  ? 'border-violet-400/40 bg-gradient-to-br from-violet-950/60 via-violet-900/50 to-slate-950/80'
-                  : 'border-slate-700/40 bg-gradient-to-br from-slate-900/60 via-slate-900/40 to-slate-950/80'
-              }
-              badgeClassName={
-                court.slug === 'picassent'
-                  ? 'border-sky-400/30 bg-sky-400/10 text-sky-200'
-                  : court.slug === 'quart'
-                  ? 'border-amber-400/30 bg-amber-400/10 text-amber-200'
-                  : court.slug === 'mislata'
-                  ? 'border-violet-400/30 bg-violet-400/10 text-violet-200'
-                  : 'border-slate-400/30 bg-slate-400/10 text-slate-200'
-              }
               onClick={() => navigate(`/analytics/${court.slug}`)}
             />
           ))}
