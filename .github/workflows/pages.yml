@@ -2,7 +2,7 @@ name: Deploy Case-Ops
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "master"]
   workflow_dispatch:
 
 permissions:
@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: case-ops
-        run: npm install   # <--- ¡AQUÍ ESTÁ EL CAMBIO!
+        run: npm install
 
       - name: Build
         working-directory: case-ops

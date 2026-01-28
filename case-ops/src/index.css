@@ -94,6 +94,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.modo-juicio {
+  filter: contrast(1.15) saturate(1.05);
+}
+
 /* App container */
 #root {
   min-height: 100vh;
@@ -921,3 +925,5 @@ a:hover {
     display: none;
   }
 }
+
+.modo-juicio { filter: contrast(1.12) saturate(1.05); }
