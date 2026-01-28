@@ -9,13 +9,12 @@ type AppLayoutProps = {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className={`${bg} ${textPrimary} min-h-screen`}
-    >
+    <div className={`${bg} ${textPrimary} min-h-screen font-sans selection:bg-blue-500/30`}>
       <div className="flex min-h-screen">
         <Sidebar />
         <div className="flex min-h-screen flex-1 flex-col">
           <Topbar />
-          <main className="flex-1 px-4 pb-10 pt-6 md:px-8">
+          <main className="flex-1 px-4 pb-12 pt-6 md:px-8 overflow-x-hidden">
             <div className="mx-auto w-full" style={{ maxWidth: appMaxWidth }}>
               {children}
             </div>
