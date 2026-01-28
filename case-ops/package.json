@@ -12,6 +12,7 @@
   "dependencies": {
     "dexie-react-hooks": "^4.2.0",
     "dexie": "^4.2.1",
+    "dexie-react-hooks": "^1.1.7",
     "jszip": "^3.10.1",
     "lucide-react": "^0.542.0",
     "pdfjs-dist": "^5.4.530",
@@ -28,7 +29,6 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.1.1",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",

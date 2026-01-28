@@ -17,9 +17,6 @@ import type { Document, DocFile, Span, Fact, Partida } from '../../types';
 import * as pdfjsLib from 'pdfjs-dist';
 import './PdfViewer.css';
 
-// Set up PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-
 export function PdfViewerPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
