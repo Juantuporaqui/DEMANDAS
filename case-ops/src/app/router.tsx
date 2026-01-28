@@ -147,6 +147,10 @@ export const router = createBrowserRouter(
         path: 'tasks',
         element: <TasksPage />,
       },
+      {
+        path: 'analytics',
+        element: <AnalyticsDashboard />,
+      },
       // Backup
       {
         path: 'backup',
