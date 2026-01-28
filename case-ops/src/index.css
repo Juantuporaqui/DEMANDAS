@@ -1,52 +1,11 @@
 @import "tailwindcss";
 
-/* =========================================
-   RESTORED DESIGN FROM CACHE (Cleaned)
-   ========================================= */
-
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7SUc.woff2) format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-
-:root {
-  /* Typography */
+@theme {
+  /* Tipografía */
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* Color Palette (OKLCH - Vivid & Modern) */
-  --color-red-400: oklch(70.4% .191 22.216);
-  --color-red-500: oklch(63.7% .237 25.331);
-
-  --color-orange-400: oklch(75% .183 55.934);
-  --color-orange-500: oklch(70.5% .213 47.604);
-  --color-orange-600: oklch(64.6% .222 41.116);
-  --color-orange-800: oklch(47% .157 37.304);
-
-  --color-amber-400: oklch(82.8% .189 84.429);
-  --color-amber-500: oklch(76.9% .188 70.08);
-  --color-amber-600: oklch(66.6% .179 58.318);
-  --color-amber-800: oklch(47.3% .137 46.201);
-
-  --color-emerald-400: oklch(76.5% .177 163.223);
-  --color-emerald-500: oklch(69.6% .17 162.48);
-
-  --color-blue-400: oklch(70.7% .165 254.624);
-  --color-blue-500: oklch(62.3% .214 259.815);
-  --color-blue-600: oklch(54.6% .245 262.881);
-  --color-blue-700: oklch(48.8% .243 264.376);
-  --color-blue-800: oklch(42.4% .199 265.638);
-
-  --color-purple-400: oklch(71.4% .203 305.504);
-  --color-purple-500: oklch(62.7% .265 303.9);
-  --color-purple-600: oklch(55.8% .288 302.321);
-  --color-purple-800: oklch(43.8% .218 303.724);
-
-  /* Slate Scale (Dark Theme Base) */
+  /* Sobrescribimos la paleta Slate con tus tonos oscuros (OKLCH) */
   --color-slate-200: oklch(92.9% .013 255.508);
   --color-slate-300: oklch(86.9% .022 252.894);
   --color-slate-400: oklch(70.4% .04 256.788);
@@ -54,43 +13,34 @@
   --color-slate-600: oklch(44.6% .043 257.281);
   --color-slate-700: oklch(37.2% .044 257.287);
   --color-slate-800: oklch(27.9% .041 260.031);
-  --color-slate-900: oklch(20.8% .042 265.755); /* Deep Dark Blue/Grey */
+  --color-slate-900: oklch(20.8% .042 265.755);
   --color-slate-950: oklch(15.4% .035 264.8);
 
-  /* App Specific Variables */
-  /* Recuperamos el fondo oscuro basándonos en tu paleta Slate */
+  /* Definimos tus colores personalizados */
   --color-fondo: var(--color-slate-950);
   --color-text-main: #e2e8f0;
   --color-border: var(--color-slate-800);
-  --color-accent: var(--color-amber-500);
 
-  /* Spacing & Sizing */
-  --spacing: .25rem;
-  --container-7xl: 80rem;
+  /* Animaciones */
+  --animate-fade-in: fadeIn 0.5s ease-out forwards;
+
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
 }
 
-/* =========================================
-   GLOBAL STYLES
-   ========================================= */
-
-html {
-  -webkit-text-size-adjust: 100%;
-  tab-size: 4;
-  line-height: 1.5;
-  font-family: var(--font-sans);
-  -webkit-tap-highlight-color: transparent;
+/* Estilos base */
+:root {
+  color-scheme: dark; /* Fuerza al navegador a usar scrollbars oscuras */
 }
 
 body {
   background-color: var(--color-fondo);
   color: var(--color-text-main);
-  min-height: 100vh;
   font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   margin: 0;
-  display: flex;
-  flex-direction: column;
+  min-height: 100vh;
 }
 
 #root {
@@ -101,42 +51,18 @@ body {
   flex-direction: column;
 }
 
-/* =========================================
-   SCROLLBARS (The "Case Ops" look)
-   ========================================= */
-
+/* Scrollbars personalizadas */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--color-slate-700);
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-slate-600);
 }
-
 ::-webkit-scrollbar-track {
   background: var(--color-slate-900);
-}
-
-/* =========================================
-   UTILITIES / OVERRIDES
-   ========================================= */
-
-/* High contrast mode fallback (Modo Juicio support) */
-.modo-juicio {
-  --color-fondo: #050505;
-  --color-text-main: #fbbf24; /* Amber 400 */
-  --color-border: #1f2937;
-}
-
-*, :after, :before, ::backdrop {
-  box-sizing: border-box;
-  border: 0 solid;
-  margin: 0;
-  padding: 0;
 }
