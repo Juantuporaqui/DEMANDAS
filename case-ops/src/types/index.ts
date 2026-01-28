@@ -59,6 +59,54 @@ export type DocType =
   | 'otros';
 
 // ============================================
+// Analytics Types
+// ============================================
+
+export type AnalyticsTimelineStatus = 'ok' | 'warn' | 'danger' | 'info';
+
+export type AnalyticsCourtSlug = 'picassent' | 'quart' | 'mislata' | 'otros';
+
+export interface AnalyticsTimelineItem {
+  label: string;
+  date: string;
+  status?: AnalyticsTimelineStatus;
+}
+
+export interface AnalyticsCourtMeta {
+  slug: AnalyticsCourtSlug;
+  title: string;
+  procedimiento?: string;
+  juzgado?: string;
+  cuantia?: number | null;
+  fase?: string | null;
+  proximoHito?: string | null;
+  tags?: string[];
+}
+
+export interface AnalyticsPrescripcionMeta {
+  articulo: string;
+  fechaCorte: string;
+  narrativa: string;
+  impactoPct?: number | null;
+  hitos?: string[];
+}
+
+export interface AnalyticsMeta {
+  id: string;
+  totalReclamado: number | null;
+  riesgoReal: number | null;
+  objetivoReduccionPct: number | null;
+  audienciaFecha: string | null;
+  estrategiasActivas: number | null;
+  diasHastaVista: number | null;
+  lineaTemporal: AnalyticsTimelineItem[];
+  courts: AnalyticsCourtMeta[];
+  prescripcion: AnalyticsPrescripcionMeta;
+  pendientes?: string[];
+  updatedAt: string;
+}
+
+// ============================================
 // Database Interfaces
 // ============================================
 
@@ -248,6 +296,7 @@ export interface ExportManifest {
     strategies: number;
     tasks: number;
     links: number;
+    analyticsMeta: number;
   };
   fileHashes: string[];
 }
@@ -265,6 +314,7 @@ export interface ExportData {
   tasks: Task[];
   links: Link[];
   auditLogs: AuditLog[];
+  analyticsMeta: AnalyticsMeta[];
 }
 
 // ============================================

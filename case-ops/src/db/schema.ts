@@ -17,10 +17,11 @@ import type {
   Task,
   Link,
   AuditLog,
+  AnalyticsMeta,
 } from '../types';
 
 // Database Schema Version
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 // Database class extending Dexie
 class CaseOpsDB extends Dexie {
@@ -37,6 +38,7 @@ class CaseOpsDB extends Dexie {
   tasks!: EntityTable<Task, 'id'>;
   links!: EntityTable<Link, 'id'>;
   auditLogs!: EntityTable<AuditLog, 'id'>;
+  analytics_meta!: EntityTable<AnalyticsMeta, 'id'>;
 
   constructor() {
     super('CaseOpsDB');
@@ -80,6 +82,9 @@ class CaseOpsDB extends Dexie {
 
       // Audit log - optional tracking
       auditLogs: 'id, at, action, entityType, entityId',
+
+      // Analytics meta - singleton configuration
+      analytics_meta: 'id, updatedAt',
     });
   }
 }

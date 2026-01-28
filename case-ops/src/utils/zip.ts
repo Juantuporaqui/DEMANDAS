@@ -81,6 +81,7 @@ export async function exportToZip(
   const tasks = await tasksRepo.getAll();
   const links = await linksRepo.getAll();
   const auditLogs = await auditRepo.getAll();
+  const analyticsMeta = await db.analytics_meta.toArray();
 
   // Stage 2: Export data (without blobs)
   onProgress?.({
@@ -103,6 +104,7 @@ export async function exportToZip(
     tasks,
     links,
     auditLogs,
+    analyticsMeta,
   };
 
   zip.file('db.json', JSON.stringify(exportData, null, 2));
@@ -150,6 +152,7 @@ export async function exportToZip(
       strategies: strategies.length,
       tasks: tasks.length,
       links: links.length,
+      analyticsMeta: analyticsMeta.length,
     },
     fileHashes,
   };
@@ -335,6 +338,14 @@ export async function importFromZip(
       if (!existing || item.updatedAt > existing.updatedAt) {
         await db.links.put(item);
         result.stats.linksImported++;
+      }
+    }
+
+    // Import analytics meta
+    for (const item of importData.analyticsMeta ?? []) {
+      const existing = await db.analytics_meta.get(item.id);
+      if (!existing || item.updatedAt > existing.updatedAt) {
+        await db.analytics_meta.put(item);
       }
     }
 

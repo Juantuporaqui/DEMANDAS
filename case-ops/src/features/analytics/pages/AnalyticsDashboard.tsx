@@ -1,95 +1,195 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../../db/schema';
-import SectionTitle from '../../../ui/components/SectionTitle';
-import { ActionButton } from '../components/ActionButton';
+import { useEffect, useState } from 'react';
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
+import { useNavigate } from 'react-router-dom';
+import { AnalyticsLayout } from '../layout/AnalyticsLayout';
 import { CourtCard } from '../components/CourtCard';
 import { KpiCard } from '../components/KpiCard';
+import { QuickActions } from '../components/QuickActions';
+import { SectionCard } from '../components/SectionCard';
 import { Timeline } from '../components/Timeline';
+import { useAnalyticsMeta } from '../hooks/useAnalyticsMeta';
+import { useAnalyticsComputed, getStatusLabel } from '../hooks/useAnalyticsComputed';
+import { formatMoney, formatNumber } from '../utils/money';
 
 export function AnalyticsDashboardPage() {
-  const kpis = useLiveQuery(async () => {
-    const [partidasCount, factsCount, strategiesCount, eventsCount] =
-      await Promise.all([
-        db.partidas.count(),
-        db.facts.count(),
-        db.strategies.count(),
-        db.events.count(),
-      ]);
+  const navigate = useNavigate();
+  const { meta } = useAnalyticsMeta();
+  const { totalCases, casesByStatus } = useAnalyticsComputed();
+  const [modoJuicio, setModoJuicio] = useState(false);
 
-    return {
-      partidasCount,
-      factsCount,
-      strategiesCount,
-      eventsCount,
-    };
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    setModoJuicio(document.documentElement.classList.contains('modo-juicio'));
   }, []);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.classList.toggle('modo-juicio', modoJuicio);
+  }, [modoJuicio]);
+
+  const casesData = Object.entries(casesByStatus).map(([status, count]) => ({
+    status,
+    label: getStatusLabel(status),
+    count,
+  }));
+
+  const activeCases = casesByStatus.activo ?? 0;
+
   return (
-    <div className="space-y-8">
+    <AnalyticsLayout
+      title="Dashboard Ejecutivo"
+      subtitle="Panel estratégico inspirado en Chaladita"
+      actions={
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setModoJuicio((prev) => !prev)}
+            className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
+          >
+            Modo Juicio {modoJuicio ? 'ON' : 'OFF'}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/analytics/admin')}
+            className="rounded-full border border-emerald-400/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200"
+          >
+            Configurar analítica
+          </button>
+        </div>
+      }
+    >
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="Total reclamado"
-          value={kpis?.partidasCount ?? 0}
-          helper="Registros Dexie (placeholder)"
+          label="Procedimientos activos"
+          value={formatNumber(activeCases || totalCases)}
+          helper={`${totalCases} casos en Dexie`}
+          onClick={() => navigate(activeCases ? '/cases?status=activo' : '/cases')}
         />
         <KpiCard
-          label="Riesgo"
-          value={kpis?.factsCount ?? 0}
-          helper="Hechos en tabla"
+          label="Total reclamado"
+          value={formatMoney(meta?.totalReclamado)}
+          helper="Meta configurable"
+          onClick={() => navigate('/analytics/admin')}
         />
         <KpiCard
           label="Estrategias activas"
-          value={kpis?.strategiesCount ?? 0}
-          helper="Estrategias en curso"
+          value={formatNumber(meta?.estrategiasActivas)}
+          helper="Meta configurable"
+          onClick={() => navigate('/analytics/admin')}
         />
         <KpiCard
-          label="Días a vista"
-          value={kpis?.eventsCount ?? 0}
-          helper="Eventos registrados"
+          label="Días hasta vista"
+          value={formatNumber(meta?.diasHastaVista)}
+          helper={meta?.audienciaFecha ? `Audiencia: ${meta.audienciaFecha}` : 'Configurable'}
+          onClick={() => navigate('/analytics/admin')}
         />
       </section>
 
-      <section className="space-y-4">
-        <SectionTitle
-          title="Juzgados"
-          subtitle="Acceso rápido a paneles por órgano"
-        />
-        <div className="grid gap-4 lg:grid-cols-3">
-          <CourtCard
-            title="Picassent"
-            subtitle="Juzgado mixto · Vista ordinaria"
-            amountLabel="€ --"
-            to="/analytics/picassent"
-          />
-          <CourtCard
-            title="Quart"
-            subtitle="Ejecución hipotecaria"
-            amountLabel="€ --"
-            to="/analytics/quart"
-          />
-          <CourtCard
-            title="Mislata"
-            subtitle="Social · Laboral"
-            amountLabel="€ --"
-            to="/analytics/mislata"
-          />
+      <SectionCard
+        title="Frentes judiciales"
+        subtitle="Juzgados prioritarios y su estado"
+      >
+        <div className="grid gap-4 lg:grid-cols-2">
+          {(meta?.courts ?? []).map((court) => (
+            <CourtCard
+              key={court.slug}
+              court={court}
+              onClick={() => navigate(`/analytics/${court.slug}`)}
+            />
+          ))}
         </div>
-      </section>
+      </SectionCard>
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <Timeline />
-        <div className="space-y-4">
-          <SectionTitle
-            title="Accesos rápidos"
-            subtitle="Atajos para secciones clave"
-          />
-          <div className="flex flex-col gap-3">
-            <ActionButton label="Ver prescripción" to="/analytics/prescripcion" />
-            <ActionButton label="Desglose de hechos" to="/analytics/hechos" />
-            <ActionButton label="Abrir casos" to="/cases" tone="ghost" />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <Timeline
+          items={meta?.lineaTemporal ?? []}
+          onConfigure={() => navigate('/analytics/admin')}
+        />
+        <SectionCard
+          title="Acceso rápido"
+          subtitle="Atajos críticos de la operación"
+        >
+          <QuickActions />
+          <div className="mt-4 grid gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/analytics/hechos')}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
+            >
+              Desglose de hechos
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/analytics/prescripcion')}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
+            >
+              Prescripción estratégica
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/cases')}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
+            >
+              Ir a casos
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/documents')}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
+            >
+              Documentos clave
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/partidas')}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm font-semibold text-slate-200 transition hover:border-emerald-400/40"
+            >
+              Partidas económicas
+            </button>
           </div>
-        </div>
-      </section>
-    </div>
+        </SectionCard>
+      </div>
+
+      <SectionCard
+        title="Casos por estado"
+        subtitle="Distribución en tiempo real"
+      >
+        {casesData.length ? (
+          <div className="h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={casesData} margin={{ top: 16, right: 0, left: 0, bottom: 0 }}>
+                <XAxis dataKey="label" tick={{ fill: '#cbd5f5', fontSize: 12 }} />
+                <Tooltip
+                  cursor={{ fill: 'rgba(15,23,42,0.6)' }}
+                  contentStyle={{
+                    background: '#0f172a',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 12,
+                    color: '#e2e8f0',
+                  }}
+                />
+                <Bar
+                  dataKey="count"
+                  fill="#34d399"
+                  radius={[8, 8, 0, 0]}
+                  onClick={(data) => {
+                    const status = data?.status as string | undefined;
+                    if (!status || status === 'sin_estado') {
+                      navigate('/cases');
+                      return;
+                    }
+                    navigate(`/cases?status=${status}`);
+                  }}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-white/10 p-4 text-sm text-slate-400">
+            No hay casos registrados todavía.
+          </div>
+        )}
+      </SectionCard>
+    </AnalyticsLayout>
   );
 }
