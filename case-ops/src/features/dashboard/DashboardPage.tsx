@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../../ui/components/Card';
 import SectionTitle from '../../ui/components/SectionTitle';
-import Stat from '../../ui/components/Stat';
 import { claimFilesRepo, docFilesRepo } from '../../db/repositories';
 import { formatBytes, formatCurrency } from '../../utils/validators';
 import { sha256 } from '../../utils/hash';
@@ -19,17 +18,6 @@ type ClaimFile = {
 };
 
 // Datos DEMO para visualización inmediata
-const CASES = [
-  {
-    id: 'pic-715-24',
-    title: 'Picassent · División Cosa Común',
-    autos: 'Autos 715/2024',
-    court: 'JPI nº1 Picassent',
-    status: 'Audiencia previa en preparación',
-    tags: ['División cosa común', 'Unidad de caja', 'Prescripción 1964.2 CC'],
-  },
-];
-
 const CLAIMS = [
   {
     id: 'r01',
@@ -72,10 +60,6 @@ export function DashboardPage() {
 
   useEffect(() => {
     // Carga inicial simulada
-    const loadFiles = async () => {
-       // Lógica futura de carga
-    };
-    void loadFiles();
   }, []);
 
   const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
