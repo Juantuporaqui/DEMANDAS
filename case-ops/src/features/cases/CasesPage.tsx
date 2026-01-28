@@ -2,98 +2,234 @@
 // CASE OPS - Cases List (Dark Mode Fusion)
 // ============================================
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../../components';
-import { casesRepo } from '../../db/repositories';
-import type { Case } from '../../types';
+import {
+  casesRepo,
+  documentsRepo,
+  eventsRepo,
+  factsRepo,
+  partidasRepo,
+  strategiesRepo,
+} from '../../db/repositories';
+import type { Case, Document, Event, Fact, Partida, Strategy } from '../../types';
+import { formatDate } from '../../utils/dates';
+import { formatCurrency } from '../../utils/validators';
 
-const STATUS_COLORS: Record<string, string> = {
-  activo: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]',
-  suspendido: 'bg-amber-500',
-  archivado: 'bg-slate-600',
-  cerrado: 'bg-slate-700',
+const STATUS_LABELS: Record<string, string> = {
+  activo: 'Activo',
+  suspendido: 'Suspendido',
+  archivado: 'Archivado',
+  cerrado: 'Cerrado',
 };
+
+const STATUS_BADGES: Record<string, string> = {
+  activo: 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200',
+  suspendido: 'border-amber-400/40 bg-amber-400/10 text-amber-200',
+  archivado: 'border-slate-500/40 bg-slate-500/10 text-slate-200',
+  cerrado: 'border-slate-500/40 bg-slate-500/10 text-slate-200',
+};
+
+const CARD_STYLES = [
+  {
+    accent: 'from-blue-900/70 via-slate-900/70 to-slate-950/90',
+    border: 'border-blue-500/30 hover:border-blue-400/50',
+    icon: '⚖️',
+  },
+  {
+    accent: 'from-amber-900/40 via-slate-900/70 to-slate-950/90',
+    border: 'border-amber-400/30 hover:border-amber-300/50',
+    icon: '📌',
+  },
+  {
+    accent: 'from-purple-900/50 via-slate-900/70 to-slate-950/90',
+    border: 'border-purple-400/30 hover:border-purple-300/50',
+    icon: '🛡️',
+  },
+  {
+    accent: 'from-slate-800/60 via-slate-900/70 to-slate-950/90',
+    border: 'border-slate-600/40 hover:border-slate-500/60',
+    icon: '🧭',
+  },
+];
+
+function getNextEvent(events: Event[]) {
+  const now = Date.now();
+  const upcoming = events
+    .map((event) => ({ event, time: new Date(event.date).getTime() }))
+    .filter(({ time }) => !Number.isNaN(time))
+    .filter(({ time }) => time >= now)
+    .sort((a, b) => a.time - b.time)[0];
+
+  return upcoming?.event ?? null;
+}
 
 export function CasesPage() {
   const [cases, setCases] = useState<Case[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [facts, setFacts] = useState<Fact[]>([]);
+  const [partidas, setPartidas] = useState<Partida[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    casesRepo.getAll().then(setCases).finally(() => setLoading(false));
+    async function loadCases() {
+      const [casesData, documentsData, factsData, partidasData, eventsData, strategiesData] =
+        await Promise.all([
+          casesRepo.getAll(),
+          documentsRepo.getAll(),
+          factsRepo.getAll(),
+          partidasRepo.getAll(),
+          eventsRepo.getAll(),
+          strategiesRepo.getAll(),
+        ]);
+
+      setCases(casesData);
+      setDocuments(documentsData);
+      setFacts(factsData);
+      setPartidas(partidasData);
+      setEvents(eventsData);
+      setStrategies(strategiesData);
+      setLoading(false);
+    }
+
+    loadCases().catch((error) => {
+      console.error('Error loading cases:', error);
+      setLoading(false);
+    });
   }, []);
 
-  const mainCases = cases.filter((c) => !c.parentCaseId);
-  const childCases = cases.filter((c) => c.parentCaseId);
+  const mainCases = useMemo(() => cases.filter((caseItem) => !caseItem.parentCaseId), [cases]);
+  const childCases = useMemo(() => cases.filter((caseItem) => caseItem.parentCaseId), [cases]);
 
   if (loading) return <div className="p-8 text-center text-slate-500">Cargando casos...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Casos</h1>
-          <p className="text-sm text-slate-400">{cases.length} procedimientos activos</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
+            Procedimientos principales
+          </p>
+          <h1 className="text-3xl font-semibold text-white">Mapa de frentes judiciales</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            {mainCases.length} procedimientos activos con su documentación, hechos y estrategia.
+          </p>
         </div>
-        <Link to="/cases/new" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-500 transition-colors">
-          Nuevo Caso
+        <Link
+          to="/analytics"
+          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-emerald-400/40"
+        >
+          Ver tablero ejecutivo
         </Link>
       </div>
 
       {cases.length === 0 ? (
         <EmptyState title="Sin casos" description="Crea tu primer procedimiento judicial." />
       ) : (
-        <div className="grid gap-4">
-          {mainCases.map((caseItem) => {
-            const children = childCases.filter((c) => c.parentCaseId === caseItem.id);
-            return (
-              <div key={caseItem.id} className="space-y-2">
-                <Link to={`/cases/${caseItem.id}`} className="block group">
-                  <div className="relative overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800/40 p-4 transition-all hover:border-slate-600 hover:bg-slate-800">
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-900/20 text-2xl group-hover:bg-blue-900/40 transition-colors">
-                        ⚖️
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-3">
-                          <h3 className="truncate text-base font-bold text-slate-200 group-hover:text-white">
-                            {caseItem.title}
-                          </h3>
-                          <span className={`h-2 w-2 rounded-full ${STATUS_COLORS[caseItem.status] || 'bg-slate-500'}`} />
-                        </div>
-                        <p className="text-sm text-slate-500 mt-1 font-medium">
-                          {caseItem.court} <span className="text-slate-700 mx-1">•</span> {caseItem.autosNumber || 'S/N'}
-                        </p>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {mainCases.map((caseItem, index) => {
+            const accent = CARD_STYLES[index % CARD_STYLES.length];
+            const docs = documents.filter((doc) => doc.caseId === caseItem.id);
+            const caseFacts = facts.filter((fact) => fact.caseId === caseItem.id);
+            const caseStrategies = strategies.filter((strategy) => strategy.caseId === caseItem.id);
+            const casePartidas = partidas.filter((partida) => partida.caseId === caseItem.id);
+            const caseEvents = events.filter((event) => event.caseId === caseItem.id);
+            const pendingFacts = caseFacts.filter(
+              (fact) => fact.status === 'controvertido' || fact.status === 'a_probar'
+            );
+            const totalAmount = casePartidas.reduce((sum, partida) => sum + partida.amountCents, 0);
+            const nextEvent = getNextEvent(caseEvents);
+            const children = childCases.filter((child) => child.parentCaseId === caseItem.id);
 
-                        <div className="mt-3 flex gap-2">
-                          <span className="inline-flex items-center rounded-md bg-slate-800 px-2 py-1 text-xs font-medium text-slate-300 border border-slate-700">
-                            {caseItem.type}
+            return (
+              <Link
+                key={caseItem.id}
+                to={`/cases/${caseItem.id}`}
+                className="group flex h-full"
+              >
+                <div
+                  className={`flex h-full w-full flex-col gap-6 rounded-2xl border bg-gradient-to-br ${accent.accent} ${accent.border} p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-xl`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-2xl">
+                        {accent.icon}
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="text-lg font-semibold text-white">{caseItem.title}</h2>
+                          <span
+                            className={`rounded-full border px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] ${
+                              STATUS_BADGES[caseItem.status] || 'border-white/10 bg-white/5 text-slate-300'
+                            }`}
+                          >
+                            {STATUS_LABELS[caseItem.status] || caseItem.status}
                           </span>
                         </div>
+                        <p className="mt-1 text-xs uppercase tracking-[0.3em] text-slate-400">
+                          {caseItem.type} · {caseItem.autosNumber || 'Sin autos'}
+                        </p>
+                        <p className="mt-2 text-sm text-slate-300">{caseItem.court}</p>
                       </div>
-                      <span className="self-center text-slate-600 group-hover:text-slate-400">›</span>
+                    </div>
+                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                      {formatCurrency(totalAmount)}
+                    </span>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                        Documentos
+                      </div>
+                      <div className="mt-2 text-lg font-semibold text-white">{docs.length}</div>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                        Hechos clave
+                      </div>
+                      <div className="mt-2 text-lg font-semibold text-white">{pendingFacts.length}</div>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                        Estrategias
+                      </div>
+                      <div className="mt-2 text-lg font-semibold text-white">{caseStrategies.length}</div>
                     </div>
                   </div>
-                </Link>
 
-                {children.length > 0 && (
-                  <div className="ml-8 border-l-2 border-slate-800 pl-6 space-y-2">
-                    {children.map((child) => (
-                      <Link key={child.id} to={`/cases/${child.id}`} className="block rounded-lg border border-slate-800 bg-slate-900/50 p-3 hover:bg-slate-800 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg opacity-70">
-                            {child.type === 'ejecucion' ? '📋' : '📄'}
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-sm text-slate-300 truncate">{child.title}</div>
-                            <div className="text-xs text-slate-600">{child.type}</div>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300">
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                      {casePartidas.length} partidas
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                      {caseEvents.length} eventos
+                    </span>
+                    {children.length > 0 && (
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                        {children.length} procedimientos vinculados
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300">
+                    <div>
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                        Próximo hito
+                      </div>
+                      <div className="text-sm text-slate-200">
+                        {nextEvent ? `${nextEvent.title} · ${formatDate(nextEvent.date)}` : 'Sin eventos próximos'}
+                      </div>
+                    </div>
+                    <span className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
+                      Ver dossier →
+                    </span>
+                  </div>
+                </div>
+              </Link>
             );
           })}
         </div>
