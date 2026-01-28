@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { to: '/tasks', label: 'Tareas', icon: '✅' },
 ];
 
-// AQUÍ ESTABA EL ERROR: Añadimos 'default' para complacer a AppLayout
+// IMPORTANTE: 'export default' es lo que soluciona tu error
 export default function Sidebar() {
   return (
     <aside
