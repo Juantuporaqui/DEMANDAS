@@ -1,401 +1,151 @@
-// ============================================
-// CASE OPS - Tasks Page
-// ============================================
-
 import { useState, useEffect } from 'react';
-import { tasksRepo, casesRepo } from '../../db/repositories';
-import { Modal, EmptyState } from '../../components';
-import type { Task, Case, TaskStatus, TaskPriority } from '../../types';
-import { formatDate, getCurrentDate } from '../../utils/dates';
-
-const STATUS_LABELS: Record<TaskStatus, string> = {
-  pendiente: 'Pendiente',
-  en_progreso: 'En progreso',
-  completada: 'Completada',
-  cancelada: 'Cancelada',
-};
-
-const PRIORITY_LABELS: Record<TaskPriority, string> = {
-  alta: 'Alta',
-  media: 'Media',
-  baja: 'Baja',
-};
+import { Link } from 'react-router-dom';
+import { tasksRepo } from '../../db/repositories';
+import type { Task } from '../../types';
+import Card from '../../ui/components/Card';
+import { formatDate } from '../../utils/dates';
 
 export function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('pending');
-
-  const [formData, setFormData] = useState({
-    caseId: '',
-    title: '',
-    dueDate: getCurrentDate(),
-    priority: 'media' as TaskPriority,
-    status: 'pendiente' as TaskStatus,
-    notes: '',
-  });
+  const [filter, setFilter] = useState<'pending' | 'all'>('pending');
 
   useEffect(() => {
-    loadData();
+    loadTasks();
   }, []);
 
-  async function loadData() {
+  async function loadTasks() {
     try {
-      const [allTasks, allCases] = await Promise.all([
-        tasksRepo.getAll(),
-        casesRepo.getAll(),
-      ]);
-      setTasks(allTasks);
-      setCases(allCases);
-
-      if (allCases.length === 1) {
-        setFormData((prev) => ({ ...prev, caseId: allCases[0].id }));
-      }
+      const data = await tasksRepo.getAll();
+      // Ordenar: Primero las pendientes, luego por prioridad, luego por fecha
+      setTasks(data.sort((a, b) => {
+        if (a.done === b.done) {
+            // Si ambas tienen mismo estado, priorizamos la "Alta"
+            if (a.priority === 'alta' && b.priority !== 'alta') return -1;
+            if (a.priority !== 'alta' && b.priority === 'alta') return 1;
+            return (b.createdAt || 0) - (a.createdAt || 0);
+        }
+        return a.done ? 1 : -1; // Pendientes primero
+      }));
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading tasks:', error);
     } finally {
       setLoading(false);
     }
   }
 
-  function openNewTask() {
-    setEditingTask(null);
-    setFormData({
-      caseId: cases.length === 1 ? cases[0].id : '',
-      title: '',
-      dueDate: getCurrentDate(),
-      priority: 'media',
-      status: 'pendiente',
-      notes: '',
-    });
-    setShowModal(true);
-  }
-
-  function openEditTask(task: Task) {
-    setEditingTask(task);
-    setFormData({
-      caseId: task.caseId,
-      title: task.title,
-      dueDate: task.dueDate || getCurrentDate(),
-      priority: task.priority,
-      status: task.status,
-      notes: task.notes,
-    });
-    setShowModal(true);
-  }
-
-  async function handleSubmit() {
-    if (!formData.caseId) {
-      alert('Selecciona un caso');
-      return;
-    }
-
-    if (!formData.title.trim()) {
-      alert('El título es obligatorio');
-      return;
-    }
-
+  const toggleTask = async (task: Task) => {
     try {
-      const taskData = {
-        caseId: formData.caseId,
-        title: formData.title.trim(),
-        dueDate: formData.dueDate || undefined,
-        priority: formData.priority,
-        status: formData.status,
-        notes: formData.notes.trim(),
-        links: editingTask?.links || [],
-      };
-
-      if (editingTask) {
-        await tasksRepo.update(editingTask.id, taskData);
-      } else {
-        await tasksRepo.create(taskData);
-      }
-
-      await loadData();
-      setShowModal(false);
+      const updated = { ...task, done: !task.done };
+      await tasksRepo.update(updated);
+      setTasks(current => 
+        current.map(t => t.id === task.id ? updated : t)
+               .sort((a, b) => a.done === b.done ? 0 : a.done ? 1 : -1)
+      );
     } catch (error) {
-      console.error('Error saving task:', error);
-      alert('Error al guardar la tarea');
+      console.error('Error updating task:', error);
     }
-  }
+  };
 
-  async function handleToggleStatus(task: Task) {
-    const newStatus: TaskStatus =
-      task.status === 'completada' ? 'pendiente' : 'completada';
-    await tasksRepo.update(task.id, { status: newStatus });
-    await loadData();
-  }
+  const getPriorityColor = (priority: string, done: boolean) => {
+    if (done) return 'border-slate-800 opacity-50';
+    if (priority === 'alta') return 'border-rose-500/50 bg-rose-500/5';
+    if (priority === 'media') return 'border-amber-500/50 bg-amber-500/5';
+    return 'border-blue-500/50 bg-blue-500/5';
+  };
 
-  async function handleDelete() {
-    if (!editingTask) return;
-    if (!confirm('¿Eliminar esta tarea?')) return;
-
-    try {
-      await tasksRepo.delete(editingTask.id);
-      await loadData();
-      setShowModal(false);
-    } catch (error) {
-      console.error('Error deleting task:', error);
-    }
-  }
-
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === 'pending') {
-      return task.status === 'pendiente' || task.status === 'en_progreso';
-    }
-    if (filter === 'completed') {
-      return task.status === 'completada';
-    }
-    return true;
-  });
+  const filteredTasks = filter === 'all' ? tasks : tasks.filter(t => !t.done);
 
   if (loading) {
-    return (
-      <div className="page">
-        <div className="flex justify-center p-md">
-          <div className="spinner" />
-        </div>
-      </div>
-    );
+    return <div className="p-8 text-center text-slate-500">Cargando operaciones...</div>;
   }
 
   return (
-    <div className="page">
-      <div className="page-header">
+    <div className="space-y-6 pb-20">
+      {/* CABECERA */}
+      <header className="flex flex-col gap-4">
         <div>
-          <h1 className="page-title">Tareas</h1>
-          <p className="page-subtitle">
-            {tasks.filter((t) => t.status === 'pendiente').length} pendientes
+          <Link 
+            to="/dashboard" 
+            className="mb-4 inline-flex items-center text-xs font-semibold uppercase tracking-widest text-slate-400 hover:text-amber-400 lg:hidden"
+          >
+            ← Volver al Panel
+          </Link>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-500">
+            Operaciones
+          </p>
+          <h1 className="text-3xl font-bold text-slate-100 tracking-tight">
+            Tareas
+          </h1>
+          <p className="text-sm text-slate-400">
+            {tasks.filter(t => !t.done).length} acciones pendientes de ejecución.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={openNewTask}>
-          + Nueva
-        </button>
-      </div>
 
-      {/* Filters */}
-      <div className="tabs mb-md">
-        <button
-          className={`tab ${filter === 'pending' ? 'active' : ''}`}
-          onClick={() => setFilter('pending')}
-        >
-          Pendientes (
-          {tasks.filter((t) => t.status === 'pendiente' || t.status === 'en_progreso').length}
-          )
-        </button>
-        <button
-          className={`tab ${filter === 'completed' ? 'active' : ''}`}
-          onClick={() => setFilter('completed')}
-        >
-          Completadas ({tasks.filter((t) => t.status === 'completada').length})
-        </button>
-        <button
-          className={`tab ${filter === 'all' ? 'active' : ''}`}
-          onClick={() => setFilter('all')}
-        >
-          Todas ({tasks.length})
-        </button>
-      </div>
+        {/* PESTAÑAS SIMPLES */}
+        <div className="flex gap-4 border-b border-slate-800 text-sm">
+            <button 
+                onClick={() => setFilter('pending')}
+                className={`pb-2 px-1 border-b-2 transition-colors ${filter === 'pending' ? 'border-emerald-500 text-emerald-400 font-bold' : 'border-transparent text-slate-500'}`}
+            >
+                Pendientes
+            </button>
+            <button 
+                onClick={() => setFilter('all')}
+                className={`pb-2 px-1 border-b-2 transition-colors ${filter === 'all' ? 'border-emerald-500 text-emerald-400 font-bold' : 'border-transparent text-slate-500'}`}
+            >
+                Histórico
+            </button>
+        </div>
+      </header>
 
+      {/* LISTA DE TAREAS */}
       {filteredTasks.length === 0 ? (
-        <EmptyState
-          icon="✅"
-          title={filter === 'completed' ? 'Sin tareas completadas' : 'Sin tareas pendientes'}
-          description={
-            filter === 'pending'
-              ? '¡Bien hecho! No tienes tareas pendientes'
-              : 'Añade tareas para organizar el trabajo'
-          }
-          action={
-            filter === 'pending'
-              ? { label: 'Nueva tarea', onClick: openNewTask }
-              : undefined
-          }
-        />
+        <Card className="p-8 text-center border-dashed border-slate-800 bg-slate-900/30">
+          <div className="text-4xl mb-4">✅</div>
+          <h3 className="text-lg font-semibold text-slate-200">Todo limpio</h3>
+          <p className="text-slate-500">No hay tareas pendientes en esta vista.</p>
+        </Card>
       ) : (
-        <div className="card">
+        <div className="grid gap-3">
           {filteredTasks.map((task) => (
             <div
               key={task.id}
-              className="list-item"
-              style={{
-                opacity: task.status === 'completada' ? 0.6 : 1,
-              }}
+              onClick={() => toggleTask(task)}
+              className={`group flex cursor-pointer items-center justify-between gap-4 rounded-xl border p-4 transition-all hover:bg-slate-800/50 ${getPriorityColor(task.priority, task.done)}`}
             >
-              <button
-                className="btn btn-ghost btn-icon"
-                onClick={() => handleToggleStatus(task)}
-                style={{
-                  color:
-                    task.status === 'completada'
-                      ? 'var(--color-success)'
-                      : 'var(--text-muted)',
-                }}
-              >
-                {task.status === 'completada' ? '✓' : '○'}
-              </button>
-              <div
-                className="list-item-content"
-                onClick={() => openEditTask(task)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div
-                  className="list-item-title"
-                  style={{
-                    textDecoration:
-                      task.status === 'completada' ? 'line-through' : 'none',
-                  }}
-                >
-                  {task.title}
+              <div className="flex items-start gap-4">
+                <div className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                    task.done 
+                    ? 'border-emerald-500 bg-emerald-500 text-black' 
+                    : 'border-slate-600 group-hover:border-slate-400'
+                }`}>
+                  {task.done && <span className="text-xs font-bold">✓</span>}
                 </div>
-                <div className="list-item-subtitle flex gap-sm items-center">
-                  <span
-                    className={`chip ${
-                      task.priority === 'alta'
-                        ? 'chip-danger'
-                        : task.priority === 'media'
-                        ? 'chip-warning'
-                        : ''
-                    }`}
-                    style={{ fontSize: '0.625rem' }}
-                  >
-                    {PRIORITY_LABELS[task.priority]}
-                  </span>
-                  {task.dueDate && (
-                    <span>{formatDate(task.dueDate)}</span>
-                  )}
+                
+                <div>
+                    <h3 className={`font-medium transition-all ${task.done ? 'text-slate-500 line-through' : 'text-slate-200'}`}>
+                        {task.title}
+                    </h3>
+                    {task.dueDate && (
+                        <p className="text-xs text-slate-500 mt-1">
+                            Vence: {formatDate(task.dueDate)}
+                        </p>
+                    )}
                 </div>
+              </div>
+
+              <div className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${
+                  task.priority === 'alta' ? 'text-rose-400 bg-rose-500/10' :
+                  task.priority === 'media' ? 'text-amber-400 bg-amber-500/10' :
+                  'text-blue-400 bg-blue-500/10'
+              }`}>
+                {task.priority}
               </div>
             </div>
           ))}
         </div>
       )}
-
-      {/* Task Modal */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title={editingTask ? 'Editar tarea' : 'Nueva tarea'}
-        footer={
-          <>
-            {editingTask && (
-              <button className="btn btn-danger" onClick={handleDelete}>
-                Eliminar
-              </button>
-            )}
-            <div style={{ flex: 1 }} />
-            <button
-              className="btn btn-secondary"
-              onClick={() => setShowModal(false)}
-            >
-              Cancelar
-            </button>
-            <button className="btn btn-primary" onClick={handleSubmit}>
-              Guardar
-            </button>
-          </>
-        }
-      >
-        <div className="form-group">
-          <label className="form-label">Caso *</label>
-          <select
-            className="form-select"
-            value={formData.caseId}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, caseId: e.target.value }))
-            }
-          >
-            <option value="">Seleccionar...</option>
-            {cases.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.id} - {c.title}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Título *</label>
-          <input
-            type="text"
-            className="form-input"
-            value={formData.title}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, title: e.target.value }))
-            }
-            placeholder="¿Qué hay que hacer?"
-          />
-        </div>
-
-        <div className="grid grid-2">
-          <div className="form-group">
-            <label className="form-label">Fecha límite</label>
-            <input
-              type="date"
-              className="form-input"
-              value={formData.dueDate}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, dueDate: e.target.value }))
-              }
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Prioridad</label>
-            <select
-              className="form-select"
-              value={formData.priority}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  priority: e.target.value as TaskPriority,
-                }))
-              }
-            >
-              <option value="alta">Alta</option>
-              <option value="media">Media</option>
-              <option value="baja">Baja</option>
-            </select>
-          </div>
-        </div>
-
-        {editingTask && (
-          <div className="form-group">
-            <label className="form-label">Estado</label>
-            <select
-              className="form-select"
-              value={formData.status}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  status: e.target.value as TaskStatus,
-                }))
-              }
-            >
-              <option value="pendiente">Pendiente</option>
-              <option value="en_progreso">En progreso</option>
-              <option value="completada">Completada</option>
-              <option value="cancelada">Cancelada</option>
-            </select>
-          </div>
-        )}
-
-        <div className="form-group">
-          <label className="form-label">Notas</label>
-          <textarea
-            className="form-textarea"
-            value={formData.notes}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, notes: e.target.value }))
-            }
-            placeholder="Detalles adicionales..."
-            rows={3}
-          />
-        </div>
-      </Modal>
     </div>
   );
 }
