@@ -1,5 +1,5 @@
 // ============================================
-// CASE OPS - Dashboard Page
+// CASE OPS - Dashboard Page (Dark Mode Fusion)
 // ============================================
 
 import { useState, useEffect } from 'react';
@@ -20,7 +20,7 @@ import {
   getAlerts,
 } from '../../db/repositories';
 import { formatCurrency } from '../../utils/validators';
-import type { Case, Fact, Partida } from '../../types';
+import type { Case, Fact } from '../../types';
 import Card from '../../ui/components/Card';
 import EmptyState from '../../ui/components/EmptyState';
 import SectionTitle from '../../ui/components/SectionTitle';
@@ -56,18 +56,13 @@ export function DashboardPage() {
         getAlerts(),
       ]);
 
-      // Get active case (first one for now)
-      if (cases.length > 0) {
-        setActiveCase(cases[0]);
-      }
+      if (cases.length > 0) setActiveCase(cases[0]);
 
-      // Recent controversial facts
       const controversial = facts.filter(
         (f) => f.status === 'controvertido' || f.status === 'a_probar'
       );
       setRecentFacts(controversial.slice(0, 5));
 
-      // Calculate stats
       const totalAmount = partidas.reduce((sum, p) => sum + p.amountCents, 0);
 
       setStats({
@@ -79,7 +74,6 @@ export function DashboardPage() {
         totalAmount,
       });
 
-      // Limit alerts to 3
       setAlerts(alertsData.slice(0, 3));
     } catch (error) {
       console.error('Error loading dashboard:', error);
@@ -91,7 +85,7 @@ export function DashboardPage() {
   if (loading) {
     return (
       <div className="flex min-h-[320px] items-center justify-center">
-        <div className="spinner" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
       </div>
     );
   }
@@ -100,29 +94,29 @@ export function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900">Dashboard</h1>
-          <p className="text-sm text-zinc-500">Panel de control ejecutivo</p>
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Dashboard</h1>
+          <p className="text-sm text-slate-400 font-medium">Panel de control ejecutivo</p>
         </div>
         <Link
           to="/settings"
-          className="rounded-full border border-zinc-200/70 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+          className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
         >
           Ajustes
         </Link>
       </div>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Link to="/documents" className="block">
+        <Link to="/documents" className="block transition-transform hover:-translate-y-1">
           <Card className="p-5">
             <Stat label="Documentos" value={stats.documents} />
           </Card>
         </Link>
-        <Link to="/facts" className="block">
+        <Link to="/facts" className="block transition-transform hover:-translate-y-1">
           <Card className="p-5">
-            <Stat label="Hechos controvertidos" value={stats.factsControvertidos} />
+            <Stat label="Hechos" value={stats.factsControvertidos} delta="Controvertidos" />
           </Card>
         </Link>
-        <Link to="/partidas" className="block">
+        <Link to="/partidas" className="block transition-transform hover:-translate-y-1">
           <Card className="p-5">
             <Stat label="Partidas" value={stats.partidas} />
           </Card>
@@ -148,10 +142,19 @@ export function DashboardPage() {
                   { name: 'Partidas', value: stats.partidas },
                 ]}
               >
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#0f172a" radius={[6, 6, 0, 0]} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} stroke="#94a3b8" fontSize={12} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} stroke="#94a3b8" fontSize={12} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    color: '#f1f5f9',
+                  }}
+                  itemStyle={{ color: '#60a5fa' }}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                />
+                <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -162,10 +165,7 @@ export function DashboardPage() {
             <SectionTitle
               title="Caso activo"
               action={
-                <Link
-                  to="/cases"
-                  className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500"
-                >
+                <Link to="/cases" className="text-xs font-bold uppercase tracking-wider text-blue-400 hover:text-blue-300">
                   Ver todos
                 </Link>
               }
@@ -174,54 +174,48 @@ export function DashboardPage() {
               {activeCase ? (
                 <Link
                   to={`/cases/${activeCase.id}`}
-                  className="flex items-center gap-3 rounded-xl border border-zinc-200/70 bg-zinc-50 px-3 py-3 text-sm text-zinc-800"
+                  className="flex items-center gap-3 rounded-xl border border-slate-700/50 bg-slate-800/50 px-3 py-3 hover:bg-slate-800 transition-colors"
                 >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-900 text-white">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-900/30 text-blue-400 text-lg">
                     ⚖️
                   </span>
                   <div className="min-w-0">
-                    <div className="truncate font-semibold">{activeCase.title}</div>
-                    <div className="truncate text-xs text-zinc-500">
+                    <div className="truncate font-semibold text-slate-200">{activeCase.title}</div>
+                    <div className="truncate text-xs text-slate-500 font-medium">
                       {activeCase.court} · {activeCase.autosNumber}
                     </div>
                   </div>
                 </Link>
               ) : (
-                <EmptyState
-                  title="Sin caso activo"
-                  description="Carga un expediente para destacarlo aquí."
-                />
+                <EmptyState title="Sin caso activo" description="Carga un expediente." />
               )}
             </div>
           </Card>
 
           <Card className="p-5">
-            <SectionTitle title="Alertas" subtitle="Últimas novedades operativas" />
+            <SectionTitle title="Alertas" subtitle="Novedades operativas" />
             <div className="mt-4 space-y-3">
               {alerts.length > 0 ? (
                 alerts.map((alert) => (
                   <div
                     key={alert.id}
-                    className="flex items-start gap-3 rounded-xl border border-zinc-200/70 bg-white px-3 py-3"
+                    className="flex items-start gap-3 rounded-lg border border-slate-700/50 bg-slate-800/30 px-3 py-2.5"
                   >
-                    <span className="mt-1 text-lg">
+                    <span className="mt-0.5 text-base">
                       {alert.type === 'warning' ? '⚠️' : 'ℹ️'}
                     </span>
                     <div>
-                      <div className="text-sm font-semibold text-zinc-800">
+                      <div className="text-sm font-semibold text-slate-300">
                         {alert.title}
                       </div>
-                      <div className="text-xs text-zinc-500">
+                      <div className="text-xs text-slate-500">
                         {alert.description}
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <EmptyState
-                  title="Sin alertas recientes"
-                  description="Todo está bajo control por ahora."
-                />
+                <div className="text-sm text-slate-500 italic py-2">Todo en orden.</div>
               )}
             </div>
           </Card>
@@ -232,80 +226,57 @@ export function DashboardPage() {
         <Card className="p-6">
           <SectionTitle
             title="Hechos a probar"
-            subtitle="Prioridades jurídicas en curso"
-            action={
-              <Link
-                to="/facts"
-                className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500"
-              >
-                Ver todos
-              </Link>
-            }
+            subtitle="Prioridades jurídicas"
+            action={<Link to="/facts" className="text-xs font-bold uppercase tracking-wider text-blue-400 hover:text-blue-300">Ver todos</Link>}
           />
-          <div className="mt-4 space-y-3">
-            {recentFacts.length > 0 ? (
-              recentFacts.map((fact) => (
-                <Link
-                  key={fact.id}
-                  to={`/facts/${fact.id}`}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200/70 bg-zinc-50 px-3 py-3 text-sm text-zinc-800"
-                >
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full ${
-                        fact.risk === 'alto'
-                          ? 'bg-slate-700'
-                          : fact.risk === 'medio'
-                          ? 'bg-slate-500'
-                          : 'bg-slate-300'
-                      }`}
-                    />
-                    <div className="min-w-0">
-                      <div className="truncate font-semibold">{fact.title}</div>
-                      <div className="truncate text-xs text-zinc-500">
-                        {fact.status} · {fact.burden}
-                      </div>
-                    </div>
+          <div className="mt-4 space-y-2">
+            {recentFacts.map((fact) => (
+              <Link
+                key={fact.id}
+                to={`/facts/${fact.id}`}
+                className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2.5 hover:border-slate-700 transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      fact.risk === 'alto'
+                        ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+                        : fact.risk === 'medio'
+                        ? 'bg-amber-500'
+                        : 'bg-emerald-500'
+                    }`}
+                  />
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-slate-300">{fact.title}</div>
                   </div>
-                  <span className="text-sm text-zinc-400">›</span>
-                </Link>
-              ))
-            ) : (
-              <EmptyState
-                title="Sin hechos pendientes"
-                description="No hay hechos controvertidos para revisar."
-              />
-            )}
+                </div>
+                <span className="text-xs text-slate-600">›</span>
+              </Link>
+            ))}
           </div>
         </Card>
 
         <Card className="p-6">
-          <SectionTitle title="Acciones rápidas" subtitle="Atajos operativos" />
+          <SectionTitle title="Acciones rápidas" />
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Link
-              to="/documents/new"
-              className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-white px-4 py-3 text-sm font-semibold text-zinc-800"
-            >
-              Nuevo documento <span className="text-zinc-400">↗</span>
-            </Link>
-            <Link
-              to="/facts/new"
-              className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-white px-4 py-3 text-sm font-semibold text-zinc-800"
-            >
-              Nuevo hecho <span className="text-zinc-400">↗</span>
-            </Link>
-            <Link
-              to="/partidas/new"
-              className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-white px-4 py-3 text-sm font-semibold text-zinc-800"
-            >
-              Nueva partida <span className="text-zinc-400">↗</span>
-            </Link>
-            <Link
-              to="/search"
-              className="flex items-center justify-between rounded-xl border border-zinc-200/70 bg-zinc-900 px-4 py-3 text-sm font-semibold text-white"
-            >
-              Buscar <span className="text-white/70">↗</span>
-            </Link>
+            {[
+              { label: 'Nuevo documento', to: '/documents/new', accent: false },
+              { label: 'Nuevo hecho', to: '/facts/new', accent: false },
+              { label: 'Nueva partida', to: '/partidas/new', accent: false },
+              { label: 'Buscar global', to: '/search', accent: true },
+            ].map((action) => (
+              <Link
+                key={action.label}
+                to={action.to}
+                className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm font-semibold transition-all ${
+                  action.accent
+                    ? 'border-blue-600 bg-blue-600 text-white hover:bg-blue-500'
+                    : 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                }`}
+              >
+                {action.label} <span className="opacity-70">↗</span>
+              </Link>
+            ))}
           </div>
         </Card>
       </section>
