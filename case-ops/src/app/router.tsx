@@ -33,8 +33,6 @@ import { AnalyticsAdminPage } from '../features/analytics/pages/AnalyticsAdminPa
 import { CourtDashboard } from '../features/analytics/pages/CourtDashboard';
 import { HechosPage } from '../features/analytics/pages/HechosPage';
 import { PrescripcionPage } from '../features/analytics/pages/PrescripcionPage';
-import { AudienciaPreviaPage } from '../features/audiencia/AudienciaPreviaPage';
-import { ToolsPage } from '../features/tools/ToolsPage';
 
 export const router = createBrowserRouter(
   [
@@ -44,7 +42,7 @@ export const router = createBrowserRouter(
       children: [
         {
           index: true,
-          element: <Navigate to="/cases" replace />,
+          element: <Navigate to="/analytics" replace />,
         },
         {
           path: 'dashboard',
@@ -82,14 +80,6 @@ export const router = createBrowserRouter(
         {
           path: 'cases/:id',
           element: <CaseDetailPage />,
-        },
-        {
-          path: 'audiencia-previa',
-          element: <AudienciaPreviaPage />,
-        },
-        {
-          path: 'tools',
-          element: <ToolsPage />,
         },
         // Documents
         {
