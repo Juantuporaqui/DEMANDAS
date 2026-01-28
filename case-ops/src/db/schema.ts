@@ -26,7 +26,7 @@ import type {
 } from '../types';
 
 // Database Schema Version
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 3;
 
 // Database class extending Dexie
 class CaseOpsDB extends Dexie {
