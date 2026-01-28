@@ -45,6 +45,10 @@ export const router = createBrowserRouter(
         element: <DashboardPage />,
       },
       {
+        path: 'analytics',
+        element: <AnalyticsDashboard />,
+      },
+      {
         path: 'search',
         element: <SearchPage />,
       },

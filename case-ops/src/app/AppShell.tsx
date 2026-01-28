@@ -2,118 +2,104 @@
 // CASE OPS - App Shell
 // ============================================
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, WifiOff } from 'lucide-react';
 import { BottomNav } from '../components';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
-const MODO_JUICIO_STORAGE_KEY = 'caseops:modoJuicio';
+const MODO_JUICIO_KEY = 'caseops:modoJuicio';
 
 export function AppShell() {
-  const isOnline = useOnlineStatus();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const isOnline = useOnlineStatus();
   const [modoJuicio, setModoJuicio] = useState(false);
 
+  const showBackButton = useMemo(() => {
+    return location.pathname !== '/' && location.pathname !== '/dashboard';
+  }, [location.pathname]);
+
   useEffect(() => {
-    const storedValue = window.localStorage.getItem(MODO_JUICIO_STORAGE_KEY);
-    if (storedValue === '1') {
-      setModoJuicio(true);
-    }
+    const storedValue = localStorage.getItem(MODO_JUICIO_KEY);
+    const enabled = storedValue === 'true';
+    setModoJuicio(enabled);
+    document.documentElement.classList.toggle('modo-juicio', enabled);
   }, []);
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (modoJuicio) {
-      root.classList.add('modo-juicio');
-      window.localStorage.setItem(MODO_JUICIO_STORAGE_KEY, '1');
-    } else {
-      root.classList.remove('modo-juicio');
-      window.localStorage.setItem(MODO_JUICIO_STORAGE_KEY, '0');
-    }
+    document.documentElement.classList.toggle('modo-juicio', modoJuicio);
+    localStorage.setItem(MODO_JUICIO_KEY, String(modoJuicio));
   }, [modoJuicio]);
 
-  const showBackButton = pathname !== '/' && pathname !== '/dashboard';
+  const handleToggleModoJuicio = () => {
+    setModoJuicio((prev) => !prev);
+  };
 
   return (
     <div className="app-shell">
       <header
-        className="app-shell__header"
         style={{
           position: 'sticky',
           top: 0,
-          zIndex: 20,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          padding: '12px 16px',
-          background: 'rgba(12, 14, 20, 0.9)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          color: '#f1f5f9',
+          zIndex: 1000,
+          backgroundColor: 'rgba(15, 23, 42, 0.92)',
+          color: '#f8fafc',
+          borderBottom: '1px solid rgba(148, 163, 184, 0.2)',
+          backdropFilter: 'blur(10px)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {showBackButton && (
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="app-shell__back"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius: '999px',
-                background: 'rgba(30, 41, 59, 0.6)',
-                color: 'inherit',
-                padding: '6px 12px',
-                cursor: 'pointer',
-              }}
-            >
-              <ArrowLeft size={18} />
-              <span>Volver</span>
-            </button>
-          )}
-          {!isOnline && (
-            <div
-              className="offline-banner"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 12px',
-                borderRadius: '999px',
-                background: 'rgba(239, 68, 68, 0.15)',
-                border: '1px solid rgba(239, 68, 68, 0.35)',
-              }}
-            >
-              <WifiOff size={16} />
-              <span>Sin conexión - Modo offline</span>
-            </div>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={() => setModoJuicio((value) => !value)}
-          className="app-shell__modo-juicio"
+        <div
           style={{
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: '999px',
-            background: 'rgba(15, 23, 42, 0.7)',
-            color: 'inherit',
-            padding: '6px 12px',
-            cursor: 'pointer',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            gap: '12px',
           }}
         >
-          {modoJuicio ? <Sun size={18} /> : <Moon size={18} />}
-          <span>Modo Juicio</span>
-        </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {showBackButton && (
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => navigate(-1)}
+                aria-label="Volver"
+              >
+                ← Volver
+              </button>
+            )}
+            <div>
+              <div style={{ fontWeight: 700 }}>Case Ops</div>
+              <div style={{ fontSize: '0.75rem', color: 'rgba(248, 250, 252, 0.7)' }}>
+                Panel operativo
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {!isOnline && (
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  padding: '4px 8px',
+                  borderRadius: '999px',
+                  backgroundColor: 'rgba(251, 191, 36, 0.2)',
+                  color: '#fbbf24',
+                }}
+              >
+                OFFLINE
+              </span>
+            )}
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={handleToggleModoJuicio}
+            >
+              Modo Juicio
+            </button>
+          </div>
+        </div>
       </header>
       <main className="app-main">
         <Outlet />
