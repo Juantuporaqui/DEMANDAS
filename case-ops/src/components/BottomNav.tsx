@@ -17,6 +17,7 @@ const navItems: NavItem[] = [
   { path: '/facts', label: 'Hechos', icon: '📋' },
   { path: '/documents', label: 'Docs', icon: '📄' },
   { path: '/partidas', label: 'Partidas', icon: '💰' },
+  { path: '/analytics', label: 'Analítica', icon: '📊' },
   { path: '/more', label: 'Más', icon: '☰' },
 ];
 
