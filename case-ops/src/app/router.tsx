@@ -28,6 +28,7 @@ import { MorePage } from '../features/dashboard/MorePage';
 import { SettingsPage } from '../features/dashboard/SettingsPage';
 import { CasesPage } from '../features/cases/CasesPage';
 import { CaseDetailPage } from '../features/cases/CaseDetailPage';
+import { AnalyticsDashboard } from '../features/analytics/AnalyticsDashboard';
 
 export const router = createBrowserRouter(
   [
@@ -42,6 +43,10 @@ export const router = createBrowserRouter(
       {
         path: 'dashboard',
         element: <DashboardPage />,
+      },
+      {
+        path: 'analytics',
+        element: <AnalyticsDashboard />,
       },
       {
         path: 'search',
