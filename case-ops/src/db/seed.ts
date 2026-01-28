@@ -99,12 +99,12 @@ Este procedimiento es el "TRONCO" del árbol de procedimientos.`,
     });
 
     // ==========================================
-    // CASE CAS002 - Ejecución de sentencia
+    // CASE CAS002 - Ejecución de sentencia (Mislata)
     // ==========================================
-    await casesRepo.create({
+    const cas002 = await casesRepo.create({
       title: 'Ejecución de sentencia (familia)',
       court: 'Juzgado de Mislata',
-      autosNumber: '',
+      autosNumber: '362/2023',
       type: 'ejecucion',
       status: 'activo',
       amountTotal: eurosToCents(3500),
@@ -116,14 +116,42 @@ Este procedimiento es el "TRONCO" del árbol de procedimientos.`,
 - Ejecución por cantidades (≈3.500 € embargados)
 - Fondo común hijos / gastos escolares
 
+Situación:
+- Cuenta privativa en control de la parte actora
+- Incumplimientos reiterados de gastos extraordinarios
+
 Deriva del divorcio y del incumplimiento de obligaciones económicas.`,
-      tags: ['ejecucion', 'pension', 'gastos'],
+      tags: ['mislata', 'ejecucion', 'pension', 'gastos'],
     });
 
     // ==========================================
-    // CASE CAS003 - Incidentes hipotecarios
+    // CASE CAS003 - Quart (ejecución DANA)
     // ==========================================
-    await casesRepo.create({
+    const cas003 = await casesRepo.create({
+      title: 'Quart · Ejecución Familia',
+      court: 'Juzgado de Quart',
+      autosNumber: '362/2023',
+      type: 'ejecucion',
+      status: 'activo',
+      amountTotal: eurosToCents(9800),
+      nextMilestone: 'Liquidación de cantidades',
+      nextDate: '2025-07-10',
+      themeColor: '#F97316',
+      parentCaseId: cas001.id,
+      notes: `Objeto:
+- Gastos extraordinarios derivados de DANA
+- Ayuda material escolar y cuentas comunes
+
+Estado:
+- Documentación DANA pendiente de completar
+- Pendiente resolución sobre cuenta privativa`,
+      tags: ['quart', 'dana', 'ejecucion', 'escolar'],
+    });
+
+    // ==========================================
+    // CASE CAS004 - Incidentes hipotecarios
+    // ==========================================
+    const cas004 = await casesRepo.create({
       title: 'Impagos hipoteca - Reclamación',
       court: 'Pendiente',
       autosNumber: '',
@@ -143,7 +171,7 @@ Estado: Pre-procesal / preparación de demanda`,
     });
 
     // ==========================================
-    // CASE CAS004 - Consorcio Compensación Seguros
+    // CASE CAS005 - Consorcio Compensación Seguros
     // ==========================================
     await casesRepo.create({
       title: 'Expediente Consorcio Compensación Seguros',
@@ -167,7 +195,7 @@ Valor probatorio: ALTO`,
     });
 
     // ==========================================
-    // CASE CAS005 - Resolución AEAT
+    // CASE CAS006 - Resolución AEAT
     // ==========================================
     await casesRepo.create({
       title: 'Resolución AEAT (2012)',
@@ -189,7 +217,7 @@ Documento "blindado" que neutraliza narrativa contraria`,
     });
 
     // ==========================================
-    // CASE CAS006 - Mediación ICAV
+    // CASE CAS007 - Mediación ICAV
     // ==========================================
     await casesRepo.create({
       title: 'Mediación ICAV',
@@ -320,6 +348,66 @@ Valor:
     for (const factData of factsData) {
       await factsRepo.create({
         caseId: cas001.id,
+        ...factData,
+      });
+    }
+
+    const factsMislata = [
+      {
+        title: 'Cuenta privativa utilizada para gastos comunes',
+        narrative:
+          'La parte actora ha utilizado una cuenta privativa para gastos comunes sin rendición de cuentas.',
+        status: 'controvertido' as const,
+        burden: 'demandado' as const,
+        risk: 'medio' as const,
+        strength: 3,
+        tags: ['mislata', 'cuenta', 'gastos'],
+      },
+      {
+        title: 'Gastos escolares extraordinarios no reintegrados',
+        narrative:
+          'Se han asumido gastos escolares extraordinarios que no han sido reintegrados.',
+        status: 'a_probar' as const,
+        burden: 'demandado' as const,
+        risk: 'medio' as const,
+        strength: 4,
+        tags: ['mislata', 'escolar'],
+      },
+    ];
+
+    for (const factData of factsMislata) {
+      await factsRepo.create({
+        caseId: cas002.id,
+        ...factData,
+      });
+    }
+
+    const factsQuart = [
+      {
+        title: 'Ayuda DANA aplicada a cuenta privativa',
+        narrative:
+          'La ayuda por DANA fue ingresada en cuenta privativa sin reflejo en el fondo común.',
+        status: 'controvertido' as const,
+        burden: 'demandado' as const,
+        risk: 'alto' as const,
+        strength: 4,
+        tags: ['quart', 'dana', 'cuenta'],
+      },
+      {
+        title: 'Necesidad de documentación DOGV',
+        narrative:
+          'Se requiere resolución DOGV para acreditar la cuantía y destino de la ayuda.',
+        status: 'a_probar' as const,
+        burden: 'demandado' as const,
+        risk: 'medio' as const,
+        strength: 3,
+        tags: ['quart', 'dogv'],
+      },
+    ];
+
+    for (const factData of factsQuart) {
+      await factsRepo.create({
+        caseId: cas003.id,
         ...factData,
       });
     }
@@ -457,6 +545,90 @@ Valor:
         ...claimData,
       });
       claimIdMap.set(claimData.shortLabel, created.id);
+    }
+
+    const claimsMislata = [
+      {
+        shortLabel: 'M01',
+        title: 'Reintegro gastos escolares extraordinarios',
+        amount: eurosToCents(1800),
+        winChance: 'media' as const,
+        importance: 'media' as const,
+        summaryShort: 'Reintegro de gastos escolares 2022-2024.',
+        summaryLong:
+          'Se solicita reintegro de gastos escolares extraordinarios asumidos por Juan y vinculados al fondo común de hijos.',
+        defenseShort: 'Aportar recibos y comunicaciones previas.',
+        defenseLong:
+          'Reunir recibos, facturas y mensajes de notificación para acreditar la necesidad y el pago.',
+        linkedFactIds: [],
+        linkedDocIds: [],
+      },
+      {
+        shortLabel: 'M02',
+        title: 'Regularización de cuenta privativa',
+        amount: eurosToCents(1700),
+        winChance: 'baja' as const,
+        importance: 'baja' as const,
+        summaryShort: 'Conciliar movimientos de cuenta privativa.',
+        summaryLong:
+          'Se solicita conciliación de movimientos de cuenta privativa utilizada para gastos comunes.',
+        defenseShort: 'Solicitar extractos y justificar movimientos.',
+        defenseLong:
+          'Solicitar extractos completos y justificar cada cargo para demostrar su impacto en el fondo común.',
+        linkedFactIds: [],
+        linkedDocIds: [],
+      },
+    ];
+
+    const claimsQuart = [
+      {
+        shortLabel: 'Q01',
+        title: 'Ayuda DANA aplicada a fondo común',
+        amount: eurosToCents(5200),
+        winChance: 'alta' as const,
+        importance: 'alta' as const,
+        summaryShort: 'Reintegro de ayuda DANA al fondo común.',
+        summaryLong:
+          'La ayuda DANA debe imputarse al fondo común de hijos, no a cuenta privativa.',
+        defenseShort: 'Aportar resolución DOGV y trazabilidad bancaria.',
+        defenseLong:
+          'Acreditar con resolución DOGV y extractos el destino real de la ayuda.',
+        linkedFactIds: [],
+        linkedDocIds: [],
+      },
+      {
+        shortLabel: 'Q02',
+        title: 'Compensación por material escolar',
+        amount: eurosToCents(4600),
+        winChance: 'media' as const,
+        importance: 'media' as const,
+        summaryShort: 'Compensación por compras escolares.',
+        summaryLong:
+          'Se reclama compensación por material escolar financiado sin reembolso.',
+        defenseShort: 'Justificar compras y pagos.',
+        defenseLong:
+          'Reunir facturas de material escolar y evidencias de pago realizadas por Juan.',
+        linkedFactIds: [],
+        linkedDocIds: [],
+      },
+    ];
+
+    const claimMapMislata = new Map<string, string>();
+    for (const claimData of claimsMislata) {
+      const created = await claimsRepo.create({
+        caseId: cas002.id,
+        ...claimData,
+      });
+      claimMapMislata.set(claimData.shortLabel, created.id);
+    }
+
+    const claimMapQuart = new Map<string, string>();
+    for (const claimData of claimsQuart) {
+      const created = await claimsRepo.create({
+        caseId: cas003.id,
+        ...claimData,
+      });
+      claimMapQuart.set(claimData.shortLabel, created.id);
     }
 
     // ==========================================
@@ -691,6 +863,44 @@ Valor:
       });
     }
 
+    const strategiesMislata = [
+      {
+        attack: 'Actora alegará que los gastos escolares son voluntarios y no exigibles.',
+        risk: 'Medio: posible falta de consenso previo.',
+        rebuttal:
+          'Aportar comunicaciones previas y pruebas de necesidad, así como precedentes de reparto.',
+        evidencePlan: 'Mensajes, emails y facturas escolares 2022-2024',
+        questions: '¿Se notificaron los gastos antes de realizarse?',
+        tags: ['mislata', 'escolar'],
+      },
+    ];
+
+    for (const strategyData of strategiesMislata) {
+      await strategiesRepo.create({
+        caseId: cas002.id,
+        ...strategyData,
+      });
+    }
+
+    const strategiesQuart = [
+      {
+        attack: 'La ayuda DANA se considerará privativa por ingreso individual.',
+        risk: 'Alto: pueden alegar titularidad exclusiva.',
+        rebuttal:
+          'Demostrar que la ayuda se concedió para necesidades familiares y se destinó a bienes comunes.',
+        evidencePlan: 'Resolución DOGV + extractos bancarios + facturas de reparación',
+        questions: '¿En qué se aplicó la ayuda DANA?',
+        tags: ['quart', 'dana'],
+      },
+    ];
+
+    for (const strategyData of strategiesQuart) {
+      await strategiesRepo.create({
+        caseId: cas003.id,
+        ...strategyData,
+      });
+    }
+
     // ==========================================
     // JURISPRUDENCIA
     // ==========================================
@@ -740,12 +950,30 @@ Valor:
           'Doctrina sobre la obligación de no bloquear la venta del bien común sin causa justificada.',
         linkedClaims: ['R08'],
       },
+      {
+        ref: 'SAP Valencia 104/2024',
+        court: 'AP Valencia',
+        dateISO: '2024-05-07',
+        summaryShort: 'Gastos escolares extraordinarios en ejecuciones.',
+        summaryLong:
+          'Criterio sobre reintegro de gastos escolares extraordinarios en procedimientos de ejecución.',
+        linkedClaims: ['M01'],
+      },
+      {
+        ref: 'SAP Valencia 42/2023',
+        court: 'AP Valencia',
+        dateISO: '2023-02-14',
+        summaryShort: 'Ayudas públicas y fondos comunes.',
+        summaryLong:
+          'Reconoce que ayudas públicas destinadas a la unidad familiar deben imputarse al fondo común.',
+        linkedClaims: ['Q01'],
+      },
     ];
 
     for (const jurisprudence of jurisprudenceData) {
       const { linkedClaims, ...rest } = jurisprudence;
       const linkedClaimIds = linkedClaims
-        .map((key) => claimIdMap.get(key))
+        .map((key) => claimIdMap.get(key) ?? claimMapMislata.get(key) ?? claimMapQuart.get(key))
         .filter((id): id is string => Boolean(id));
       await jurisprudenceRepo.create({
         ...rest,
@@ -818,6 +1046,40 @@ Valor:
     for (const docRequest of docRequests) {
       await docRequestsRepo.create({
         caseId: cas001.id,
+        ...docRequest,
+      });
+    }
+
+    const docRequestsMislata = [
+      {
+        title: 'Recibos material escolar 2022-2024',
+        source: 'Centro escolar',
+        purpose: 'Justificar gastos extraordinarios.',
+        priority: 'media' as const,
+        status: 'pendiente' as const,
+      },
+    ];
+
+    for (const docRequest of docRequestsMislata) {
+      await docRequestsRepo.create({
+        caseId: cas002.id,
+        ...docRequest,
+      });
+    }
+
+    const docRequestsQuart = [
+      {
+        title: 'Resolución DOGV ayuda DANA',
+        source: 'DOGV',
+        purpose: 'Acreditar cuantía y beneficiario.',
+        priority: 'alta' as const,
+        status: 'solicitado' as const,
+      },
+    ];
+
+    for (const docRequest of docRequestsQuart) {
+      await docRequestsRepo.create({
+        caseId: cas003.id,
         ...docRequest,
       });
     }
@@ -911,6 +1173,42 @@ Valor:
     for (const task of tasks) {
       await tasksRepo.create({
         caseId: cas001.id,
+        ...task,
+      });
+    }
+
+    const tasksMislata = [
+      {
+        title: 'Preparar ejecución gastos escolares',
+        dueDate: '2025-06-30',
+        priority: 'media' as const,
+        status: 'pendiente' as const,
+        notes: 'Consolidar recibos y notificaciones.',
+        links: [],
+      },
+    ];
+
+    for (const task of tasksMislata) {
+      await tasksRepo.create({
+        caseId: cas002.id,
+        ...task,
+      });
+    }
+
+    const tasksQuart = [
+      {
+        title: 'Verificar ayuda DANA en cuenta',
+        dueDate: '2025-06-26',
+        priority: 'alta' as const,
+        status: 'pendiente' as const,
+        notes: 'Solicitar extractos y resolución DOGV.',
+        links: [],
+      },
+    ];
+
+    for (const task of tasksQuart) {
+      await tasksRepo.create({
+        caseId: cas003.id,
         ...task,
       });
     }

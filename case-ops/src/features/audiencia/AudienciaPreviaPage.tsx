@@ -216,6 +216,14 @@ export function AudienciaPreviaPage() {
                         <option value="baja">Baja</option>
                       </select>
                     </div>
+                    <div className="mt-2 flex items-center gap-2 text-xs text-slate-300">
+                      <span
+                        className={`rounded-full border px-2 py-0.5 ${IMPORTANCE_STYLES[item.importance]}`}
+                      >
+                        {item.importance}
+                      </span>
+                      <span>Checklist editable</span>
+                    </div>
                     <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-300">
                       {item.linkedClaimIds.map((claimId) => (
                         <span

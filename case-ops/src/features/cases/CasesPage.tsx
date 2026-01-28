@@ -118,10 +118,18 @@ export function CasesPage() {
     });
   }, []);
 
-  const mainCases = useMemo(() => cases.filter((caseItem) => !caseItem.parentCaseId), [cases]);
   const activeCases = useMemo(() => cases.filter((caseItem) => caseItem.status === 'activo'), [
     cases,
   ]);
+  const displayCases = useMemo(
+    () =>
+      [...activeCases].sort((a, b) => {
+        if (a.parentCaseId && !b.parentCaseId) return 1;
+        if (!a.parentCaseId && b.parentCaseId) return -1;
+        return a.title.localeCompare(b.title);
+      }),
+    [activeCases]
+  );
 
   const totalClaimed = useMemo(
     () => activeCases.reduce((sum, caseItem) => sum + caseItem.amountTotal, 0),
@@ -198,11 +206,11 @@ export function CasesPage() {
       <section className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="space-y-6">
           <SectionTitle title="Procedimientos" subtitle="Mapa de frentes y dossier" />
-          {cases.length === 0 ? (
+          {displayCases.length === 0 ? (
             <EmptyState title="Sin casos" description="Crea tu primer procedimiento judicial." />
           ) : (
             <div className="grid gap-6 lg:grid-cols-2">
-              {mainCases.map((caseItem, index) => {
+              {displayCases.map((caseItem, index) => {
                 const accent = CARD_STYLES[index % CARD_STYLES.length];
                 const docs = documents.filter((doc) => doc.caseId === caseItem.id);
                 const caseFacts = facts.filter((fact) => fact.caseId === caseItem.id);
@@ -210,6 +218,9 @@ export function CasesPage() {
                   (strategy) => strategy.caseId === caseItem.id
                 );
                 const caseClaims = claims.filter((claim) => claim.caseId === caseItem.id);
+                const parentCase = caseItem.parentCaseId
+                  ? cases.find((parent) => parent.id === caseItem.parentCaseId)
+                  : undefined;
 
                 return (
                   <Link
@@ -246,6 +257,11 @@ export function CasesPage() {
                               {caseItem.type} · {caseItem.autosNumber || 'Sin autos'}
                             </p>
                             <p className="mt-2 text-sm text-slate-300">{caseItem.court}</p>
+                            {parentCase ? (
+                              <p className="mt-1 text-xs text-slate-500">
+                                Vinculado a {parentCase.title}
+                              </p>
+                            ) : null}
                           </div>
                         </div>
                         <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">

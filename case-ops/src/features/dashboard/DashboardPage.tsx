@@ -295,7 +295,12 @@ export function DashboardPage() {
                   <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
                     {claim.shortLabel}
                   </span>
-                  <span>{claim.title}</span>
+                  <span className="flex items-center gap-2">
+                    <span
+                      className={`h-2 w-2 rounded-full border ${WIN_CHANCE_STYLES[claim.winChance]}`}
+                    />
+                    {claim.title}
+                  </span>
                 </div>
                 <span className="text-sm text-slate-200">
                   {formatCurrency(claim.amount)}
