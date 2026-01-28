@@ -1,5 +1,5 @@
 // ============================================
-// CASE OPS - Seed Data (CASO REAL: PICASSENT 715/2024)
+// CASE OPS - Seed Data (CASO REAL: PICASSENT 715/2024 - VERSIÓN EXTENDIDA)
 // ============================================
 
 import {
@@ -10,215 +10,204 @@ import {
   partidasRepo,
   eventsRepo,
   strategiesRepo,
+  documentsRepo
 } from './repositories';
 import { eurosToCents } from '../utils/validators';
+import { nanoid } from 'nanoid';
 
 export async function seedDatabase(): Promise<boolean> {
-  // Verificamos si ya existe la base de datos
   const settings = await settingsRepo.get();
   if (settings) {
     console.log('Database already initialized');
     return false;
   }
 
-  console.log('Seeding database with REAL CASE DATA...');
+  console.log('Seeding database with EXTENDED REAL CASE DATA...');
 
   try {
-    // 1. Inicialización básica
-    const deviceName =
-      typeof navigator !== 'undefined' && navigator.userAgent.includes('Android')
-        ? 'Android'
-        : 'Desktop';
-
-    await settingsRepo.init(deviceName);
-
-    // Reiniciamos contadores
-    await counterRepo.setCounter('cases', 0);
-    await counterRepo.setCounter('documents', 0);
-    await counterRepo.setCounter('spans', 0);
-    await counterRepo.setCounter('facts', 0);
-    await counterRepo.setCounter('partidas', 0);
-    await counterRepo.setCounter('events', 0);
-    await counterRepo.setCounter('strategies', 0);
-    await counterRepo.setCounter('tasks', 0);
+    // 1. Configuración Inicial
+    await settingsRepo.init('Desktop');
+    const counters = ['cases', 'documents', 'spans', 'facts', 'partidas', 'events', 'strategies', 'tasks'];
+    for (const c of counters) await counterRepo.setCounter(c, 0);
 
     // =====================================================================
-    // CASO PRINCIPAL: P.O. 715/2024 (División de Cosa Común)
-    // Fuente: Demanda_picassent_Transcrita.docx / Contestacion_picassent_transcrita.docx
+    // 1. CASO PRINCIPAL
     // =====================================================================
     const mainCase = await casesRepo.create({
       title: 'P.O. 715/2024 · División Cosa Común y Reclamación',
-      court: 'Juzgado de Primera Instancia e Instrucción nº 1 de Picassent',
+      court: 'JPI nº 1 de Picassent',
       autosNumber: '715/2024',
       type: 'ordinario',
       status: 'activo',
-      clientRole: 'demandado', // Juan es el cliente
-      opposingCounsel: 'Isabel Luzzy Aguilar (Procuradora)', 
-      judge: '[Pendiente Asignación]',
-      notes: `OBJETO DEL PLEITO:
-1. División de la cosa común (inmuebles y bienes).
-2. Reclamación económica de la actora (Vicenta) por 212.677,08 €.
-3. Reconvención/Compensación solicitada por Juan.
-
-PARTES:
-- Actora: Dña. Vicenta Jiménez Vera.
-- Demandado: D. Juan Rodríguez Crespo.
-
-CLAVES DEL CASO:
-- La actora pretende cobrar deudas prescritas (2008-2019).
-- Discusión sobre la naturaleza del préstamo ("Hipoteca del demandado" vs "Préstamo solidario").
-- Compensación de saldos por retiradas de efectivo (38.500€ vs 32.000€).
-- Impugnación de documentos bancarios manipulados (recortes).`,
-      tags: ['división', 'reclamacion', 'familia', 'hipoteca'],
+      clientRole: 'demandado',
+      judge: '[Pendiente]',
+      opposingCounsel: 'Isabel Luzzy Aguilar',
+      notes: 'Reclamación de 212.677€ por Vicenta. Defensa basada en Prescripción (71% cuantía), Naturaleza de Hipoteca y Compensación de saldos.',
+      tags: ['familia', 'civil', 'complejo', 'prescripcion']
     });
 
     // =====================================================================
-    // HECHOS CONTROVERTIDOS (FACTS)
-    // Fuente: FIJAR.docx, 1_CONTRV_NTRALZA_HIPOTECA.docx
+    // 2. DOCUMENTOS CLAVE (MOCK)
+    // Para probar la vinculación Hecho <-> Documento
+    // =====================================================================
+    const docsData = [
+      { title: 'Doc. 25 - Recibos Oficiales CaixaBank', docType: 'prueba', description: 'Recibos íntegros que identifican a Juan como ordenante real.' },
+      { title: 'Doc. 26 - Cuadro Comparativo Visual', docType: 'prueba', description: 'Gráfico enfrentando captura recortada vs recibo real.' },
+      { title: 'Escritura Compraventa Piso Madrid (2000)', docType: 'prueba', description: 'Prueba del carácter privativo y origen de fondos.' },
+      { title: 'Resolución AEAT 2012 Reinversión', docType: 'sentencia', description: 'Prueba oficial del destino de los fondos a la obra común.' },
+      { title: 'Demanda Contraria', docType: 'demanda', description: 'Escrito inicial de la actora.' },
+      { title: 'Extracto Cuenta Común (Retirada 38.500)', docType: 'prueba', description: 'Doc. 3 Contestación. Acredita la retirada de fondos de ella.' },
+      { title: 'STS 458/2025 (Doctrina Cuentas)', docType: 'sentencia', description: 'Jurisprudencia sobre caja única familiar.' }
+    ];
+
+    const docIds: Record<string, string> = {}; // Para vincular luego
+    for (const d of docsData) {
+      const doc = await documentsRepo.create({
+        caseId: mainCase.id,
+        title: d.title,
+        docType: d.docType as any,
+        mime: 'application/pdf',
+        size: 1024 * 500, // Fake size
+        path: 'mock/path',
+        tags: ['importante']
+      });
+      docIds[d.title] = doc.id;
+    }
+
+    // =====================================================================
+    // 3. HECHOS CONTROVERTIDOS (FACTS) - AMPLIADO
+    // Fuentes: FIJAR.docx, APORTACIÓN DE TESTIGOS.docx
     // =====================================================================
     const factsData = [
       {
-        title: 'Naturaleza del Préstamo Hipotecario',
-        narrative: 'La actora lo califica como "Hipoteca del demandado". Esta parte sostiene que es un préstamo solidario suscrito por ambos cónyuges, donde la vivienda privativa del demandado (Lope de Vega) solo actúa como garantía real, no como causa del préstamo.',
-        status: 'controvertido' as const,
-        burden: 'demandante' as const,
-        risk: 'alto' as const,
-        strength: 5,
-        tags: ['hipoteca', 'naturaleza_juridica', 'garantia_real']
+        title: 'Manipulación de Pruebas (Recortes BBVA)',
+        narrative: 'La actora aporta capturas de pantalla recortadas (Doc. adverso) eliminando el campo "Ordenante". El Doc. 25 y 26 demuestran que el pagador fue Juan.',
+        status: 'a_probar', burden: 'demandado', risk: 'bajo', strength: 5,
+        tags: ['mala_fe', 'documental'],
+        linkedDocIds: [docIds['Doc. 25 - Recibos Oficiales CaixaBank'], docIds['Doc. 26 - Cuadro Comparativo Visual']]
       },
       {
-        title: 'Retirada de fondos: 38.500€ vs 32.000€',
-        narrative: 'La actora reclama 32.000€ retirados por Juan de la cuenta común. Se oculta que ELLA retiró 38.500€ (6.500€ más) en el mismo periodo de ruptura. Se opone compensación (Art. 1196 CC).',
-        status: 'a_probar' as const,
-        burden: 'demandado' as const,
-        risk: 'medio' as const,
-        strength: 5,
-        tags: ['compensacion', 'cuentas', 'retiradas']
+        title: 'Naturaleza Solidaria del Préstamo',
+        narrative: 'No existe "Hipoteca del demandado". Es un préstamo solidario (ambos titulares) con garantía real sobre vivienda privativa. El destino fue la obra común.',
+        status: 'controvertido', burden: 'mixta', risk: 'alto', strength: 5,
+        tags: ['hipoteca', 'juridico']
       },
       {
-        title: 'Prescripción de deudas (2008-2019)',
-        narrative: 'La actora reclama gastos de IBI, préstamos y cuotas desde 2008. Esta parte alega prescripción (Art. 1964 CC - 5 años) y falta de reclamación previa (Art. 1969 CC). Se trata de "arqueología contable".',
-        status: 'controvertido' as const,
-        burden: 'demandado' as const, // Es excepción nuestra
-        risk: 'alto' as const, // Si falla, se paga mucho
-        strength: 4,
-        tags: ['prescripcion', 'plazos', '1964_CC']
+        title: 'Retirada de Fondos: 38.500€ (Ella) vs 32.000€ (Él)',
+        narrative: 'En la ruptura, Juan retiró 32.000€ (que se reclaman) pero Vicenta retiró 38.500€ de la cuenta común. Se opone compensación.',
+        status: 'a_probar', burden: 'demandado', risk: 'medio', strength: 5,
+        tags: ['compensacion', 'cuentas'],
+        linkedDocIds: [docIds['Extracto Cuenta Común (Retirada 38.500)']]
       },
       {
-        title: 'Autoría de Transferencias (BBVA vs Caixa)',
-        narrative: 'La actora aporta capturas de pantalla recortadas de BBVA donde no se ve el ordenante. Esta parte aporta los recibos íntegros de CaixaBank que demuestran que el ordenante real fue JUAN RODRÍGUEZ.',
-        status: 'a_probar' as const,
-        burden: 'demandado' as const,
-        risk: 'bajo' as const, // Prueba documental sólida
-        strength: 5,
-        tags: ['falsedad', 'documental', 'bancos']
+        title: 'Caja Única Familiar (Doctrina STS 458/2025)',
+        narrative: 'Existían dos cuentas conjuntas indistintas donde se cruzaban nóminas y gastos. No cabe liquidación retroactiva de partidas de consumo.',
+        status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 4,
+        tags: ['jurisprudencia', 'sts_458_2025'],
+        linkedDocIds: [docIds['STS 458/2025 (Doctrina Cuentas)']]
       },
       {
-        title: 'Existencia de Comunidad de Bienes Tácita',
-        narrative: 'Existía un sistema de "caja única" con dos cuentas conjuntas indistintas. La STS 458/2025 avala que en economías familiares confundidas no cabe reclamación retroactiva de partidas de consumo.',
-        status: 'controvertido' as const,
-        burden: 'demandado' as const,
-        risk: 'medio' as const,
-        strength: 4,
-        tags: ['doctrina_ts', 'caja_unica', 'sts_458_2025']
+        title: 'Financiación Vehículo Seat León',
+        narrative: 'La actora reclama 13.000€ del vehículo (2014). El vehículo es bien común y fue pagado con fondos de la sociedad de gananciales/comunidad tácita.',
+        status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 3,
+        tags: ['vehiculo', 'bienes_muebles']
       }
     ];
 
     for (const f of factsData) {
-      await factsRepo.create({ caseId: mainCase.id, ...f });
+      await factsRepo.create({ caseId: mainCase.id, ...f } as any);
     }
 
     // =====================================================================
-    // ESTRATEGIAS (WAR ROOM)
-    // Fuente: PRESCRIPCIÓN.docx, DEFENSA ARTURO PIERA.docx, Demostración_gráfica..docx
+    // 4. ESTRATEGIAS (WAR ROOM)
+    // Fuentes: PRESCRIPCIÓN.docx, DEFENSA ARTURO PIERA.docx
     // =====================================================================
     const strategiesData = [
       {
-        attack: 'La actora reclama 150.502€ acumulados en facturas y cuotas desde 2008.',
-        risk: 'Alto: Supone el 70% de la cuantía reclamada.',
-        rebuttal: 'Invocar PRESCRIPCIÓN (Art. 1964.2 CC). No hubo interrupción (Art. 1973 CC). Argumento: "El divorcio no resucita deudas muertas".',
-        evidencePlan: 'Calendario de prescripción (Excel) + Falta de burofaxes previos.',
+        attack: 'Reclamación de deudas de 2008-2019 (150.502€)',
+        risk: 'Alto',
+        rebuttal: 'Excepción de PRESCRIPCIÓN (Art. 1964 CC). Falta de reclamación previa interruptiva (Art. 1973 CC). "Arqueología contable".',
+        evidencePlan: 'Calendario de plazos + Ausencia de burofaxes.',
         tags: ['prescripcion', 'defensa_total']
       },
       {
-        attack: 'La actora reclama 32.000€ por la venta del piso de Arturo Piera.',
-        risk: 'Medio: El movimiento bancario existe.',
-        rebuttal: 'Excepción de COMPENSACIÓN. Acreditar que ella retiró 38.500€ de la cuenta común ES72...9491 a su privativa ES61...4052.',
-        evidencePlan: 'Doc. 3 Contestación (Extracto CaixaBank con la salida de 38.500€).',
-        tags: ['compensacion', 'arturo_piera']
+        attack: 'Aportación de Perito de Parte (Vínculo personal)',
+        risk: 'Medio',
+        rebuttal: 'TACHA DE PERITO. El perito tiene relación de amistad/familiaridad con la actora. Solicitar perito judicial insaculado.',
+        evidencePlan: 'Interrogatorio sobre imparcialidad (Art. 343 LEC).',
+        tags: ['procesal', 'peritos']
       },
       {
-        attack: 'La actora presenta capturas de app bancaria recortadas para atribuirse pagos.',
-        risk: 'Bajo: Fácil de desmontar.',
-        rebuttal: 'IMPUGNACIÓN por falta de autenticidad parcial. Aportar el "Cuadro Comparativo" (Doc. 26) enfrentando su captura con nuestro recibo bancario completo.',
-        evidencePlan: 'Doc. 25 (Recibos oficiales) + Doc. 26 (Comparativa visual).',
-        tags: ['impugnacion', 'manipulacion_prueba']
-      },
-      {
-        attack: 'Aportación de Perito de Parte (Familiar/Amigo).',
-        risk: 'Medio: Sesgo en la valoración.',
-        rebuttal: 'Tacha de perito por interés. Solicitar perito judicial insaculado o aportar contraperitaje.',
-        evidencePlan: 'Interrogatorio sobre relación personal con la actora.',
-        tags: ['peritos', 'tacha']
+        attack: 'Negativa de la actora a la retirada de 38.500€',
+        risk: 'Bajo',
+        rebuttal: 'Solicitar OFICIO A CAIXABANK si no reconoce el Doc. 3. El rastro bancario es indeleble.',
+        evidencePlan: 'Documental bancaria + Oficio judicial subsidiario.',
+        tags: ['prueba_judicial']
       }
     ];
 
     for (const s of strategiesData) {
-      await strategiesRepo.create({ caseId: mainCase.id, ...s });
+      await strategiesRepo.create({ caseId: mainCase.id, ...s } as any);
     }
 
     // =====================================================================
-    // EVENTOS (CRONOLOGÍA)
-    // Fuente: INFORME_ESTRATEGICO.pdf, FIJAR.docx
+    // 5. PARTIDAS ECONÓMICAS (DESGLOSE COMPLETO)
+    // Fuente: FIJAR.docx, Defensa_STS_458_2025.docx
+    // =====================================================================
+    const partidasList = [
+      // Bloque Prescrito
+      { date: '2008-09-01', concepto: 'Préstamos Personales 2008', importe: 20085, estado: 'prescrita', notas: 'Prescrito (16 años)' },
+      { date: '2006-08-22', concepto: 'Cancelación Hipoteca Previa', importe: 16979, estado: 'prescrita', notas: 'Prescrito' },
+      { date: '2014-10-01', concepto: 'Compra Vehículo Seat León', importe: 13000, estado: 'prescrita', notas: 'Prescrito (10 años)' },
+      
+      // IBI (Ejemplo de serie)
+      { date: '2013-01-01', concepto: 'IBI 2013-2019 (Acumulado)', importe: 1063, estado: 'prescrita', notas: 'Prescrito' },
+
+      // Hipoteca (Desglose por tramos de Defensa_STS...)
+      { date: '2009-12-31', concepto: 'Hipoteca 2009 (Jul-Dic)', importe: 5996, estado: 'prescrita', notas: 'Prescrito' },
+      { date: '2010-12-31', concepto: 'Hipoteca 2010 (Anual)', importe: 11534, estado: 'prescrita', notas: 'Prescrito' },
+      { date: '2011-12-31', concepto: 'Hipoteca 2011 (Anual)', importe: 11856, estado: 'prescrita', notas: 'Prescrito' },
+      { date: '2012-12-31', concepto: 'Hipoteca 2012 (Anual)', importe: 12000, estado: 'prescrita', notas: 'Prescrito' },
+      
+      // Bloque Compensable
+      { date: '2023-11-01', concepto: 'Retirada Juan (Objeto Demanda)', importe: -32000, estado: 'reclamada', notas: 'Reclamado por actora' },
+      { date: '2023-11-02', concepto: 'Retirada Vicenta (A Compensar)', importe: 38500, estado: 'reclamable', notas: 'Crédito a nuestro favor' }
+    ];
+
+    for (const p of partidasList) {
+      await partidasRepo.create({
+        caseId: mainCase.id,
+        date: p.date,
+        amountCents: eurosToCents(p.importe),
+        concept: p.concepto,
+        payer: 'N/A',
+        beneficiary: 'N/A',
+        state: p.estado as any, // 'reclamada', 'pagada', etc.
+        theory: 'Desglose Demanda',
+        notes: p.notas,
+        tags: ['financiero', p.estado === 'prescrita' ? 'prescripcion' : 'fondo']
+      });
+    }
+
+    // =====================================================================
+    // 6. CRONOLOGÍA (EVENTS)
+    // Fuente: INFORME_ESTRATEGICO.pdf
     // =====================================================================
     const eventsData = [
-      { date: '2006-08-22', type: 'factico', title: 'Cancelación Hipoteca Previa', description: 'Cancelación de carga previa privativa (22/08/2006). Base de una reclamación de la actora.' },
-      { date: '2008-09-01', type: 'factico', title: 'Inicio Deudas Prescritas', description: 'Fecha de origen de los Préstamos Personales reclamados (Prescritos hace 16 años).' },
-      { date: '2009-07-01', type: 'factico', title: 'Hipoteca Lope de Vega', description: 'Inicio de pagos de la hipoteca sobre vivienda privativa, usada como garantía.' },
-      { date: '2012-01-01', type: 'factico', title: 'Venta Piso Madrid', description: 'Venta del inmueble privativo de Juan. Reinversión en obra común.' },
-      { date: '2023-11-01', type: 'factico', title: 'Ruptura / Separación de Hecho', description: 'Momento de las retiradas de fondos (38.500€ vs 32.000€). Inicio pago exclusivo hipoteca por Juan.' },
-      { date: '2024-01-20', type: 'procesal', title: 'Presentación Demanda', description: 'Vicenta presenta demanda reclamando 212.677€.' },
-      { date: '2025-01-27', type: 'procesal', title: 'Emplazamiento', description: 'Notificación del juzgado para contestar en 20 días.' },
-      { date: '2025-02-19', type: 'procesal', title: 'Contestación a la Demanda', description: 'Presentación del escrito de defensa por Procuradora Rosa Calvo. Allanamiento parcial a división, oposición a pagos.' }
+      { date: '2006-08-22', type: 'factico', title: 'Cancelación Carga Previa', description: 'Origen de la reclamación de 16.979€.' },
+      { date: '2012-01-15', type: 'factico', title: 'Venta Piso Madrid', description: 'Venta bien privativo Juan. Reinversión en obra.' },
+      { date: '2023-10-01', type: 'factico', title: 'Ruptura Convivencia', description: 'Inicio de la separación de hecho y retiradas de fondos.' },
+      { date: '2023-11-01', type: 'factico', title: 'Inicio Pago Hipoteca Exclusivo', description: 'Juan asume el 100% de la cuota (850€/mes).' },
+      { date: '2024-01-20', type: 'procesal', title: 'Presentación Demanda', description: 'Vicenta reclama 212.677€.' },
+      { date: '2025-02-19', type: 'procesal', title: 'Contestación Demanda', description: 'Presentación del escrito de defensa.' },
+      { date: '2025-10-24', type: 'procesal', title: 'Señalamiento Audiencia Previa', description: 'Fecha prevista para la vista preliminar.' }
     ];
 
     for (const e of eventsData) {
       await eventsRepo.create({ caseId: mainCase.id, ...e } as any);
     }
 
-    // =====================================================================
-    // PARTIDAS ECONÓMICAS
-    // Fuente: FIJAR.docx, Defensa_STS_458_2025.docx
-    // =====================================================================
-    // Partida 1: Lo que ella reclama (IBI Prescrito)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2013-01-01',
-      amountCents: eurosToCents(1063),
-      concept: 'IBI Quart 2013-2019',
-      payer: 'Vicenta (Actora)',
-      beneficiary: 'Comunidad',
-      state: 'prescrita', // Estado especial
-      theory: 'Reclamación de gastos de hace 11 años',
-      notes: 'Prescrito por Art. 1964 CC (5 años).',
-      tags: ['ibi', 'prescrito']
-    });
-
-    // Partida 2: La retirada de fondos de ella (Compensación)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2023-11-01',
-      amountCents: eurosToCents(38500),
-      concept: 'Retirada fondos cuenta común (Caixa)',
-      payer: 'Cuenta Común',
-      beneficiary: 'Vicenta (Privativo)',
-      state: 'reclamable',
-      theory: 'Compensación art. 1196 CC frente a los 32.000 reclamados',
-      notes: 'Acreditado en Doc. 3 de la Contestación.',
-      tags: ['compensacion', 'bancos']
-    });
-
-    console.log('Database seeded successfully with REAL DATA');
+    console.log('Database seeded successfully with HEAVY REAL DATA');
     return true;
   } catch (error) {
     console.error('Error seeding database:', error);
