@@ -5,7 +5,7 @@
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* Sobrescribimos la paleta Slate con tus tonos oscuros (OKLCH) */
+  /* Paleta Slate Oscura (OKLCH) - La base del modo War Room */
   --color-slate-200: oklch(92.9% .013 255.508);
   --color-slate-300: oklch(86.9% .022 252.894);
   --color-slate-400: oklch(70.4% .04 256.788);
@@ -16,7 +16,7 @@
   --color-slate-900: oklch(20.8% .042 265.755);
   --color-slate-950: oklch(15.4% .035 264.8);
 
-  /* Definimos tus colores personalizados */
+  /* Variables Semánticas que usa la app */
   --color-fondo: var(--color-slate-950);
   --color-text-main: #e2e8f0;
   --color-border: var(--color-slate-800);
@@ -30,9 +30,9 @@
   }
 }
 
-/* Estilos base */
+/* Estilos base globales */
 :root {
-  color-scheme: dark; /* Fuerza al navegador a usar scrollbars oscuras */
+  color-scheme: dark;
 }
 
 body {
@@ -44,25 +44,8 @@ body {
 }
 
 #root {
-  isolation: isolate;
   width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-}
-
-/* Scrollbars personalizadas */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-slate-700);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-slate-600);
-}
-::-webkit-scrollbar-track {
-  background: var(--color-slate-900);
 }
