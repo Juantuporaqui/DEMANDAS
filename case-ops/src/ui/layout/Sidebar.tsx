@@ -14,8 +14,7 @@ import {
 type NavItem = { label: string; path: string };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', path: 'dashboard' },
-  { label: 'Demandas', path: 'cases' },
+  { label: 'Procedimientos', path: 'cases' },
   { label: 'Documentos', path: 'documents' },
   { label: 'Ajustes', path: 'settings' },
 ];
@@ -80,7 +79,7 @@ export default function Sidebar() {
           ))}
           {primaryItems.length === 0 ? (
             <div className="rounded-lg border border-dashed border-slate-700 px-3 py-2 text-xs text-slate-500">
-              Dashboard
+              Sin navegación disponible
             </div>
           ) : null}
         </nav>
