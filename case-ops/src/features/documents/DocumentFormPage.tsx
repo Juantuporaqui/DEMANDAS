@@ -11,9 +11,6 @@ import { getCurrentDate } from '../../utils/dates';
 import type { Document, Case, DocType } from '../../types';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Set up PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-
 const DOC_TYPES: { value: DocType; label: string }[] = [
   { value: 'demanda', label: 'Demanda' },
   { value: 'contestacion', label: 'Contestación' },
