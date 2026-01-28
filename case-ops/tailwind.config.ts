@@ -1,18 +1,40 @@
-export const appMaxWidth = '1280px';
-export const sidebarWidth = '280px';
-export const radius = '14px';
+import type { Config } from 'tailwindcss';
 
-// Usamos las variables que acabamos de configurar en tailwind.config.ts
-export const bg = 'bg-slate-950'; 
-export const card = 'bg-slate-900/70 backdrop-blur-sm';
-export const border = 'border border-slate-800/60';
-export const shadowCard = 'shadow-lg shadow-black/30';
+const config: Config = {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        // Conectamos las clases de Tailwind con tus variables CSS de index.css
+        fondo: 'var(--color-fondo)',
+        border: 'var(--color-border)',
+        text: {
+          main: 'var(--color-text-main)',
+          muted: 'var(--color-slate-400)',
+        },
+        // Extendemos la paleta Slate para usar tus tonos OKLCH exactos
+        slate: {
+          800: 'var(--color-slate-800)',
+          900: 'var(--color-slate-900)',
+          950: 'var(--color-slate-950)',
+        },
+      },
+      fontFamily: {
+        sans: ['var(--font-sans)', 'sans-serif'],
+        mono: ['var(--font-mono)', 'monospace'],
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-out forwards',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+    },
+  },
+  plugins: [],
+};
 
-export const textPrimary = 'text-slate-100';
-export const textSecondary = 'text-slate-300';
-export const textMuted = 'text-slate-400';
-export const accent = 'text-amber-300';
-
-export const hover = 'hover:bg-slate-800/70 transition-colors';
-// Este es el toque de oro: el botón activo resalta en ámbar
-export const active = 'bg-amber-500/90 text-slate-950 shadow-md shadow-amber-500/20';
+export default config;
