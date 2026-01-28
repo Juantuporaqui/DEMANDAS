@@ -13,15 +13,20 @@ import type {
   Fact,
   Partida,
   Event,
+  TimelineEvent,
+  AudienciaPhase,
   Strategy,
   Task,
+  Claim,
+  Jurisprudence,
+  DocRequest,
   Link,
   AuditLog,
   AnalyticsMeta,
 } from '../types';
 
 // Database Schema Version
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 4;
 
 // Database class extending Dexie
 class CaseOpsDB extends Dexie {
@@ -34,8 +39,13 @@ class CaseOpsDB extends Dexie {
   facts!: EntityTable<Fact, 'id'>;
   partidas!: EntityTable<Partida, 'id'>;
   events!: EntityTable<Event, 'id'>;
+  timelineEvents!: EntityTable<TimelineEvent, 'id'>;
+  audienciaPhases!: EntityTable<AudienciaPhase, 'id'>;
+  claims!: EntityTable<Claim, 'id'>;
   strategies!: EntityTable<Strategy, 'id'>;
   tasks!: EntityTable<Task, 'id'>;
+  jurisprudence!: EntityTable<Jurisprudence, 'id'>;
+  docRequests!: EntityTable<DocRequest, 'id'>;
   links!: EntityTable<Link, 'id'>;
   auditLogs!: EntityTable<AuditLog, 'id'>;
   analytics_meta!: EntityTable<AnalyticsMeta, 'id'>;
@@ -71,11 +81,26 @@ class CaseOpsDB extends Dexie {
       // Events - timeline entries
       events: 'id, caseId, date, type, updatedAt, *tags',
 
+      // Timeline events - combined timeline
+      timelineEvents: 'id, caseId, dateISO, importance, updatedAt',
+
+      // Audiencia previa phases
+      audienciaPhases: 'id, caseId, phase, importance, updatedAt',
+
+      // Claims - core legal claims
+      claims: 'id, caseId, shortLabel, winChance, importance, updatedAt',
+
       // Strategies - war room entries
       strategies: 'id, caseId, updatedAt, *tags',
 
       // Tasks - action items
       tasks: 'id, caseId, dueDate, priority, status, updatedAt',
+
+      // Jurisprudence - legal precedents
+      jurisprudence: 'id, ref, court, dateISO, updatedAt',
+
+      // Document requests - pending documentation
+      docRequests: 'id, caseId, priority, status, updatedAt',
 
       // Links - generic entity relationships
       links: 'id, fromType, fromId, toType, toId, [fromType+fromId], [toType+toId], updatedAt',

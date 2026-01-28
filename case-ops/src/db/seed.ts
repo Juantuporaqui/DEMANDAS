@@ -8,10 +8,16 @@ import {
   settingsRepo,
   counterRepo,
   casesRepo,
+  claimsRepo,
   factsRepo,
   partidasRepo,
   eventsRepo,
+  timelineEventsRepo,
+  audienciaPhasesRepo,
   strategiesRepo,
+  tasksRepo,
+  jurisprudenceRepo,
+  docRequestsRepo,
 } from './repositories';
 import { generateUUID } from '../utils/id';
 import { eurosToCents } from '../utils/validators';
@@ -42,8 +48,13 @@ export async function seedDatabase(): Promise<boolean> {
     await counterRepo.setCounter('facts', 0);
     await counterRepo.setCounter('partidas', 0);
     await counterRepo.setCounter('events', 0);
+    await counterRepo.setCounter('timelineEvents', 0);
+    await counterRepo.setCounter('audienciaPhases', 0);
     await counterRepo.setCounter('strategies', 0);
     await counterRepo.setCounter('tasks', 0);
+    await counterRepo.setCounter('claims', 0);
+    await counterRepo.setCounter('jurisprudence', 0);
+    await counterRepo.setCounter('docRequests', 0);
 
     // ==========================================
     // CASE CAS001 - Procedimiento Ordinario Civil (TRONCO)
@@ -54,6 +65,10 @@ export async function seedDatabase(): Promise<boolean> {
       autosNumber: '715/2024',
       type: 'ordinario',
       status: 'activo',
+      amountTotal: eurosToCents(216000),
+      nextMilestone: 'Audiencia Previa',
+      nextDate: '2025-10-24',
+      themeColor: '#F59E0B',
       notes: `Objeto:
 - División de la cosa común
 - Reclamación económica entre ex-cónyuges
@@ -92,6 +107,10 @@ Este procedimiento es el "TRONCO" del árbol de procedimientos.`,
       autosNumber: '',
       type: 'ejecucion',
       status: 'activo',
+      amountTotal: eurosToCents(3500),
+      nextMilestone: 'Requerimiento de pago',
+      nextDate: '2025-07-18',
+      themeColor: '#10B981',
       parentCaseId: cas001.id,
       notes: `Objeto:
 - Ejecución por cantidades (≈3.500 € embargados)
@@ -110,6 +129,10 @@ Deriva del divorcio y del incumplimiento de obligaciones económicas.`,
       autosNumber: '',
       type: 'incidente',
       status: 'activo',
+      amountTotal: eurosToCents(12800),
+      nextMilestone: 'Borrador demanda',
+      nextDate: '2025-07-08',
+      themeColor: '#60A5FA',
       parentCaseId: cas001.id,
       notes: `Objeto:
 - Impago de hipoteca por Vicenta desde octubre 2023
@@ -128,6 +151,10 @@ Estado: Pre-procesal / preparación de demanda`,
       autosNumber: '',
       type: 'administrativo',
       status: 'cerrado',
+      amountTotal: eurosToCents(5400),
+      nextMilestone: 'Archivo',
+      nextDate: '2024-07-02',
+      themeColor: '#6366F1',
       parentCaseId: cas001.id,
       notes: `Objeto: Indemnización por daños en chalet común
 Importe: 5.400 €
@@ -148,6 +175,10 @@ Valor probatorio: ALTO`,
       autosNumber: '',
       type: 'administrativo',
       status: 'cerrado',
+      amountTotal: eurosToCents(0),
+      nextMilestone: 'Documento firme',
+      nextDate: '2012-09-30',
+      themeColor: '#0EA5E9',
       parentCaseId: cas001.id,
       notes: `Objeto: Reinversión de beneficio de piso privativo en construcción
 Estado: Resuelto, firme
@@ -166,6 +197,10 @@ Documento "blindado" que neutraliza narrativa contraria`,
       autosNumber: '',
       type: 'mediacion',
       status: 'cerrado',
+      amountTotal: eurosToCents(0),
+      nextMilestone: 'Cierre mediación',
+      nextDate: '2025-04-17',
+      themeColor: '#A855F7',
       parentCaseId: cas001.id,
       notes: `Fecha: 17/04/2025
 Estado: Fracasada (negativa de la otra parte)
@@ -290,6 +325,141 @@ Valor:
     }
 
     // ==========================================
+    // RECLAMACIONES R001-R008 (Picassent)
+    // ==========================================
+    const claimsData = [
+      {
+        shortLabel: 'R01',
+        title: 'Unidad de caja y mezcla de fondos',
+        amount: eurosToCents(216000),
+        winChance: 'media' as const,
+        importance: 'alta' as const,
+        summaryShort: 'Trazabilidad de aportaciones y gestión conjunta 2006-2024.',
+        summaryLong:
+          'Se sostiene que la economía matrimonial operó como unidad de caja desde 2006, con aportaciones cruzadas y ausencia de segregación contable. La trazabilidad de los ingresos y gastos soporta la compensación por aportaciones privativas.',
+        defenseShort: 'Reforzar trazabilidad con extractos y pericial contable.',
+        defenseLong:
+          'Acreditar con extractos bancarios, movimientos consolidados y pericial contable la unidad funcional de caja y la ausencia de separación patrimonial durante el periodo controvertido.',
+        linkedFactIds: ['H001', 'H002'],
+        linkedDocIds: [],
+      },
+      {
+        shortLabel: 'R02',
+        title: 'Error material en transferencia 2024',
+        amount: eurosToCents(13000),
+        winChance: 'alta' as const,
+        importance: 'media' as const,
+        summaryShort: 'La demanda cita 2024 con fecha imposible.',
+        summaryLong:
+          'El relato cronológico contiene un error material al citar 2024 en una transferencia que, por contexto, corresponde a 2014. Se solicita rectificación y pérdida de fuerza probatoria del tramo alegado.',
+        defenseShort: 'Impulsar rectificación en audiencia previa.',
+        defenseLong:
+          'Aportar cronología bancaria y solicitar aclaración judicial de la fecha, evitando que la parte actora reconduzca el error como subsanable sin impacto.',
+        linkedFactIds: ['H007'],
+        linkedDocIds: [],
+      },
+      {
+        shortLabel: 'R03',
+        title: 'Uso exclusivo del chalet por Vicenta',
+        amount: eurosToCents(24000),
+        winChance: 'media' as const,
+        importance: 'media' as const,
+        summaryShort: 'Compensación por uso exclusivo sin contraprestación.',
+        summaryLong:
+          'Se reclama compensación por el uso exclusivo del chalet por parte de Vicenta desde la separación de hecho, sin abono de renta ni compensación económica.',
+        defenseShort: 'Acreditar empadronamiento y ausencia de uso por Juan.',
+        defenseLong:
+          'Reforzar con certificados de empadronamiento, testifical vecinal y datos de consumo que acrediten el uso exclusivo por Vicenta.',
+        linkedFactIds: ['H005'],
+        linkedDocIds: [],
+      },
+      {
+        shortLabel: 'R04',
+        title: 'Impago cuotas hipotecarias desde 2023',
+        amount: eurosToCents(12800),
+        winChance: 'alta' as const,
+        importance: 'alta' as const,
+        summaryShort: 'Reclamación por cuotas impagadas.',
+        summaryLong:
+          'Desde octubre de 2023 se registran cuotas hipotecarias impagadas atribuibles a la parte actora, con riesgo de ejecución sobre el bien común.',
+        defenseShort: 'Solicitar certificación bancaria de impagos.',
+        defenseLong:
+          'Aportar certificaciones bancarias y cuadros de amortización para acreditar el impago y su impacto económico.',
+        linkedFactIds: ['H003'],
+        linkedDocIds: [],
+      },
+      {
+        shortLabel: 'R05',
+        title: 'Indemnización Consorcio no aplicada',
+        amount: eurosToCents(5400),
+        winChance: 'media' as const,
+        importance: 'media' as const,
+        summaryShort: 'Cobro de indemnización sin reparar bien común.',
+        summaryLong:
+          'Se reclama que la indemnización por daños del Consorcio se destinó a fines personales y no a la reparación del chalet, generando perjuicio.',
+        defenseShort: 'Cruzar facturas de reparación con fecha de pago.',
+        defenseLong:
+          'Solicitar facturas de reparación y pericial del estado del inmueble para evidenciar la falta de aplicación de fondos.',
+        linkedFactIds: ['H004'],
+        linkedDocIds: [],
+      },
+      {
+        shortLabel: 'R06',
+        title: 'Gastos extraordinarios de hijos',
+        amount: eurosToCents(8600),
+        winChance: 'media' as const,
+        importance: 'media' as const,
+        summaryShort: 'Reintegro de gastos escolares y médicos.',
+        summaryLong:
+          'Se solicita reintegro de gastos extraordinarios asumidos por Juan para los hijos comunes sin compensación.',
+        defenseShort: 'Aportar recibos y comunicaciones previas.',
+        defenseLong:
+          'Compilar justificantes de pagos, comunicaciones con la parte actora y decisiones escolares/médicas.',
+        linkedFactIds: ['H008'],
+        linkedDocIds: [],
+      },
+      {
+        shortLabel: 'R07',
+        title: 'Deterioro por falta de mantenimiento',
+        amount: eurosToCents(15000),
+        winChance: 'baja' as const,
+        importance: 'baja' as const,
+        summaryShort: 'Daños por falta de mantenimiento del chalet.',
+        summaryLong:
+          'Se reclama compensación por deterioro del chalet derivado de falta de mantenimiento durante el uso exclusivo por Vicenta.',
+        defenseShort: 'Necesaria pericial del estado actual.',
+        defenseLong:
+          'Preparar pericial técnica y reportaje fotográfico para cuantificar daños y causas.',
+        linkedFactIds: ['H009'],
+        linkedDocIds: [],
+      },
+      {
+        shortLabel: 'R08',
+        title: 'Bloqueo de venta del bien común',
+        amount: eurosToCents(9000),
+        winChance: 'baja' as const,
+        importance: 'media' as const,
+        summaryShort: 'Daños por bloqueo a la venta.',
+        summaryLong:
+          'Se solicita compensación por el bloqueo continuado de la venta del chalet, prolongando la copropiedad conflictiva.',
+        defenseShort: 'Acreditar intentos de venta frustrados.',
+        defenseLong:
+          'Aportar comunicaciones y ofertas de mercado rechazadas, así como propuestas notariales de división.',
+        linkedFactIds: ['H010'],
+        linkedDocIds: [],
+      },
+    ];
+
+    const claimIdMap = new Map<string, string>();
+    for (const claimData of claimsData) {
+      const created = await claimsRepo.create({
+        caseId: cas001.id,
+        ...claimData,
+      });
+      claimIdMap.set(claimData.shortLabel, created.id);
+    }
+
+    // ==========================================
     // PARTIDAS P001-P015 (Hipoteca aportaciones)
     // ==========================================
     const partidasData = [
@@ -407,6 +577,49 @@ Valor:
     }
 
     // ==========================================
+    // TIMELINE EVENTS (Combinado)
+    // ==========================================
+    const timelineEvents = [
+      {
+        dateISO: '2006-01-01',
+        title: 'Inicio unidad de caja funcional',
+        description: 'Comienzo del periodo de gestión conjunta de fondos.',
+        importance: 'media' as const,
+      },
+      {
+        dateISO: '2012-06-15',
+        title: 'Venta piso privativo Madrid',
+        description: 'Venta que financia la construcción del chalet.',
+        importance: 'alta' as const,
+      },
+      {
+        dateISO: '2023-10-01',
+        title: 'Impagos hipotecarios',
+        description: 'Inicio de impagos por la parte actora.',
+        importance: 'alta' as const,
+      },
+      {
+        dateISO: '2024-02-12',
+        title: 'Presentación demanda',
+        description: 'Inicio del procedimiento ordinario en Picassent.',
+        importance: 'media' as const,
+      },
+      {
+        dateISO: '2025-10-24',
+        title: 'Audiencia previa señalada',
+        description: 'Fecha prevista para la audiencia previa.',
+        importance: 'alta' as const,
+      },
+    ];
+
+    for (const item of timelineEvents) {
+      await timelineEventsRepo.create({
+        caseId: cas001.id,
+        ...item,
+      });
+    }
+
+    // ==========================================
     // ESTRATEGIAS (War Room)
     // ==========================================
     const strategiesData = [
@@ -475,6 +688,367 @@ Valor:
       await strategiesRepo.create({
         caseId: cas001.id,
         ...strategyData,
+      });
+    }
+
+    // ==========================================
+    // JURISPRUDENCIA
+    // ==========================================
+    const jurisprudenceData = [
+      {
+        ref: 'STS 458/2025',
+        court: 'Tribunal Supremo',
+        dateISO: '2025-02-12',
+        summaryShort: 'Prescripción en reclamaciones de aportaciones privativas.',
+        summaryLong:
+          'Sentencia que fija criterios sobre prescripción en acciones de reembolso de aportaciones privativas, con especial atención a la prueba del régimen económico matrimonial.',
+        linkedClaims: ['R01', 'R02'],
+      },
+      {
+        ref: 'STS 120/2023',
+        court: 'Tribunal Supremo',
+        dateISO: '2023-04-05',
+        summaryShort: 'Unidad de caja y compensación de gastos comunes.',
+        summaryLong:
+          'Doctrina sobre la unidad de caja y su impacto en la compensación de aportaciones cuando no existe separación patrimonial clara.',
+        linkedClaims: ['R01'],
+      },
+      {
+        ref: 'SAP Valencia 86/2024',
+        court: 'AP Valencia',
+        dateISO: '2024-03-19',
+        summaryShort: 'Uso exclusivo de inmueble y compensación económica.',
+        summaryLong:
+          'Resolución que admite compensación por uso exclusivo del inmueble común tras la separación de hecho.',
+        linkedClaims: ['R03'],
+      },
+      {
+        ref: 'SAP Valencia 22/2022',
+        court: 'AP Valencia',
+        dateISO: '2022-01-21',
+        summaryShort: 'Impagos hipotecarios y responsabilidad solidaria.',
+        summaryLong:
+          'Criterio sobre responsabilidad en impagos hipotecarios en régimen de copropiedad.',
+        linkedClaims: ['R04'],
+      },
+      {
+        ref: 'STS 312/2021',
+        court: 'Tribunal Supremo',
+        dateISO: '2021-06-11',
+        summaryShort: 'Bloqueo de venta del bien común.',
+        summaryLong:
+          'Doctrina sobre la obligación de no bloquear la venta del bien común sin causa justificada.',
+        linkedClaims: ['R08'],
+      },
+    ];
+
+    for (const jurisprudence of jurisprudenceData) {
+      const { linkedClaims, ...rest } = jurisprudence;
+      const linkedClaimIds = linkedClaims
+        .map((key) => claimIdMap.get(key))
+        .filter((id): id is string => Boolean(id));
+      await jurisprudenceRepo.create({
+        ...rest,
+        linkedClaimIds,
+      });
+    }
+
+    // ==========================================
+    // DOCUMENTACIÓN PENDIENTE
+    // ==========================================
+    const docRequests = [
+      {
+        title: 'Extractos BBVA 2011',
+        source: 'BBVA',
+        purpose: 'Reconstruir unidad de caja 2010-2012.',
+        priority: 'alta' as const,
+        status: 'solicitado' as const,
+      },
+      {
+        title: 'Extractos caja rural 2012-2013',
+        source: 'Caja Rural',
+        purpose: 'Contrastar transferencias de obra.',
+        priority: 'alta' as const,
+        status: 'pendiente' as const,
+      },
+      {
+        title: 'Facturas reparación chalet 2023',
+        source: 'Parte actora',
+        purpose: 'Verificar destino indemnización Consorcio.',
+        priority: 'media' as const,
+        status: 'pendiente' as const,
+      },
+      {
+        title: 'Tasación pericial actualizada',
+        source: 'Perito externo',
+        purpose: 'Actualizar valor de mercado del inmueble.',
+        priority: 'media' as const,
+        status: 'solicitado' as const,
+      },
+      {
+        title: 'Justificantes gastos escolares 2022-2024',
+        source: 'Centro escolar',
+        purpose: 'Soportar reclamación de gastos extraordinarios.',
+        priority: 'media' as const,
+        status: 'pendiente' as const,
+      },
+      {
+        title: 'Certificado empadronamiento Juan',
+        source: 'Ayuntamiento',
+        purpose: 'Acreditar ausencia de uso del chalet.',
+        priority: 'baja' as const,
+        status: 'recibido' as const,
+      },
+      {
+        title: 'Informe pericial estado chalet',
+        source: 'Arquitecto',
+        purpose: 'Valorar deterioro por falta de mantenimiento.',
+        priority: 'media' as const,
+        status: 'pendiente' as const,
+      },
+      {
+        title: 'Acta mediación ICAV',
+        source: 'ICAV',
+        purpose: 'Respaldar buena fe procesal.',
+        priority: 'baja' as const,
+        status: 'recibido' as const,
+      },
+    ];
+
+    for (const docRequest of docRequests) {
+      await docRequestsRepo.create({
+        caseId: cas001.id,
+        ...docRequest,
+      });
+    }
+
+    // ==========================================
+    // TAREAS
+    // ==========================================
+    const tasks = [
+      {
+        title: 'Formalizar alegación prescripción art. 1964.2 CC',
+        dueDate: '2025-06-24',
+        priority: 'alta' as const,
+        status: 'pendiente' as const,
+        notes: 'Relacionar con STS 458/2025.',
+        links: [],
+      },
+      {
+        title: 'Solicitar extractos BBVA 2011',
+        dueDate: '2025-06-20',
+        priority: 'alta' as const,
+        status: 'pendiente' as const,
+        notes: 'Unidad de caja y aportaciones.',
+        links: [],
+      },
+      {
+        title: 'Validar error material transferencia 2024',
+        dueDate: '2025-06-18',
+        priority: 'media' as const,
+        status: 'pendiente' as const,
+        notes: 'Preparar cronología bancaria.',
+        links: [],
+      },
+      {
+        title: 'Ensayar guiones audiencia previa',
+        dueDate: '2025-06-15',
+        priority: 'baja' as const,
+        status: 'pendiente' as const,
+        notes: 'Preparar lectura en sala.',
+        links: [],
+      },
+      {
+        title: 'Actualizar cuadro comparativo de ingresos',
+        dueDate: '2025-06-22',
+        priority: 'media' as const,
+        status: 'en_progreso' as const,
+        notes: 'Pendiente de facturas 2012.',
+        links: [],
+      },
+      {
+        title: 'Coordinar pericial del estado del chalet',
+        dueDate: '2025-06-28',
+        priority: 'media' as const,
+        status: 'pendiente' as const,
+        notes: 'Solicitar presupuesto perito.',
+        links: [],
+      },
+      {
+        title: 'Revisar anexos documentales',
+        dueDate: '2025-06-19',
+        priority: 'baja' as const,
+        status: 'pendiente' as const,
+        notes: 'Listado de anexos actualizados.',
+        links: [],
+      },
+      {
+        title: 'Preparar testifical vecinal',
+        dueDate: '2025-07-01',
+        priority: 'media' as const,
+        status: 'pendiente' as const,
+        notes: 'Uso exclusivo del chalet.',
+        links: [],
+      },
+      {
+        title: 'Verificar gastos extraordinarios de hijos',
+        dueDate: '2025-06-25',
+        priority: 'alta' as const,
+        status: 'en_progreso' as const,
+        notes: 'Recopilar recibos pendientes.',
+        links: [],
+      },
+      {
+        title: 'Revisar borrador de demanda hipoteca',
+        dueDate: '2025-07-05',
+        priority: 'media' as const,
+        status: 'pendiente' as const,
+        notes: 'Procedimiento de impagos.',
+        links: [],
+      },
+    ];
+
+    for (const task of tasks) {
+      await tasksRepo.create({
+        caseId: cas001.id,
+        ...task,
+      });
+    }
+
+    // ==========================================
+    // AUDIENCIA PREVIA (FASES)
+    // ==========================================
+    const audienciaPhases = [
+      {
+        phase: 'Cuestiones procesales',
+        importance: 'alta' as const,
+        script:
+          'Con la venia, esta parte se remite a las cuestiones procesales planteadas, solicitando se ratifique la competencia y se tenga por válidamente constituida la relación procesal.',
+        items: [
+          {
+            id: generateUUID(),
+            title: 'Competencia objetiva y territorial confirmadas',
+            importance: 'alta' as const,
+            linkedClaimIds: [],
+            linkedDocIds: [],
+          },
+          {
+            id: generateUUID(),
+            title: 'Legitimación activa/pasiva sin incidencias',
+            importance: 'media' as const,
+            linkedClaimIds: [],
+            linkedDocIds: [],
+          },
+        ],
+      },
+      {
+        phase: 'Hechos controvertidos',
+        importance: 'alta' as const,
+        script:
+          'Se fijan como controvertidos los hechos relativos a la unidad de caja, el impago hipotecario y el destino de la indemnización del Consorcio.',
+        items: [
+          {
+            id: generateUUID(),
+            title: 'Unidad de caja funcional 2006-2024',
+            importance: 'alta' as const,
+            linkedClaimIds: [claimIdMap.get('R01')].filter(
+              (id): id is string => Boolean(id)
+            ),
+            linkedDocIds: [],
+          },
+          {
+            id: generateUUID(),
+            title: 'Impago de cuotas hipotecarias desde octubre 2023',
+            importance: 'alta' as const,
+            linkedClaimIds: [claimIdMap.get('R04')].filter(
+              (id): id is string => Boolean(id)
+            ),
+            linkedDocIds: [],
+          },
+          {
+            id: generateUUID(),
+            title: 'Destino de indemnización Consorcio',
+            importance: 'media' as const,
+            linkedClaimIds: [claimIdMap.get('R05')].filter(
+              (id): id is string => Boolean(id)
+            ),
+            linkedDocIds: [],
+          },
+        ],
+      },
+      {
+        phase: 'Proposición de prueba',
+        importance: 'alta' as const,
+        script:
+          'Se proponen documentales, pericial y testifical para acreditar la trazabilidad de fondos y el uso exclusivo del inmueble.',
+        items: [
+          {
+            id: generateUUID(),
+            title: 'Extractos bancarios y cuadro consolidado de ingresos',
+            importance: 'alta' as const,
+            linkedClaimIds: [claimIdMap.get('R01')].filter(
+              (id): id is string => Boolean(id)
+            ),
+            linkedDocIds: [],
+          },
+          {
+            id: generateUUID(),
+            title: 'Pericial estado chalet y tasación actualizada',
+            importance: 'media' as const,
+            linkedClaimIds: [claimIdMap.get('R07')].filter(
+              (id): id is string => Boolean(id)
+            ),
+            linkedDocIds: [],
+          },
+          {
+            id: generateUUID(),
+            title: 'Testifical vecinal sobre uso exclusivo',
+            importance: 'media' as const,
+            linkedClaimIds: [claimIdMap.get('R03')].filter(
+              (id): id is string => Boolean(id)
+            ),
+            linkedDocIds: [],
+          },
+        ],
+      },
+      {
+        phase: 'Sobrevenidos',
+        importance: 'media' as const,
+        script:
+          'Se reserva la posibilidad de introducir documentación sobrevenida vinculada a extractos bancarios y mediación.',
+        items: [
+          {
+            id: generateUUID(),
+            title: 'Aportación de nuevos extractos bancarios',
+            importance: 'media' as const,
+            linkedClaimIds: [claimIdMap.get('R02')].filter(
+              (id): id is string => Boolean(id)
+            ),
+            linkedDocIds: [],
+          },
+        ],
+      },
+      {
+        phase: 'Peticiones de ordenación',
+        importance: 'baja' as const,
+        script:
+          'Se interesa el señalamiento preferente y la fijación clara de hechos controvertidos para evitar nuevos aplazamientos.',
+        items: [
+          {
+            id: generateUUID(),
+            title: 'Señalamiento preferente por dilaciones previas',
+            importance: 'baja' as const,
+            linkedClaimIds: [],
+            linkedDocIds: [],
+          },
+        ],
+      },
+    ];
+
+    for (const phase of audienciaPhases) {
+      await audienciaPhasesRepo.create({
+        caseId: cas001.id,
+        ...phase,
       });
     }
 

@@ -1,226 +1,169 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
+import { Link } from 'react-router-dom';
 import Card from '../../ui/components/Card';
 import SectionTitle from '../../ui/components/SectionTitle';
 import Stat from '../../ui/components/Stat';
-import { claimFilesRepo, docFilesRepo } from '../../db/repositories';
+import {
+  casesRepo,
+  claimsRepo,
+  docFilesRepo,
+  documentsRepo,
+  linksRepo,
+  tasksRepo,
+  docRequestsRepo,
+  timelineEventsRepo,
+  jurisprudenceRepo,
+} from '../../db/repositories';
+import type { Case, Claim, Task, DocRequest, TimelineEvent, Jurisprudence, Document } from '../../types';
 import { formatBytes, formatCurrency } from '../../utils/validators';
+import { formatDate } from '../../utils/dates';
 import { sha256 } from '../../utils/hash';
 
-type ClaimTab = 'resumen' | 'ampliar' | 'prueba';
+type ClaimTab = 'resumen' | 'ampliar' | 'documentos' | 'estrategias';
 
-type ClaimFile = {
-  id: string;
-  fileId: string;
+type ClaimDocument = {
+  linkId: string;
+  document: Document;
   filename: string;
   size: number;
   mime: string;
-  createdAt: number;
 };
 
-const CASES = [
-  {
-    id: 'pic-715-24',
-    title: 'Picassent · División Cosa Común',
-    autos: 'Autos 715/2024',
-    court: 'JPI nº1 Picassent',
-    status: 'Audiencia previa en preparación',
-    tags: ['División cosa común', 'Unidad de caja', 'Prescripción 1964.2 CC'],
-  },
-  {
-    id: 'qua-362-23',
-    title: 'Quart · Ejecución Familia',
-    autos: 'Autos 362/2023',
-    court: 'Juzgado Quart',
-    status: 'Ejecución en seguimiento',
-    tags: ['DANA', 'Ayuda material escolar', 'Cuenta privativa'],
-  },
-];
-
-const CLAIMS = [
-  {
-    id: 'r01',
-    shortLabel: 'R01',
-    title: 'Mezcla de Fondos',
-    amountCents: 21_600_000,
-    probability: 'media',
-    color: 'border-amber-400/50 bg-amber-500/10 text-amber-200',
-    thesis: 'Unidad de caja funcional 2006-2024 con trazabilidad de aportaciones.',
-    antithesis: 'Se opondrán aportaciones privativas sin rastro documental.',
-    detail:
-      'Se sostiene que el patrimonio común se gestionó como unidad de caja durante todo el ciclo 2006-2024. La falta de segregación contable habilita la compensación por aportaciones privativas conforme a la doctrina de los gastos comunes.',
-    evidence: ['Extractos consolidados 2006-2024', 'Resumen bancario conjunto', 'Cuadro comparativo de ingresos'],
-  },
-  {
-    id: 'r02',
-    shortLabel: 'R02',
-    title: 'Transferencia Errónea',
-    amountCents: 1_300_000,
-    probability: 'alta',
-    color: 'border-rose-400/50 bg-rose-500/10 text-rose-200',
-    thesis: 'Impugnación por error material: la demanda cita 2024, fecha imposible.',
-    antithesis: 'Se intentará reconducir como error formal subsanable.',
-    detail:
-      'El relato cronológico acredita que la transferencia no puede corresponder al año 2024, fecha posterior a los hechos descritos. Se impulsa la rectificación por error material con base en la propia narrativa de la demanda.',
-    evidence: ['Orden de transferencia con sello bancario', 'Cruce de movimientos con fecha real'],
-  },
-  {
-    id: 'r03',
-    shortLabel: 'R03',
-    title: 'SEAT LEÓN',
-    amountCents: 1_450_000,
-    probability: 'media',
-    color: 'border-emerald-400/50 bg-emerald-500/10 text-emerald-200',
-    thesis: 'Uso exclusivo del vehículo desde agosto 2022.',
-    antithesis: 'Se alegará uso compartido y gastos comunes.',
-    detail:
-      'La tenencia exclusiva del SEAT LEÓN desde agosto 2022 refuerza la compensación por privación de uso. Se documenta con seguros, mantenimientos y testifical.',
-    evidence: ['Póliza de seguro 2022-2024', 'Tickets de mantenimiento', 'Testifical vecinal'],
-  },
-];
-
-const AUDIENCE_CHECKLIST = [
-  {
-    phase: 'Procesal',
-    items: ['Competencia y cuantía confirmadas', 'Subsistencia de legitimación activa'],
-  },
-  {
-    phase: 'Hechos',
-    items: ['Unidad de caja 2006-2024', 'Error material transferencia 2024', 'Uso exclusivo SEAT LEÓN'],
-  },
-  {
-    phase: 'Prueba',
-    items: ['Extractos consolidados listos', 'Dogv ayuda DANA (Quart)', 'Listado de anexos actualizado'],
-  },
-  {
-    phase: 'Alegaciones complementarias',
-    items: ['Prescripción art. 1964.2 CC', 'Inaplicabilidad STS 458/2025 tramo 2006-2013'],
-  },
-];
-
-const AUDIENCE_SCRIPTS = [
-  'Con la venia, esta parte interesa la inadmisión del tramo 2006-2013 por ausencia de régimen económico probado.',
-  'Se interesa la rectificación del error material en la demanda respecto de la fecha 2024, imposible según el relato.',
-  'Se solicita se tenga por acreditado el uso exclusivo del SEAT LEÓN desde agosto de 2022.',
-];
-
-const PENDING_DOCS = [
-  {
-    title: 'Extractos BBVA 2011',
-    status: 'Solicitado',
-    note: 'Necesarios para reconstruir unidad de caja.',
-  },
-  {
-    title: 'Cuadro comparativo ingresos 2006-2010',
-    status: 'Pendiente',
-    note: 'Soporte a la tesis de mezcla de fondos.',
-  },
-  {
-    title: 'Resolución DOGV ayuda DANA',
-    status: 'Recibido',
-    note: 'Caso Quart · cuenta privativa.',
-  },
-];
-
-const TASKS = [
-  {
-    title: 'Formalizar alegación prescripción art. 1964.2 CC',
-    priority: 'alta',
-    due: '24/06',
-  },
-  {
-    title: 'Solicitar extractos BBVA 2011 (unidad de caja)',
-    priority: 'alta',
-    due: '20/06',
-  },
-  {
-    title: 'Validar error material en transferencia 2024',
-    priority: 'media',
-    due: '18/06',
-  },
-  {
-    title: 'Ensayar guiones audiencia previa',
-    priority: 'baja',
-    due: '15/06',
-  },
-];
-
-const TIMELINE_SEED = [
-  {
-    type: 'Hito',
-    date: '2006-01-01',
-    title: 'Inicio unidad de caja funcional',
-    detail: 'Comienzo del periodo que la actora pretende compensar.',
-  },
-  {
-    type: 'Hecho',
-    date: '2013-12-31',
-    title: 'Tramo pre-matrimonial sin régimen probado',
-    detail: 'Base para excluir 2006-2013 de la STS 458/2025.',
-  },
-  {
-    type: 'Documento',
-    date: '2022-08-01',
-    title: 'Uso exclusivo SEAT LEÓN',
-    detail: 'Se documenta desde agosto 2022.',
-  },
-  {
-    type: 'Hito',
-    date: '2024-02-12',
-    title: 'Demanda división cosa común',
-    detail: 'Autos 715/2024 · JPI nº1 Picassent.',
-  },
-  {
-    type: 'Hecho',
-    date: '2024-02-20',
-    title: 'Detección error material transferencia',
-    detail: 'La demanda cita 2024, fecha imposible.',
-  },
-];
+const WIN_CHANCE_STYLES: Record<Claim['winChance'], string> = {
+  alta: 'border-emerald-400/50 bg-emerald-500/10 text-emerald-200',
+  media: 'border-amber-400/50 bg-amber-500/10 text-amber-200',
+  baja: 'border-rose-400/50 bg-rose-500/10 text-rose-200',
+};
 
 export function DashboardPage() {
-  const [selectedClaimId, setSelectedClaimId] = useState(CLAIMS[0]?.id ?? '');
+  const [cases, setCases] = useState<Case[]>([]);
+  const [claims, setClaims] = useState<Claim[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [docRequests, setDocRequests] = useState<DocRequest[]>([]);
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [jurisprudence, setJurisprudence] = useState<Jurisprudence[]>([]);
+  const [claimDocuments, setClaimDocuments] = useState<Record<string, ClaimDocument[]>>({});
+  const [selectedCaseId, setSelectedCaseId] = useState<string>('');
+  const [selectedClaimId, setSelectedClaimId] = useState<string>('');
   const [activeTab, setActiveTab] = useState<ClaimTab>('resumen');
-  const [claimFiles, setClaimFiles] = useState<Record<string, ClaimFile[]>>({});
   const [uploading, setUploading] = useState(false);
-
-  const selectedClaim = CLAIMS.find((claim) => claim.id === selectedClaimId) ?? CLAIMS[0];
-
-  const totalClaimed = useMemo(
-    () => CLAIMS.reduce((sum, claim) => sum + claim.amountCents, 0),
-    []
-  );
-
-  const timelineItems = useMemo(() => {
-    return [...TIMELINE_SEED].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-  }, []);
 
   useEffect(() => {
     let mounted = true;
-    const loadFiles = async () => {
-      const entries = await Promise.all(
-        CLAIMS.map(async (claim) => ({
-          claimId: claim.id,
-          files: await claimFilesRepo.getByClaimId(claim.id),
-        }))
-      );
+
+    const loadData = async () => {
+      const [casesData, claimsData, tasksData, docRequestsData, timelineData, jurisprudenceData] =
+        await Promise.all([
+          casesRepo.getAll(),
+          claimsRepo.getAll(),
+          tasksRepo.getAll(),
+          docRequestsRepo.getAll(),
+          timelineEventsRepo.getAll(),
+          jurisprudenceRepo.getAll(),
+        ]);
+
       if (!mounted) return;
-      const mapped = entries.reduce<Record<string, ClaimFile[]>>((acc, entry) => {
-        acc[entry.claimId] = entry.files;
-        return acc;
-      }, {});
-      setClaimFiles(mapped);
+      setCases(casesData);
+      setClaims(claimsData);
+      setTasks(tasksData);
+      setDocRequests(docRequestsData);
+      setTimelineEvents(timelineData);
+      setJurisprudence(jurisprudenceData);
+
+      const firstActiveCase = casesData.find((caseItem) => caseItem.status === 'activo');
+      const initialCaseId = firstActiveCase?.id ?? casesData[0]?.id ?? '';
+      setSelectedCaseId(initialCaseId);
+      const caseClaims = claimsData.filter((claim) => claim.caseId === initialCaseId);
+      setSelectedClaimId(caseClaims[0]?.id ?? '');
     };
-    void loadFiles();
+
+    void loadData();
+
     return () => {
       mounted = false;
     };
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    const loadClaimDocs = async () => {
+      if (claims.length === 0) return;
+      const entries = await Promise.all(
+        claims.map(async (claim) => {
+          const links = await linksRepo.getByTo('claim', claim.id);
+          const documentLinks = links.filter((link) => link.fromType === 'document');
+          const docs = await Promise.all(
+            documentLinks.map(async (link) => {
+              const document = await documentsRepo.getById(link.fromId);
+              if (!document) return null;
+              const file = document.fileId ? await docFilesRepo.getById(document.fileId) : undefined;
+              return {
+                linkId: link.id,
+                document,
+                filename: file?.filename ?? document.title,
+                size: file?.size ?? 0,
+                mime: file?.mime ?? 'documento',
+              } as ClaimDocument;
+            })
+          );
+          return { claimId: claim.id, docs: docs.filter(Boolean) as ClaimDocument[] };
+        })
+      );
+      if (!mounted) return;
+      const mapped = entries.reduce<Record<string, ClaimDocument[]>>((acc, entry) => {
+        acc[entry.claimId] = entry.docs;
+        return acc;
+      }, {});
+      setClaimDocuments(mapped);
+    };
+    void loadClaimDocs();
+    return () => {
+      mounted = false;
+    };
+  }, [claims]);
+
+  useEffect(() => {
+    if (!selectedCaseId) return;
+    const caseClaims = claims.filter((claim) => claim.caseId === selectedCaseId);
+    if (!caseClaims.find((claim) => claim.id === selectedClaimId)) {
+      setSelectedClaimId(caseClaims[0]?.id ?? '');
+    }
+  }, [claims, selectedCaseId, selectedClaimId]);
+
+  const selectedCase = useMemo(
+    () => cases.find((caseItem) => caseItem.id === selectedCaseId),
+    [cases, selectedCaseId]
+  );
+
+  const caseClaims = useMemo(
+    () => claims.filter((claim) => claim.caseId === selectedCaseId),
+    [claims, selectedCaseId]
+  );
+
+  const selectedClaim = useMemo(
+    () => claims.find((claim) => claim.id === selectedClaimId),
+    [claims, selectedClaimId]
+  );
+
+  const totalClaimed = useMemo(
+    () => caseClaims.reduce((sum, claim) => sum + claim.amount, 0),
+    [caseClaims]
+  );
+
+  const timelineItems = useMemo(() => {
+    return timelineEvents
+      .filter((item) => !item.caseId || item.caseId === selectedCaseId)
+      .sort((a, b) => new Date(b.dateISO).getTime() - new Date(a.dateISO).getTime());
+  }, [timelineEvents, selectedCaseId]);
+
+  const claimJurisprudence = useMemo(() => {
+    if (!selectedClaim) return [];
+    return jurisprudence.filter((item) => item.linkedClaimIds.includes(selectedClaim.id));
+  }, [jurisprudence, selectedClaim]);
+
   const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files || files.length === 0 || !selectedClaim) return;
+    if (!files || files.length === 0 || !selectedClaim || !selectedCase) return;
 
     setUploading(true);
     try {
@@ -234,17 +177,45 @@ export function DashboardPage() {
             size: file.size,
             blob: file,
           });
-          return claimFilesRepo.addForClaim({
-            claimId: selectedClaim.id,
+
+          const document = await documentsRepo.create({
+            caseId: selectedCase.id,
+            title: file.name,
+            docType: 'prueba',
+            source: 'Carga local',
+            docDate: new Date().toISOString().split('T')[0],
+            tags: [selectedClaim.shortLabel],
+            hashSha256,
             fileId: stored.id,
+            pagesCount: 0,
+            annexCode: '',
+            notes: `Documento vinculado a ${selectedClaim.shortLabel}.`,
+          });
+
+          const link = await linksRepo.create(
+            'document',
+            document.id,
+            'claim',
+            selectedClaim.id,
+            'evidence',
+            'Adjunto reclamación'
+          );
+
+          await claimsRepo.update(selectedClaim.id, {
+            linkedDocIds: [...selectedClaim.linkedDocIds, document.id],
+          });
+
+          return {
+            linkId: link.id,
+            document,
             filename: stored.filename,
             size: stored.size,
             mime: stored.mime,
-          });
+          } as ClaimDocument;
         })
       );
 
-      setClaimFiles((prev) => ({
+      setClaimDocuments((prev) => ({
         ...prev,
         [selectedClaim.id]: [...(prev[selectedClaim.id] ?? []), ...updates],
       }));
@@ -254,11 +225,11 @@ export function DashboardPage() {
     }
   };
 
-  const handleRemoveFile = async (claimId: string, fileId: string) => {
-    await claimFilesRepo.remove(fileId);
-    setClaimFiles((prev) => ({
+  const handleRemoveFile = async (claimId: string, linkId: string) => {
+    await linksRepo.delete(linkId);
+    setClaimDocuments((prev) => ({
       ...prev,
-      [claimId]: (prev[claimId] ?? []).filter((file) => file.id !== fileId),
+      [claimId]: (prev[claimId] ?? []).filter((file) => file.linkId !== linkId),
     }));
   };
 
@@ -270,16 +241,18 @@ export function DashboardPage() {
             Case Ops · Dashboard Operativo
           </p>
           <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
-            Picassent · División cosa común
+            {selectedCase?.title ?? 'Procedimiento activo'}
           </h1>
           <p className="text-sm text-slate-400">
-            Autos 715/2024 · JPI nº1 Picassent · Offline-first en sala de vistas
+            {selectedCase
+              ? `${selectedCase.autosNumber || 'Sin autos'} · ${selectedCase.court}`
+              : 'Selecciona un procedimiento para iniciar'}
           </p>
         </div>
         <div className="rounded-2xl border border-slate-800/60 bg-slate-900/70 px-4 py-3">
-          <div className="text-xs uppercase text-slate-400">Prescripción estratégica</div>
+          <div className="text-xs uppercase text-slate-400">Estrategia principal</div>
           <div className="text-sm font-semibold text-slate-200">
-            Art. 1964.2 CC · Inaplicabilidad STS 458/2025 tramo 2006-2013
+            {claimJurisprudence[0]?.ref ?? 'Sin jurisprudencia vinculada'}
           </div>
         </div>
       </header>
@@ -287,18 +260,18 @@ export function DashboardPage() {
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card className="p-5">
           <Stat label="Total reclamado" value={formatCurrency(totalClaimed)} />
-          <div className="mt-2 text-xs text-slate-500">Suma real Picassent</div>
+          <div className="mt-2 text-xs text-slate-500">Suma de reclamaciones activas</div>
         </Card>
         <Card className="p-5">
-          <Stat label="Reclamaciones" value={CLAIMS.length} delta="R01 · R02 · R03" />
-          <div className="mt-2 text-xs text-slate-500">Tiles activos</div>
+          <Stat label="Reclamaciones" value={caseClaims.length} delta="Tiles activos" />
+          <div className="mt-2 text-xs text-slate-500">Núcleo de estrategia</div>
         </Card>
         <Card className="p-5">
-          <Stat label="Docs pendientes" value={PENDING_DOCS.length} />
+          <Stat label="Docs pendientes" value={docRequests.length} />
           <div className="mt-2 text-xs text-slate-500">Solicitudes en curso</div>
         </Card>
         <Card className="p-5">
-          <Stat label="Deberes críticos" value={TASKS.length} />
+          <Stat label="Deberes críticos" value={tasks.length} />
           <div className="mt-2 text-xs text-slate-500">Prioridades en sala</div>
         </Card>
       </section>
@@ -307,7 +280,7 @@ export function DashboardPage() {
         <Card className="p-6">
           <SectionTitle title="Reclamaciones" subtitle="Vista por tiles con probabilidad" />
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {CLAIMS.map((claim) => (
+            {caseClaims.map((claim) => (
               <button
                 key={claim.id}
                 type="button"
@@ -324,7 +297,9 @@ export function DashboardPage() {
                   </span>
                   <span>{claim.title}</span>
                 </div>
-                <span className="text-sm text-slate-200">{formatCurrency(claim.amountCents)}</span>
+                <span className="text-sm text-slate-200">
+                  {formatCurrency(claim.amount)}
+                </span>
               </button>
             ))}
           </div>
@@ -340,70 +315,68 @@ export function DashboardPage() {
                     {selectedClaim.title}
                   </div>
                   <div className="text-sm text-slate-400">
-                    {formatCurrency(selectedClaim.amountCents)} · Probabilidad{' '}
-                    <span className={`rounded-full border px-2 py-0.5 text-xs ${selectedClaim.color}`}>
-                      {selectedClaim.probability}
+                    {formatCurrency(selectedClaim.amount)} · Probabilidad{' '}
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-xs ${
+                        WIN_CHANCE_STYLES[selectedClaim.winChance]
+                      }`}
+                    >
+                      {selectedClaim.winChance}
                     </span>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  {(['resumen', 'ampliar', 'prueba'] as ClaimTab[]).map((tab) => (
-                    <button
-                      key={tab}
-                      type="button"
-                      onClick={() => setActiveTab(tab)}
-                      className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
-                        activeTab === tab
-                          ? 'bg-amber-400/20 text-amber-200'
-                          : 'bg-slate-900/60 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
+                  {(['resumen', 'ampliar', 'documentos', 'estrategias'] as ClaimTab[]).map(
+                    (tab) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        onClick={() => setActiveTab(tab)}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
+                          activeTab === tab
+                            ? 'bg-amber-400/20 text-amber-200'
+                            : 'bg-slate-900/60 text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        {tab}
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
 
               {activeTab === 'resumen' && (
                 <div className="mt-5 grid gap-4 md:grid-cols-2">
                   <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4">
-                    <div className="text-xs uppercase tracking-[0.3em] text-slate-500">Tesis</div>
-                    <p className="mt-2 text-sm text-slate-200">{selectedClaim.thesis}</p>
+                    <div className="text-xs uppercase tracking-[0.3em] text-slate-500">Resumen</div>
+                    <p className="mt-2 text-sm text-slate-200">
+                      {selectedClaim.summaryShort}
+                    </p>
                   </div>
                   <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 p-4">
                     <div className="text-xs uppercase tracking-[0.3em] text-slate-500">
-                      Antítesis
+                      Defensa
                     </div>
-                    <p className="mt-2 text-sm text-slate-200">{selectedClaim.antithesis}</p>
+                    <p className="mt-2 text-sm text-slate-200">
+                      {selectedClaim.defenseShort}
+                    </p>
                   </div>
                 </div>
               )}
 
               {activeTab === 'ampliar' && (
-                <div className="mt-5 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 text-sm text-slate-200">
-                  {selectedClaim.detail}
+                <div className="mt-5 space-y-4">
+                  <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 text-sm text-slate-200">
+                    {selectedClaim.summaryLong}
+                  </div>
+                  <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 text-sm text-slate-200">
+                    {selectedClaim.defenseLong}
+                  </div>
                 </div>
               )}
 
-              {activeTab === 'prueba' && (
+              {activeTab === 'documentos' && (
                 <div className="mt-5 space-y-4">
-                  <div>
-                    <div className="text-xs uppercase tracking-[0.3em] text-slate-500">
-                      Evidencia base
-                    </div>
-                    <ul className="mt-3 space-y-2 text-sm text-slate-200">
-                      {selectedClaim.evidence.map((item) => (
-                        <li
-                          key={item}
-                          className="flex items-center justify-between rounded-lg border border-slate-800/70 bg-slate-900/40 px-3 py-2"
-                        >
-                          <span>{item}</span>
-                          <span className="text-xs text-slate-500">Doc</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
                   <div>
                     <div className="text-xs uppercase tracking-[0.3em] text-slate-500">
                       Subir archivos vinculados
@@ -422,14 +395,14 @@ export function DashboardPage() {
                       </span>
                     </label>
                     <div className="mt-3 space-y-2">
-                      {(claimFiles[selectedClaim.id] ?? []).length === 0 ? (
+                      {(claimDocuments[selectedClaim.id] ?? []).length === 0 ? (
                         <div className="rounded-lg border border-slate-800/70 bg-slate-900/40 px-3 py-2 text-xs text-slate-500">
-                          Sin archivos adicionales vinculados.
+                          Sin documentos vinculados.
                         </div>
                       ) : (
-                        (claimFiles[selectedClaim.id] ?? []).map((file) => (
+                        (claimDocuments[selectedClaim.id] ?? []).map((file) => (
                           <div
-                            key={file.id}
+                            key={file.linkId}
                             className="flex items-center justify-between rounded-lg border border-slate-800/70 bg-slate-900/40 px-3 py-2 text-xs text-slate-300"
                           >
                             <div>
@@ -440,7 +413,7 @@ export function DashboardPage() {
                             </div>
                             <button
                               type="button"
-                              onClick={() => handleRemoveFile(selectedClaim.id, file.id)}
+                              onClick={() => handleRemoveFile(selectedClaim.id, file.linkId)}
                               className="rounded-full border border-slate-700/70 px-2 py-1 text-xs text-slate-400 hover:text-slate-200"
                             >
                               Quitar
@@ -452,6 +425,39 @@ export function DashboardPage() {
                   </div>
                 </div>
               )}
+
+              {activeTab === 'estrategias' && (
+                <div className="mt-5 space-y-4">
+                  <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 text-sm text-slate-200">
+                    {selectedClaim.defenseLong}
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase tracking-[0.3em] text-slate-500">
+                      Jurisprudencia vinculada
+                    </div>
+                    <ul className="mt-3 space-y-2 text-sm text-slate-200">
+                      {claimJurisprudence.length === 0 ? (
+                        <li className="rounded-lg border border-slate-800/70 bg-slate-900/40 px-3 py-2 text-xs text-slate-500">
+                          Sin jurisprudencia vinculada.
+                        </li>
+                      ) : (
+                        claimJurisprudence.map((item) => (
+                          <li
+                            key={item.id}
+                            className="rounded-lg border border-slate-800/70 bg-slate-900/40 px-3 py-2"
+                          >
+                            <div className="text-sm font-semibold text-slate-200">{item.ref}</div>
+                            <div className="text-xs text-slate-500">
+                              {item.court} · {formatDate(item.dateISO)}
+                            </div>
+                            <div className="text-xs text-slate-400">{item.summaryShort}</div>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </Card>
@@ -460,9 +466,9 @@ export function DashboardPage() {
           <Card className="p-5">
             <SectionTitle title="Panel de deberes" subtitle="Tasks con prioridad" />
             <div className="mt-4 space-y-3">
-              {TASKS.map((task) => (
+              {tasks.slice(0, 4).map((task) => (
                 <div
-                  key={task.title}
+                  key={task.id}
                   className="rounded-xl border border-slate-800/70 bg-slate-900/40 px-3 py-3"
                 >
                   <div className="flex items-center justify-between">
@@ -479,7 +485,9 @@ export function DashboardPage() {
                       {task.priority}
                     </span>
                   </div>
-                  <div className="mt-1 text-xs text-slate-500">Vence: {task.due}</div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    Vence: {task.dueDate ? formatDate(task.dueDate) : 'Sin fecha'}
+                  </div>
                 </div>
               ))}
             </div>
@@ -488,9 +496,9 @@ export function DashboardPage() {
           <Card className="p-5">
             <SectionTitle title="Documentación a consultar" subtitle="Solicitudes activas" />
             <div className="mt-4 space-y-3">
-              {PENDING_DOCS.map((doc) => (
+              {docRequests.slice(0, 4).map((doc) => (
                 <div
-                  key={doc.title}
+                  key={doc.id}
                   className="rounded-xl border border-slate-800/70 bg-slate-900/40 px-3 py-3"
                 >
                   <div className="flex items-center justify-between">
@@ -499,7 +507,7 @@ export function DashboardPage() {
                       {doc.status}
                     </span>
                   </div>
-                  <div className="mt-1 text-xs text-slate-500">{doc.note}</div>
+                  <div className="mt-1 text-xs text-slate-500">{doc.purpose}</div>
                 </div>
               ))}
             </div>
@@ -513,17 +521,17 @@ export function DashboardPage() {
           <div className="mt-5 space-y-3">
             {timelineItems.map((item) => (
               <div
-                key={`${item.type}-${item.date}`}
+                key={item.id}
                 className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800/70 bg-slate-900/40 px-4 py-3 text-sm"
               >
                 <div>
                   <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                    {item.type}
+                    {item.importance}
                   </div>
                   <div className="font-semibold text-slate-200">{item.title}</div>
-                  <div className="text-xs text-slate-500">{item.detail}</div>
+                  <div className="text-xs text-slate-500">{item.description}</div>
                 </div>
-                <div className="text-xs text-slate-400">{item.date}</div>
+                <div className="text-xs text-slate-400">{formatDate(item.dateISO)}</div>
               </div>
             ))}
           </div>
@@ -534,62 +542,16 @@ export function DashboardPage() {
             title="Modo Audiencia Previa"
             subtitle="Interfaz simplificada rojo/negro"
           />
-          <div className="mt-4 space-y-4">
-            {AUDIENCE_CHECKLIST.map((phase) => (
-              <div key={phase.phase}>
-                <div className="text-xs uppercase tracking-[0.2em] text-rose-300">
-                  {phase.phase}
-                </div>
-                <ul className="mt-2 space-y-2 text-xs text-slate-200">
-                  {phase.items.map((item) => (
-                    <li
-                      key={item}
-                      className="flex items-start gap-2 rounded-lg border border-rose-500/20 bg-black/60 px-2 py-1"
-                    >
-                      <span className="text-rose-400">▣</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-            <div>
-              <div className="text-xs uppercase tracking-[0.2em] text-rose-300">
-                Guiones listos
-              </div>
-              <ul className="mt-2 space-y-2 text-xs text-slate-200">
-                {AUDIENCE_SCRIPTS.map((script) => (
-                  <li
-                    key={script}
-                    className="rounded-lg border border-rose-500/20 bg-black/60 px-2 py-2"
-                  >
-                    “{script}”
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="mt-4 space-y-3 text-xs text-slate-200">
+            <div>Configura la audiencia previa por fases y guion de sala.</div>
+            <Link
+              to="/audiencia-previa"
+              className="inline-flex items-center rounded-full border border-rose-500/40 px-3 py-1 text-xs text-rose-200"
+            >
+              Abrir audiencia previa →
+            </Link>
           </div>
         </Card>
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-2">
-        {CASES.map((caseItem) => (
-          <Card key={caseItem.id} className="p-5">
-            <SectionTitle title={caseItem.title} subtitle={caseItem.court} />
-            <div className="mt-3 text-sm text-slate-300">{caseItem.autos}</div>
-            <div className="mt-2 text-xs text-slate-500">{caseItem.status}</div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {caseItem.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-slate-700/70 bg-slate-900/40 px-3 py-1 text-xs text-slate-300"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </Card>
-        ))}
       </section>
     </div>
   );
