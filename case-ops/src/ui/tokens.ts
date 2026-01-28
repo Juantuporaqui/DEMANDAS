@@ -1,0 +1,10 @@
+export const appMaxWidth = '1280px';
+export const sidebarWidth = '280px';
+export const radius = '14px';
+export const shadowCard = 'shadow-[0_1px_2px_rgba(0,0,0,0.06)]';
+export const border = 'border border-zinc-200/70';
+export const bg = 'bg-zinc-50';
+export const card = 'bg-white';
+export const textPrimary = 'text-zinc-900';
+export const textMuted = 'text-zinc-500';
+export const accent = 'text-slate-700';
