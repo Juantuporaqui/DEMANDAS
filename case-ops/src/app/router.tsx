@@ -28,145 +28,161 @@ import { MorePage } from '../features/dashboard/MorePage';
 import { SettingsPage } from '../features/dashboard/SettingsPage';
 import { CasesPage } from '../features/cases/CasesPage';
 import { CaseDetailPage } from '../features/cases/CaseDetailPage';
-import { AnalyticsDashboard } from '../features/analytics/AnalyticsDashboard';
+import { AnalyticsDashboardPage } from '../features/analytics/pages/AnalyticsDashboard';
+import { AnalyticsAdminPage } from '../features/analytics/pages/AnalyticsAdminPage';
+import { CourtDashboard } from '../features/analytics/pages/CourtDashboard';
+import { HechosPage } from '../features/analytics/pages/HechosPage';
+import { PrescripcionPage } from '../features/analytics/pages/PrescripcionPage';
 
 export const router = createBrowserRouter(
   [
-  {
-    path: '/',
-    element: <AppShell />,
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/dashboard" replace />,
-      },
-      {
-        path: 'dashboard',
-        element: <DashboardPage />,
-      },
-      {
-        path: 'analytics',
-        element: <AnalyticsDashboard />,
-      },
-      {
-        path: 'search',
-        element: <SearchPage />,
-      },
-      // Cases
-      {
-        path: 'cases',
-        element: <CasesPage />,
-      },
-      {
-        path: 'cases/:id',
-        element: <CaseDetailPage />,
-      },
-      // Documents
-      {
-        path: 'documents',
-        element: <DocumentsPage />,
-      },
-      {
-        path: 'documents/new',
-        element: <DocumentFormPage />,
-      },
-      {
-        path: 'documents/:id',
-        element: <DocumentDetailPage />,
-      },
-      {
-        path: 'documents/:id/edit',
-        element: <DocumentFormPage />,
-      },
-      {
-        path: 'documents/:id/view',
-        element: <PdfViewerPage />,
-      },
-      // Facts
-      {
-        path: 'facts',
-        element: <FactsPage />,
-      },
-      {
-        path: 'facts/new',
-        element: <FactFormPage />,
-      },
-      {
-        path: 'facts/:id',
-        element: <FactDetailPage />,
-      },
-      {
-        path: 'facts/:id/edit',
-        element: <FactFormPage />,
-      },
-      // Partidas
-      {
-        path: 'partidas',
-        element: <PartidasPage />,
-      },
-      {
-        path: 'partidas/new',
-        element: <PartidaFormPage />,
-      },
-      {
-        path: 'partidas/:id',
-        element: <PartidaDetailPage />,
-      },
-      {
-        path: 'partidas/:id/edit',
-        element: <PartidaFormPage />,
-      },
-      // Events/Timeline
-      {
-        path: 'events',
-        element: <EventsPage />,
-      },
-      {
-        path: 'events/new',
-        element: <EventFormPage />,
-      },
-      {
-        path: 'events/:id/edit',
-        element: <EventFormPage />,
-      },
-      // War Room
-      {
-        path: 'warroom',
-        element: <WarRoomPage />,
-      },
-      {
-        path: 'warroom/new',
-        element: <StrategyFormPage />,
-      },
-      {
-        path: 'warroom/:id/edit',
-        element: <StrategyFormPage />,
-      },
-      // Tasks
-      {
-        path: 'tasks',
-        element: <TasksPage />,
-      },
-      {
-        path: 'analytics',
-        element: <AnalyticsDashboard />,
-      },
-      // Backup
-      {
-        path: 'backup',
-        element: <BackupPage />,
-      },
-      // More & Settings
-      {
-        path: 'more',
-        element: <MorePage />,
-      },
-      {
-        path: 'settings',
-        element: <SettingsPage />,
-      },
-    ],
-  },
+    {
+      path: '/',
+      element: <AppShell />,
+      children: [
+        {
+          index: true,
+          element: <Navigate to="/dashboard" replace />,
+        },
+        {
+          path: 'dashboard',
+          element: <DashboardPage />,
+        },
+        {
+          path: 'analytics',
+          element: <AnalyticsDashboardPage />,
+        },
+        {
+          path: 'analytics/admin',
+          element: <AnalyticsAdminPage />,
+        },
+        {
+          path: 'analytics/prescripcion',
+          element: <PrescripcionPage />,
+        },
+        {
+          path: 'analytics/hechos',
+          element: <HechosPage />,
+        },
+        {
+          path: 'analytics/:court',
+          element: <CourtDashboard />,
+        },
+        {
+          path: 'search',
+          element: <SearchPage />,
+        },
+        // Cases
+        {
+          path: 'cases',
+          element: <CasesPage />,
+        },
+        {
+          path: 'cases/:id',
+          element: <CaseDetailPage />,
+        },
+        // Documents
+        {
+          path: 'documents',
+          element: <DocumentsPage />,
+        },
+        {
+          path: 'documents/new',
+          element: <DocumentFormPage />,
+        },
+        {
+          path: 'documents/:id',
+          element: <DocumentDetailPage />,
+        },
+        {
+          path: 'documents/:id/edit',
+          element: <DocumentFormPage />,
+        },
+        {
+          path: 'documents/:id/view',
+          element: <PdfViewerPage />,
+        },
+        // Facts
+        {
+          path: 'facts',
+          element: <FactsPage />,
+        },
+        {
+          path: 'facts/new',
+          element: <FactFormPage />,
+        },
+        {
+          path: 'facts/:id',
+          element: <FactDetailPage />,
+        },
+        {
+          path: 'facts/:id/edit',
+          element: <FactFormPage />,
+        },
+        // Partidas
+        {
+          path: 'partidas',
+          element: <PartidasPage />,
+        },
+        {
+          path: 'partidas/new',
+          element: <PartidaFormPage />,
+        },
+        {
+          path: 'partidas/:id',
+          element: <PartidaDetailPage />,
+        },
+        {
+          path: 'partidas/:id/edit',
+          element: <PartidaFormPage />,
+        },
+        // Events/Timeline
+        {
+          path: 'events',
+          element: <EventsPage />,
+        },
+        {
+          path: 'events/new',
+          element: <EventFormPage />,
+        },
+        {
+          path: 'events/:id/edit',
+          element: <EventFormPage />,
+        },
+        // War Room
+        {
+          path: 'warroom',
+          element: <WarRoomPage />,
+        },
+        {
+          path: 'warroom/new',
+          element: <StrategyFormPage />,
+        },
+        {
+          path: 'warroom/:id/edit',
+          element: <StrategyFormPage />,
+        },
+        // Tasks
+        {
+          path: 'tasks',
+          element: <TasksPage />,
+        },
+        // Backup
+        {
+          path: 'backup',
+          element: <BackupPage />,
+        },
+        // More & Settings
+        {
+          path: 'more',
+          element: <MorePage />,
+        },
+        {
+          path: 'settings',
+          element: <SettingsPage />,
+        },
+      ],
+    },
   ],
   {
     // Respeta el "base" de Vite (p.ej. /DEMANDAS/ en GitHub Pages)
