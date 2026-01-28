@@ -79,16 +79,8 @@ export const counterRepo = {
 
     return db.transaction('rw', db.counters, async () => {
       const counter = await db.counters.get(tableName);
-      const current = counter?.current ?? 0;
-      const next = current + 1;
-
-      await db.counters.put({
-        id: tableName,
-        prefix,
-        current: next,
-      });
-
-      // Format: CAS001, D001, etc.
+      const next = (counter?.current ?? 0) + 1;
+      await db.counters.put({ id: tableName, prefix, current: next });
       return `${prefix}${String(next).padStart(3, '0')}`;
     });
   },
@@ -818,54 +810,34 @@ export const getAlerts = async () => {
       linksRepo.getAll(),
     ]);
 
-  // Facts without evidence
   for (const fact of controvertidos) {
-    const hasEvidence = allLinks.some(
-      (link) =>
-        link.toType === 'fact' &&
-        link.toId === fact.id &&
-        link.fromType === 'span' &&
-        link.meta.role === 'evidence',
-    );
-
-    if (!hasEvidence) {
+    if (!allLinks.some((l) => l.toId === fact.id && l.meta.role === 'evidence')) {
       alerts.push({
         id: `alert-fact-${fact.id}`,
         type: 'warning',
-        title: `Hecho sin evidencia: ${fact.title}`,
-        description: `El hecho ${fact.id} (${fact.status}) no tiene spans de evidencia vinculados`,
+        title: `Sin evidencia: ${fact.title}`,
+        description: `Hecho ${fact.status} sin pruebas`,
         entityType: 'fact',
         entityId: fact.id,
       });
     }
   }
 
-  // Partidas without evidence
   for (const partida of discutidas) {
-    const hasEvidence = allLinks.some(
-      (link) =>
-        link.toType === 'partida' &&
-        link.toId === partida.id &&
-        link.fromType === 'span' &&
-        link.meta.role === 'evidence',
-    );
-
-    if (!hasEvidence) {
+    if (!allLinks.some((l) => l.toId === partida.id && l.meta.role === 'evidence')) {
       alerts.push({
         id: `alert-partida-${partida.id}`,
         type: 'warning',
-        title: `Partida sin evidencia: ${partida.concept}`,
-        description: `La partida ${partida.id} (discutida) no tiene spans de evidencia vinculados`,
+        title: `Sin evidencia: ${partida.concept}`,
+        description: `Partida discutida sin pruebas`,
         entityType: 'partida',
         entityId: partida.id,
       });
     }
   }
 
-  // Documents without spans
   for (const doc of docs) {
-    const hasSpans = allSpans.some((span) => span.documentId === doc.id);
-    if (!hasSpans) {
+    if (!allSpans.some((span) => span.documentId === doc.id)) {
       alerts.push({
         id: `alert-doc-${doc.id}`,
         type: 'info',
@@ -877,12 +849,8 @@ export const getAlerts = async () => {
     }
   }
 
-  // Spans without links
   for (const span of allSpans) {
-    const hasLinks = allLinks.some(
-      (link) => link.fromType === 'span' && link.fromId === span.id,
-    );
-    if (!hasLinks) {
+    if (!allLinks.some((link) => link.fromType === 'span' && link.fromId === span.id)) {
       alerts.push({
         id: `alert-span-${span.id}`,
         type: 'info',

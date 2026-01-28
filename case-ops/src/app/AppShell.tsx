@@ -1,7 +1,3 @@
-// ============================================
-// CASE OPS - App Shell (Merged with Chaladita Header)
-// ============================================
-
 import { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Moon, Scale, Sun, WifiOff } from 'lucide-react';
@@ -10,8 +6,6 @@ import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 const STORAGE_KEY = 'caseops:modoJuicio';
 
-// “Modo Juicio” aquí = alto contraste rápido sin romper el theming actual.
-// Si luego quieres, lo movemos a zustand + settings en Dexie.
 function readModoJuicio(): boolean {
   try {
     return localStorage.getItem(STORAGE_KEY) === '1';
@@ -32,26 +26,16 @@ export function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
   const isOnline = useOnlineStatus();
-  const routerNavigate = useNavigate();
-  const routerLocation = useLocation();
-
   const [modoJuicio, setModoJuicio] = useState<boolean>(() => readModoJuicio());
 
-  // Rutas donde NO tiene sentido el “volver” (ajusta a tu gusto)
   const showBack = useMemo(() => {
-    const path = routerLocation.pathname;
-    return !['/dashboard', '/'].includes(path);
-  }, [routerLocation.pathname]);
+    return !['/dashboard', '/'].includes(location.pathname);
+  }, [location.pathname]);
 
-  // Aplica una clase global para alto contraste sin depender aún de Tailwind
   useEffect(() => {
     const root = document.documentElement;
-    if (modoJuicio) {
-      root.classList.add('modo-juicio');
-    } else {
-      root.classList.remove('modo-juicio');
-    }
-
+    if (modoJuicio) root.classList.add('modo-juicio');
+    else root.classList.remove('modo-juicio');
     writeModoJuicio(modoJuicio);
   }, [modoJuicio]);
 
@@ -60,8 +44,6 @@ export function AppShell() {
       {!isOnline && (
         <div className="offline-banner">Sin conexión - Modo offline</div>
       )}
-
-      {/* Header unificado (chaladita vibe, case-ops layout) */}
       <header
         style={{
           position: 'sticky',
@@ -94,8 +76,7 @@ export function AppShell() {
           >
             {showBack ? (
               <button
-                onClick={() => routerNavigate(-1)}
-                aria-label="Volver"
+                onClick={() => navigate(-1)}
                 style={{
                   width: 44,
                   height: 44,
@@ -123,12 +104,10 @@ export function AppShell() {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                title="Case Ops"
               >
                 <Scale size={22} />
               </div>
             )}
-
             <div style={{ minWidth: 0 }}>
               <div
                 style={{
@@ -154,7 +133,6 @@ export function AppShell() {
                 Legal-Tech Enterprise · Offline-first
               </div>
             </div>
-
             {!isOnline && (
               <div
                 style={{
@@ -170,16 +148,13 @@ export function AppShell() {
                   fontSize: 12,
                   fontWeight: 700,
                 }}
-                title="Sin conexión"
               >
-                <WifiOff size={14} />
-                OFFLINE
+                <WifiOff size={14} /> OFFLINE
               </div>
             )}
           </div>
-
           <button
-            onClick={() => setModoJuicio((value) => !value)}
+            onClick={() => setModoJuicio((v) => !v)}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -197,26 +172,16 @@ export function AppShell() {
               cursor: 'pointer',
               fontWeight: 800,
               fontSize: 13,
-              letterSpacing: 0.2,
-              userSelect: 'none',
-              whiteSpace: 'nowrap',
             }}
-            title={
-              modoJuicio
-                ? 'Desactivar Modo Juicio'
-                : 'Activar Modo Juicio (alto contraste)'
-            }
           >
-            {modoJuicio ? <Sun size={16} /> : <Moon size={16} />}
+            {modoJuicio ? <Sun size={16} /> : <Moon size={16} />}{' '}
             {modoJuicio ? 'Normal' : 'Modo Juicio'}
           </button>
         </div>
       </header>
-
       <main className="app-main">
         <Outlet />
       </main>
-
       <BottomNav />
     </div>
   );
