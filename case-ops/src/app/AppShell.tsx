@@ -29,6 +29,8 @@ function writeModoJuicio(value: boolean) {
 }
 
 export function AppShell() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const isOnline = useOnlineStatus();
   const navigate = useNavigate();
   const routerLocation = useLocation();
