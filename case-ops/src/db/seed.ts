@@ -1,6 +1,5 @@
 // ============================================
-// CASE OPS - Seed Data
-// Initial data for first install
+// CASE OPS - Seed Data (CASO REAL: PICASSENT 715/2024)
 // ============================================
 
 import {
@@ -15,17 +14,17 @@ import {
 import { eurosToCents } from '../utils/validators';
 
 export async function seedDatabase(): Promise<boolean> {
-  // Check if already seeded
+  // Verificamos si ya existe la base de datos
   const settings = await settingsRepo.get();
   if (settings) {
     console.log('Database already initialized');
     return false;
   }
 
-  console.log('Seeding database...');
+  console.log('Seeding database with REAL CASE DATA...');
 
   try {
-    // Initialize settings
+    // 1. Inicialización básica
     const deviceName =
       typeof navigator !== 'undefined' && navigator.userAgent.includes('Android')
         ? 'Android'
@@ -33,7 +32,7 @@ export async function seedDatabase(): Promise<boolean> {
 
     await settingsRepo.init(deviceName);
 
-    // Set counters to start from 0
+    // Reiniciamos contadores
     await counterRepo.setCounter('cases', 0);
     await counterRepo.setCounter('documents', 0);
     await counterRepo.setCounter('spans', 0);
@@ -43,440 +42,183 @@ export async function seedDatabase(): Promise<boolean> {
     await counterRepo.setCounter('strategies', 0);
     await counterRepo.setCounter('tasks', 0);
 
-    // ==========================================
-    // CASE CAS001 - Procedimiento Ordinario Civil (TRONCO)
-    // ==========================================
-    const cas001 = await casesRepo.create({
-      title: 'Procedimiento Ordinario Civil',
-      court: 'JPII nº 1 de Picassent (Valencia)',
+    // =====================================================================
+    // CASO PRINCIPAL: P.O. 715/2024 (División de Cosa Común)
+    // Fuente: Demanda_picassent_Transcrita.docx / Contestacion_picassent_transcrita.docx
+    // =====================================================================
+    const mainCase = await casesRepo.create({
+      title: 'P.O. 715/2024 · División Cosa Común y Reclamación',
+      court: 'Juzgado de Primera Instancia e Instrucción nº 1 de Picassent',
       autosNumber: '715/2024',
       type: 'ordinario',
       status: 'activo',
-      notes: `Objeto:
-- División de la cosa común
-- Reclamación económica entre ex-cónyuges
+      clientRole: 'demandado', // Juan es el cliente
+      opposingCounsel: 'Isabel Luzzy Aguilar (Procuradora)', 
+      judge: '[Pendiente Asignación]',
+      notes: `OBJETO DEL PLEITO:
+1. División de la cosa común (inmuebles y bienes).
+2. Reclamación económica de la actora (Vicenta) por 212.677,08 €.
+3. Reconvención/Compensación solicitada por Juan.
 
-Estado actual: Audiencia Previa pendiente
-Señalamiento inicial: 24/10/2025
-Múltiples aplazamientos (≥5)
+PARTES:
+- Actora: Dña. Vicenta Jiménez Vera.
+- Demandado: D. Juan Rodríguez Crespo.
 
-Partes:
-- Actora: Vicenta Jiménez Vera (DNI 52.708.915-E)
-- Demandado: Juan Rodríguez
-
-ASSETS REGISTRADOS:
-A001 - Chalet en construcción (Picassent) - Bien común
-A002 - Piso Madrid (vendido 2012) - Privativo Juan
-A003 - Vehículo Nissan - Bien común
-A004 - Cuenta corriente conjunta - Bien común
-A005 - Cuentas privativas - A determinar
-
-PRÉSTAMOS:
-L001 - Hipoteca Chalet (Banco X) - Impagos desde Oct 2023
-L002 - Préstamo personal (ya amortizado)
-L003 - Crédito mejoras vivienda
-
-Riesgo procesal: ALTO
-Este procedimiento es el "TRONCO" del árbol de procedimientos.`,
-      tags: ['principal', 'division', 'hipoteca', 'chalet'],
+CLAVES DEL CASO:
+- La actora pretende cobrar deudas prescritas (2008-2019).
+- Discusión sobre la naturaleza del préstamo ("Hipoteca del demandado" vs "Préstamo solidario").
+- Compensación de saldos por retiradas de efectivo (38.500€ vs 32.000€).
+- Impugnación de documentos bancarios manipulados (recortes).`,
+      tags: ['división', 'reclamacion', 'familia', 'hipoteca'],
     });
 
-    // ==========================================
-    // CASE CAS002 - Ejecución de sentencia
-    // ==========================================
-    await casesRepo.create({
-      title: 'Ejecución de sentencia (familia)',
-      court: 'Juzgado de Mislata',
-      autosNumber: '',
-      type: 'ejecucion',
-      status: 'activo',
-      parentCaseId: cas001.id,
-      notes: `Objeto:
-- Ejecución por cantidades (≈3.500 € embargados)
-- Fondo común hijos / gastos escolares
-
-Deriva del divorcio y del incumplimiento de obligaciones económicas.`,
-      tags: ['ejecucion', 'pension', 'gastos'],
-    });
-
-    // ==========================================
-    // CASE CAS003 - Incidentes hipotecarios
-    // ==========================================
-    await casesRepo.create({
-      title: 'Impagos hipoteca - Reclamación',
-      court: 'Pendiente',
-      autosNumber: '',
-      type: 'incidente',
-      status: 'activo',
-      parentCaseId: cas001.id,
-      notes: `Objeto:
-- Impago de hipoteca por Vicenta desde octubre 2023
-- Reclamación de cuotas impagadas
-
-Estado: Pre-procesal / preparación de demanda`,
-      tags: ['hipoteca', 'impago'],
-    });
-
-    // ==========================================
-    // CASE CAS004 - Consorcio Compensación Seguros
-    // ==========================================
-    await casesRepo.create({
-      title: 'Expediente Consorcio Compensación Seguros',
-      court: 'Consorcio de Compensación de Seguros',
-      autosNumber: '',
-      type: 'administrativo',
-      status: 'cerrado',
-      parentCaseId: cas001.id,
-      notes: `Objeto: Indemnización por daños en chalet común
-Importe: 5.400 €
-Estado: Resuelto (abono efectuado a cuenta de Vicenta)
-
-Problema: No se destinó a reparación del bien común
-
-Valor probatorio: ALTO`,
-      tags: ['seguro', 'indemnizacion', 'apropiacion'],
-    });
-
-    // ==========================================
-    // CASE CAS005 - Resolución AEAT
-    // ==========================================
-    await casesRepo.create({
-      title: 'Resolución AEAT (2012)',
-      court: 'AEAT',
-      autosNumber: '',
-      type: 'administrativo',
-      status: 'cerrado',
-      parentCaseId: cas001.id,
-      notes: `Objeto: Reinversión de beneficio de piso privativo en construcción
-Estado: Resuelto, firme
-
-Valor: Valida cronología y destino de fondos
-Documento "blindado" que neutraliza narrativa contraria`,
-      tags: ['aeat', 'fiscal', 'reinversion'],
-    });
-
-    // ==========================================
-    // CASE CAS006 - Mediación ICAV
-    // ==========================================
-    await casesRepo.create({
-      title: 'Mediación ICAV',
-      court: 'ICAV',
-      autosNumber: '',
-      type: 'mediacion',
-      status: 'cerrado',
-      parentCaseId: cas001.id,
-      notes: `Fecha: 17/04/2025
-Estado: Fracasada (negativa de la otra parte)
-
-Valor:
-- Prueba de buena fe
-- Contraargumento de dilación y bloqueo`,
-      tags: ['mediacion', 'buena_fe'],
-    });
-
-    // ==========================================
-    // HECHOS H001-H010
-    // ==========================================
+    // =====================================================================
+    // HECHOS CONTROVERTIDOS (FACTS)
+    // Fuente: FIJAR.docx, 1_CONTRV_NTRALZA_HIPOTECA.docx
+    // =====================================================================
     const factsData = [
       {
-        title: 'Origen fondos construcción chalet',
-        narrative:
-          'Los fondos para la construcción del chalet provinieron de la venta del piso privativo de Juan en Madrid (2012), reinvirtiendo el beneficio fiscal conforme a resolución AEAT.',
+        title: 'Naturaleza del Préstamo Hipotecario',
+        narrative: 'La actora lo califica como "Hipoteca del demandado". Esta parte sostiene que es un préstamo solidario suscrito por ambos cónyuges, donde la vivienda privativa del demandado (Lope de Vega) solo actúa como garantía real, no como causa del préstamo.',
+        status: 'controvertido' as const,
+        burden: 'demandante' as const,
+        risk: 'alto' as const,
+        strength: 5,
+        tags: ['hipoteca', 'naturaleza_juridica', 'garantia_real']
+      },
+      {
+        title: 'Retirada de fondos: 38.500€ vs 32.000€',
+        narrative: 'La actora reclama 32.000€ retirados por Juan de la cuenta común. Se oculta que ELLA retiró 38.500€ (6.500€ más) en el mismo periodo de ruptura. Se opone compensación (Art. 1196 CC).',
         status: 'a_probar' as const,
         burden: 'demandado' as const,
-        risk: 'alto' as const,
+        risk: 'medio' as const,
+        strength: 5,
+        tags: ['compensacion', 'cuentas', 'retiradas']
+      },
+      {
+        title: 'Prescripción de deudas (2008-2019)',
+        narrative: 'La actora reclama gastos de IBI, préstamos y cuotas desde 2008. Esta parte alega prescripción (Art. 1964 CC - 5 años) y falta de reclamación previa (Art. 1969 CC). Se trata de "arqueología contable".',
+        status: 'controvertido' as const,
+        burden: 'demandado' as const, // Es excepción nuestra
+        risk: 'alto' as const, // Si falla, se paga mucho
         strength: 4,
-        tags: ['fondos', 'construccion', 'privativo'],
+        tags: ['prescripcion', 'plazos', '1964_CC']
       },
       {
-        title: 'Aportaciones hipotecarias de Juan',
-        narrative:
-          'Juan ha realizado aportaciones continuadas al pago de la hipoteca del chalet desde 2012 hasta 2023, incluso tras la separación de hecho.',
+        title: 'Autoría de Transferencias (BBVA vs Caixa)',
+        narrative: 'La actora aporta capturas de pantalla recortadas de BBVA donde no se ve el ordenante. Esta parte aporta los recibos íntegros de CaixaBank que demuestran que el ordenante real fue JUAN RODRÍGUEZ.',
         status: 'a_probar' as const,
         burden: 'demandado' as const,
-        risk: 'alto' as const,
+        risk: 'bajo' as const, // Prueba documental sólida
+        strength: 5,
+        tags: ['falsedad', 'documental', 'bancos']
+      },
+      {
+        title: 'Existencia de Comunidad de Bienes Tácita',
+        narrative: 'Existía un sistema de "caja única" con dos cuentas conjuntas indistintas. La STS 458/2025 avala que en economías familiares confundidas no cabe reclamación retroactiva de partidas de consumo.',
+        status: 'controvertido' as const,
+        burden: 'demandado' as const,
+        risk: 'medio' as const,
         strength: 4,
-        tags: ['hipoteca', 'aportaciones'],
-      },
-      {
-        title: 'Impago hipoteca por Vicenta desde Oct 2023',
-        narrative:
-          'Desde octubre de 2023, Vicenta ha dejado de pagar las cuotas hipotecarias que le correspondían, acumulando un impago que pone en riesgo el bien común.',
-        status: 'controvertido' as const,
-        burden: 'demandado' as const,
-        risk: 'alto' as const,
-        strength: 5,
-        tags: ['impago', 'hipoteca'],
-      },
-      {
-        title: 'Apropiación indemnización Consorcio',
-        narrative:
-          'La indemnización de 5.400€ del Consorcio de Compensación de Seguros por daños en el chalet fue cobrada por Vicenta y no destinada a la reparación del bien común.',
-        status: 'controvertido' as const,
-        burden: 'demandado' as const,
-        risk: 'medio' as const,
-        strength: 5,
-        tags: ['consorcio', 'indemnizacion', 'apropiacion'],
-      },
-      {
-        title: 'Uso exclusivo del chalet por Vicenta',
-        narrative:
-          'Desde la separación de hecho, Vicenta ha mantenido el uso exclusivo del chalet sin compensación económica a Juan.',
-        status: 'pacifico' as const,
-        burden: 'mixta' as const,
-        risk: 'bajo' as const,
-        strength: 3,
-        tags: ['uso', 'ocupacion'],
-      },
-      {
-        title: 'Intento de mediación fallido',
-        narrative:
-          'Juan propuso mediación a través del ICAV (17/04/2025) que fue rechazada por Vicenta, demostrando buena fe procesal por parte del demandado.',
-        status: 'pacifico' as const,
-        burden: 'demandado' as const,
-        risk: 'bajo' as const,
-        strength: 5,
-        tags: ['mediacion', 'buena_fe'],
-      },
-      {
-        title: 'Aplazamientos reiterados de Audiencia Previa',
-        narrative:
-          'La Audiencia Previa ha sufrido múltiples aplazamientos (≥5), retrasando la resolución del conflicto.',
-        status: 'pacifico' as const,
-        burden: 'mixta' as const,
-        risk: 'bajo' as const,
-        strength: 3,
-        tags: ['procedimiento', 'aplazamientos'],
-      },
-      {
-        title: 'Gastos extraordinarios de hijos no compensados',
-        narrative:
-          'Juan ha asumido gastos extraordinarios de los hijos (escolares, médicos) que no han sido reembolsados ni compensados por Vicenta.',
-        status: 'a_probar' as const,
-        burden: 'demandado' as const,
-        risk: 'medio' as const,
-        strength: 3,
-        tags: ['hijos', 'gastos', 'pension'],
-      },
-      {
-        title: 'Deterioro del chalet por falta de mantenimiento',
-        narrative:
-          'El chalet presenta deterioro por falta de mantenimiento durante el período de uso exclusivo por Vicenta.',
-        status: 'a_probar' as const,
-        burden: 'demandado' as const,
-        risk: 'medio' as const,
-        strength: 2,
-        tags: ['deterioro', 'mantenimiento'],
-      },
-      {
-        title: 'Bloqueo de venta del bien común',
-        narrative:
-          'Vicenta ha bloqueado cualquier intento de venta del chalet para división de la cosa común, prolongando la situación de copropiedad conflictiva.',
-        status: 'controvertido' as const,
-        burden: 'demandado' as const,
-        risk: 'medio' as const,
-        strength: 3,
-        tags: ['venta', 'bloqueo', 'division'],
-      },
+        tags: ['doctrina_ts', 'caja_unica', 'sts_458_2025']
+      }
     ];
 
-    for (const factData of factsData) {
-      await factsRepo.create({
-        caseId: cas001.id,
-        ...factData,
-      });
+    for (const f of factsData) {
+      await factsRepo.create({ caseId: mainCase.id, ...f });
     }
 
-    // ==========================================
-    // PARTIDAS P001-P015 (Hipoteca aportaciones)
-    // ==========================================
-    const partidasData = [
-      { date: '2020-01-15', amount: 850.0, concept: 'Cuota hipoteca enero 2020' },
-      { date: '2020-02-15', amount: 850.0, concept: 'Cuota hipoteca febrero 2020' },
-      { date: '2020-03-15', amount: 850.0, concept: 'Cuota hipoteca marzo 2020' },
-      { date: '2020-04-15', amount: 850.0, concept: 'Cuota hipoteca abril 2020' },
-      { date: '2020-05-15', amount: 850.0, concept: 'Cuota hipoteca mayo 2020' },
-      { date: '2020-06-15', amount: 850.0, concept: 'Cuota hipoteca junio 2020' },
-      { date: '2020-07-15', amount: 850.0, concept: 'Cuota hipoteca julio 2020' },
-      { date: '2020-08-15', amount: 850.0, concept: 'Cuota hipoteca agosto 2020' },
-      { date: '2020-09-15', amount: 850.0, concept: 'Cuota hipoteca septiembre 2020' },
-      { date: '2020-10-15', amount: 850.0, concept: 'Cuota hipoteca octubre 2020' },
-      { date: '2020-11-15', amount: 850.0, concept: 'Cuota hipoteca noviembre 2020' },
-      { date: '2020-12-15', amount: 850.0, concept: 'Cuota hipoteca diciembre 2020' },
-      { date: '2021-01-15', amount: 850.0, concept: 'Cuota hipoteca enero 2021' },
-      { date: '2021-02-15', amount: 850.0, concept: 'Cuota hipoteca febrero 2021' },
-      { date: '2021-03-15', amount: 850.0, concept: 'Cuota hipoteca marzo 2021' },
-    ];
-
-    for (const partidaData of partidasData) {
-      await partidasRepo.create({
-        caseId: cas001.id,
-        date: partidaData.date,
-        amountCents: eurosToCents(partidaData.amount),
-        currency: 'EUR',
-        concept: partidaData.concept,
-        payer: 'Juan Rodríguez',
-        beneficiary: 'Banco X (Hipoteca)',
-        theory: 'Aportación a bien común (hipoteca) realizada por Juan',
-        state: 'reclamable',
-        tags: ['hipoteca', 'aportacion'],
-        notes: '',
-      });
-    }
-
-    // Partida especial: Indemnización Consorcio
-    await partidasRepo.create({
-      caseId: cas001.id,
-      date: '2023-06-01',
-      amountCents: eurosToCents(5400.0),
-      currency: 'EUR',
-      concept: 'Indemnización Consorcio Compensación Seguros',
-      payer: 'Consorcio de Compensación de Seguros',
-      beneficiary: 'Vicenta Jiménez Vera',
-      theory:
-        'Indemnización por daños en chalet común cobrada por Vicenta y no aplicada a reparación',
-      state: 'discutida',
-      tags: ['consorcio', 'indemnizacion', 'apropiacion'],
-      notes:
-        'Importe destinado a uso particular, no a reparación del bien común. Reclamable como perjuicio.',
-    });
-
-    // ==========================================
-    // EVENTOS (Cronología)
-    // ==========================================
-    const eventsData = [
-      {
-        date: '2012-06-15',
-        type: 'factico' as const,
-        title: 'Venta piso Madrid',
-        description: 'Venta del piso privativo de Juan en Madrid. Reinversión del beneficio.',
-        tags: ['venta', 'privativo'],
-      },
-      {
-        date: '2012-09-01',
-        type: 'factico' as const,
-        title: 'Inicio construcción chalet',
-        description: 'Comienzo de obras de construcción del chalet en Picassent con fondos de la venta.',
-        tags: ['construccion', 'chalet'],
-      },
-      {
-        date: '2023-10-01',
-        type: 'factico' as const,
-        title: 'Inicio impagos hipoteca por Vicenta',
-        description: 'Vicenta deja de abonar su parte de las cuotas hipotecarias.',
-        tags: ['impago', 'hipoteca'],
-      },
-      {
-        date: '2024-01-15',
-        type: 'procesal' as const,
-        title: 'Presentación demanda',
-        description: 'Presentación de demanda de división de cosa común y reclamación económica.',
-        tags: ['demanda'],
-      },
-      {
-        date: '2024-03-20',
-        type: 'procesal' as const,
-        title: 'Admisión a trámite',
-        description: 'Auto de admisión a trámite de la demanda.',
-        tags: ['admision'],
-      },
-      {
-        date: '2025-04-17',
-        type: 'procesal' as const,
-        title: 'Mediación ICAV - Fracasada',
-        description: 'Intento de mediación rechazado por la parte actora.',
-        tags: ['mediacion'],
-      },
-      {
-        date: '2025-10-24',
-        type: 'procesal' as const,
-        title: 'Audiencia Previa (señalamiento)',
-        description:
-          'Fecha prevista para Audiencia Previa. Múltiples aplazamientos anteriores.',
-        tags: ['audiencia', 'señalamiento'],
-      },
-    ];
-
-    for (const eventData of eventsData) {
-      await eventsRepo.create({
-        caseId: cas001.id,
-        ...eventData,
-      });
-    }
-
-    // ==========================================
-    // ESTRATEGIAS (War Room)
-    // ==========================================
+    // =====================================================================
+    // ESTRATEGIAS (WAR ROOM)
+    // Fuente: PRESCRIPCIÓN.docx, DEFENSA ARTURO PIERA.docx, Demostración_gráfica..docx
+    // =====================================================================
     const strategiesData = [
       {
-        attack:
-          'La parte actora alegará que el piso de Madrid era bien ganancial y no privativo de Juan.',
-        risk: 'Alto: Podría afectar a la trazabilidad de fondos de la construcción.',
-        rebuttal:
-          'Aportar escritura de propiedad anterior al matrimonio y declaración IRPF de reinversión aprobada por AEAT.',
-        evidencePlan: 'Escritura notarial piso Madrid + Resolución AEAT 2012 + Extractos bancarios transferencia a obra',
-        questions: '¿Cuándo adquirió el demandado el piso de Madrid? ¿Existía matrimonio en ese momento?',
-        tags: ['propiedad', 'fondos'],
+        attack: 'La actora reclama 150.502€ acumulados en facturas y cuotas desde 2008.',
+        risk: 'Alto: Supone el 70% de la cuantía reclamada.',
+        rebuttal: 'Invocar PRESCRIPCIÓN (Art. 1964.2 CC). No hubo interrupción (Art. 1973 CC). Argumento: "El divorcio no resucita deudas muertas".',
+        evidencePlan: 'Calendario de prescripción (Excel) + Falta de burofaxes previos.',
+        tags: ['prescripcion', 'defensa_total']
       },
       {
-        attack: 'Actora negará haber dejado de pagar la hipoteca, alegando pago en efectivo.',
-        risk: 'Medio: Sin documentación, difícil de rebatir.',
-        rebuttal:
-          'Solicitar extractos bancarios de la cuenta hipotecaria donde consten todos los cargos. Los pagos en efectivo no aparecerían.',
-        evidencePlan: 'Extractos cuenta hipotecaria Oct 2023 - presente + Requerimiento banco sobre origen de fondos',
-        questions: '¿Puede aportar justificantes de los pagos en efectivo alegados?',
-        tags: ['impago', 'hipoteca'],
+        attack: 'La actora reclama 32.000€ por la venta del piso de Arturo Piera.',
+        risk: 'Medio: El movimiento bancario existe.',
+        rebuttal: 'Excepción de COMPENSACIÓN. Acreditar que ella retiró 38.500€ de la cuenta común ES72...9491 a su privativa ES61...4052.',
+        evidencePlan: 'Doc. 3 Contestación (Extracto CaixaBank con la salida de 38.500€).',
+        tags: ['compensacion', 'arturo_piera']
       },
       {
-        attack:
-          'Actora argumentará que la indemnización del Consorcio se usó para reparaciones del chalet.',
-        risk: 'Medio: Si demuestra gastos de reparación, debilita la reclamación.',
-        rebuttal:
-          'Solicitar facturas de reparación y cruzar con fecha de cobro de indemnización. Inspección actual del chalet para verificar daños sin reparar.',
-        evidencePlan: 'Informe pericial estado actual chalet + Certificado Consorcio fecha y destino pago',
-        questions:
-          '¿Qué reparaciones se realizaron con la indemnización? ¿Puede aportar facturas?',
-        tags: ['consorcio', 'indemnizacion'],
+        attack: 'La actora presenta capturas de app bancaria recortadas para atribuirse pagos.',
+        risk: 'Bajo: Fácil de desmontar.',
+        rebuttal: 'IMPUGNACIÓN por falta de autenticidad parcial. Aportar el "Cuadro Comparativo" (Doc. 26) enfrentando su captura con nuestro recibo bancario completo.',
+        evidencePlan: 'Doc. 25 (Recibos oficiales) + Doc. 26 (Comparativa visual).',
+        tags: ['impugnacion', 'manipulacion_prueba']
       },
       {
-        attack:
-          'Actora solicitará compensación por uso exclusivo del chalet por Juan.',
-        risk: 'Bajo: Es Vicenta quien tiene uso exclusivo.',
-        rebuttal:
-          'Acreditar que Juan no reside ni ha residido en el chalet desde la separación. Vicenta tiene las llaves y uso exclusivo.',
-        evidencePlan: 'Certificado empadronamiento Juan + Testigos vecinos',
-        questions: '¿Dónde ha residido el demandado desde la separación?',
-        tags: ['uso', 'ocupacion'],
-      },
-      {
-        attack: 'Actora alegará mala fe procesal por retrasar el procedimiento.',
-        risk: 'Medio: Los aplazamientos pueden interpretarse en contra.',
-        rebuttal:
-          'Documentar que los aplazamientos fueron solicitados por ambas partes o por causas ajenas. Aportar acta de mediación como prueba de buena fe.',
-        evidencePlan: 'Providencias de aplazamiento + Acta mediación ICAV',
-        questions: '¿Quién solicitó cada uno de los aplazamientos de la Audiencia Previa?',
-        tags: ['procedimiento', 'buena_fe'],
-      },
-      {
-        attack:
-          'Actora reclamará derecho preferente de adjudicación del chalet.',
-        risk: 'Alto: Podría obtener el bien a valor inferior de mercado.',
-        rebuttal:
-          'Solicitar tasación pericial actualizada. Argumentar que la venta en subasta garantiza mejor precio para ambas partes.',
-        evidencePlan: 'Tasación pericial inmueble + Comparables de mercado zona Picassent',
-        questions: '¿Está dispuesta a igualar el precio de mercado para la adjudicación?',
-        tags: ['adjudicacion', 'venta'],
-      },
+        attack: 'Aportación de Perito de Parte (Familiar/Amigo).',
+        risk: 'Medio: Sesgo en la valoración.',
+        rebuttal: 'Tacha de perito por interés. Solicitar perito judicial insaculado o aportar contraperitaje.',
+        evidencePlan: 'Interrogatorio sobre relación personal con la actora.',
+        tags: ['peritos', 'tacha']
+      }
     ];
 
-    for (const strategyData of strategiesData) {
-      await strategiesRepo.create({
-        caseId: cas001.id,
-        ...strategyData,
-      });
+    for (const s of strategiesData) {
+      await strategiesRepo.create({ caseId: mainCase.id, ...s });
     }
 
-    console.log('Database seeded successfully');
+    // =====================================================================
+    // EVENTOS (CRONOLOGÍA)
+    // Fuente: INFORME_ESTRATEGICO.pdf, FIJAR.docx
+    // =====================================================================
+    const eventsData = [
+      { date: '2006-08-22', type: 'factico', title: 'Cancelación Hipoteca Previa', description: 'Cancelación de carga previa privativa (22/08/2006). Base de una reclamación de la actora.' },
+      { date: '2008-09-01', type: 'factico', title: 'Inicio Deudas Prescritas', description: 'Fecha de origen de los Préstamos Personales reclamados (Prescritos hace 16 años).' },
+      { date: '2009-07-01', type: 'factico', title: 'Hipoteca Lope de Vega', description: 'Inicio de pagos de la hipoteca sobre vivienda privativa, usada como garantía.' },
+      { date: '2012-01-01', type: 'factico', title: 'Venta Piso Madrid', description: 'Venta del inmueble privativo de Juan. Reinversión en obra común.' },
+      { date: '2023-11-01', type: 'factico', title: 'Ruptura / Separación de Hecho', description: 'Momento de las retiradas de fondos (38.500€ vs 32.000€). Inicio pago exclusivo hipoteca por Juan.' },
+      { date: '2024-01-20', type: 'procesal', title: 'Presentación Demanda', description: 'Vicenta presenta demanda reclamando 212.677€.' },
+      { date: '2025-01-27', type: 'procesal', title: 'Emplazamiento', description: 'Notificación del juzgado para contestar en 20 días.' },
+      { date: '2025-02-19', type: 'procesal', title: 'Contestación a la Demanda', description: 'Presentación del escrito de defensa por Procuradora Rosa Calvo. Allanamiento parcial a división, oposición a pagos.' }
+    ];
+
+    for (const e of eventsData) {
+      await eventsRepo.create({ caseId: mainCase.id, ...e } as any);
+    }
+
+    // =====================================================================
+    // PARTIDAS ECONÓMICAS
+    // Fuente: FIJAR.docx, Defensa_STS_458_2025.docx
+    // =====================================================================
+    // Partida 1: Lo que ella reclama (IBI Prescrito)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2013-01-01',
+      amountCents: eurosToCents(1063),
+      concept: 'IBI Quart 2013-2019',
+      payer: 'Vicenta (Actora)',
+      beneficiary: 'Comunidad',
+      state: 'prescrita', // Estado especial
+      theory: 'Reclamación de gastos de hace 11 años',
+      notes: 'Prescrito por Art. 1964 CC (5 años).',
+      tags: ['ibi', 'prescrito']
+    });
+
+    // Partida 2: La retirada de fondos de ella (Compensación)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2023-11-01',
+      amountCents: eurosToCents(38500),
+      concept: 'Retirada fondos cuenta común (Caixa)',
+      payer: 'Cuenta Común',
+      beneficiary: 'Vicenta (Privativo)',
+      state: 'reclamable',
+      theory: 'Compensación art. 1196 CC frente a los 32.000 reclamados',
+      notes: 'Acreditado en Doc. 3 de la Contestación.',
+      tags: ['compensacion', 'bancos']
+    });
+
+    console.log('Database seeded successfully with REAL DATA');
     return true;
   } catch (error) {
     console.error('Error seeding database:', error);
