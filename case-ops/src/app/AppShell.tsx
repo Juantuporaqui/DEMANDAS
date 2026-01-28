@@ -32,7 +32,7 @@ export function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
   const isOnline = useOnlineStatus();
-  const navigate = useNavigate();
+  const routerNavigate = useNavigate();
   const routerLocation = useLocation();
 
   const [modoJuicio, setModoJuicio] = useState<boolean>(() => readModoJuicio());
@@ -94,7 +94,7 @@ export function AppShell() {
           >
             {showBack ? (
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => routerNavigate(-1)}
                 aria-label="Volver"
                 style={{
                   width: 44,
