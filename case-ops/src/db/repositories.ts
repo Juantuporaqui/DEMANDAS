@@ -77,18 +77,20 @@ export const counterRepo = {
     const prefix = ID_PREFIXES[tableName];
     if (!prefix) throw new Error(`Unknown table: ${tableName}`);
 
-    const counter = await db.counters.get(tableName);
-    const current = counter?.current ?? 0;
-    const next = current + 1;
+    return db.transaction('rw', db.counters, async () => {
+      const counter = await db.counters.get(tableName);
+      const current = counter?.current ?? 0;
+      const next = current + 1;
 
-    await db.counters.put({
-      id: tableName,
-      prefix,
-      current: next,
+      await db.counters.put({
+        id: tableName,
+        prefix,
+        current: next,
+      });
+
+      // Format: CAS001, D001, etc.
+      return `${prefix}${String(next).padStart(3, '0')}`;
     });
-
-    // Format: CAS001, D001, etc.
-    return `${prefix}${String(next).padStart(3, '0')}`;
   },
 
   async setCounter(tableName: string, value: number): Promise<void> {
@@ -807,11 +809,26 @@ export const getAlerts = async () => {
     entityId?: string;
   }[] = [];
 
+  const [controvertidos, discutidas, docs, allSpans, allLinks] =
+    await Promise.all([
+      factsRepo.getControvertidos(),
+      partidasRepo.getDiscutidas(),
+      documentsRepo.getAll(),
+      spansRepo.getAll(),
+      linksRepo.getAll(),
+    ]);
+
   // Facts without evidence
-  const controvertidos = await factsRepo.getControvertidos();
   for (const fact of controvertidos) {
-    const evidence = await linksRepo.getEvidenceForFact(fact.id);
-    if (evidence.length === 0) {
+    const hasEvidence = allLinks.some(
+      (link) =>
+        link.toType === 'fact' &&
+        link.toId === fact.id &&
+        link.fromType === 'span' &&
+        link.meta.role === 'evidence',
+    );
+
+    if (!hasEvidence) {
       alerts.push({
         id: `alert-fact-${fact.id}`,
         type: 'warning',
@@ -824,10 +841,16 @@ export const getAlerts = async () => {
   }
 
   // Partidas without evidence
-  const discutidas = await partidasRepo.getDiscutidas();
   for (const partida of discutidas) {
-    const evidence = await linksRepo.getEvidenceForPartida(partida.id);
-    if (evidence.length === 0) {
+    const hasEvidence = allLinks.some(
+      (link) =>
+        link.toType === 'partida' &&
+        link.toId === partida.id &&
+        link.fromType === 'span' &&
+        link.meta.role === 'evidence',
+    );
+
+    if (!hasEvidence) {
       alerts.push({
         id: `alert-partida-${partida.id}`,
         type: 'warning',
@@ -840,10 +863,9 @@ export const getAlerts = async () => {
   }
 
   // Documents without spans
-  const docs = await documentsRepo.getAll();
   for (const doc of docs) {
-    const spans = await spansRepo.getByDocumentId(doc.id);
-    if (spans.length === 0) {
+    const hasSpans = allSpans.some((span) => span.documentId === doc.id);
+    if (!hasSpans) {
       alerts.push({
         id: `alert-doc-${doc.id}`,
         type: 'info',
@@ -856,10 +878,11 @@ export const getAlerts = async () => {
   }
 
   // Spans without links
-  const allSpans = await spansRepo.getAll();
   for (const span of allSpans) {
-    const links = await linksRepo.getByFrom('span', span.id);
-    if (links.length === 0) {
+    const hasLinks = allLinks.some(
+      (link) => link.fromType === 'span' && link.fromId === span.id,
+    );
+    if (!hasLinks) {
       alerts.push({
         id: `alert-span-${span.id}`,
         type: 'info',
