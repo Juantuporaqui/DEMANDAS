@@ -162,6 +162,53 @@ export const casesRepo = {
 };
 
 // ============================================
+// Claims Repository
+// ============================================
+
+const claimsRepo = {
+  async getAll(): Promise<Claim[]> {
+    return db.claims.orderBy('updatedAt').reverse().toArray();
+  },
+
+  async getByCaseId(caseId: string): Promise<Claim[]> {
+    return db.claims.where('caseId').equals(caseId).toArray();
+  },
+
+  async getById(id: string): Promise<Claim | undefined> {
+    return db.claims.get(id);
+  },
+
+  async create(data: Omit<Claim, 'id' | 'createdAt' | 'updatedAt'>): Promise<Claim> {
+    return db.transaction('rw', db.counters, db.claims, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('claims');
+      const now = Date.now();
+      const claim: Claim = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.claims.add(claim);
+      await auditRepo.log('create', 'claim', id);
+      return claim;
+    });
+  },
+
+  async update(id: string, updates: Partial<Claim>): Promise<void> {
+    await db.claims.update(id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+    await auditRepo.log('update', 'claim', id);
+  },
+
+  async delete(id: string): Promise<void> {
+    await db.claims.delete(id);
+    await auditRepo.log('delete', 'claim', id);
+  },
+};
+
+// ============================================
 // Documents Repository
 // ============================================
 
@@ -938,3 +985,5 @@ export const getAlerts = async () => {
 
   return alerts;
 };
+
+export { claimsRepo };
