@@ -1,5 +1,4 @@
 @import "tailwindcss";
-
 /* ============================================
    CASE OPS - Global Styles
    Mobile-first, one-hand operation
@@ -923,6 +922,4 @@ a:hover {
   }
 }
 
-.modo-juicio {
-  filter: contrast(1.12) saturate(1.05);
-}
+.modo-juicio { filter: contrast(1.12) saturate(1.05); }
