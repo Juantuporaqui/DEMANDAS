@@ -175,7 +175,7 @@ export const casesRepo = {
 // Claims Repository
 // ============================================
 
-export const claimsRepo = {
+const claimsRepo = {
   async getAll(): Promise<Claim[]> {
     return db.claims.orderBy('updatedAt').reverse().toArray();
   },
@@ -1248,3 +1248,5 @@ export const getAlerts = async () => {
 
   return alerts;
 };
+
+export { claimsRepo };
