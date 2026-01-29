@@ -12,6 +12,9 @@ import type { Case, Claim, Jurisprudence, Strategy, Link } from '../../types';
 import { formatDate } from '../../utils/dates';
 // CHALADITA CASE-OPS
 import { ProcedimientosChaladita } from '../../components/ProcedimientosChaladita';
+import { HechosQuickNav } from '../../components/HechosQuickNav';
+import { AudienciaQuickNav } from '../../components/AudienciaQuickNav';
+import { useProcedimientos } from '../../db/chaladitaRepos';
 
 export function ToolsPage() {
   const [cases, setCases] = useState<Case[]>([]);
@@ -21,6 +24,9 @@ export function ToolsPage() {
   const [links, setLinks] = useState<Link[]>([]);
   const [selectedClaimId, setSelectedClaimId] = useState<string>('');
   const [selectedJurisprudenceId, setSelectedJurisprudenceId] = useState<string>('');
+  // Chaladita
+  const procedimientos = useProcedimientos();
+  const [selectedProcId, setSelectedProcId] = useState<string>('');
 
   useEffect(() => {
     let mounted = true;
@@ -51,6 +57,13 @@ export function ToolsPage() {
       mounted = false;
     };
   }, []);
+
+  // Seleccionar primer procedimiento Chaladita
+  useEffect(() => {
+    if (procedimientos.length > 0 && !selectedProcId) {
+      setSelectedProcId(procedimientos[0].id);
+    }
+  }, [procedimientos, selectedProcId]);
 
   const selectedClaim = useMemo(
     () => claims.find((claim) => claim.id === selectedClaimId),
@@ -199,10 +212,41 @@ export function ToolsPage() {
         </div>
       </section>
 
-      {/* CHALADITA CASE-OPS - Procedimientos y Hechos */}
-      <section className="mt-8 pt-8 border-t border-amber-500/20">
-        <ProcedimientosChaladita />
-      </section>
+      {/* CHALADITA CASE-OPS - Quick Nav */}
+      {procedimientos.length > 0 && (
+        <section className="mt-8 pt-8 border-t border-amber-500/20">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-500">
+                Chaladita Case-Ops
+              </p>
+              <h2 className="text-xl font-bold text-slate-100">
+                Acceso Rápido
+              </h2>
+            </div>
+            <select
+              value={selectedProcId}
+              onChange={(e) => setSelectedProcId(e.target.value)}
+              className="rounded-xl border border-amber-500/30 bg-slate-900/60 px-3 py-2 text-sm text-slate-200"
+            >
+              {procedimientos.map((proc) => (
+                <option key={proc.id} value={proc.id}>
+                  {proc.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {selectedProcId && (
+            <div className="grid lg:grid-cols-2 gap-6 mb-8">
+              <HechosQuickNav procedimientoId={selectedProcId} />
+              <AudienciaQuickNav procedimientoId={selectedProcId} />
+            </div>
+          )}
+
+          <ProcedimientosChaladita />
+        </section>
+      )}
     </div>
   );
 }
