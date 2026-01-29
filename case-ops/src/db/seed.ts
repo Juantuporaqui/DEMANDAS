@@ -47,7 +47,68 @@ export async function seedDatabase(): Promise<boolean> {
     });
 
     // =====================================================================
-    // 2. DOCUMENTOS CLAVE (MOCK)
+    // 2. CASOS SECUNDARIOS
+    // =====================================================================
+    const quartCase = await casesRepo.create({
+      title: 'P.O. 362/2023 · Ejecución Familia',
+      court: 'JPI nº 2 de Quart de Poblet',
+      autosNumber: '362/2023',
+      type: 'ejecucion',
+      status: 'activo',
+      clientRole: 'ejecutante',
+      judge: '[Pendiente]',
+      opposingCounsel: 'Mª Carmen Gómez',
+      notes: 'Ejecución de sentencia de divorcio. Liquidación de gananciales pendiente.',
+      tags: ['familia', 'ejecucion', 'gananciales']
+    });
+
+    const mislataCase = await casesRepo.create({
+      title: 'Hipoteca Mislata · Cláusulas Abusivas',
+      court: 'JPI nº 1 de Mislata',
+      autosNumber: '128/2024',
+      type: 'ordinario',
+      status: 'suspendido',
+      clientRole: 'demandante',
+      judge: '[Pendiente]',
+      opposingCounsel: 'Banco Santander, S.A.',
+      notes: 'Reclamación de cláusulas abusivas en préstamo hipotecario. Gastos de constitución y comisión de apertura.',
+      tags: ['bancario', 'hipoteca', 'clausulas_abusivas']
+    });
+
+    // Eventos básicos para Quart
+    await eventsRepo.create({
+      caseId: quartCase.id,
+      date: '2023-06-15',
+      type: 'procesal',
+      title: 'Sentencia Divorcio Firme',
+      description: 'Sentencia de divorcio con liquidación de gananciales pendiente.'
+    } as any);
+    await eventsRepo.create({
+      caseId: quartCase.id,
+      date: '2024-03-20',
+      type: 'procesal',
+      title: 'Demanda de Ejecución',
+      description: 'Inicio del procedimiento de ejecución.'
+    } as any);
+
+    // Eventos básicos para Mislata
+    await eventsRepo.create({
+      caseId: mislataCase.id,
+      date: '2024-02-10',
+      type: 'procesal',
+      title: 'Presentación Demanda Hipotecaria',
+      description: 'Demanda por cláusulas abusivas.'
+    } as any);
+    await eventsRepo.create({
+      caseId: mislataCase.id,
+      date: '2024-05-15',
+      type: 'procesal',
+      title: 'Suspensión por Prejudicialidad',
+      description: 'Suspendido a la espera de TJUE.'
+    } as any);
+
+    // =====================================================================
+    // 4. DOCUMENTOS CLAVE (MOCK) - PICASSENT
     // Para probar la vinculación Hecho <-> Documento
     // =====================================================================
     const docsData = [
