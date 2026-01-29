@@ -1,12 +1,14 @@
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Scale, 
-  FileText, 
-  Target, 
-  CheckSquare, 
-  Calendar, 
-  Search 
+import {
+  LayoutDashboard,
+  Scale,
+  FileText,
+  Target,
+  CheckSquare,
+  Calendar,
+  Search,
+  Gavel,
+  Wrench
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -14,6 +16,8 @@ const NAV_ITEMS = [
   { to: '/cases', label: 'Expedientes', icon: <Scale size={18} /> },
   { to: '/search', label: 'Buscador', icon: <Search size={18} /> },
   { to: '/documents', label: 'Documental', icon: <FileText size={18} /> },
+  { to: '/audiencia-previa', label: 'Audiencia', icon: <Gavel size={18} /> },
+  { to: '/tools', label: 'Herramientas', icon: <Wrench size={18} /> },
   { to: '/warroom', label: 'Estrategia', icon: <Target size={18} /> },
   { to: '/events', label: 'Agenda', icon: <Calendar size={18} /> },
   { to: '/tasks', label: 'Tareas', icon: <CheckSquare size={18} /> },

@@ -34,6 +34,8 @@ import { CourtDashboard } from '../features/analytics/pages/CourtDashboard';
 import { HechosPage } from '../features/analytics/pages/HechosPage';
 import { PrescripcionPage } from '../features/analytics/pages/PrescripcionPage';
 import { ModoAudienciaPage } from '../features/audiencia/ModoAudienciaPage';
+import { AudienciaPreviaPage } from '../features/audiencia/AudienciaPreviaPage';
+import { ToolsPage } from '../features/tools/ToolsPage';
 
 export const router = createBrowserRouter(
   [
@@ -68,6 +70,14 @@ export const router = createBrowserRouter(
         {
           path: 'analytics/audiencia',
           element: <ModoAudienciaPage />,
+        },
+        {
+          path: 'audiencia-previa',
+          element: <AudienciaPreviaPage />,
+        },
+        {
+          path: 'tools',
+          element: <ToolsPage />,
         },
         {
           path: 'analytics/:court',

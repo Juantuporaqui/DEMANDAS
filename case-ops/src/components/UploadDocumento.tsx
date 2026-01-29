@@ -147,7 +147,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.875rem',
     fontWeight: 600,
     color: 'var(--color-text-primary, #f1f5f9)',
-    marginBottom: '1rem',
     margin: 0,
     marginBottom: '1rem',
   },
