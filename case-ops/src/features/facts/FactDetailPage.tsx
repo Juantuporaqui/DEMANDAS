@@ -17,7 +17,6 @@ import {
 import { chaladitaDb } from '../../db/chaladitaDb';
 
 // Componente para secciones de texto con estilo
-// Definido con tipos explícitos para evitar errores de build
 interface DetailSectionProps {
   title: string;
   icon: any;
@@ -43,7 +42,7 @@ export function FactDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  // CORRECCIÓN IMPORTANTE: Los IDs son string (ej: 'h-pic-001'), no números.
+  // Convertimos a string o usamos vacío para evitar errores
   const hechoId = id || '';
 
   // Consultamos el Hecho (Reclamación)
@@ -59,7 +58,7 @@ export function FactDetailPage() {
       return await chaladitaDb.documentos
         .where('procedimientoId')
         .equals(hecho.procedimientoId)
-        .limit(10) // Limitamos a 10 para no saturar
+        .limit(10)
         .toArray();
     },
     [hecho?.procedimientoId]
@@ -81,7 +80,7 @@ export function FactDetailPage() {
   const isAltoRiesgo = hecho.riesgo === 'alto';
   const statusColor = isAltoRiesgo ? 'text-rose-400' : 'text-emerald-400';
 
-  // Calculamos cuantía si existe
+  // Intentamos extraer cuantía del título si existe, o ponemos placeholder
   const cuantiaDisplay = hecho.titulo.includes('€') 
     ? hecho.titulo.match(/\d+(?:[.,]\d+)?€/)?.[0] 
     : 'Consultar Partida';
@@ -153,7 +152,6 @@ export function FactDetailPage() {
               ? `Enfoque basado en: ${hecho.tags.join(', ')}. Se requiere análisis de jurisprudencia reciente.`
               : "Analizar prescripción y falta de legitimación activa."}
           </div>
-          {/* Decoración de fondo */}
           <Target className="absolute -right-4 -bottom-4 w-32 h-32 text-blue-500/5 z-0" />
         </DetailSection>
       </div>
