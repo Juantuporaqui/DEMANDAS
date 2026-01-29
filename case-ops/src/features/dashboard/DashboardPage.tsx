@@ -6,9 +6,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/schema';
-// CORRECCIÓN: Usamos llaves para importar componentes (Named Imports)
-import { Card } from '../../ui/components/Card';
-import { SectionTitle } from '../../ui/components/SectionTitle';
+// CORRECCIÓN: Los componentes usan export default, no named exports
+import Card from '../../ui/components/Card';
+import SectionTitle from '../../ui/components/SectionTitle';
 import { formatCurrency } from '../../utils/validators';
 
 // Datos DEMO (Mock)
