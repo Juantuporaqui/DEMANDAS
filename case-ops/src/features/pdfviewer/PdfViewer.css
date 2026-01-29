@@ -1,193 +1,131 @@
-/* ============================================
-   CASE OPS - PDF Viewer Styles
-   ============================================ */
+// ============================================
+// CASE OPS - PDF Viewer
+// ============================================
 
-.pdf-viewer {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 4rem); /* Ajuste para la altura */
-  background-color: #0f172a; /* Slate 950 */
-  color: #e2e8f0; /* Slate 200 */
-  overflow: hidden;
-}
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+// CORRECCIÓN: Importación directa
+import { Modal } from '../../components/Modal';
+import { documentsRepo, docFilesRepo } from '../../db/repositories';
+import type { Document } from '../../types';
+import * as pdfjsLib from 'pdfjs-dist';
+import './PdfViewer.css';
 
-/* --- Header --- */
-.pdf-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background-color: #1e293b; /* Slate 800 */
-  border-bottom: 1px solid #334155; /* Slate 700 */
-  gap: 1rem;
-}
+// CORRECCIÓN IMPORTANTE: Configurar el Worker para que no falle el build/runtime
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).toString();
 
-.pdf-title {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+export function PdfViewerPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-.pdf-title span:first-child {
-  font-weight: 600;
-  font-size: 0.875rem;
-}
+  const [document, setDocument] = useState<Document | null>(null);
+  const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [numPages, setNumPages] = useState(0);
+  const [scale, setScale] = useState(1.0);
+  const [loading, setLoading] = useState(true);
 
-/* --- Canvas Container --- */
-.pdf-canvas-container {
-  flex: 1;
-  overflow: auto;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  padding: 2rem;
-  background-color: #334155;
-}
+  useEffect(() => {
+    if (id) loadDocument(id);
+  }, [id]);
 
-.pdf-loading {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-}
+  useEffect(() => {
+    if (pdfDoc) renderPage(currentPage);
+  }, [pdfDoc, currentPage, scale]);
 
-.pdf-canvas {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  background-color: white;
-}
+  async function loadDocument(docId: string) {
+    try {
+      setLoading(true);
+      const doc = await documentsRepo.getById(docId);
+      if (!doc) {
+        alert('Documento no encontrado');
+        navigate('/documents');
+        return;
+      }
+      setDocument(doc);
 
-/* --- Navigation Bar --- */
-.pdf-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem;
-  background-color: #1e293b;
-  border-top: 1px solid #334155;
-  gap: 1rem;
-}
+      const file = await docFilesRepo.getById(doc.fileId);
+      if (!file) {
+        alert('Archivo PDF físico no encontrado');
+        return;
+      }
 
-.pdf-page-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-family: monospace;
-}
-
-.pdf-page-input {
-  width: 3rem;
-  background-color: #0f172a;
-  border: 1px solid #475569;
-  border-radius: 0.25rem;
-  color: white;
-  text-align: center;
-  padding: 0.25rem;
-}
-
-.pdf-zoom {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: 1rem;
-  font-size: 0.75rem;
-  color: #94a3b8;
-}
-
-/* --- Spans Sidebar / Panel --- */
-.pdf-spans {
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  background-color: #0f172a;
-  border-top: 1px solid #334155;
-  padding: 1rem;
-}
-
-@media (min-width: 1024px) {
-  .pdf-viewer {
-    flex-direction: row;
-  }
-  
-  .pdf-canvas-container {
-    flex: 1;
-    order: 2;
+      const arrayBuffer = await file.blob.arrayBuffer();
+      const loadedPdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      setPdfDoc(loadedPdf);
+      setNumPages(loadedPdf.numPages);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  .pdf-spans {
-    width: 300px;
-    height: 100%;
-    max-height: none;
-    order: 3;
-    border-top: none;
-    border-left: 1px solid #334155;
-  }
-  
-  .pdf-header {
-    width: 100%;
-  }
-}
+  const renderPage = useCallback(async (pageNum: number) => {
+    if (!pdfDoc || !canvasRef.current) return;
+    
+    try {
+      const page = await pdfDoc.getPage(pageNum);
+      const viewport = page.getViewport({ scale });
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
 
-.spans-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
+      if (context) {
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        await page.render({ canvasContext: context, viewport }).promise;
+      }
+    } catch (err) {
+      console.error('Error renderizando página', err);
+    }
+  }, [pdfDoc, scale]);
 
-.span-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem;
-  border-radius: 0.375rem;
-  background-color: #1e293b;
-  border: 1px solid transparent;
-  transition: all 0.2s;
-}
+  if (loading) return <div className="p-8 text-center text-white">Cargando PDF...</div>;
 
-.span-item:hover {
-  background-color: #334155;
-}
+  return (
+    <div className="pdf-viewer">
+      <div className="pdf-header">
+        <button onClick={() => navigate(-1)} className="text-slate-400 hover:text-white">← Volver</button>
+        <div className="pdf-title">{document?.title}</div>
+        <div className="flex gap-2">
+           <button onClick={() => setScale(s => Math.max(0.5, s - 0.2))} className="px-2 bg-slate-700 rounded">-</button>
+           <span>{Math.round(scale * 100)}%</span>
+           <button onClick={() => setScale(s => Math.min(3, s + 0.2))} className="px-2 bg-slate-700 rounded">+</button>
+        </div>
+      </div>
 
-.span-item-active {
-  border-color: #f59e0b;
-  background-color: rgba(245, 158, 11, 0.1);
-}
+      <div className="pdf-canvas-container">
+        <canvas ref={canvasRef} className="pdf-canvas" />
+      </div>
 
-.span-item-content {
-  flex: 1;
-  cursor: pointer;
-}
-
-.span-item-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #f1f5f9;
-}
-
-.span-item-pages {
-  font-size: 0.75rem;
-  color: #94a3b8;
-}
-
-.span-item-actions {
-  display: flex;
-  gap: 0.25rem;
-}
-
-/* --- Utilities --- */
-.spinner {
-  width: 2rem;
-  height: 2rem;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: #f59e0b;
-  animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+      <div className="pdf-nav">
+        <button 
+          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          disabled={currentPage <= 1}
+          className="px-3 py-1 bg-slate-700 rounded disabled:opacity-50"
+        >
+          Anterior
+        </button>
+        <span className="text-sm">
+          Página <input 
+            type="number" 
+            value={currentPage} 
+            onChange={(e) => setCurrentPage(Number(e.target.value))}
+            className="pdf-page-input mx-1"
+          /> de {numPages}
+        </span>
+        <button 
+          onClick={() => setCurrentPage(p => Math.min(numPages, p + 1))}
+          disabled={currentPage >= numPages}
+          className="px-3 py-1 bg-slate-700 rounded disabled:opacity-50"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+  );
 }
