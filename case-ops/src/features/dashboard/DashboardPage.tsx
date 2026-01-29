@@ -1,12 +1,17 @@
+// ============================================
+// CASE OPS - Dashboard
+// ============================================
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/schema';
-import Card from '../../ui/components/Card';
-import SectionTitle from '../../ui/components/SectionTitle';
+// CORRECCIÓN: Usamos llaves para importar componentes (Named Imports)
+import { Card } from '../../ui/components/Card';
+import { SectionTitle } from '../../ui/components/SectionTitle';
 import { formatCurrency } from '../../utils/validators';
 
-// Datos DEMO para visualización (hasta que se cree tabla específica en schema)
+// Datos DEMO (Mock)
 const CLAIMS = [
   {
     id: 'r01',
@@ -31,23 +36,19 @@ const CLAIMS = [
 ];
 
 export function DashboardPage() {
-  // --- CONEXIÓN A BASE DE DATOS REAL ---
   const activeCasesCount = useLiveQuery(() => db.cases.where('status').equals('open').count(), [], 0);
   
   const urgentTasks = useLiveQuery(() => 
     db.tasks
-      .where('status').equals('pending') // Asumiendo que 'pending' es un estado
+      .where('status').equals('pendiente')
       .limit(5)
       .toArray()
   , []);
 
-  // Calcular total reclamado (mock + real podría ir aquí)
   const totalAmount = CLAIMS.reduce((acc, curr) => acc + curr.amountCents, 0);
 
   return (
     <div className="space-y-6 pb-20">
-      
-      {/* CABECERA DASHBOARD */}
       <header>
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-500 mb-1">
           Panel de Control
@@ -63,19 +64,17 @@ export function DashboardPage() {
         </div>
       </header>
 
-      {/* KPIS PRINCIPALES (Conectados a DB y Mock mixto) */}
       <section className="grid grid-cols-2 gap-3">
         <Card className="p-4 bg-slate-900/60 border-slate-800">
-          <div className="text-xs text-slate-500 uppercase tracking-wider">Cuantía en Litigio</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wider">Cuantía</div>
           <div className="text-xl font-bold text-slate-100">{formatCurrency(totalAmount)}</div>
         </Card>
         <Card className="p-4 bg-slate-900/60 border-slate-800">
-          <div className="text-xs text-slate-500 uppercase tracking-wider">Casos Activos</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wider">Casos</div>
           <div className="text-xl font-bold text-slate-100">{activeCasesCount}</div>
         </Card>
       </section>
 
-      {/* SECCIÓN RECLAMACIONES */}
       <section>
         <SectionTitle title="Frentes Abiertos" subtitle="Análisis de riesgo y tesis" />
         <div className="mt-4 space-y-3">
@@ -91,23 +90,11 @@ export function DashboardPage() {
               </div>
               <h3 className="font-bold text-slate-100 mb-1">{claim.title}</h3>
               <p className="text-xs text-slate-400 mb-3">{claim.thesis}</p>
-              
-              <div className="border-t border-slate-800 pt-3 mt-3">
-                <p className="text-[10px] uppercase text-slate-500 mb-1">Evidencia Clave</p>
-                <div className="flex flex-wrap gap-2">
-                   {claim.evidence.slice(0, 2).map(e => (
-                     <span key={e} className="text-[10px] bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">
-                       {e}
-                     </span>
-                   ))}
-                </div>
-              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* LISTA DE TAREAS (Datos reales de DB) */}
       <section>
         <div className="flex items-center justify-between mb-2">
            <SectionTitle title="Tareas Pendientes" subtitle="Próximos vencimientos" />
@@ -124,7 +111,7 @@ export function DashboardPage() {
                 <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-900/40 border border-slate-800/50">
                   <div className={`w-2 h-2 rounded-full ${task.priority === 'high' ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                   <div className="flex-1">
-                    <div className="text-sm text-slate-200 font-medium">{task.title || 'Tarea sin título'}</div>
+                    <div className="text-sm text-slate-200 font-medium">{task.title}</div>
                     {task.dueDate && <div className="text-xs text-slate-500">Vence: {new Date(task.dueDate).toLocaleDateString()}</div>}
                   </div>
                 </div>
