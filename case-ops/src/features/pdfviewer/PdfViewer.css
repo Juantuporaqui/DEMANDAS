@@ -5,7 +5,7 @@
 .pdf-viewer {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 4rem); /* Ajuste para el header/topbar */
+  height: calc(100vh - 4rem); /* Ajuste para la altura */
   background-color: #0f172a; /* Slate 950 */
   color: #e2e8f0; /* Slate 200 */
   overflow: hidden;
@@ -42,7 +42,7 @@
   display: flex;
   justify-content: center;
   padding: 2rem;
-  background-color: #334155; /* Fondo gris oscuro para contraste */
+  background-color: #334155;
 }
 
 .pdf-loading {
@@ -99,7 +99,7 @@
 /* --- Spans Sidebar / Panel --- */
 .pdf-spans {
   width: 100%;
-  max-height: 200px; /* Panel inferior o lateral */
+  max-height: 200px;
   overflow-y: auto;
   background-color: #0f172a;
   border-top: 1px solid #334155;
@@ -153,7 +153,7 @@
 }
 
 .span-item-active {
-  border-color: #f59e0b; /* Amber 500 */
+  border-color: #f59e0b;
   background-color: rgba(245, 158, 11, 0.1);
 }
 
@@ -190,63 +190,4 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* Botones genéricos (si no usas Tailwind en todo) */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.375rem;
-  padding: 0.5rem 1rem;
-  font-weight: 500;
-  transition: colors 0.2s;
-  cursor: pointer;
-  border: none;
-}
-
-.btn-primary {
-  background-color: #f59e0b;
-  color: #0f172a;
-}
-.btn-primary:hover {
-  background-color: #d97706;
-}
-
-.btn-secondary {
-  background-color: #334155;
-  color: white;
-}
-.btn-secondary:hover {
-  background-color: #475569;
-}
-
-.btn-ghost {
-  background-color: transparent;
-  color: #94a3b8;
-}
-.btn-ghost:hover {
-  color: white;
-  background-color: rgba(255,255,255,0.1);
-}
-
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-}
-
-.btn-icon {
-  padding: 0.5rem;
-  width: 2.5rem;
-  height: 2.5rem;
-}
-
-.btn-icon-sm {
-  padding: 0.25rem;
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.text-muted {
-  color: #64748b;
 }
