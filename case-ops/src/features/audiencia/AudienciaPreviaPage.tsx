@@ -5,6 +5,11 @@ import Card from '../../ui/components/Card';
 import SectionTitle from '../../ui/components/SectionTitle';
 import { formatDate } from '../../utils/dates';
 import { generateUUID } from '../../utils/id';
+// FASE 2 - Chaladita Case-Ops
+import { useProcedimientos } from '../../db/chaladitaRepos';
+import { ReclamacionesTiles } from '../../components/ReclamacionesTiles';
+import { UploadDocumento } from '../../components/UploadDocumento';
+import { AudienciaPrevia as AudienciaPreviaChaladita } from '../../components/AudienciaPrevia';
 
 const IMPORTANCE_STYLES: Record<string, string> = {
   alta: 'border-rose-400/40 bg-rose-500/10 text-rose-200',
@@ -19,6 +24,10 @@ export function AudienciaPreviaPage() {
   const [phases, setPhases] = useState<AudienciaPhase[]>([]);
   const [selectedCaseId, setSelectedCaseId] = useState<string>('');
   const [savingPhaseId, setSavingPhaseId] = useState<string | null>(null);
+  // FASE 2 - Chaladita
+  const procedimientos = useProcedimientos();
+  const [selectedProcId, setSelectedProcId] = useState<string>('');
+  const [showUpload, setShowUpload] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -45,6 +54,13 @@ export function AudienciaPreviaPage() {
       mounted = false;
     };
   }, []);
+
+  // FASE 2 - Seleccionar primer procedimiento Chaladita
+  useEffect(() => {
+    if (procedimientos.length > 0 && !selectedProcId) {
+      setSelectedProcId(procedimientos[0].id);
+    }
+  }, [procedimientos, selectedProcId]);
 
   const casePhases = useMemo(
     () => phases.filter((phase) => phase.caseId === selectedCaseId),
@@ -265,6 +281,61 @@ export function AudienciaPreviaPage() {
               </div>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* FASE 2 - Chaladita Case-Ops */}
+      {procedimientos.length > 0 && (
+        <div className="mt-8 pt-8 border-t border-amber-500/20">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-500">
+                Chaladita Case-Ops
+              </p>
+              <h2 className="text-xl font-bold text-slate-100">
+                Preparación de Audiencia
+              </h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <select
+                value={selectedProcId}
+                onChange={(e) => setSelectedProcId(e.target.value)}
+                className="rounded-xl border border-amber-500/30 bg-slate-900/60 px-3 py-2 text-sm text-slate-200"
+              >
+                {procedimientos.map((proc) => (
+                  <option key={proc.id} value={proc.id}>
+                    {proc.nombre}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setShowUpload(!showUpload)}
+                className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200"
+              >
+                {showUpload ? 'Cerrar' : '+ Subir Doc'}
+              </button>
+            </div>
+          </div>
+
+          {showUpload && selectedProcId && (
+            <div className="mb-6">
+              <UploadDocumento
+                procedimientoId={selectedProcId}
+                onSuccess={() => {
+                  setShowUpload(false);
+                  alert('Documento guardado correctamente');
+                }}
+                onCancel={() => setShowUpload(false)}
+              />
+            </div>
+          )}
+
+          {selectedProcId && (
+            <div className="space-y-6">
+              <ReclamacionesTiles procedimientoId={selectedProcId} />
+              <AudienciaPreviaChaladita procedimientoId={selectedProcId} editable />
+            </div>
+          )}
         </div>
       )}
     </div>

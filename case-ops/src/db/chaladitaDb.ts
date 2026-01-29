@@ -14,6 +14,10 @@ import type {
   LinkProc,
   TimelineItem,
   SeedData,
+  // FASE 2
+  ReclamacionVisual,
+  DocumentoSubido,
+  SeccionAudiencia,
 } from '../types/caseops';
 
 // ============================================
@@ -21,6 +25,7 @@ import type {
 // ============================================
 
 class ChaladitaDB extends Dexie {
+  // FASE 1 - Tablas base
   procedimientos!: EntityTable<ProcedimientoCase, 'id'>;
   hechos!: EntityTable<HechoCase, 'id'>;
   documentos!: EntityTable<DocumentoCase, 'id'>;
@@ -29,12 +34,16 @@ class ChaladitaDB extends Dexie {
   tareas!: EntityTable<TareaProc, 'id'>;
   links!: EntityTable<LinkProc, 'id'>;
   timeline!: EntityTable<TimelineItem, 'id'>;
+  // FASE 2 - Tablas nuevas
+  reclamacionesVisuales!: EntityTable<ReclamacionVisual, 'id'>;
+  documentosSubidos!: EntityTable<DocumentoSubido, 'id'>;
+  seccionesAudiencia!: EntityTable<SeccionAudiencia, 'id'>;
 
   constructor() {
     // Nombre único para no interferir con CaseOpsDB
     super('ChaladitaDB');
 
-    // Version 1: Schema base
+    // Version 1: Schema base FASE 1
     this.version(1).stores({
       procedimientos: 'id, estado',
       hechos: 'id, procedimientoId, riesgo, fuerza',
@@ -46,8 +55,22 @@ class ChaladitaDB extends Dexie {
       timeline: 'id, procedimientoId, fecha, tipo',
     });
 
-    // Version 2: Para futuras migraciones FASE 2
-    // this.version(2).stores({ ... }).upgrade(tx => { ... });
+    // Version 2: FASE 2 - Añade nuevas tablas
+    this.version(2).stores({
+      // Redeclara stores v1 (requerido por Dexie)
+      procedimientos: 'id, estado',
+      hechos: 'id, procedimientoId, riesgo, fuerza',
+      documentos: 'id, procedimientoId, tipo, fecha',
+      partidas: 'id, procedimientoId, estado, prescripcion, importe',
+      hitos: 'id, procedimientoId, fecha',
+      tareas: 'id, procedimientoId, prioridad, estado, fechaLimite',
+      links: 'id, fromId, toId, relationType',
+      timeline: 'id, procedimientoId, fecha, tipo',
+      // Nuevas tablas FASE 2
+      reclamacionesVisuales: 'id, procedimientoId, ganabilidad',
+      documentosSubidos: 'id, procedimientoId, fecha',
+      seccionesAudiencia: 'id, procedimientoId, orden',
+    });
   }
 }
 
@@ -81,6 +104,10 @@ export async function importSeed(seed: SeedData): Promise<void> {
       chaladitaDb.tareas,
       chaladitaDb.links,
       chaladitaDb.timeline,
+      // FASE 2
+      chaladitaDb.reclamacionesVisuales,
+      chaladitaDb.documentosSubidos,
+      chaladitaDb.seccionesAudiencia,
     ],
     async () => {
       // Insertar en orden para mantener integridad referencial
@@ -92,6 +119,16 @@ export async function importSeed(seed: SeedData): Promise<void> {
       await chaladitaDb.tareas.bulkPut(seed.tareas);
       await chaladitaDb.links.bulkPut(seed.links);
       await chaladitaDb.timeline.bulkPut(seed.timeline);
+      // FASE 2 - con fallback a [] si no existe
+      if (seed.reclamacionesVisuales?.length) {
+        await chaladitaDb.reclamacionesVisuales.bulkPut(seed.reclamacionesVisuales);
+      }
+      if (seed.documentosSubidos?.length) {
+        await chaladitaDb.documentosSubidos.bulkPut(seed.documentosSubidos);
+      }
+      if (seed.seccionesAudiencia?.length) {
+        await chaladitaDb.seccionesAudiencia.bulkPut(seed.seccionesAudiencia);
+      }
     }
   );
 }
@@ -111,19 +148,37 @@ export async function exportAll(): Promise<SeedData> {
       chaladitaDb.tareas,
       chaladitaDb.links,
       chaladitaDb.timeline,
+      // FASE 2
+      chaladitaDb.reclamacionesVisuales,
+      chaladitaDb.documentosSubidos,
+      chaladitaDb.seccionesAudiencia,
     ],
     async () => {
-      const [procedimientos, hechos, documentos, partidas, hitos, tareas, links, timeline] =
-        await Promise.all([
-          chaladitaDb.procedimientos.toArray(),
-          chaladitaDb.hechos.toArray(),
-          chaladitaDb.documentos.toArray(),
-          chaladitaDb.partidas.toArray(),
-          chaladitaDb.hitos.toArray(),
-          chaladitaDb.tareas.toArray(),
-          chaladitaDb.links.toArray(),
-          chaladitaDb.timeline.toArray(),
-        ]);
+      const [
+        procedimientos,
+        hechos,
+        documentos,
+        partidas,
+        hitos,
+        tareas,
+        links,
+        timeline,
+        reclamacionesVisuales,
+        documentosSubidos,
+        seccionesAudiencia,
+      ] = await Promise.all([
+        chaladitaDb.procedimientos.toArray(),
+        chaladitaDb.hechos.toArray(),
+        chaladitaDb.documentos.toArray(),
+        chaladitaDb.partidas.toArray(),
+        chaladitaDb.hitos.toArray(),
+        chaladitaDb.tareas.toArray(),
+        chaladitaDb.links.toArray(),
+        chaladitaDb.timeline.toArray(),
+        chaladitaDb.reclamacionesVisuales.toArray(),
+        chaladitaDb.documentosSubidos.toArray(),
+        chaladitaDb.seccionesAudiencia.toArray(),
+      ]);
 
       return {
         procedimientos,
@@ -134,6 +189,9 @@ export async function exportAll(): Promise<SeedData> {
         tareas,
         links,
         timeline,
+        reclamacionesVisuales,
+        documentosSubidos,
+        seccionesAudiencia,
       };
     }
   );
@@ -154,6 +212,10 @@ export async function resetDb(): Promise<void> {
       chaladitaDb.tareas,
       chaladitaDb.links,
       chaladitaDb.timeline,
+      // FASE 2
+      chaladitaDb.reclamacionesVisuales,
+      chaladitaDb.documentosSubidos,
+      chaladitaDb.seccionesAudiencia,
     ],
     async () => {
       await chaladitaDb.procedimientos.clear();
@@ -164,6 +226,10 @@ export async function resetDb(): Promise<void> {
       await chaladitaDb.tareas.clear();
       await chaladitaDb.links.clear();
       await chaladitaDb.timeline.clear();
+      // FASE 2
+      await chaladitaDb.reclamacionesVisuales.clear();
+      await chaladitaDb.documentosSubidos.clear();
+      await chaladitaDb.seccionesAudiencia.clear();
     }
   );
 }

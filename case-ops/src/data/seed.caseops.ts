@@ -20,6 +20,11 @@ import type {
   PrioridadTarea,
   EstadoTarea,
   TipoTimeline,
+  // FASE 2
+  ReclamacionVisual,
+  GanabilidadReclamacion,
+  DocumentoSubido,
+  SeccionAudiencia,
 } from '../types/caseops';
 
 // ============================================
@@ -765,6 +770,301 @@ const timelineData: TimelineItem[] = [
 ];
 
 // ============================================
+// FASE 2 - RECLAMACIONES VISUALES (12 tiles)
+// ============================================
+
+function reclamacion(
+  id: string,
+  procedimientoId: string,
+  label: string,
+  cantidad: number,
+  ganabilidad: GanabilidadReclamacion,
+  partidaId: string
+): ReclamacionVisual {
+  return { id, procedimientoId, label, cantidad, ganabilidad, partidaId };
+}
+
+const reclamacionesVisuales: ReclamacionVisual[] = [
+  // Picassent (4)
+  reclamacion('rec-pic-001', 'picassent-715-2024', 'DISPOSICIONES', 2250000, 'alta', 'p-pic-001'),
+  reclamacion('rec-pic-002', 'picassent-715-2024', 'HIPOTECA', 780000, 'alta', 'p-pic-004'),
+  reclamacion('rec-pic-003', 'picassent-715-2024', 'USO VIVIENDA', 600000, 'media', 'p-pic-005'),
+  reclamacion('rec-pic-004', 'picassent-715-2024', 'MUEBLES', 400000, 'media', 'p-pic-006'),
+
+  // Quart (4)
+  reclamacion('rec-qrt-001', 'quart-362-2023', 'ESCOLAR', 92500, 'alta', 'p-qrt-001'),
+  reclamacion('rec-qrt-002', 'quart-362-2023', 'MÉDICO', 120000, 'media', 'p-qrt-003'),
+  reclamacion('rec-qrt-003', 'quart-362-2023', 'EXTRAESCOLAR', 84000, 'alta', 'p-qrt-005'),
+  reclamacion('rec-qrt-004', 'quart-362-2023', 'BECAS', 180000, 'baja', 'p-qrt-007'),
+
+  // Mislata (4)
+  reclamacion('rec-mis-001', 'mislata-hipoteca', 'CLÁUSULA SUELO', 1850000, 'alta', 'p-mis-001'),
+  reclamacion('rec-mis-002', 'mislata-hipoteca', 'GASTOS NOTARÍA', 85000, 'media', 'p-mis-003'),
+  reclamacion('rec-mis-003', 'mislata-hipoteca', 'GASTOS REGISTRO', 42000, 'media', 'p-mis-004'),
+  reclamacion('rec-mis-004', 'mislata-hipoteca', 'COMISIÓN APERTURA', 180000, 'baja', 'p-mis-006'),
+];
+
+// ============================================
+// FASE 2 - DOCUMENTOS SUBIDOS (6 con Blob)
+// ============================================
+
+// Helper para crear Blob de texto simulado
+const mkBlob = (txt: string): Blob => new Blob([txt], { type: 'text/plain;charset=utf-8' });
+
+const nowISO = new Date().toISOString();
+
+const documentosSubidos: DocumentoSubido[] = [
+  {
+    id: 'docup-001',
+    procedimientoId: 'picassent-715-2024',
+    nombre: 'extracto_banco_consolidado.txt',
+    tipoMime: 'text/plain',
+    tamano: 2048,
+    fecha: '2024-06-15',
+    descripcion: 'Resumen consolidado de movimientos bancarios jun-dic 2022',
+    tags: ['banco', 'extracto', 'consolidado'],
+    blob: mkBlob(`EXTRACTO CONSOLIDADO CUENTA COMÚN
+======================================
+Periodo: Junio - Diciembre 2022
+
+MOVIMIENTOS DESTACADOS:
+- 15/06/2022: Transferencia saliente 12.000€ (Demandado)
+- 22/06/2022: Transferencia saliente 8.500€ (Demandado)
+- 05/07/2022: Transferencia saliente 4.500€ (Demandado)
+- 18/08/2022: Retirada efectivo 2.000€
+
+SALDO INICIAL: 48.500€
+SALDO FINAL: 3.200€
+
+Total disposiciones unilaterales: 45.300€
+`),
+    createdAt: nowISO,
+  },
+  {
+    id: 'docup-002',
+    procedimientoId: 'picassent-715-2024',
+    nombre: 'borrador_interrogatorio.txt',
+    tipoMime: 'text/plain',
+    tamano: 1536,
+    fecha: '2025-01-20',
+    descripcion: 'Borrador preguntas para interrogatorio demandado',
+    tags: ['interrogatorio', 'audiencia', 'borrador'],
+    blob: mkBlob(`BORRADOR INTERROGATORIO DEMANDADO
+===================================
+
+1. ¿Reconoce haber realizado transferencias desde la cuenta común sin consentimiento de la Actora?
+
+2. ¿Puede justificar el destino de los 45.000€ retirados entre junio y diciembre de 2022?
+
+3. ¿Por qué no ha abonado su parte de la hipoteca desde la separación?
+
+4. ¿Reconoce ocupar en exclusiva la vivienda común desde junio de 2022?
+
+5. ¿Qué hizo con los muebles retirados del domicilio común?
+`),
+    createdAt: nowISO,
+  },
+  {
+    id: 'docup-003',
+    procedimientoId: 'quart-362-2023',
+    nombre: 'calculo_gastos_escolares.txt',
+    tipoMime: 'text/plain',
+    tamano: 1024,
+    fecha: '2024-09-10',
+    descripcion: 'Desglose gastos escolares curso 2022-2023',
+    tags: ['escolar', 'calculo', 'gastos'],
+    blob: mkBlob(`DESGLOSE GASTOS ESCOLARES 2022-2023
+=====================================
+
+Matrícula colegio: 700€
+Libros de texto: 450€
+Material escolar: 350€
+Uniforme: 150€
+-----------------------
+SUBTOTAL: 1.650€
+
+50% a cargo del deudor: 825€
+CANTIDAD RECLAMADA: 825€
+
+Estado: IMPAGADO
+`),
+    createdAt: nowISO,
+  },
+  {
+    id: 'docup-004',
+    procedimientoId: 'quart-362-2023',
+    nombre: 'capturas_whatsapp_becas.txt',
+    tipoMime: 'text/plain',
+    tamano: 768,
+    fecha: '2024-01-15',
+    descripcion: 'Transcripción conversaciones WhatsApp sobre becas',
+    tags: ['whatsapp', 'becas', 'comunicacion'],
+    blob: mkBlob(`TRANSCRIPCIÓN WHATSAPP
+======================
+
+[15/09/2022 10:32] Actora: "¿Han concedido la beca de comedor a los niños?"
+[15/09/2022 14:45] Deudor: "No sé nada"
+
+[20/10/2022 09:15] Actora: "Me han dicho en el cole que sí tienen beca"
+[Mensaje no leído]
+
+[05/01/2024 11:00] Actora: "Necesito saber cuánto cobras de ayudas"
+[Mensaje no leído]
+`),
+    createdAt: nowISO,
+  },
+  {
+    id: 'docup-005',
+    procedimientoId: 'mislata-hipoteca',
+    nombre: 'calculo_clausula_suelo.txt',
+    tipoMime: 'text/plain',
+    tamano: 2560,
+    fecha: '2024-02-01',
+    descripcion: 'Cálculo diferencial por cláusula suelo 2008-2017',
+    tags: ['clausula-suelo', 'calculo', 'hipoteca'],
+    blob: mkBlob(`CÁLCULO DIFERENCIAL CLÁUSULA SUELO
+====================================
+
+DATOS DEL PRÉSTAMO:
+- Capital inicial: 180.000€
+- Plazo: 30 años
+- Tipo: Variable EURIBOR + 1,5%
+- Cláusula suelo: 3,5%
+
+PERIODO AFECTADO: Abril 2008 - Enero 2017
+
+AÑO    EURIBOR   APLICADO   DIFERENCIA
+----   -------   --------   ----------
+2008   4,2%      4,2%       0€
+2009   1,2%      3,5%       1.850€
+2010   1,0%      3,5%       2.100€
+2011   1,5%      3,5%       1.600€
+2012   0,5%      3,5%       2.500€
+2013   0,3%      3,5%       2.700€
+2014   0,2%      3,5%       2.800€
+2015   0,0%      3,5%       2.950€
+2016   -0,1%     3,5%       3.000€
+
+TOTAL SOBRECOSTE: 18.500€
++ Intereses legales: estimación pendiente
+`),
+    createdAt: nowISO,
+  },
+  {
+    id: 'docup-006',
+    procedimientoId: 'mislata-hipoteca',
+    nombre: 'borrador_demanda_hipoteca.txt',
+    tipoMime: 'text/plain',
+    tamano: 3072,
+    fecha: '2025-01-25',
+    descripcion: 'Borrador inicial demanda reclamación hipotecaria',
+    tags: ['demanda', 'borrador', 'hipoteca'],
+    blob: mkBlob(`BORRADOR DEMANDA - RECLAMACIÓN HIPOTECARIA
+============================================
+
+AL JUZGADO DE PRIMERA INSTANCIA DE MISLATA
+
+D/Dña. [CLIENTE], con DNI [***], y domicilio a efectos de notificaciones en [***],
+
+DEMANDA juicio ordinario contra BANCO [***], solicitando:
+
+PRIMERO.- Nulidad cláusula suelo por abusiva.
+
+SEGUNDO.- Condena a devolver 18.500€ por aplicación indebida.
+
+TERCERO.- Nulidad gastos de constitución y condena a devolver:
+- Notaría: 850€
+- Registro: 420€
+- Gestoría: 380€
+- Tasación: 350€
+
+CUARTO.- Nulidad comisión apertura (pendiente TJUE).
+
+TOTAL RECLAMADO: 20.500€ + intereses + costas
+
+[DOCUMENTO EN PREPARACIÓN]
+`),
+    createdAt: nowISO,
+  },
+];
+
+// ============================================
+// FASE 2 - SECCIONES AUDIENCIA PREVIA
+// ============================================
+
+function seccion(
+  id: string,
+  procedimientoId: string,
+  titulo: string,
+  bullets: string[],
+  orden: number
+): SeccionAudiencia {
+  return { id, procedimientoId, titulo, bullets, orden, updatedAt: nowISO };
+}
+
+const seccionesAudiencia: SeccionAudiencia[] = [
+  // Picassent - 6 secciones
+  seccion('sec-pic-001', 'picassent-715-2024', 'Hechos controvertidos', [
+    'Cuantía exacta de las disposiciones unilaterales',
+    'Destino de los fondos retirados por el demandado',
+    'Existencia o no de acuerdo tácito sobre uso de vivienda',
+    'Valoración de los muebles retirados del domicilio',
+  ], 1),
+  seccion('sec-pic-002', 'picassent-715-2024', 'Hechos no controvertidos', [
+    'Adquisición conjunta de la vivienda en 2015 al 50%',
+    'Cese de la convivencia en junio de 2022',
+    'Pago exclusivo de la hipoteca por la Actora desde julio 2022',
+    'Valoración pericial de la vivienda en 185.000€',
+  ], 2),
+  seccion('sec-pic-003', 'picassent-715-2024', 'Prueba documental', [
+    'Extractos bancarios cuenta común (jun-dic 2022)',
+    'Recibos de hipoteca abonados por Actora (24 meses)',
+    'Escritura de compraventa y nota simple',
+    'Informe de tasación oficial',
+    'Burofax de requerimiento y acuse de recibo',
+  ], 3),
+  seccion('sec-pic-004', 'picassent-715-2024', 'Prueba testifical', [
+    'Testigo vecino: acreditar uso exclusivo vivienda',
+    'Testigo familiar: acreditar estado muebles antes de salida',
+  ], 4),
+  seccion('sec-pic-005', 'picassent-715-2024', 'Prueba pericial', [
+    'Ratificación informe tasador sobre valor vivienda',
+    'Posible perito contable para cálculo intereses',
+  ], 5),
+  seccion('sec-pic-006', 'picassent-715-2024', 'Interrogatorio de partes', [
+    'Interrogatorio demandado sobre disposiciones cuenta',
+    'Interrogatorio demandado sobre destino muebles',
+    'Interrogatorio demandado sobre acuerdos uso vivienda',
+  ], 6),
+
+  // Quart - 4 secciones
+  seccion('sec-qrt-001', 'quart-362-2023', 'Hechos controvertidos', [
+    'Carácter extraordinario de gastos médicos (ortodoncista)',
+    'Consentimiento previo para actividades extraescolares',
+    'Conocimiento y ocultación de becas escolares',
+  ], 1),
+  seccion('sec-qrt-002', 'quart-362-2023', 'Documentación aportada', [
+    'Sentencia de divorcio con obligaciones alimenticias',
+    'Facturas de colegio, material y actividades',
+    'Facturas médicas (óptica, ortodoncista)',
+    'Resoluciones de becas comedor y ayudas libros',
+    'Capturas WhatsApp de comunicaciones ignoradas',
+  ], 2),
+  seccion('sec-qrt-003', 'quart-362-2023', 'Liquidación actualizada', [
+    'Total gastos escolares 2022-2023: 1.850€ (50% = 925€)',
+    'Total gastos médicos: 2.400€ (50% = 1.200€)',
+    'Total extraescolares: 1.680€ (50% = 840€)',
+    'Compensación becas: 1.800€',
+    'TOTAL RECLAMADO: 4.765€',
+  ], 3),
+  seccion('sec-qrt-004', 'quart-362-2023', 'Peticiones al juzgado', [
+    'Requerimiento de pago con apercibimiento de apremio',
+    'Averiguación patrimonial si procede',
+    'Imposición de costas al ejecutado',
+  ], 4),
+];
+
+// ============================================
 // EXPORT FINAL
 // ============================================
 
@@ -777,4 +1077,8 @@ export const seedCaseOps: SeedData = {
   tareas,
   links,
   timeline: timelineData,
+  // FASE 2
+  reclamacionesVisuales,
+  documentosSubidos,
+  seccionesAudiencia,
 };
