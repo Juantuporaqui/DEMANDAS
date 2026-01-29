@@ -218,7 +218,152 @@ CLAVES DEL CASO:
       tags: ['compensacion', 'bancos']
     });
 
-    console.log('Database seeded successfully with REAL DATA');
+    // =====================================================================
+    // PARTIDAS DE LOS 10 HECHOS RECLAMADOS
+    // Fuente: hechosReclamados.ts (extraído de rama claude/setup-litigation-system-yDgIX)
+    // =====================================================================
+
+    // Hecho 1: Préstamos Personales BBVA (PRESCRITO)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2008-09-05',
+      amountCents: eurosToCents(20085),
+      concept: 'Préstamos Personales BBVA - Cancelación',
+      payer: 'Vicenta (alega)',
+      beneficiary: 'BBVA',
+      state: 'prescrita_interna',
+      theory: 'Prescrito +15 años. Art. 1964 CC. Sin justificante de ingreso.',
+      notes: 'Docs. 13, 11, 4. Contradicción AEAT: préstamos para chalet común.',
+      tags: ['prescrito', 'bbva', 'prestamo']
+    });
+
+    // Hecho 2: Vehículo Seat León (PRESCRITO)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2014-01-01',
+      amountCents: eurosToCents(13000),
+      concept: 'Vehículo Seat León',
+      payer: 'Cuenta Barclays Común',
+      beneficiary: 'Concesionario',
+      state: 'prescrita_interna',
+      theory: 'Prescrito +10 años. Liberalidad familiar. Juan pagó Renault Scenic 4.500€.',
+      notes: 'Docs. 2, 17, 16. Doble rasero: reclama 100% sin mencionar Scenic.',
+      tags: ['prescrito', 'vehiculo', 'liberalidad']
+    });
+
+    // Hecho 3: Venta Vivienda Artur Piera (DISPUTA)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2022-09-01',
+      amountCents: eurosToCents(32000),
+      concept: 'Retirada Juan - Venta Artur Piera',
+      payer: 'Cuenta Común',
+      beneficiary: 'Juan (Privativo)',
+      state: 'discutida',
+      theory: 'Compensación: Vicenta retiró 38.500€ (6.500€ más). Inversión común en subasta.',
+      notes: 'Docs. 20, 3, 22. Juan hizo reforma física. Mala fe de actora al omitir su retirada mayor.',
+      tags: ['disputa', 'artur_piera', 'compensacion']
+    });
+
+    // Hecho 4: Hipoteca Vivienda Lope de Vega (PRESCRITO parcial)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2009-07-01',
+      amountCents: eurosToCents(122282.28),
+      concept: 'Cuotas Hipoteca Lope de Vega (2009-2024)',
+      payer: 'Cuentas Comunes',
+      beneficiary: 'Entidad Bancaria',
+      state: 'prescrita_interna',
+      theory: 'Pre-2019 prescrito. Préstamo 310K para terrenos comunes, no para vivienda privativa.',
+      notes: 'Doc. 6. Lope de Vega solo fue garantía, no destino. Ella pide 50% terrenos.',
+      tags: ['prescrito', 'hipoteca', 'lope_de_vega']
+    });
+
+    // Hecho 5: IBI Lope de Vega (PRESCRITO)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2013-01-01',
+      amountCents: eurosToCents(1826.91),
+      concept: 'IBI Lope de Vega (2013-2019)',
+      payer: 'Cuenta BBVA 9397',
+      beneficiary: 'Ayuntamiento Quart',
+      state: 'prescrita_interna',
+      theory: 'Prescrito pre-2019. Cuenta nutrida por nómina de Juan 16 años.',
+      notes: 'Doc. 12. Vincular recibos a historial nóminas Juan.',
+      tags: ['prescrito', 'ibi', 'quart']
+    });
+
+    // Hecho 6: IBI Chalet Montroy (DISPUTA)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2020-02-12',
+      amountCents: eurosToCents(530.85),
+      concept: 'IBI Chalet Montroy (50%)',
+      payer: 'Cuenta Común BBVA',
+      beneficiary: 'Ayuntamiento',
+      state: 'discutida',
+      theory: 'Fondos comunes para bienes comunes. No cabe reembolso.',
+      notes: 'Doc. 1. Extracto BBVA 12/02/2021 muestra cargo directo.',
+      tags: ['disputa', 'ibi', 'montroy']
+    });
+
+    // Hecho 7: IBI Fincas Rústicas (COMPENSABLE)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2020-01-01',
+      amountCents: eurosToCents(151.81),
+      concept: 'IBI Fincas Rústicas',
+      payer: 'Vicenta (Privativo)',
+      beneficiary: 'Ayuntamiento',
+      state: 'reclamable',
+      theory: 'Compensación Art. 1196 CC. Juan pagó fitosanitarios 308,24€.',
+      notes: 'Doc. 27. Deuda ella > este IBI.',
+      tags: ['compensable', 'ibi', 'rusticas']
+    });
+
+    // Hecho 8: Comunidad Loma de los Caballeros (COMPENSABLE)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2023-10-01',
+      amountCents: eurosToCents(19.39),
+      concept: 'Comunidad Loma Caballeros Q4/2023',
+      payer: 'Vicenta',
+      beneficiary: 'Comunidad',
+      state: 'reclamable',
+      theory: 'Compensación. Juan pagó Q1/2024 (36,06€).',
+      notes: 'Doc. 28. Compensación directa.',
+      tags: ['compensable', 'comunidad']
+    });
+
+    // Hecho 9: Amortización Hipoteca Previa (PRESCRITO)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2006-08-22',
+      amountCents: eurosToCents(16979.59),
+      concept: 'Amortización Hipoteca Previa Juan',
+      payer: 'Fondos Comunes',
+      beneficiary: 'Entidad Bancaria',
+      state: 'prescrita_interna',
+      theory: 'Prescrito 19 años. Condición banco para préstamo 310K terrenos comunes.',
+      notes: 'Vicenta aceptó en 2006 para comprar Montroy. Vinculado a Hecho 4.',
+      tags: ['prescrito', 'hipoteca', 'amortizacion']
+    });
+
+    // Hecho 10: Maquinaria Agrícola (DISPUTA)
+    await partidasRepo.create({
+      caseId: mainCase.id,
+      date: '2018-01-01',
+      amountCents: eurosToCents(5801.25),
+      concept: 'Maquinaria Agrícola Olivar',
+      payer: 'Fondos Comunes',
+      beneficiary: 'Proveedor',
+      state: 'discutida',
+      theory: 'Inversión negocio olivos. Vicenta cobró 10.887,57€ beneficios 2023.',
+      notes: 'Doc. 29. Factura Oleos Dels Alforins a nombre Vicenta.',
+      tags: ['disputa', 'maquinaria', 'olivar']
+    });
+
+    console.log('Database seeded successfully with REAL DATA + 10 HECHOS RECLAMADOS');
     return true;
   } catch (error) {
     console.error('Error seeding database:', error);
