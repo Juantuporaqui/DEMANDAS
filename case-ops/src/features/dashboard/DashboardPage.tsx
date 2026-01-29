@@ -10,6 +10,8 @@ import { db } from '../../db/schema';
 import Card from '../../ui/components/Card';
 import SectionTitle from '../../ui/components/SectionTitle';
 import { formatCurrency } from '../../utils/validators';
+// Chaladita Case-Ops: Panel de alertas
+import { AlertasPanel } from '../../components/AlertasPanel';
 
 // Datos DEMO (Mock)
 const CLAIMS = [
@@ -63,6 +65,9 @@ export function DashboardPage() {
           </div>
         </div>
       </header>
+
+      {/* Chaladita Case-Ops: Alertas */}
+      <AlertasPanel />
 
       <section className="grid grid-cols-2 gap-3">
         <Card className="p-4 bg-slate-900/60 border-slate-800">
