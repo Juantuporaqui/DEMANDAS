@@ -262,7 +262,7 @@ export const LEGAL_DOCS_MAP: Record<string, string> = {
   'demanda-picassent': DEMANDA_PICASSENT_HTML,
   'contestacion-picassent': CONTESTACION_PICASSENT_HTML,
   
-  // MISLATA (Ahora sí están todos)
+  // MISLATA
   'recurso-reposicion-mislata': RECURSO_REPOSICION_MISLATA_HTML,
   'oposicion-mislata': OPOSICION_RECURSO_MISLATA_HTML,
   'contestacion-mislata': CONTESTACION_MISLATA_HTML,
