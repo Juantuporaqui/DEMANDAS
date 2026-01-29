@@ -145,7 +145,48 @@ export interface TimelineItem {
 }
 
 // ============================================
-// Seed Data Interface
+// FASE 2 - Tipos adicionales
+// ============================================
+
+// Ganabilidad de reclamación visual
+export type GanabilidadReclamacion = 'alta' | 'media' | 'baja';
+
+// Reclamación visual (tile)
+export interface ReclamacionVisual {
+  id: string;
+  label: string; // "HIPOTECA", "PRÉSTAMOS", "OBRAS", etc.
+  cantidad: number; // en céntimos
+  ganabilidad: GanabilidadReclamacion;
+  partidaId: string;
+  procedimientoId: string;
+}
+
+// Documento subido con Blob real (offline)
+export interface DocumentoSubido {
+  id: string;
+  procedimientoId: string;
+  nombre: string;
+  tipoMime: string;
+  tamano: number;
+  fecha: string; // ISO
+  descripcion?: string;
+  tags: string[];
+  blob: Blob; // CLAVE: contenido real offline
+  createdAt: string;
+}
+
+// Sección de audiencia previa
+export interface SeccionAudiencia {
+  id: string;
+  procedimientoId: string;
+  titulo: string; // "Hechos controvertidos", "Prueba documental", etc.
+  bullets: string[];
+  orden: number;
+  updatedAt: string;
+}
+
+// ============================================
+// Seed Data Interface (compatible FASE 1 + FASE 2)
 // ============================================
 
 export interface SeedData {
@@ -157,6 +198,10 @@ export interface SeedData {
   tareas: TareaProc[];
   links: LinkProc[];
   timeline: TimelineItem[];
+  // FASE 2 - opcionales para compatibilidad
+  reclamacionesVisuales?: ReclamacionVisual[];
+  documentosSubidos?: DocumentoSubido[];
+  seccionesAudiencia?: SeccionAudiencia[];
 }
 
 // ============================================
