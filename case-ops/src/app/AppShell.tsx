@@ -5,7 +5,6 @@
 import { Outlet, ScrollRestoration } from 'react-router-dom';
 import { Sidebar } from '../ui/layout/Sidebar';
 import { BottomNav } from '../components/BottomNav';
-import { Toaster } from 'sonner'; // Si usas notificaciones (opcional)
 
 export function AppShell() {
   return (
@@ -29,7 +28,6 @@ export function AppShell() {
 
       {/* Utilidades Globales */}
       <ScrollRestoration />
-      <Toaster position="top-right" theme="dark" />
     </div>
   );
 }
