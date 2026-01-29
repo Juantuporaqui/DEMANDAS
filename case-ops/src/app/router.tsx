@@ -33,6 +33,7 @@ import { AnalyticsAdminPage } from '../features/analytics/pages/AnalyticsAdminPa
 import { CourtDashboard } from '../features/analytics/pages/CourtDashboard';
 import { HechosPage } from '../features/analytics/pages/HechosPage';
 import { PrescripcionPage } from '../features/analytics/pages/PrescripcionPage';
+import { ModoAudienciaPage } from '../features/audiencia/ModoAudienciaPage';
 
 export const router = createBrowserRouter(
   [
@@ -63,6 +64,10 @@ export const router = createBrowserRouter(
         {
           path: 'analytics/hechos',
           element: <HechosPage />,
+        },
+        {
+          path: 'analytics/audiencia',
+          element: <ModoAudienciaPage />,
         },
         {
           path: 'analytics/:court',
