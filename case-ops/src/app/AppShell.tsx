@@ -1,29 +1,35 @@
-import { useEffect, type ReactNode } from 'react';
-import { Outlet } from 'react-router-dom';
-import AppLayout from '../ui/layout/AppLayout';
+// ============================================
+// CASE OPS - Main Application Shell
+// ============================================
 
-type AppShellProps = {
-  children?: ReactNode;
-};
+import { Outlet, ScrollRestoration } from 'react-router-dom';
+import { Sidebar } from '../ui/layout/Sidebar';
+import { BottomNav } from '../components/BottomNav';
+import { Toaster } from 'sonner'; // Si usas notificaciones (opcional)
 
-export default function AppShell({ children }: AppShellProps) {
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const storageKey = 'case-ops:modo-juicio';
-    const stored = localStorage.getItem(storageKey) === 'true';
-    document.documentElement.classList.toggle('modo-juicio', stored);
+export function AppShell() {
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-amber-500/30">
+      
+      {/* 1. Sidebar para Desktop (Izquierda) */}
+      <Sidebar />
 
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key !== storageKey) return;
-      const enabled = event.newValue === 'true';
-      document.documentElement.classList.toggle('modo-juicio', enabled);
-    };
+      {/* 2. Área de Contenido Principal */}
+      <main className="lg:pl-64 min-h-screen flex flex-col transition-all duration-300">
+        
+        {/* Contenedor con padding responsivo */}
+        <div className="flex-1 p-4 pb-24 lg:p-8 lg:pb-8 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+          <Outlet />
+        </div>
 
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
+      </main>
 
-  return <AppLayout>{children ?? <Outlet />}</AppLayout>;
+      {/* 3. Navegación Inferior para Móvil (Solo visible en pantallas pequeñas) */}
+      <BottomNav />
+
+      {/* Utilidades Globales */}
+      <ScrollRestoration />
+      <Toaster position="top-right" theme="dark" />
+    </div>
+  );
 }
-
-export { AppShell };
