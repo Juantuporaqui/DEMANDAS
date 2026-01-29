@@ -3,21 +3,21 @@
 // ============================================
 
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Scale, 
-  Search, 
-  FileText, 
-  Menu 
+import {
+  LayoutDashboard,
+  Scale,
+  Gavel,
+  Wrench,
+  Menu
 } from 'lucide-react';
 
 export function BottomNav() {
   const NAV_ITEMS = [
     { to: '/dashboard', label: 'Inicio', icon: <LayoutDashboard size={20} /> },
     { to: '/cases', label: 'Casos', icon: <Scale size={20} /> },
-    { to: '/search', label: 'Buscar', icon: <Search size={20} /> },
-    { to: '/documents', label: 'Docs', icon: <FileText size={20} /> },
-    { to: '/more', label: 'Menú', icon: <Menu size={20} /> }, // Ruta para ver el resto de opciones
+    { to: '/audiencia-previa', label: 'Audiencia', icon: <Gavel size={20} /> },
+    { to: '/tools', label: 'Tools', icon: <Wrench size={20} /> },
+    { to: '/more', label: 'Menú', icon: <Menu size={20} /> },
   ];
 
   return (
