@@ -4,11 +4,12 @@
 // ============================================
 
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useNavigate } from 'react-router-dom';
 import { chaladitaDb } from '../db/chaladitaDb';
 import type { GanabilidadReclamacion } from '../types/caseops';
 
 interface ReclamacionesTilesProps {
-  procedimientoId: string;
+  procedimientoId: string | number; // Aceptamos string o número para evitar errores
 }
 
 const ganabilidadColors: Record<GanabilidadReclamacion, { bg: string; text: string; border: string }> = {
@@ -18,6 +19,8 @@ const ganabilidadColors: Record<GanabilidadReclamacion, { bg: string; text: stri
 };
 
 export function ReclamacionesTiles({ procedimientoId }: ReclamacionesTilesProps) {
+  const navigate = useNavigate();
+
   const reclamaciones = useLiveQuery(
     () =>
       chaladitaDb.reclamacionesVisuales
@@ -40,7 +43,7 @@ export function ReclamacionesTiles({ procedimientoId }: ReclamacionesTilesProps)
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h3 style={styles.title}>Reclamaciones</h3>
+        <h3 style={styles.title}>Reclamaciones (Hechos)</h3>
         <span style={styles.total}>
           Total: {(total / 100).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
         </span>
@@ -57,7 +60,10 @@ export function ReclamacionesTiles({ procedimientoId }: ReclamacionesTilesProps)
                 borderColor: colors.border,
                 backgroundColor: colors.bg,
               }}
-              onClick={() => alert(`Partida: ${rec.partidaId}\nGanabilidad: ${rec.ganabilidad}`)}
+              // Navegación al detalle del hecho
+              onClick={() => navigate(`/facts/${rec.id}`)}
+              role="button"
+              tabIndex={0}
             >
               <div style={styles.tileLabel}>{rec.label}</div>
               <div style={styles.tileCantidad}>
@@ -91,6 +97,7 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: 'var(--color-bg-secondary, #1e293b)',
     borderRadius: '0.5rem',
     border: '1px solid var(--color-border, #334155)',
+    marginTop: '1rem',
   },
   header: {
     display: 'flex',
@@ -122,6 +129,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '2px solid',
     cursor: 'pointer',
     transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+    userSelect: 'none',
   },
   tileLabel: {
     fontSize: '0.6875rem',
@@ -130,6 +138,9 @@ const styles: Record<string, React.CSSProperties> = {
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
     marginBottom: '0.25rem',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   tileCantidad: {
     fontSize: '1.125rem',
@@ -151,6 +162,9 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'center',
     color: 'var(--color-text-muted, #64748b)',
     fontSize: '0.875rem',
+    border: '1px dashed #334155',
+    borderRadius: '0.5rem',
+    marginTop: '1rem',
   },
 };
 
