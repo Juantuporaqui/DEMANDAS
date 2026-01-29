@@ -101,7 +101,18 @@ export function CasesPage() {
     });
   }, []);
 
-  const mainCases = useMemo(() => cases.filter((caseItem) => !caseItem.parentCaseId), [cases]);
+  // Ordenar para que Picassent aparezca primero
+  const mainCases = useMemo(() => {
+    const filtered = cases.filter((caseItem) => !caseItem.parentCaseId);
+    return filtered.sort((a, b) => {
+      // Picassent siempre primero
+      const aIsPicassent = a.title.toLowerCase().includes('picassent') || a.autosNumber?.includes('715/2024');
+      const bIsPicassent = b.title.toLowerCase().includes('picassent') || b.autosNumber?.includes('715/2024');
+      if (aIsPicassent && !bIsPicassent) return -1;
+      if (!aIsPicassent && bIsPicassent) return 1;
+      return 0;
+    });
+  }, [cases]);
   const childCases = useMemo(() => cases.filter((caseItem) => caseItem.parentCaseId), [cases]);
 
   if (loading) return <div className="p-8 text-center text-slate-500">Cargando casos...</div>;
