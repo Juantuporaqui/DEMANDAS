@@ -10,6 +10,8 @@ import {
 } from '../../db/repositories';
 import type { Case, Claim, Jurisprudence, Strategy, Link } from '../../types';
 import { formatDate } from '../../utils/dates';
+// CHALADITA CASE-OPS
+import { ProcedimientosChaladita } from '../../components/ProcedimientosChaladita';
 
 export function ToolsPage() {
   const [cases, setCases] = useState<Case[]>([]);
@@ -195,6 +197,11 @@ export function ToolsPage() {
             </Card>
           ))}
         </div>
+      </section>
+
+      {/* CHALADITA CASE-OPS - Procedimientos y Hechos */}
+      <section className="mt-8 pt-8 border-t border-amber-500/20">
+        <ProcedimientosChaladita />
       </section>
     </div>
   );
