@@ -7,9 +7,10 @@ import { formatDate } from '../../utils/dates';
 import { generateUUID } from '../../utils/id';
 // FASE 2 - Chaladita Case-Ops
 import { useProcedimientos } from '../../db/chaladitaRepos';
-import { ReclamacionesTiles } from '../../components/ReclamacionesTiles';
 import { UploadDocumento } from '../../components/UploadDocumento';
-import { AudienciaPrevia as AudienciaPreviaChaladita } from '../../components/AudienciaPrevia';
+// Quick Nav - Botones estilo app móvil
+import { HechosQuickNav } from '../../components/HechosQuickNav';
+import { AudienciaQuickNav } from '../../components/AudienciaQuickNav';
 
 const IMPORTANCE_STYLES: Record<string, string> = {
   alta: 'border-rose-400/40 bg-rose-500/10 text-rose-200',
@@ -331,9 +332,9 @@ export function AudienciaPreviaPage() {
           )}
 
           {selectedProcId && (
-            <div className="space-y-6">
-              <ReclamacionesTiles procedimientoId={selectedProcId} />
-              <AudienciaPreviaChaladita procedimientoId={selectedProcId} editable />
+            <div className="grid lg:grid-cols-2 gap-6">
+              <HechosQuickNav procedimientoId={selectedProcId} />
+              <AudienciaQuickNav procedimientoId={selectedProcId} />
             </div>
           )}
         </div>
