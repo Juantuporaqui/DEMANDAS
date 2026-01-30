@@ -39,6 +39,25 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
   const factsControvertidos = facts.filter((f: Fact) => f.status === 'controvertido').length;
   const factsAProbar = facts.filter((f: Fact) => f.status === 'a_probar').length;
 
+  // Detectar tipo de caso
+  const isPicassent = caseData.id?.includes('picassent') ||
+                      caseData.title?.toLowerCase().includes('picassent') ||
+                      caseData.autosNumber?.includes('715');
+  const isMislata = caseData.id?.includes('mislata') ||
+                    caseData.title?.toLowerCase().includes('mislata') ||
+                    caseData.autosNumber?.includes('1185');
+  const isQuart = caseData.id?.includes('quart') ||
+                  caseData.title?.toLowerCase().includes('quart') ||
+                  caseData.autosNumber?.includes('1428');
+
+  // Calcular días hasta vista/audiencia
+  const vistaEvent = events.find((e: Event) =>
+    e.title?.toLowerCase().includes('vista') ||
+    e.title?.toLowerCase().includes('audiencia') ||
+    e.title?.toLowerCase().includes('juicio')
+  );
+  const diasHastaVista = vistaEvent ? Math.ceil((new Date(vistaEvent.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* INFO DEL CASO */}
@@ -63,6 +82,118 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
         </div>
         {caseData.notes && (
           <p className="mt-3 text-sm text-slate-400 leading-relaxed">{caseData.notes}</p>
+        )}
+      </div>
+
+      {/* TARJETAS PRINCIPALES ESTILO ANDROID */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Card Desglose de Hechos - TODOS LOS CASOS */}
+        <button
+          type="button"
+          onClick={() => isPicassent ? navigate('/analytics/hechos') : setActiveTab('economico')}
+          className="group rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left transition-all hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/5 active:scale-[0.98]"
+        >
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 mb-3">
+            <ListChecks className="w-6 h-6 text-emerald-400" />
+          </div>
+          <h3 className="text-lg font-bold text-white mb-1">Desglose de Hechos</h3>
+          <p className="text-sm text-slate-400 mb-3">
+            {facts.length} partidas con análisis detallado
+          </p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+              {factsControvertidos} controvertidos
+            </span>
+            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              {factsAProbar} a probar
+            </span>
+          </div>
+          <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
+            Ver desglose completo <ChevronRight className="w-4 h-4 ml-1" />
+          </div>
+        </button>
+
+        {/* Card Audiencia Previa - SOLO PICASSENT */}
+        {isPicassent && (
+          <button
+            type="button"
+            onClick={() => navigate('/analytics/audiencia')}
+            className="group relative rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left transition-all hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/5 active:scale-[0.98]"
+          >
+            <div className="absolute top-4 right-4">
+              <span className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <AlertTriangle className="w-3 h-3" /> Urgente
+              </span>
+            </div>
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 mb-3">
+              <Gavel className="w-6 h-6 text-amber-400" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-1">Audiencia Previa</h3>
+            <p className="text-sm text-slate-400 mb-3">
+              Alegaciones y hechos controvertidos
+            </p>
+            <div className="flex flex-wrap gap-2 mb-3">
+              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/50 text-slate-300">
+                12 Alegaciones
+              </span>
+              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/50 text-slate-300">
+                18 Hechos
+              </span>
+            </div>
+            <div className="flex items-center text-sm text-amber-400 font-medium group-hover:translate-x-1 transition-transform">
+              Preparar audiencia <ChevronRight className="w-4 h-4 ml-1" />
+            </div>
+          </button>
+        )}
+
+        {/* Card Vista - TODOS LOS CASOS */}
+        {vistaEvent && (
+          <button
+            type="button"
+            onClick={() => isMislata || isQuart ? navigate('/audiencia/checklist') : navigate('/audiencia-previa')}
+            className="group relative rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left transition-all hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/5 active:scale-[0.98]"
+          >
+            <div className="absolute top-4 right-4">
+              {diasHastaVista !== null && diasHastaVista <= 30 && diasHastaVista > 0 && (
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                  {diasHastaVista}d
+                </span>
+              )}
+            </div>
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-violet-500/20 border border-violet-500/30 mb-3">
+              <Scale className="w-6 h-6 text-violet-400" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-1">Vista / Juicio</h3>
+            <p className="text-sm text-slate-400 mb-3">
+              {vistaEvent.title}
+            </p>
+            <div className="text-xs text-slate-500 mb-3">
+              📅 {formatDate(vistaEvent.date)}
+            </div>
+            <div className="flex items-center text-sm text-violet-400 font-medium group-hover:translate-x-1 transition-transform">
+              Preparar vista <ChevronRight className="w-4 h-4 ml-1" />
+            </div>
+          </button>
+        )}
+
+        {/* Si no hay vista programada, mostrar card para añadirla */}
+        {!vistaEvent && (
+          <button
+            type="button"
+            onClick={() => navigate(`/events/new?caseId=${caseData.id}`)}
+            className="group rounded-2xl border border-dashed border-slate-600 bg-slate-900/30 p-5 text-left transition-all hover:border-violet-500/50 hover:bg-violet-500/5 active:scale-[0.98]"
+          >
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-800/50 border border-slate-700 mb-3">
+              <Calendar className="w-6 h-6 text-slate-500" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-400 mb-1">Vista / Juicio</h3>
+            <p className="text-sm text-slate-500 mb-3">
+              No hay fecha de vista programada
+            </p>
+            <div className="flex items-center text-sm text-violet-400 font-medium group-hover:translate-x-1 transition-transform">
+              + Añadir fecha <ChevronRight className="w-4 h-4 ml-1" />
+            </div>
+          </button>
         )}
       </div>
 
