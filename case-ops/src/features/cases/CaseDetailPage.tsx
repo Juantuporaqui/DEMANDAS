@@ -12,185 +12,199 @@ import {
 } from '../../db/repositories';
 import type { Case, Document, Event, Fact, Partida, Strategy } from '../../types';
 import { formatDate } from '../../utils/dates';
-import { calcularTotales, resumenContador, hechosReclamados } from '../../data/hechosReclamados';
 import { TextReader } from '../../ui/components/TextReader';
 // Importamos el mapa de textos reales
 import { LEGAL_DOCS_MAP } from '../../data/legal_texts';
-
-// Hechos más relevantes para mostrar en el resumen
-const hechosRelevantes = hechosReclamados
-  .filter(h => h.estado === 'disputa' || h.cuantia > 15000)
-  .sort((a, b) => b.cuantia - a.cuantia)
-  .slice(0, 4);
+import { formatCurrency } from '../../utils/validators';
 
 // ============================================
-// 1. DASHBOARD EJECUTIVO (Tab Resumen)
+// 1. DASHBOARD EJECUTIVO (Tab Resumen) - DINÁMICO
 // ============================================
-function TabResumen({ caseData, strategies, events, facts, navigate, setActiveTab }: any) {
-  // Detección robusta del caso
-  const isPicassent = caseData.id?.includes('picassent') || 
-                      caseData.title.toLowerCase().includes('picassent') || 
-                      caseData.autosNumber?.includes('715');
-  
-  const totalReclamado = facts.length > 0 ? facts.length * 15000 : resumenContador.totalReclamado; 
-  
+function TabResumen({ caseData, strategies, events, facts, partidas, documents, navigate, setActiveTab }: any) {
+  // Calcular totales desde partidas reales
+  const totalPartidas = partidas.reduce((sum: number, p: Partida) => sum + (p.amountCents || 0), 0);
+
+  // Hechos ordenados por riesgo
+  const factsByRisk = [...facts].sort((a: Fact, b: Fact) => {
+    const riskOrder: Record<string, number> = { alto: 0, medio: 1, bajo: 2 };
+    return (riskOrder[a.risk || 'bajo'] || 2) - (riskOrder[b.risk || 'bajo'] || 2);
+  });
+  const topFacts = factsByRisk.slice(0, 4);
+
   const nextEvent = events
     .filter((e: Event) => new Date(e.date).getTime() >= Date.now())
     .sort((a: Event, b: Event) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
 
+  // Contadores por estado de hechos
+  const factsControvertidos = facts.filter((f: Fact) => f.status === 'controvertido').length;
+  const factsAProbar = facts.filter((f: Fact) => f.status === 'a_probar').length;
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* KPIs GUERRA */}
+      {/* INFO DEL CASO */}
+      <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/60 p-4">
+        <div className="flex flex-wrap gap-3 text-xs">
+          <span className="bg-slate-700/50 px-3 py-1 rounded-full text-slate-300">
+            <strong>Juzgado:</strong> {caseData.court}
+          </span>
+          <span className="bg-slate-700/50 px-3 py-1 rounded-full text-slate-300">
+            <strong>Rol:</strong> {caseData.clientRole}
+          </span>
+          {caseData.judge && caseData.judge !== '[Pendiente]' && (
+            <span className="bg-slate-700/50 px-3 py-1 rounded-full text-slate-300">
+              <strong>Juez:</strong> {caseData.judge}
+            </span>
+          )}
+          {caseData.opposingCounsel && (
+            <span className="bg-rose-500/20 px-3 py-1 rounded-full text-rose-300">
+              <strong>Contrario:</strong> {caseData.opposingCounsel}
+            </span>
+          )}
+        </div>
+        {caseData.notes && (
+          <p className="mt-3 text-sm text-slate-400 leading-relaxed">{caseData.notes}</p>
+        )}
+      </div>
+
+      {/* KPIs DINÁMICOS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
-          <div className="text-[10px] uppercase tracking-wider text-slate-500">Total en Disputa</div>
+          <div className="text-[10px] uppercase tracking-wider text-slate-500">Cuantía Total</div>
           <div className="text-2xl font-bold text-rose-400 mt-1">
-             {(isPicassent ? resumenContador.totalReclamado : totalReclamado).toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+            {formatCurrency(totalPartidas)}
           </div>
+          <div className="text-[10px] text-slate-600">{partidas.length} partidas</div>
         </div>
         <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
-          <div className="text-[10px] uppercase tracking-wider text-slate-500">Hechos Clave</div>
+          <div className="text-[10px] uppercase tracking-wider text-slate-500">Hechos</div>
           <div className="text-2xl font-bold text-emerald-400 mt-1">{facts.length}</div>
-          <div className="text-[10px] text-slate-600">Puntos de conflicto</div>
+          <div className="text-[10px] text-slate-600">{factsControvertidos} controvertidos</div>
         </div>
         <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
-          <div className="text-[10px] uppercase tracking-wider text-slate-500">Documentos</div>
-          <div className="text-2xl font-bold text-amber-400 mt-1">{caseData.tags?.length || 0}</div>
+          <div className="text-[10px] uppercase tracking-wider text-slate-500">Eventos</div>
+          <div className="text-2xl font-bold text-amber-400 mt-1">{events.length}</div>
+          <div className="text-[10px] text-slate-600">{events.filter((e: Event) => new Date(e.date) > new Date()).length} próximos</div>
         </div>
         <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Estrategias</div>
-          <div className="text-2xl font-bold text-blue-400 mt-1">{strategies.length} activas</div>
+          <div className="text-2xl font-bold text-blue-400 mt-1">{strategies.length}</div>
+          <div className="text-[10px] text-slate-600">líneas de defensa</div>
         </div>
       </div>
 
-      {/* ACCESOS RÁPIDOS - BOTONES TIPO APP MÓVIL */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2">
-        {/* TARJETA DESGLOSE DE HECHOS */}
-        <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-4 sm:p-5 hover:border-emerald-500/30 transition-all">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400"><ListChecks size={20} /></div>
-            <div>
-              <h3 className="font-bold text-white text-sm">Desglose de Hechos</h3>
-              <p className="text-[10px] text-slate-500">{isPicassent ? '10' : facts.length} partidas analizadas</p>
+      {/* HECHOS DEL CASO */}
+      {facts.length > 0 && (
+        <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400"><ListChecks size={20} /></div>
+              <div>
+                <h3 className="font-bold text-white text-sm">Hechos del Caso</h3>
+                <p className="text-[10px] text-slate-500">{facts.length} puntos registrados</p>
+              </div>
             </div>
           </div>
 
-          {/* HECHOS RELEVANTES - GRID TIPO APP */}
-          <div className="grid grid-cols-4 gap-2 mb-4">
-            {hechosRelevantes.slice(0, 4).map((hecho) => (
+          <div className="space-y-2 mb-4">
+            {topFacts.map((fact: Fact, i: number) => (
               <button
-                key={hecho.id}
-                onClick={() => navigate(`/facts/${hecho.id}`)}
-                className={`flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl border transition-all hover:scale-105 active:scale-95 ${
-                  hecho.estado === 'disputa'
-                    ? 'bg-orange-500/10 border-orange-500/30 hover:border-orange-500/60'
-                    : hecho.estado === 'prescrito'
+                key={fact.id}
+                onClick={() => navigate(`/facts/${fact.id}`)}
+                className={`w-full text-left p-3 rounded-xl border transition-all hover:scale-[1.01] ${
+                  fact.risk === 'alto' || fact.status === 'controvertido'
                     ? 'bg-rose-500/10 border-rose-500/30 hover:border-rose-500/60'
-                    : 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60'
+                    : fact.status === 'a_probar'
+                    ? 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60'
+                    : 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-500/60'
                 }`}
               >
-                <span className={`text-base sm:text-xl font-bold ${
-                  hecho.estado === 'disputa' ? 'text-orange-400' :
-                  hecho.estado === 'prescrito' ? 'text-rose-400' : 'text-amber-400'
-                }`}>
-                  #{hecho.id}
-                </span>
-                <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight line-clamp-2">
-                  {hecho.titulo.split(' ').slice(0, 2).join(' ')}
-                </span>
-                <span className="text-[8px] text-slate-600 font-mono">
-                  {(hecho.cuantia / 1000).toFixed(0)}k€
-                </span>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <span className={`text-xs font-bold ${
+                      fact.risk === 'alto' ? 'text-rose-400' :
+                      fact.risk === 'medio' ? 'text-amber-400' : 'text-emerald-400'
+                    }`}>
+                      #{i + 1}
+                    </span>
+                    <span className="text-white text-sm ml-2 line-clamp-1">{fact.title || fact.titulo}</span>
+                  </div>
+                  <span className={`text-[10px] uppercase px-2 py-0.5 rounded ${
+                    fact.status === 'controvertido' ? 'bg-rose-500/20 text-rose-300' :
+                    fact.status === 'a_probar' ? 'bg-amber-500/20 text-amber-300' :
+                    'bg-emerald-500/20 text-emerald-300'
+                  }`}>
+                    {fact.status}
+                  </span>
+                </div>
               </button>
             ))}
           </div>
 
-          <button
-            onClick={() => navigate('/analytics/hechos')}
-            className="w-full text-xs text-emerald-400 font-medium py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors flex items-center justify-center gap-2"
-          >
-            <ListChecks size={14} />
-            Ver los 10 hechos →
-          </button>
+          {facts.length > 4 && (
+            <button
+              onClick={() => setActiveTab('economico')}
+              className="w-full text-xs text-emerald-400 font-medium py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors"
+            >
+              Ver todos los {facts.length} hechos →
+            </button>
+          )}
         </div>
+      )}
 
-        {/* TARJETA AUDIENCIA PREVIA */}
-        <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-4 sm:p-5 hover:border-amber-500/30 transition-all relative">
-          <div className="absolute top-3 right-3"><span className="bg-rose-500/20 text-rose-300 text-[9px] px-2 py-0.5 rounded-full border border-rose-500/30 animate-pulse">URGENTE</span></div>
+      {/* ESTRATEGIAS DEL CASO */}
+      {strategies.length > 0 && (
+        <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-4 sm:p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400"><Gavel size={20} /></div>
             <div>
-              <h3 className="font-bold text-white text-sm">Audiencia Previa</h3>
-              <p className="text-[10px] text-slate-500">Puntos clave de defensa</p>
+              <h3 className="font-bold text-white text-sm">Líneas de Defensa/Ataque</h3>
+              <p className="text-[10px] text-slate-500">{strategies.length} estrategias definidas</p>
             </div>
           </div>
 
-          {/* PUNTOS CLAVE - GRID TIPO APP */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            <button
-              onClick={() => navigate('/facts/4')}
-              className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:border-rose-500/60 transition-all hover:scale-105 active:scale-95"
-            >
-              <AlertTriangle size={20} className="text-rose-400" />
-              <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight">Hipoteca</span>
-              <span className="text-[8px] text-rose-400 font-bold">122k€</span>
-            </button>
-            <button
-              onClick={() => navigate('/facts/3')}
-              className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:border-amber-500/60 transition-all hover:scale-105 active:scale-95"
-            >
-              <Scale size={20} className="text-amber-400" />
-              <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight">Compensa</span>
-              <span className="text-[8px] text-amber-400 font-bold">38.5k€</span>
-            </button>
-            <button
-              onClick={() => navigate('/facts/10')}
-              className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 hover:border-cyan-500/60 transition-all hover:scale-105 active:scale-95"
-            >
-              <FileText size={20} className="text-cyan-400" />
-              <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight">Agrícola</span>
-              <span className="text-[8px] text-cyan-400 font-bold">10.8k€</span>
-            </button>
+          <div className="space-y-2">
+            {strategies.slice(0, 3).map((s: Strategy, i: number) => (
+              <div key={s.id} className={`p-3 rounded-xl border ${
+                s.risk === 'Alto' ? 'bg-rose-500/10 border-rose-500/30' :
+                s.risk === 'Medio' ? 'bg-amber-500/10 border-amber-500/30' :
+                'bg-emerald-500/10 border-emerald-500/30'
+              }`}>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm text-white line-clamp-2">{s.attack}</p>
+                  <span className={`text-[10px] px-2 py-0.5 rounded shrink-0 ${
+                    s.risk === 'Alto' ? 'bg-rose-500/30 text-rose-300' :
+                    s.risk === 'Medio' ? 'bg-amber-500/30 text-amber-300' :
+                    'bg-emerald-500/30 text-emerald-300'
+                  }`}>{s.risk}</span>
+                </div>
+              </div>
+            ))}
           </div>
 
-          <button
-            onClick={() => navigate('/analytics/audiencia')}
-            className="w-full text-xs text-amber-400 font-medium py-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors flex items-center justify-center gap-2"
-          >
-            <Gavel size={14} />
-            Modo juicio →
-          </button>
+          {strategies.length > 3 && (
+            <button
+              onClick={() => setActiveTab('estrategia')}
+              className="w-full mt-3 text-xs text-amber-400 font-medium py-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
+            >
+              Ver todas las estrategias →
+            </button>
+          )}
         </div>
-      </div>
+      )}
 
-      {/* ACCESO RÁPIDO A DOCUMENTOS - CON NAVEGACIÓN DIRECTA */}
+      {/* ACCESO RÁPIDO A DOCUMENTOS */}
       <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400"><Eye size={18} /></div>
-          <h3 className="font-bold text-white text-sm">Documentos del Procedimiento</h3>
+          <h3 className="font-bold text-white text-sm">Documentos ({documents.length})</h3>
         </div>
-        <div className="grid grid-cols-4 gap-2">
-          {/* BOTONES QUE ACTIVAN LA PESTAÑA DOCS Y SELECCIONAN EL ARCHIVO */}
-          <button
-            onClick={() => navigate(`/cases/${caseData.id}?tab=docs&doc=demanda-picassent`)}
-            className="flex flex-col items-center gap-1 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/20 transition-all hover:scale-105 active:scale-95"
-          >
-            <span className="text-xl sm:text-2xl">📜</span>
-            <span className="text-[9px] sm:text-[10px] text-amber-400 font-medium">Demanda</span>
-          </button>
-          <button
-            onClick={() => navigate(`/cases/${caseData.id}?tab=docs&doc=contestacion-picassent`)}
-            className="flex flex-col items-center gap-1 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/20 transition-all hover:scale-105 active:scale-95"
-          >
-            <span className="text-xl sm:text-2xl">🛡️</span>
-            <span className="text-[9px] sm:text-[10px] text-emerald-400 font-medium">Contest.</span>
-          </button>
+        <div className="grid grid-cols-3 gap-2">
           <button
             onClick={() => setActiveTab('docs')}
             className="flex flex-col items-center gap-1 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 hover:border-cyan-500/50 hover:bg-cyan-500/20 transition-all hover:scale-105 active:scale-95"
           >
             <span className="text-xl sm:text-2xl">📂</span>
-            <span className="text-[9px] sm:text-[10px] text-cyan-400 font-medium">Todos</span>
+            <span className="text-[9px] sm:text-[10px] text-cyan-400 font-medium">Ver todos</span>
           </button>
           <button
             onClick={() => navigate(`/documents/new?caseId=${caseData.id}`)}
@@ -198,6 +212,13 @@ function TabResumen({ caseData, strategies, events, facts, navigate, setActiveTa
           >
             <Upload size={20} className="text-slate-400 sm:w-6 sm:h-6" />
             <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium">Subir</span>
+          </button>
+          <button
+            onClick={() => navigate('/warroom')}
+            className="flex flex-col items-center gap-1 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/50 hover:bg-rose-500/20 transition-all hover:scale-105 active:scale-95"
+          >
+            <AlertTriangle size={20} className="text-rose-400" />
+            <span className="text-[9px] sm:text-[10px] text-rose-400 font-medium">War Room</span>
           </button>
         </div>
       </div>
@@ -213,6 +234,20 @@ function TabResumen({ caseData, strategies, events, facts, navigate, setActiveTa
             </div>
           </div>
           <div className="text-xl font-bold text-emerald-400">{formatDate(nextEvent.date)}</div>
+        </div>
+      )}
+
+      {/* MENSAJE SI NO HAY DATOS */}
+      {facts.length === 0 && strategies.length === 0 && events.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/30 p-8 text-center">
+          <div className="text-4xl mb-4">📋</div>
+          <h3 className="text-lg font-bold text-slate-300 mb-2">Caso sin datos</h3>
+          <p className="text-sm text-slate-500 mb-4">
+            Este caso no tiene hechos, eventos ni estrategias registradas.
+          </p>
+          <p className="text-xs text-amber-400">
+            Ve a <strong>Ajustes → Migraciones</strong> para cargar los datos reales.
+          </p>
         </div>
       )}
     </div>
@@ -524,7 +559,7 @@ export function CaseDetailPage() {
 
       {/* CONTENIDO */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} navigate={navigate} setActiveTab={setActiveTab} />}
+        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} partidas={partidas} documents={docs} navigate={navigate} setActiveTab={setActiveTab} />}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} initialDocKey={initialDoc} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
