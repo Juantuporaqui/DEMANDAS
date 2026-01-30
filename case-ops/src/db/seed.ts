@@ -63,16 +63,16 @@ export async function seedDatabase(): Promise<boolean> {
     });
 
     const mislataCase = await casesRepo.create({
-      title: 'Hipoteca Mislata · Cláusulas Abusivas',
-      court: 'JPI nº 1 de Mislata',
-      autosNumber: '128/2024',
-      type: 'ordinario',
-      status: 'suspendido',
+      title: 'J.V. 1185/2025 · Reclamación Cuotas Hipotecarias',
+      court: 'JPI nº 3 de Mislata',
+      autosNumber: '1185/2025',
+      type: 'verbal',
+      status: 'activo',
       clientRole: 'demandante',
       judge: '[Pendiente]',
-      opposingCounsel: 'Banco Santander, S.A.',
-      notes: 'Reclamación de cláusulas abusivas en préstamo hipotecario. Gastos de constitución y comisión de apertura.',
-      tags: ['bancario', 'hipoteca', 'clausulas_abusivas']
+      opposingCounsel: 'Isabel Luzzy Aguilar (Vicenta Jiménez Vera)',
+      notes: 'Reclamación de 7.119,98€ por cuotas hipotecarias pagadas en exceso (oct 2023 - jun 2025). Art. 1145 CC - Acción de regreso deudor solidario. Pendiente resolución recurso reposición contra litispendencia.',
+      tags: ['hipoteca', 'cuotas', 'solidaridad', 'regreso', 'art-1145-CC']
     });
 
     // Eventos básicos para Quart
@@ -91,20 +91,27 @@ export async function seedDatabase(): Promise<boolean> {
       description: 'Inicio del procedimiento de ejecución.'
     } as any);
 
-    // Eventos básicos para Mislata
+    // Eventos básicos para Mislata (J.V. 1185/2025)
     await eventsRepo.create({
       caseId: mislataCase.id,
-      date: '2024-02-10',
+      date: '2025-09-24',
       type: 'procesal',
-      title: 'Presentación Demanda Hipotecaria',
-      description: 'Demanda por cláusulas abusivas.'
+      title: 'Presentación Demanda',
+      description: 'Demanda de reclamación de cantidad (7.119,98€) por cuotas hipotecarias.'
     } as any);
     await eventsRepo.create({
       caseId: mislataCase.id,
-      date: '2024-05-15',
+      date: '2025-11-19',
       type: 'procesal',
-      title: 'Suspensión por Prejudicialidad',
-      description: 'Suspendido a la espera de TJUE.'
+      title: 'Admisión a Trámite',
+      description: 'Admitida demanda de juicio verbal.'
+    } as any);
+    await eventsRepo.create({
+      caseId: mislataCase.id,
+      date: '2025-12-19',
+      type: 'procesal',
+      title: 'Impugnación Recurso Reposición',
+      description: 'Impugnación del recurso de Vicenta contra litispendencia/prejudicialidad.'
     } as any);
 
     // =====================================================================
