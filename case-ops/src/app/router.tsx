@@ -23,6 +23,7 @@ import { EventFormPage } from '../features/events/EventFormPage';
 import { WarRoomPage } from '../features/warroom/WarRoomPage';
 import { StrategyFormPage } from '../features/warroom/StrategyFormPage';
 import { TasksPage } from '../features/tasks/TasksPage';
+import { NewTaskPage } from '../features/tasks/NewTaskPage';
 import { BackupPage } from '../features/backup/BackupPage';
 import { MorePage } from '../features/dashboard/MorePage';
 import { SettingsPage } from '../features/dashboard/SettingsPage';
@@ -198,6 +199,10 @@ export const router = createBrowserRouter(
         {
           path: 'tasks',
           element: <TasksPage />,
+        },
+        {
+          path: 'tasks/new',
+          element: <NewTaskPage />,
         },
         // Backup
         {

@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
   Scale,
   Gavel,
-  Wrench,
+  CheckSquare,
   Menu
 } from 'lucide-react';
 
@@ -16,7 +16,7 @@ export function BottomNav() {
     { to: '/dashboard', label: 'Inicio', icon: <LayoutDashboard size={20} /> },
     { to: '/cases', label: 'Casos', icon: <Scale size={20} /> },
     { to: '/audiencia-previa', label: 'Audiencia', icon: <Gavel size={20} /> },
-    { to: '/tools', label: 'Tools', icon: <Wrench size={20} /> },
+    { to: '/tasks', label: 'Tareas', icon: <CheckSquare size={20} /> },
     { to: '/more', label: 'Menú', icon: <Menu size={20} /> },
   ];
 

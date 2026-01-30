@@ -565,19 +565,77 @@ export function CaseDetailPage() {
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
         {activeTab === 'actuaciones' && (
           <div className="space-y-4">
-            {events.map(e => (
-              <div key={e.id} className="flex gap-4 p-4 rounded-lg bg-slate-900/50 border border-slate-800 hover:border-slate-600 transition-colors">
-                <div className="text-center min-w-[60px] pt-1">
-                  <div className="text-xl font-bold text-slate-200">{new Date(e.date).getDate()}</div>
-                  <div className="text-xs text-slate-500 uppercase">{new Date(e.date).toLocaleString('default', { month: 'short' })}</div>
-                </div>
-                <div>
-                  <h4 className="font-medium text-white">{e.title}</h4>
-                  <p className="text-sm text-slate-400">{e.description}</p>
-                </div>
+            {/* Botón añadir nuevo evento */}
+            <div className="flex justify-end">
+              <Link
+                to={`/events/new?caseId=${id}`}
+                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                <Calendar size={16} />
+                + Nuevo Evento
+              </Link>
+            </div>
+
+            {/* Lista de eventos ordenados por fecha */}
+            {[...events].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(e => {
+              const eventDate = new Date(e.date);
+              const isPast = eventDate < new Date();
+              const isSoon = !isPast && (eventDate.getTime() - Date.now()) < 7 * 24 * 60 * 60 * 1000;
+
+              return (
+                <Link
+                  key={e.id}
+                  to={`/events/${e.id}/edit`}
+                  className={`flex gap-4 p-4 rounded-lg border transition-all hover:scale-[1.01] cursor-pointer ${
+                    isPast
+                      ? 'bg-slate-900/30 border-slate-800 hover:border-slate-600'
+                      : isSoon
+                      ? 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60'
+                      : 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-500/60'
+                  }`}
+                >
+                  <div className={`text-center min-w-[70px] pt-1 ${isPast ? 'opacity-60' : ''}`}>
+                    <div className="text-xl font-bold text-slate-200">{eventDate.getDate()}</div>
+                    <div className="text-xs text-slate-400 uppercase">
+                      {eventDate.toLocaleString('es-ES', { month: 'short' })}
+                    </div>
+                    <div className="text-xs font-bold text-slate-500 mt-0.5">
+                      {eventDate.getFullYear()}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className={`font-medium ${isPast ? 'text-slate-400' : 'text-white'}`}>{e.title}</h4>
+                      {!isPast && isSoon && (
+                        <span className="text-[10px] bg-amber-500/30 text-amber-300 px-2 py-0.5 rounded uppercase">Próximo</span>
+                      )}
+                      {!isPast && !isSoon && (
+                        <span className="text-[10px] bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded uppercase">Programado</span>
+                      )}
+                      {isPast && (
+                        <span className="text-[10px] bg-slate-700 text-slate-400 px-2 py-0.5 rounded uppercase">Pasado</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-slate-400 mt-1 line-clamp-2">{e.description}</p>
+                    <p className="text-xs text-slate-600 mt-2">Pulsa para editar</p>
+                  </div>
+                </Link>
+              );
+            })}
+
+            {events.length === 0 && (
+              <div className="text-center py-12 border border-dashed border-slate-700 rounded-lg">
+                <Calendar size={40} className="mx-auto text-slate-600 mb-4" />
+                <p className="text-slate-500 mb-4">No hay actuaciones registradas.</p>
+                <Link
+                  to={`/events/new?caseId=${id}`}
+                  className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <Calendar size={16} />
+                  Crear primer evento
+                </Link>
               </div>
-            ))}
-            {events.length === 0 && <div className="text-center text-slate-500 py-10">No hay actuaciones registradas.</div>}
+            )}
           </div>
         )}
       </main>
