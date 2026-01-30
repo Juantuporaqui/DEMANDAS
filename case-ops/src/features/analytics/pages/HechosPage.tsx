@@ -1,5 +1,5 @@
 // ============================================
-// CHALADITA CASE-OPS - HECHOS PAGE (ORIGINAL RESTAURADO)
+// CHALADITA CASE-OPS - HECHOS PAGE (FUSIÓN COMPLETA)
 // ============================================
 
 import { useMemo, useState } from 'react';
@@ -8,9 +8,8 @@ import { FileText, Scale, Clock, AlertTriangle } from 'lucide-react';
 import { AnalyticsLayout } from '../layout/AnalyticsLayout';
 import { SectionCard } from '../components/SectionCard';
 import { HechoCard, HechoBadge, type HechoEstado } from '../components/HechoCard';
-// Mantenemos los datos estáticos antiguos si quieres ver la lista vieja,
-// o podrías cambiarlos por useLiveQuery si quieres datos reales nuevos.
-// Por ahora dejamos lo viejo para que visualmente sea lo que esperas.
+// Importamos el componente de los botones de colores
+import { ReclamacionesTiles } from '../../../components/ReclamacionesTiles';
 import { hechosReclamados, resumenContador, calcularTotales } from '../../../data/hechosReclamados';
 
 type FilterKey = 'todos' | 'prescrito' | 'compensable' | 'disputa';
@@ -52,7 +51,7 @@ export function HechosPage() {
         </button>
       }
     >
-      {/* KPIs principales */}
+      {/* 1. KPIs principales (Tu código original) */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="rounded-2xl border border-rose-500/20 bg-gradient-to-br from-rose-500/10 to-transparent p-4">
           <div className="text-xs text-rose-300/70 uppercase tracking-wider mb-1">Total Reclamado</div>
@@ -81,7 +80,7 @@ export function HechosPage() {
         </div>
       </section>
 
-      {/* Resumen con badges */}
+      {/* 2. Resumen con badges (Tu código original) */}
       <div className="flex flex-wrap items-center gap-2 p-4 rounded-xl border border-slate-800/50 bg-slate-900/30">
         <span className="text-sm text-slate-400 mr-2">Clasificación:</span>
         <HechoBadge count={countByEstado.prescrito} estado="prescrito" />
@@ -89,8 +88,12 @@ export function HechosPage() {
         <HechoBadge count={countByEstado.disputa} estado="disputa" />
       </div>
 
-      {/* Filtros tipo app Android */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0">
+      {/* 3. NUEVO: BOTONES DE COLORES (ReclamacionesTiles) */}
+      {/* Insertado aquí para que conviva con lo demás */}
+      <ReclamacionesTiles procedimientoId="picassent-715-2024" />
+
+      {/* 4. Filtros tipo app Android (Tu código original) */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 mt-4">
         {filters.map((filter) => {
           const Icon = filter.icon;
           const isActive = activeFilter === filter.key;
@@ -120,7 +123,7 @@ export function HechosPage() {
         })}
       </div>
 
-      {/* Lista de hechos como cards tipo app */}
+      {/* 5. Lista de hechos original (Tu código original) */}
       <SectionCard
         title={`${filteredHechos.length} hechos encontrados`}
         subtitle="Toca para ver análisis completo"
@@ -135,15 +138,15 @@ export function HechosPage() {
               estado={hecho.estado}
               año={hecho.año}
               estrategia={hecho.estrategia}
-              // AQUÍ ESTÁ EL CAMBIO CLAVE: Navegación real
+              // IMPORTANTE: He arreglado el onClick para que navegue
               onClick={() => navigate(`/facts/${hecho.id}`)}
             />
           ))}
         </div>
       </SectionCard>
 
-      {/* Acciones rápidas */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* 6. Acciones rápidas (Tu código original) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
         <button
           type="button"
           onClick={() => navigate('/analytics/prescripcion')}
