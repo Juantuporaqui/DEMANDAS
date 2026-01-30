@@ -13,8 +13,9 @@ import {
 import type { Case, Document, Event, Fact, Partida, Strategy } from '../../types';
 import { formatDate } from '../../utils/dates';
 import { TextReader } from '../../ui/components/TextReader';
-// Importamos el mapa de textos reales
-import { LEGAL_DOCS_MAP } from '../../data/legal_texts';
+// Importamos el mapa de textos reales y documentos auto-detectados
+import { LEGAL_DOCS_MAP, AUTO_DOCS } from '../../data/legal_texts';
+import type { AutoDocument } from '../../data/legal_texts';
 import { formatCurrency } from '../../utils/validators';
 
 // ============================================
@@ -513,6 +514,35 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
               )}
             </div>
           </div>
+
+          {/* DOCUMENTOS AUTO-DETECTADOS */}
+          {(() => {
+            const casoKey = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
+            const autoDocs = casoKey ? AUTO_DOCS[casoKey] : [];
+            if (autoDocs.length === 0) return null;
+            return (
+              <div>
+                <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
+                  <FileText size={14} /> Documentos Subidos ({autoDocs.length})
+                </h3>
+                <div className="space-y-2">
+                  {autoDocs.map((doc: AutoDocument) => (
+                    <button
+                      key={doc.id}
+                      onClick={() => handleSelectDoc(doc.id)}
+                      className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${
+                        selectedDocKey === doc.id
+                          ? 'bg-cyan-900/40 border-cyan-500/50 text-cyan-100'
+                          : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-cyan-500/30'
+                      }`}
+                    >
+                      {doc.extension === 'html' ? '🌐' : '📄'} {doc.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Archivos PDF Subidos */}
           <div>
