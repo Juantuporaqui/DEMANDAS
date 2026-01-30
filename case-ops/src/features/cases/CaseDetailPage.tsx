@@ -5,22 +5,27 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  Scale, FileText, Calendar, Gavel, ChevronRight, Upload, ListChecks
+  Scale, FileText, Calendar, Gavel, ChevronRight, Upload, ListChecks, RefreshCw, Eye, AlertTriangle
 } from 'lucide-react';
 import {
   casesRepo, documentsRepo, eventsRepo, factsRepo, partidasRepo, strategiesRepo
 } from '../../db/repositories';
 import type { Case, Document, Event, Fact, Partida, Strategy } from '../../types';
 import { formatDate } from '../../utils/dates';
-import { calcularTotales, resumenContador } from '../../data/hechosReclamados'; // Mantenemos solo para totales/KPIs si es necesario
-import { hechosReclamados } from '../../data/hechosReclamados'; // IMPORTANTE: Solo para fallback de totales
+import { calcularTotales, resumenContador, hechosReclamados } from '../../data/hechosReclamados';
 import { TextReader } from '../../ui/components/TextReader';
 import { LEGAL_DOCS_MAP } from '../../data/legal_texts';
+
+// Hechos más relevantes para mostrar en el resumen (los 3 de mayor cuantía en disputa)
+const hechosRelevantes = hechosReclamados
+  .filter(h => h.estado === 'disputa' || h.cuantia > 15000)
+  .sort((a, b) => b.cuantia - a.cuantia)
+  .slice(0, 4);
 
 // ============================================
 // 1. DASHBOARD EJECUTIVO (Tab Resumen)
 // ============================================
-function TabResumen({ caseData, strategies, events, facts, navigate }: any) {
+function TabResumen({ caseData, strategies, events, facts, navigate, setActiveTab }: any) {
   const isPicassent = caseData.title.toLowerCase().includes('picassent') || caseData.autosNumber?.includes('715');
   
   // Calcular totales reales basados en el seed si es posible, o usar estáticos
@@ -57,31 +62,144 @@ function TabResumen({ caseData, strategies, events, facts, navigate }: any) {
           </div>
         </div>
 
-        {/* ACCESOS RÁPIDOS */}
-        <div className="grid gap-4 lg:grid-cols-2">
-          <button onClick={() => navigate('/analytics/hechos')} className="group rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left hover:border-emerald-500/30 transition-all">
-            <div className="flex items-center gap-3 mb-2">
+        {/* ACCESOS RÁPIDOS CON HECHOS RELEVANTES - Responsive */}
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2">
+          {/* TARJETA DESGLOSE DE HECHOS */}
+          <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 hover:border-emerald-500/30 transition-all">
+            <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400"><ListChecks size={20} /></div>
-              <h3 className="font-bold text-white">Desglose de Hechos (War Room)</h3>
+              <h3 className="font-bold text-white">Desglose de Hechos</h3>
             </div>
-            <p className="text-sm text-slate-400 mb-3">{facts.length} puntos de conflicto analizados.</p>
-            <div className="text-xs text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">Ver matriz de ataque →</div>
-          </button>
+            <p className="text-sm text-slate-400 mb-4">{isPicassent ? '10' : facts.length} partidas analizadas al detalle.</p>
 
-          <button onClick={() => navigate('/analytics/audiencia')} className="group rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left hover:border-amber-500/30 transition-all relative">
+            {/* HECHOS RELEVANTES - BOTONES */}
+            <div className="space-y-2 mb-4">
+              {hechosRelevantes.slice(0, 3).map((hecho) => (
+                <button
+                  key={hecho.id}
+                  onClick={() => navigate(`/facts/${hecho.id}`)}
+                  className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/60 border border-slate-700/50 hover:border-emerald-500/40 hover:bg-slate-800/60 transition-all text-left group"
+                >
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                    hecho.estado === 'disputa' ? 'bg-orange-500/20 text-orange-400' :
+                    hecho.estado === 'prescrito' ? 'bg-rose-500/20 text-rose-400' :
+                    'bg-amber-500/20 text-amber-400'
+                  }`}>
+                    #{hecho.id}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-white font-medium truncate">{hecho.titulo}</div>
+                    <div className="text-[10px] text-slate-500">{hecho.cuantia.toLocaleString('es-ES')} €</div>
+                  </div>
+                  <ChevronRight size={14} className="text-slate-600 group-hover:text-emerald-400 transition-colors" />
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => navigate('/analytics/hechos')}
+              className="w-full text-xs text-emerald-400 font-medium py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors"
+            >
+              Ver análisis completo →
+            </button>
+          </div>
+
+          {/* TARJETA AUDIENCIA PREVIA */}
+          <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 hover:border-amber-500/30 transition-all relative">
             <div className="absolute top-4 right-4"><span className="bg-amber-500/20 text-amber-300 text-[10px] px-2 py-1 rounded-full border border-amber-500/30">URGENTE</span></div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400"><Gavel size={20} /></div>
               <h3 className="font-bold text-white">Audiencia Previa</h3>
             </div>
-            <p className="text-sm text-slate-400 mb-3">Preparación de prueba y alegaciones.</p>
-            <div className="text-xs text-amber-400 font-medium group-hover:translate-x-1 transition-transform">Ir al modo juicio →</div>
-          </button>
+            <p className="text-sm text-slate-400 mb-4">Preparación de prueba y alegaciones.</p>
+
+            {/* PUNTOS CLAVE AUDIENCIA */}
+            <div className="space-y-2 mb-4">
+              <button
+                onClick={() => navigate('/facts/4')}
+                className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/60 border border-slate-700/50 hover:border-amber-500/40 hover:bg-slate-800/60 transition-all text-left group"
+              >
+                <AlertTriangle size={14} className="text-rose-400" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-white font-medium">Hipoteca Lope de Vega</div>
+                  <div className="text-[10px] text-slate-500">122.282€ - Reclamar prescripción</div>
+                </div>
+                <ChevronRight size={14} className="text-slate-600 group-hover:text-amber-400 transition-colors" />
+              </button>
+              <button
+                onClick={() => navigate('/facts/3')}
+                className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/60 border border-slate-700/50 hover:border-amber-500/40 hover:bg-slate-800/60 transition-all text-left group"
+              >
+                <Scale size={14} className="text-amber-400" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-white font-medium">Artur Piera (Compensación)</div>
+                  <div className="text-[10px] text-slate-500">Ella retiró 38.500€ vs 32.000€</div>
+                </div>
+                <ChevronRight size={14} className="text-slate-600 group-hover:text-amber-400 transition-colors" />
+              </button>
+              <button
+                onClick={() => navigate('/facts/10')}
+                className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/60 border border-slate-700/50 hover:border-amber-500/40 hover:bg-slate-800/60 transition-all text-left group"
+              >
+                <FileText size={14} className="text-cyan-400" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-white font-medium">Maquinaria Agrícola</div>
+                  <div className="text-[10px] text-slate-500">Ella cobró 10.887€ beneficios</div>
+                </div>
+                <ChevronRight size={14} className="text-slate-600 group-hover:text-amber-400 transition-colors" />
+              </button>
+            </div>
+
+            <button
+              onClick={() => navigate('/analytics/audiencia')}
+              className="w-full text-xs text-amber-400 font-medium py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
+            >
+              Ir al modo juicio →
+            </button>
+          </div>
+        </div>
+
+        {/* ACCESO RÁPIDO A DOCUMENTOS */}
+        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400"><Eye size={18} /></div>
+            <h3 className="font-bold text-white text-sm">Documentos del Procedimiento</h3>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button
+              onClick={() => { navigate(`/cases/${caseData.id}`); setTimeout(() => document.querySelector('[data-tab="docs"]')?.dispatchEvent(new Event('click')), 100); }}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/20 transition-all"
+            >
+              <span className="text-lg">📜</span>
+              <span className="text-[10px] text-amber-400 font-medium">Demanda</span>
+            </button>
+            <button
+              onClick={() => { navigate(`/cases/${caseData.id}`); setTimeout(() => document.querySelector('[data-tab="docs"]')?.dispatchEvent(new Event('click')), 100); }}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/20 transition-all"
+            >
+              <span className="text-lg">🛡️</span>
+              <span className="text-[10px] text-emerald-400 font-medium">Contestación</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('docs')}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 hover:border-cyan-500/50 hover:bg-cyan-500/20 transition-all"
+            >
+              <span className="text-lg">📂</span>
+              <span className="text-[10px] text-cyan-400 font-medium">Ver Todos</span>
+            </button>
+            <button
+              onClick={() => navigate(`/documents/new?caseId=${caseData.id}`)}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-slate-700/50 border border-slate-600/50 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all"
+            >
+              <Upload size={18} className="text-slate-400" />
+              <span className="text-[10px] text-slate-400 font-medium">Subir</span>
+            </button>
+          </div>
         </div>
 
         {/* PRÓXIMO EVENTO */}
         {nextEvent && (
-          <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-transparent p-4 flex justify-between items-center">
+          <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-transparent p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div className="flex items-center gap-3">
               <div className="bg-emerald-500/20 p-2 rounded-lg text-emerald-400"><Calendar size={20} /></div>
               <div>
@@ -317,40 +435,54 @@ export function CaseDetailPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 pb-20 font-sans">
-      {/* HEADER */}
+      {/* HEADER - Optimizado para móvil */}
       <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-20 shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 pt-4 pb-0">
-          <div className="flex justify-between items-start mb-4">
-            <div>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 pt-3 sm:pt-4 pb-0">
+          <div className="flex justify-between items-start mb-3 sm:mb-4 gap-2">
+            <div className="min-w-0 flex-1">
               <Link to="/cases" className="text-xs text-slate-500 hover:text-white mb-1 block transition-colors">← Volver</Link>
-              <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">{currentCase.title}</h1>
-              <div className="flex gap-2 mt-2 items-center">
-                <span className="text-xs font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">{currentCase.autosNumber}</span>
+              <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight leading-tight truncate">{currentCase.title}</h1>
+              <div className="flex gap-2 mt-2 items-center flex-wrap">
+                <span className="text-[10px] sm:text-xs font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">{currentCase.autosNumber}</span>
                 <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${currentCase.status === 'activo' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>{currentCase.status}</span>
               </div>
             </div>
-            {/* Acciones Globales */}
-            <div className="flex gap-2">
-              <Link to={`/events/new?caseId=${id}`} className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700"><Calendar size={18} /></Link>
-              <Link to={`/documents/new?caseId=${id}`} className="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-900/20"><Upload size={18} /></Link>
+            {/* Acciones Globales - Compactas en móvil */}
+            <div className="flex gap-1 sm:gap-2 shrink-0">
+              <button
+                onClick={() => {
+                  if ('caches' in window) {
+                    caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))));
+                  }
+                  window.location.reload();
+                }}
+                title="Limpiar caché y recargar"
+                className="p-1.5 sm:p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 rounded-lg border border-slate-700 transition-colors"
+              >
+                <RefreshCw size={16} className="sm:w-[18px] sm:h-[18px]" />
+              </button>
+              <Link to={`/events/new?caseId=${id}`} className="p-1.5 sm:p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 hidden sm:flex"><Calendar size={18} /></Link>
+              <Link to={`/documents/new?caseId=${id}`} className="p-1.5 sm:p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-900/20"><Upload size={16} className="sm:w-[18px] sm:h-[18px]" /></Link>
             </div>
           </div>
 
-          {/* TABS */}
-          <div className="flex gap-6 overflow-x-auto no-scrollbar">
+          {/* TABS - Scroll horizontal en móvil */}
+          <div className="flex gap-3 sm:gap-6 overflow-x-auto no-scrollbar pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
             {[
-              { id: 'resumen', label: '📊 Resumen' },
-              { id: 'economico', label: '💰 Hechos / Partidas' }, // Renombrado para claridad
-              { id: 'estrategia', label: '♟️ Estrategia' },
-              { id: 'docs', label: '📂 Documentos' },
-              { id: 'actuaciones', label: '📅 Actuaciones' },
+              { id: 'resumen', label: '📊 Resumen', shortLabel: '📊' },
+              { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
+              { id: 'estrategia', label: '♟️ Estrategia', shortLabel: '♟️' },
+              { id: 'docs', label: '📂 Documentos', shortLabel: '📂' },
+              { id: 'actuaciones', label: '📅 Actuaciones', shortLabel: '📅' },
             ].map(tab => (
               <button
                 key={tab.id}
+                data-tab={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`pb-3 text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                className={`pb-2 sm:pb-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
               >
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.shortLabel} {tab.id === 'resumen' ? 'Resumen' : tab.id === 'economico' ? 'Eco.' : tab.id === 'estrategia' ? 'Estr.' : tab.id === 'docs' ? 'Docs' : 'Actu.'}</span>
               </button>
             ))}
           </div>
@@ -359,7 +491,7 @@ export function CaseDetailPage() {
 
       {/* CONTENIDO */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} navigate={navigate} />}
+        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} navigate={navigate} setActiveTab={setActiveTab} />}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}

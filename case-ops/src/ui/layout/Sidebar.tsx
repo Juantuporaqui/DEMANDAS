@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
 import {
   LayoutDashboard,
   Scale,
@@ -8,7 +9,8 @@ import {
   Calendar,
   Search,
   Gavel,
-  Wrench
+  Wrench,
+  RefreshCw
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -24,6 +26,32 @@ const NAV_ITEMS = [
 ];
 
 export function Sidebar() {
+  const [isClearing, setIsClearing] = useState(false);
+
+  const handleClearCache = async () => {
+    setIsClearing(true);
+    try {
+      // Limpiar Service Worker cache
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+      // Limpiar localStorage (excepto datos críticos)
+      const keysToKeep = ['theme', 'user-preferences'];
+      const allKeys = Object.keys(localStorage);
+      allKeys.forEach(key => {
+        if (!keysToKeep.includes(key)) {
+          localStorage.removeItem(key);
+        }
+      });
+      // Forzar recarga completa desde servidor
+      window.location.reload();
+    } catch (error) {
+      console.error('Error limpiando caché:', error);
+      window.location.reload();
+    }
+  };
+
   return (
     <aside className="hidden lg:flex flex-col w-64 bg-slate-950 border-r border-slate-800 h-screen fixed z-50">
       {/* Header del Sidebar */}
@@ -32,6 +60,15 @@ export function Sidebar() {
           C
         </div>
         <span className="text-white font-bold tracking-tight text-lg">CASE OPS</span>
+        {/* Botón Limpiar Caché */}
+        <button
+          onClick={handleClearCache}
+          disabled={isClearing}
+          title="Limpiar caché y recargar"
+          className="ml-auto p-1.5 rounded-lg text-slate-500 hover:text-amber-400 hover:bg-slate-800 transition-all disabled:opacity-50"
+        >
+          <RefreshCw size={16} className={isClearing ? 'animate-spin' : ''} />
+        </button>
       </div>
       
       {/* Navegación */}
