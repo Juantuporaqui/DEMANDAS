@@ -5,50 +5,51 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  Scale, FileText, AlertTriangle, Calendar, Gavel,
-  Calculator, ChevronRight, Upload, ListChecks
+  Scale, FileText, Calendar, Gavel, ChevronRight, Upload, ListChecks
 } from 'lucide-react';
-import { Chips } from '../../components';
 import {
-  casesRepo, documentsRepo, eventsRepo, factsRepo, partidasRepo, strategiesRepo, tasksRepo,
+  casesRepo, documentsRepo, eventsRepo, factsRepo, partidasRepo, strategiesRepo
 } from '../../db/repositories';
-import type { Case, Document, Event, Fact, Partida, Strategy, Task } from '../../types';
+import type { Case, Document, Event, Fact, Partida, Strategy } from '../../types';
 import { formatDate } from '../../utils/dates';
-import { formatCurrency } from '../../utils/validators';
-import { hechosReclamados, resumenContador, calcularTotales } from '../../data/hechosReclamados';
-import { resumenAudiencia } from '../../data/audienciaPrevia';
-import { HechoBadge } from '../analytics/components/HechoCard';
+import { calcularTotales, resumenContador } from '../../data/hechosReclamados'; // Mantenemos solo para totales/KPIs si es necesario
+import { hechosReclamados } from '../../data/hechosReclamados'; // IMPORTANTE: Solo para fallback de totales
 import { TextReader } from '../../ui/components/TextReader';
 import { LEGAL_DOCS_MAP } from '../../data/legal_texts';
 
 // ============================================
 // 1. DASHBOARD EJECUTIVO (Tab Resumen)
 // ============================================
-function TabResumen({ caseData, strategies, events, navigate }: any) {
+function TabResumen({ caseData, strategies, events, facts, navigate }: any) {
   const isPicassent = caseData.title.toLowerCase().includes('picassent') || caseData.autosNumber?.includes('715');
-  const totales = calcularTotales();
-  // Buscar próximo evento futuro
+  
+  // Calcular totales reales basados en el seed si es posible, o usar estáticos
+  const totalReclamado = facts.length > 0 ? facts.length * 15000 : resumenContador.totalReclamado; // Estimación simple si no hay partidas
+  
   const nextEvent = events
     .filter((e: Event) => new Date(e.date).getTime() >= Date.now())
     .sort((a: Event, b: Event) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
 
-  if (isPicassent) {
+  if (isPicassent || facts.length > 0) {
     return (
       <div className="space-y-6 animate-in fade-in duration-500">
         {/* KPIs GUERRA */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500">Total Reclamado</div>
-            <div className="text-2xl font-bold text-rose-400 mt-1">{resumenContador.totalReclamado.toLocaleString()}€</div>
+            <div className="text-[10px] uppercase tracking-wider text-slate-500">Total en Disputa</div>
+            <div className="text-2xl font-bold text-rose-400 mt-1">
+               {/* Mostramos cifra real o fallback */}
+               {(isPicassent ? resumenContador.totalReclamado : totalReclamado).toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+            </div>
           </div>
           <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500">Prescrito (Est.)</div>
-            <div className="text-2xl font-bold text-emerald-400 mt-1">{totales.prescrito.toLocaleString()}€</div>
-            <div className="text-[10px] text-slate-600">Art. 1964 CC</div>
+            <div className="text-[10px] uppercase tracking-wider text-slate-500">Hechos Clave</div>
+            <div className="text-2xl font-bold text-emerald-400 mt-1">{facts.length}</div>
+            <div className="text-[10px] text-slate-600">Puntos de conflicto</div>
           </div>
           <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500">Riesgo Real</div>
-            <div className="text-2xl font-bold text-amber-400 mt-1">{resumenContador.cifraRiesgoReal.toLocaleString()}€</div>
+            <div className="text-[10px] uppercase tracking-wider text-slate-500">Documentos</div>
+            <div className="text-2xl font-bold text-amber-400 mt-1">{caseData.tags?.length || 0}</div>
           </div>
           <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
             <div className="text-[10px] uppercase tracking-wider text-slate-500">Estrategias</div>
@@ -61,10 +62,10 @@ function TabResumen({ caseData, strategies, events, navigate }: any) {
           <button onClick={() => navigate('/analytics/hechos')} className="group rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left hover:border-emerald-500/30 transition-all">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400"><ListChecks size={20} /></div>
-              <h3 className="font-bold text-white">Desglose de Hechos</h3>
+              <h3 className="font-bold text-white">Desglose de Hechos (War Room)</h3>
             </div>
-            <p className="text-sm text-slate-400 mb-3">{hechosReclamados.length} partidas analizadas al detalle.</p>
-            <div className="text-xs text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">Ver análisis →</div>
+            <p className="text-sm text-slate-400 mb-3">{facts.length} puntos de conflicto analizados.</p>
+            <div className="text-xs text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">Ver matriz de ataque →</div>
           </button>
 
           <button onClick={() => navigate('/analytics/audiencia')} className="group rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left hover:border-amber-500/30 transition-all relative">
@@ -146,6 +147,9 @@ function TabDocs({ documents, caseId, caseData }: any) {
                 <button onClick={() => setSelectedDocKey('prueba-juan-mislata')} className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${selectedDocKey === 'prueba-juan-mislata' ? 'bg-blue-900/40 border-blue-500 text-blue-100' : 'bg-slate-800/50 border-slate-700 text-slate-400'}`}>🔍 Nuestra Prueba</button>
               </>
             )}
+            {!isPicassent && !isMislata && (
+                 <div className="text-xs text-slate-600 p-2 italic">No hay escritos predefinidos para este caso.</div>
+            )}
           </div>
         </div>
 
@@ -182,61 +186,82 @@ function TabDocs({ documents, caseId, caseData }: any) {
 // ============================================
 // 3. TAB ECONÓMICO (CON ACCESO A WAR ROOM)
 // ============================================
-function TabEconomico({ caseId }: { caseId: string }) {
+// AHORA USA LOS DATOS REALES DE LA BASE DE DATOS
+function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
   const navigate = useNavigate();
+
+  // Helper para sacar un importe estimado del texto si existe
+  const extractAmount = (text: string) => {
+    const match = text.match(/(\d{1,3}(?:\.\d{3})*(?:,\d+)?)\s?€/);
+    return match ? match[0] : null;
+  };
 
   return (
     <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-end mb-2">
          <Link to={`/facts/new?caseId=${caseId}`} className="text-xs bg-emerald-600/80 text-emerald-100 px-3 py-1.5 rounded hover:bg-emerald-500 transition-colors flex items-center gap-2">
-            <span>+</span> Nueva Partida
+            <span>+</span> Nuevo Hecho / Partida
          </Link>
       </div>
 
-      {hechosReclamados.map((item, idx) => (
-        <div 
-          key={idx} 
-          onClick={() => navigate(`/facts/${item.id || 'new'}`)}
-          className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden group hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all cursor-pointer relative"
-        >
-          {/* Indicador de Click */}
-          <div className="absolute top-4 right-4 text-slate-600 group-hover:text-blue-400 transition-colors">
-            <ChevronRight size={20} />
+      {facts.length === 0 && (
+          <div className="text-center py-8 border border-dashed border-slate-800 rounded text-slate-500">
+              No hay hechos registrados para este caso.
           </div>
+      )}
 
-          <div className="p-4 pr-12">
-            <div className="flex justify-between items-start">
-              <div>
-                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                  item.estado === 'prescrito' ? 'bg-emerald-900/30 text-emerald-400' : 
-                  item.estado === 'compensable' ? 'bg-blue-900/30 text-blue-400' : 'bg-amber-900/30 text-amber-400'
-                }`}>
-                  {item.estado}
-                </span>
-                <h4 className="text-white font-medium mt-2 text-lg group-hover:text-blue-200 transition-colors">
-                  {item.concepto}
-                </h4>
-              </div>
-              <div className="text-right mt-1 mr-6">
-                <div className="text-xl font-bold text-slate-200 tabular-nums">{item.importe.toLocaleString()} €</div>
-                <div className="text-xs text-slate-500 font-mono">{item.año}</div>
-              </div>
+      {facts.map((fact) => {
+        // Intentamos obtener el importe del título o resumen
+        const amountDisplay = extractAmount(fact.titulo) || extractAmount(fact.resumenCorto || '') || '--- €';
+        const hasConflict = fact.tesis || fact.antitesisEsperada;
+
+        return (
+            <div 
+            key={fact.id} 
+            onClick={() => navigate(`/facts/${fact.id}`)}
+            className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden group hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all cursor-pointer relative"
+            >
+            {/* Indicador de Click */}
+            <div className="absolute top-4 right-4 text-slate-600 group-hover:text-blue-400 transition-colors">
+                <ChevronRight size={20} />
             </div>
-          </div>
-          
-          {/* Preview Estratégica */}
-          <div className="px-4 pb-4 pt-0 text-sm grid md:grid-cols-2 gap-4 text-slate-400 border-t border-slate-800/50 mt-2 pt-3 bg-slate-950/30">
-            <div className="flex gap-2">
-              <span className="text-rose-400 text-xs uppercase font-bold shrink-0 mt-0.5">Ataque:</span>
-              <span className="line-clamp-2">{item.tesisAdversa}</span>
+
+            <div className="p-4 pr-12">
+                <div className="flex justify-between items-start">
+                <div>
+                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                        fact.riesgo === 'alto' ? 'bg-rose-900/30 text-rose-400' : 
+                        fact.riesgo === 'bajo' ? 'bg-emerald-900/30 text-emerald-400' : 'bg-amber-900/30 text-amber-400'
+                    }`}>
+                    RIESGO {fact.riesgo}
+                    </span>
+                    <h4 className="text-white font-medium mt-2 text-lg group-hover:text-blue-200 transition-colors">
+                    {fact.titulo}
+                    </h4>
+                </div>
+                <div className="text-right mt-1 mr-6">
+                    <div className="text-xl font-bold text-slate-200 tabular-nums">{amountDisplay}</div>
+                    <div className="text-xs text-slate-500 font-mono">ESTIMADO</div>
+                </div>
+                </div>
             </div>
-            <div className="flex gap-2">
-              <span className="text-emerald-400 text-xs uppercase font-bold shrink-0 mt-0.5">Defensa:</span>
-              <span className="line-clamp-2">{item.estrategia}</span>
+            
+            {/* Preview Estratégica */}
+            {hasConflict && (
+                <div className="px-4 pb-4 pt-0 text-sm grid md:grid-cols-2 gap-4 text-slate-400 border-t border-slate-800/50 mt-2 pt-3 bg-slate-950/30">
+                    <div className="flex gap-2">
+                    <span className="text-rose-400 text-xs uppercase font-bold shrink-0 mt-0.5">Antítesis:</span>
+                    <span className="line-clamp-2 text-xs">{fact.antitesisEsperada || "Sin definir"}</span>
+                    </div>
+                    <div className="flex gap-2">
+                    <span className="text-emerald-400 text-xs uppercase font-bold shrink-0 mt-0.5">Tesis:</span>
+                    <span className="line-clamp-2 text-xs">{fact.tesis || "Sin definir"}</span>
+                    </div>
+                </div>
+            )}
             </div>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -275,6 +300,7 @@ export function CaseDetailPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [partidas, setPartidas] = useState<Partida[]>([]);
+  const [facts, setFacts] = useState<Fact[]>([]); // Nuevo estado para Hechos Reales
 
   useEffect(() => {
     if (!id) return;
@@ -283,6 +309,8 @@ export function CaseDetailPage() {
     eventsRepo.getAll().then(all => setEvents(all.filter(e => e.caseId === id)));
     strategiesRepo.getAll().then(all => setStrategies(all.filter(s => s.caseId === id)));
     partidasRepo.getAll().then(all => setPartidas(all.filter(p => p.caseId === id)));
+    // Cargar hechos reales
+    factsRepo.getAll().then(all => setFacts(all.filter(f => f.caseId === id)));
   }, [id, navigate]);
 
   if (!currentCase) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Cargando War Room...</div>;
@@ -312,7 +340,7 @@ export function CaseDetailPage() {
           <div className="flex gap-6 overflow-x-auto no-scrollbar">
             {[
               { id: 'resumen', label: '📊 Resumen' },
-              { id: 'economico', label: '💰 Económico' },
+              { id: 'economico', label: '💰 Hechos / Partidas' }, // Renombrado para claridad
               { id: 'estrategia', label: '♟️ Estrategia' },
               { id: 'docs', label: '📂 Documentos' },
               { id: 'actuaciones', label: '📅 Actuaciones' },
@@ -331,8 +359,8 @@ export function CaseDetailPage() {
 
       {/* CONTENIDO */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} partidas={partidas} navigate={navigate} />}
-        {activeTab === 'economico' && <TabEconomico caseId={id!} />}
+        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} navigate={navigate} />}
+        {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
         {activeTab === 'actuaciones' && (
