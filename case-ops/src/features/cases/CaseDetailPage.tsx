@@ -1,27 +1,37 @@
 // ============================================
-// CASE OPS - Case Detail Page (FIXED)
+// CASE OPS - Case Detail Page (MASTER FINAL MERGED)
 // ============================================
 
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
-  Scale, FileText, Calendar, Gavel, ChevronRight, Upload, ListChecks
+  Scale, FileText, Calendar, Gavel, ChevronRight, Upload, ListChecks, RefreshCw, Eye, AlertTriangle
 } from 'lucide-react';
 import {
   casesRepo, documentsRepo, eventsRepo, factsRepo, partidasRepo, strategiesRepo
 } from '../../db/repositories';
 import type { Case, Document, Event, Fact, Partida, Strategy } from '../../types';
 import { formatDate } from '../../utils/dates';
-import { resumenContador } from '../../data/hechosReclamados';
+import { calcularTotales, resumenContador, hechosReclamados } from '../../data/hechosReclamados';
 import { TextReader } from '../../ui/components/TextReader';
-// Asegúrate de que esta ruta es correcta y el archivo existe
+// Importamos el mapa de textos reales
 import { LEGAL_DOCS_MAP } from '../../data/legal_texts';
 
+// Hechos más relevantes para mostrar en el resumen
+const hechosRelevantes = hechosReclamados
+  .filter(h => h.estado === 'disputa' || h.cuantia > 15000)
+  .sort((a, b) => b.cuantia - a.cuantia)
+  .slice(0, 4);
+
 // ============================================
-// 1. DASHBOARD EJECUTIVO
+// 1. DASHBOARD EJECUTIVO (Tab Resumen)
 // ============================================
-function TabResumen({ caseData, strategies, events, facts, navigate }: any) {
-  const isPicassent = caseData.id.includes('picassent') || caseData.title.toLowerCase().includes('picassent');
+function TabResumen({ caseData, strategies, events, facts, navigate, setActiveTab }: any) {
+  // Detección robusta del caso
+  const isPicassent = caseData.id?.includes('picassent') || 
+                      caseData.title.toLowerCase().includes('picassent') || 
+                      caseData.autosNumber?.includes('715');
+  
   const totalReclamado = facts.length > 0 ? facts.length * 15000 : resumenContador.totalReclamado; 
   
   const nextEvent = events
@@ -30,6 +40,7 @@ function TabResumen({ caseData, strategies, events, facts, navigate }: any) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      {/* KPIs GUERRA */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Total en Disputa</div>
@@ -40,6 +51,7 @@ function TabResumen({ caseData, strategies, events, facts, navigate }: any) {
         <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Hechos Clave</div>
           <div className="text-2xl font-bold text-emerald-400 mt-1">{facts.length}</div>
+          <div className="text-[10px] text-slate-600">Puntos de conflicto</div>
         </div>
         <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Documentos</div>
@@ -51,82 +63,234 @@ function TabResumen({ caseData, strategies, events, facts, navigate }: any) {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <button onClick={() => navigate('/analytics/hechos')} className="group rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left hover:border-emerald-500/30 transition-all">
-          <div className="flex items-center gap-3 mb-2">
+      {/* ACCESOS RÁPIDOS - BOTONES TIPO APP MÓVIL */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2">
+        {/* TARJETA DESGLOSE DE HECHOS */}
+        <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-4 sm:p-5 hover:border-emerald-500/30 transition-all">
+          <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400"><ListChecks size={20} /></div>
-            <h3 className="font-bold text-white">Desglose de Hechos (War Room)</h3>
+            <div>
+              <h3 className="font-bold text-white text-sm">Desglose de Hechos</h3>
+              <p className="text-[10px] text-slate-500">{isPicassent ? '10' : facts.length} partidas analizadas</p>
+            </div>
           </div>
-          <p className="text-sm text-slate-400 mb-3">{facts.length} puntos de conflicto analizados.</p>
-          <div className="text-xs text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">Ver matriz de ataque →</div>
-        </button>
 
-        <button onClick={() => navigate('/analytics/audiencia')} className="group rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left hover:border-amber-500/30 transition-all relative">
-          <div className="absolute top-4 right-4"><span className="bg-amber-500/20 text-amber-300 text-[10px] px-2 py-1 rounded-full border border-amber-500/30">URGENTE</span></div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400"><Gavel size={20} /></div>
-            <h3 className="font-bold text-white">Audiencia Previa</h3>
+          {/* HECHOS RELEVANTES - GRID TIPO APP */}
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {hechosRelevantes.slice(0, 4).map((hecho) => (
+              <button
+                key={hecho.id}
+                onClick={() => navigate(`/facts/${hecho.id}`)}
+                className={`flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl border transition-all hover:scale-105 active:scale-95 ${
+                  hecho.estado === 'disputa'
+                    ? 'bg-orange-500/10 border-orange-500/30 hover:border-orange-500/60'
+                    : hecho.estado === 'prescrito'
+                    ? 'bg-rose-500/10 border-rose-500/30 hover:border-rose-500/60'
+                    : 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60'
+                }`}
+              >
+                <span className={`text-base sm:text-xl font-bold ${
+                  hecho.estado === 'disputa' ? 'text-orange-400' :
+                  hecho.estado === 'prescrito' ? 'text-rose-400' : 'text-amber-400'
+                }`}>
+                  #{hecho.id}
+                </span>
+                <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight line-clamp-2">
+                  {hecho.titulo.split(' ').slice(0, 2).join(' ')}
+                </span>
+                <span className="text-[8px] text-slate-600 font-mono">
+                  {(hecho.cuantia / 1000).toFixed(0)}k€
+                </span>
+              </button>
+            ))}
           </div>
-          <p className="text-sm text-slate-400 mb-3">Preparación de prueba y alegaciones.</p>
-          <div className="text-xs text-amber-400 font-medium group-hover:translate-x-1 transition-transform">Ir al modo juicio →</div>
-        </button>
+
+          <button
+            onClick={() => navigate('/analytics/hechos')}
+            className="w-full text-xs text-emerald-400 font-medium py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors flex items-center justify-center gap-2"
+          >
+            <ListChecks size={14} />
+            Ver los 10 hechos →
+          </button>
+        </div>
+
+        {/* TARJETA AUDIENCIA PREVIA */}
+        <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-4 sm:p-5 hover:border-amber-500/30 transition-all relative">
+          <div className="absolute top-3 right-3"><span className="bg-rose-500/20 text-rose-300 text-[9px] px-2 py-0.5 rounded-full border border-rose-500/30 animate-pulse">URGENTE</span></div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400"><Gavel size={20} /></div>
+            <div>
+              <h3 className="font-bold text-white text-sm">Audiencia Previa</h3>
+              <p className="text-[10px] text-slate-500">Puntos clave de defensa</p>
+            </div>
+          </div>
+
+          {/* PUNTOS CLAVE - GRID TIPO APP */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <button
+              onClick={() => navigate('/facts/4')}
+              className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:border-rose-500/60 transition-all hover:scale-105 active:scale-95"
+            >
+              <AlertTriangle size={20} className="text-rose-400" />
+              <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight">Hipoteca</span>
+              <span className="text-[8px] text-rose-400 font-bold">122k€</span>
+            </button>
+            <button
+              onClick={() => navigate('/facts/3')}
+              className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:border-amber-500/60 transition-all hover:scale-105 active:scale-95"
+            >
+              <Scale size={20} className="text-amber-400" />
+              <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight">Compensa</span>
+              <span className="text-[8px] text-amber-400 font-bold">38.5k€</span>
+            </button>
+            <button
+              onClick={() => navigate('/facts/10')}
+              className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 hover:border-cyan-500/60 transition-all hover:scale-105 active:scale-95"
+            >
+              <FileText size={20} className="text-cyan-400" />
+              <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight">Agrícola</span>
+              <span className="text-[8px] text-cyan-400 font-bold">10.8k€</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => navigate('/analytics/audiencia')}
+            className="w-full text-xs text-amber-400 font-medium py-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors flex items-center justify-center gap-2"
+          >
+            <Gavel size={14} />
+            Modo juicio →
+          </button>
+        </div>
       </div>
+
+      {/* ACCESO RÁPIDO A DOCUMENTOS - CON NAVEGACIÓN DIRECTA */}
+      <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400"><Eye size={18} /></div>
+          <h3 className="font-bold text-white text-sm">Documentos del Procedimiento</h3>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {/* BOTONES QUE ACTIVAN LA PESTAÑA DOCS Y SELECCIONAN EL ARCHIVO */}
+          <button
+            onClick={() => navigate(`/cases/${caseData.id}?tab=docs&doc=demanda-picassent`)}
+            className="flex flex-col items-center gap-1 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/20 transition-all hover:scale-105 active:scale-95"
+          >
+            <span className="text-xl sm:text-2xl">📜</span>
+            <span className="text-[9px] sm:text-[10px] text-amber-400 font-medium">Demanda</span>
+          </button>
+          <button
+            onClick={() => navigate(`/cases/${caseData.id}?tab=docs&doc=contestacion-picassent`)}
+            className="flex flex-col items-center gap-1 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/20 transition-all hover:scale-105 active:scale-95"
+          >
+            <span className="text-xl sm:text-2xl">🛡️</span>
+            <span className="text-[9px] sm:text-[10px] text-emerald-400 font-medium">Contest.</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('docs')}
+            className="flex flex-col items-center gap-1 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 hover:border-cyan-500/50 hover:bg-cyan-500/20 transition-all hover:scale-105 active:scale-95"
+          >
+            <span className="text-xl sm:text-2xl">📂</span>
+            <span className="text-[9px] sm:text-[10px] text-cyan-400 font-medium">Todos</span>
+          </button>
+          <button
+            onClick={() => navigate(`/documents/new?caseId=${caseData.id}`)}
+            className="flex flex-col items-center gap-1 p-3 rounded-xl bg-slate-700/50 border border-slate-600/50 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all hover:scale-105 active:scale-95"
+          >
+            <Upload size={20} className="text-slate-400 sm:w-6 sm:h-6" />
+            <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium">Subir</span>
+          </button>
+        </div>
+      </div>
+
+      {/* PRÓXIMO EVENTO */}
+      {nextEvent && (
+        <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-transparent p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div className="flex items-center gap-3">
+            <div className="bg-emerald-500/20 p-2 rounded-lg text-emerald-400"><Calendar size={20} /></div>
+            <div>
+              <div className="text-xs font-bold text-emerald-400 uppercase">Próximo Hito</div>
+              <div className="text-slate-200">{nextEvent.title}</div>
+            </div>
+          </div>
+          <div className="text-xl font-bold text-emerald-400">{formatDate(nextEvent.date)}</div>
+        </div>
+      )}
     </div>
   );
 }
 
 // ============================================
-// 2. TAB DOCUMENTOS (FIXED)
+// 2. TAB DOCUMENTOS (El Lector Inteligente - FIXED)
 // ============================================
-function TabDocs({ documents, caseId, caseData }: any) {
-  const [selectedDocKey, setSelectedDocKey] = useState<string | null>(null);
+function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
+  // Estado para el documento seleccionado
+  const [selectedDocKey, setSelectedDocKey] = useState<string | null>(initialDocKey || null);
   
-  // LÓGICA DE DETECCIÓN ROBUSTA
-  // Si el ID contiene 'picassent' o el número '715', activamos los documentos
-  const isPicassent = caseId.includes('picassent') || 
-                      caseData.title.toLowerCase().includes('picassent') || 
+  // Detección robusta: ID del caso, Título o Número de Autos
+  const isPicassent = caseId?.includes('picassent') || 
+                      caseData.title?.toLowerCase().includes('picassent') || 
                       caseData.autosNumber?.includes('715');
+                      
+  const isMislata = caseData.title?.toLowerCase().includes('mislata');
 
-  // Debug rápido para ver si el mapa carga
-  const hasLegalTexts = Object.keys(LEGAL_DOCS_MAP).length > 0;
+  // Debug: Ver si tenemos textos cargados
+  const hasLegalTexts = LEGAL_DOCS_MAP && Object.keys(LEGAL_DOCS_MAP).length > 0;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-240px)] min-h-[600px]">
-      {/* SIDEBAR */}
+      {/* SIDEBAR DOCUMENTOS */}
       <div className="space-y-6 lg:col-span-1 overflow-y-auto pr-2 custom-scrollbar">
         
+        {/* Botón Subir */}
         <Link to={`/documents/new?caseId=${caseId}`} className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-900/20">
           <Upload size={16} /> Subir Nuevo
         </Link>
 
+        {/* Escritos Procesales (Textos Limpios) */}
         <div>
           <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
             <Scale size={14} /> Autos y Escritos
           </h3>
           
           <div className="space-y-1">
-            {/* MENSAJE DE DEBUG SI FALLA LA CARGA */}
+            {/* Mensaje de error si no hay textos cargados */}
             {!hasLegalTexts && (
-              <div className="text-xs text-rose-500 bg-rose-900/20 p-2 rounded mb-2 border border-rose-800">
-                ⚠️ Error: LEGAL_DOCS_MAP vacío. Revisa src/data/legal_texts.ts
-              </div>
+               <div className="text-xs text-rose-500 bg-rose-900/20 p-2 rounded mb-2 border border-rose-800">
+                 ⚠️ Error: No se han cargado los textos legales. Verifica src/data/legal_texts.ts
+               </div>
             )}
 
-            {isPicassent ? (
+            {isPicassent && (
               <>
-                <button onClick={() => setSelectedDocKey('demanda-picassent')} className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${selectedDocKey === 'demanda-picassent' ? 'bg-amber-900/40 border-amber-500/50 text-amber-100' : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'}`}>
+                <button 
+                  onClick={() => setSelectedDocKey('demanda-picassent')} 
+                  className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${selectedDocKey === 'demanda-picassent' ? 'bg-amber-900/40 border-amber-500/50 text-amber-100' : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'}`}
+                >
                   📜 Demanda Contraria
                 </button>
-                <button onClick={() => setSelectedDocKey('contestacion-picassent')} className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${selectedDocKey === 'contestacion-picassent' ? 'bg-emerald-900/40 border-emerald-500/50 text-emerald-100' : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'}`}>
+                <button 
+                  onClick={() => setSelectedDocKey('contestacion-picassent')} 
+                  className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${selectedDocKey === 'contestacion-picassent' ? 'bg-emerald-900/40 border-emerald-500/50 text-emerald-100' : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'}`}
+                >
                   🛡️ Contestación
                 </button>
               </>
-            ) : (
-              <div className="text-xs text-slate-600 italic px-2">No hay escritos predefinidos para el caso "{caseData.title}".</div>
+            )}
+            
+            {isMislata && (
+              <>
+                <button onClick={() => setSelectedDocKey('recurso-reposicion-mislata')} className={`w-full text-left p-3 rounded-lg text-sm border mb-1 transition-all ${selectedDocKey === 'recurso-reposicion-mislata' ? 'bg-rose-900/40 border-rose-500 text-rose-100' : 'bg-slate-800/50 border-slate-700 text-slate-400'}`}>🚨 Recurso Contrario</button>
+                <button onClick={() => setSelectedDocKey('oposicion-mislata')} className={`w-full text-left p-3 rounded-lg text-sm border mb-1 transition-all ${selectedDocKey === 'oposicion-mislata' ? 'bg-emerald-900/40 border-emerald-500 text-emerald-100' : 'bg-slate-800/50 border-slate-700 text-slate-400'}`}>✅ Nuestra Oposición</button>
+              </>
+            )}
+            
+            {!isPicassent && !isMislata && (
+                 <div className="text-xs text-slate-600 p-2 italic">No hay escritos predefinidos para este caso.</div>
             )}
           </div>
         </div>
 
+        {/* Archivos PDF Subidos */}
         <div>
           <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2 mt-6">
             <Upload size={14} /> Archivo Digital
@@ -140,16 +304,19 @@ function TabDocs({ documents, caseId, caseData }: any) {
         </div>
       </div>
       
-      {/* VISOR */}
+      {/* VISOR CENTRAL */}
       <div className="lg:col-span-3 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden h-full shadow-2xl relative flex flex-col">
         {selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] ? (
           <TextReader content={LEGAL_DOCS_MAP[selectedDocKey]} />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-slate-600 bg-slate-900/20">
             <FileText size={48} className="mb-4 opacity-20" />
-            <p className="mt-4">Selecciona un documento para lectura</p>
+            <p className="mt-4">Selecciona un documento para lectura inmersiva</p>
+            <p className="text-xs opacity-50 mt-2">Formatos optimizados para War Room</p>
             {selectedDocKey && !LEGAL_DOCS_MAP[selectedDocKey] && (
-               <p className="text-xs text-rose-500 mt-2">Error: No se encontró el texto para la clave "{selectedDocKey}"</p>
+               <p className="text-xs text-rose-500 mt-2 bg-rose-900/20 px-2 py-1 rounded">
+                 ⚠️ Error: No se encontró contenido para "{selectedDocKey}"
+               </p>
             )}
           </div>
         )}
@@ -159,10 +326,12 @@ function TabDocs({ documents, caseId, caseData }: any) {
 }
 
 // ============================================
-// 3. TAB ECONÓMICO
+// 3. TAB ECONÓMICO (CON ACCESO A WAR ROOM)
 // ============================================
 function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
   const navigate = useNavigate();
+
+  // Helper para sacar un importe estimado del texto si existe
   const extractAmount = (text: string) => {
     const match = text.match(/(\d{1,3}(?:\.\d{3})*(?:,\d+)?)\s?€/);
     return match ? match[0] : null;
@@ -178,11 +347,12 @@ function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
 
       {facts.length === 0 && (
           <div className="text-center py-8 border border-dashed border-slate-800 rounded text-slate-500">
-              No hay hechos registrados.
+              No hay hechos registrados para este caso.
           </div>
       )}
 
       {facts.map((fact) => {
+        // Intentamos obtener el importe del título o resumen
         const amountDisplay = extractAmount(fact.titulo) || extractAmount(fact.resumenCorto || '') || '--- €';
         const hasConflict = fact.tesis || fact.antitesisEsperada;
 
@@ -192,6 +362,7 @@ function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
             onClick={() => navigate(`/facts/${fact.id}`)}
             className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden group hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all cursor-pointer relative"
             >
+            {/* Indicador de Click */}
             <div className="absolute top-4 right-4 text-slate-600 group-hover:text-blue-400 transition-colors">
                 <ChevronRight size={20} />
             </div>
@@ -216,6 +387,7 @@ function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
                 </div>
             </div>
             
+            {/* Preview Estratégica */}
             {hasConflict && (
                 <div className="px-4 pb-4 pt-0 text-sm grid md:grid-cols-2 gap-4 text-slate-400 border-t border-slate-800/50 mt-2 pt-3 bg-slate-950/30">
                     <div className="flex gap-2">
@@ -263,11 +435,16 @@ function TabEstrategia({ strategies, caseId }: any) {
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('resumen');
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const docParam = searchParams.get('doc');
+  const [activeTab, setActiveTab] = useState(tabParam || 'resumen');
+  const [initialDoc, setInitialDoc] = useState<string | null>(docParam);
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
   const [docs, setDocs] = useState<Document[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [partidas, setPartidas] = useState<Partida[]>([]);
   const [facts, setFacts] = useState<Fact[]>([]); 
 
   useEffect(() => {
@@ -276,53 +453,80 @@ export function CaseDetailPage() {
     documentsRepo.getAll().then(all => setDocs(all.filter(d => d.caseId === id)));
     eventsRepo.getAll().then(all => setEvents(all.filter(e => e.caseId === id)));
     strategiesRepo.getAll().then(all => setStrategies(all.filter(s => s.caseId === id)));
+    partidasRepo.getAll().then(all => setPartidas(all.filter(p => p.caseId === id)));
+    // Cargar hechos reales
     factsRepo.getAll().then(all => setFacts(all.filter(f => f.caseId === id)));
   }, [id, navigate]);
+
+  // Si cambia la URL (por ejemplo al volver de ver un documento), actualizar el tab
+  useEffect(() => {
+    if (tabParam) setActiveTab(tabParam);
+    if (docParam) setInitialDoc(docParam);
+  }, [tabParam, docParam]);
 
   if (!currentCase) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Cargando War Room...</div>;
 
   return (
     <div className="min-h-screen bg-slate-950 pb-20 font-sans">
+      {/* HEADER - Optimizado para móvil */}
       <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-20 shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 pt-4 pb-0">
-          <div className="flex justify-between items-start mb-4">
-            <div>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 pt-3 sm:pt-4 pb-0">
+          <div className="flex justify-between items-start mb-3 sm:mb-4 gap-2">
+            <div className="min-w-0 flex-1">
               <Link to="/cases" className="text-xs text-slate-500 hover:text-white mb-1 block transition-colors">← Volver</Link>
-              <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">{currentCase.title}</h1>
-              <div className="flex gap-2 mt-2 items-center">
-                <span className="text-xs font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">{currentCase.autosNumber}</span>
+              <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight leading-tight truncate">{currentCase.title}</h1>
+              <div className="flex gap-2 mt-2 items-center flex-wrap">
+                <span className="text-[10px] sm:text-xs font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">{currentCase.autosNumber}</span>
+                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${currentCase.status === 'activo' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>{currentCase.status}</span>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Link to={`/events/new?caseId=${id}`} className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700"><Calendar size={18} /></Link>
-              <Link to={`/documents/new?caseId=${id}`} className="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-900/20"><Upload size={18} /></Link>
+            {/* Acciones Globales */}
+            <div className="flex gap-1 sm:gap-2 shrink-0">
+              <button
+                onClick={() => {
+                  if ('caches' in window) {
+                    caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))));
+                  }
+                  window.location.reload();
+                }}
+                title="Limpiar caché y recargar"
+                className="p-1.5 sm:p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 rounded-lg border border-slate-700 transition-colors"
+              >
+                <RefreshCw size={16} className="sm:w-[18px] sm:h-[18px]" />
+              </button>
+              <Link to={`/events/new?caseId=${id}`} className="p-1.5 sm:p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 hidden sm:flex"><Calendar size={18} /></Link>
+              <Link to={`/documents/new?caseId=${id}`} className="p-1.5 sm:p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-900/20"><Upload size={16} className="sm:w-[18px] sm:h-[18px]" /></Link>
             </div>
           </div>
 
-          <div className="flex gap-6 overflow-x-auto no-scrollbar">
+          {/* TABS - Scroll horizontal en móvil */}
+          <div className="flex gap-3 sm:gap-6 overflow-x-auto no-scrollbar pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
             {[
-              { id: 'resumen', label: '📊 Resumen' },
-              { id: 'economico', label: '💰 Hechos / Partidas' },
-              { id: 'estrategia', label: '♟️ Estrategia' },
-              { id: 'docs', label: '📂 Documentos' },
-              { id: 'actuaciones', label: '📅 Actuaciones' },
+              { id: 'resumen', label: '📊 Resumen', shortLabel: '📊' },
+              { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
+              { id: 'estrategia', label: '♟️ Estrategia', shortLabel: '♟️' },
+              { id: 'docs', label: '📂 Documentos', shortLabel: '📂' },
+              { id: 'actuaciones', label: '📅 Actuaciones', shortLabel: '📅' },
             ].map(tab => (
               <button
                 key={tab.id}
+                data-tab={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`pb-3 text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                className={`pb-2 sm:pb-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
               >
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.shortLabel} {tab.id === 'resumen' ? 'Resumen' : tab.id === 'economico' ? 'Eco.' : tab.id === 'estrategia' ? 'Estr.' : tab.id === 'docs' ? 'Docs' : 'Actu.'}</span>
               </button>
             ))}
           </div>
         </div>
       </header>
 
+      {/* CONTENIDO */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} navigate={navigate} />}
+        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} navigate={navigate} setActiveTab={setActiveTab} />}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} />}
-        {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
+        {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} initialDocKey={initialDoc} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
         {activeTab === 'actuaciones' && (
           <div className="space-y-4">
