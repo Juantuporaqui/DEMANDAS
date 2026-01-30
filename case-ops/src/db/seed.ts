@@ -234,42 +234,81 @@ export async function seedDatabase(): Promise<boolean> {
     }
 
     // =====================================================================
-    // 3. HECHOS CONTROVERTIDOS (FACTS) - AMPLIADO
+    // 3. HECHOS CONTROVERTIDOS (FACTS) - 10 HECHOS COMPLETOS PICASSENT
     // Fuentes: FIJAR.docx, APORTACIÓN DE TESTIGOS.docx
     // =====================================================================
     const factsData = [
+      // HECHO 1: Préstamos Personales BBVA
       {
-        title: 'Manipulación de Pruebas (Recortes BBVA)',
-        narrative: 'La actora aporta capturas de pantalla recortadas (Doc. adverso) eliminando el campo "Ordenante". El Doc. 25 y 26 demuestran que el pagador fue Juan.',
-        status: 'a_probar', burden: 'demandado', risk: 'bajo', strength: 5,
-        tags: ['mala_fe', 'documental'],
-        linkedDocIds: [docIds['Doc. 25 - Recibos Oficiales CaixaBank'], docIds['Doc. 26 - Cuadro Comparativo Visual']]
+        title: 'Préstamos Personales BBVA - 20.085€ (PRESCRITO)',
+        narrative: 'Vicenta alega que pagó préstamos personales en 2008. PRESCRITO +15 años (Art. 1964 CC). Sin justificante de ingreso. AEAT: préstamos para chalet común.',
+        status: 'controvertido', burden: 'demandado', risk: 'bajo', strength: 5,
+        tags: ['prescrito', 'bbva', 'prestamo'],
+        linkedDocIds: [docIds['Doc. 25 - Recibos Oficiales CaixaBank']]
       },
+      // HECHO 2: Vehículo Seat León
       {
-        title: 'Naturaleza Solidaria del Préstamo',
-        narrative: 'No existe "Hipoteca del demandado". Es un préstamo solidario (ambos titulares) con garantía real sobre vivienda privativa. El destino fue la obra común.',
-        status: 'controvertido', burden: 'mixta', risk: 'alto', strength: 5,
-        tags: ['hipoteca', 'juridico']
+        title: 'Vehículo Seat León - 13.000€ (PRESCRITO)',
+        narrative: 'Compra 2014, prescrito +10 años. Cuenta Barclays común. Liberalidad familiar. Juan pagó Renault Scenic 4.500€. Doble rasero de la actora.',
+        status: 'controvertido', burden: 'demandado', risk: 'bajo', strength: 5,
+        tags: ['prescrito', 'vehiculo', 'liberalidad']
       },
+      // HECHO 3: Venta Vivienda Artur Piera
       {
         title: 'Retirada de Fondos: 38.500€ (Ella) vs 32.000€ (Él)',
-        narrative: 'En la ruptura, Juan retiró 32.000€ (que se reclaman) pero Vicenta retiró 38.500€ de la cuenta común. Se opone compensación.',
+        narrative: 'En la ruptura, Juan retiró 32.000€ (que se reclaman) pero Vicenta retiró 38.500€ de la cuenta común (6.500€ MÁS). Se opone compensación.',
         status: 'a_probar', burden: 'demandado', risk: 'medio', strength: 5,
-        tags: ['compensacion', 'cuentas'],
+        tags: ['compensacion', 'cuentas', 'artur_piera'],
         linkedDocIds: [docIds['Extracto Cuenta Común (Retirada 38.500)']]
       },
+      // HECHO 4: Hipoteca Lope de Vega
       {
-        title: 'Caja Única Familiar (Doctrina STS 458/2025)',
-        narrative: 'Existían dos cuentas conjuntas indistintas donde se cruzaban nóminas y gastos. No cabe liquidación retroactiva de partidas de consumo.',
-        status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 4,
-        tags: ['jurisprudencia', 'sts_458_2025'],
-        linkedDocIds: [docIds['STS 458/2025 (Doctrina Cuentas)']]
+        title: 'Hipoteca Lope de Vega - 122.282€ (PRESCRITO parcial)',
+        narrative: 'Cuotas 2009-2024. Pre-2019 PRESCRITO. Préstamo 310K fue para terrenos comunes, no para vivienda privativa. Lope de Vega solo fue garantía, no destino.',
+        status: 'controvertido', burden: 'mixta', risk: 'alto', strength: 4,
+        tags: ['prescrito', 'hipoteca', 'lope_de_vega']
       },
+      // HECHO 5: IBI Lope de Vega
       {
-        title: 'Financiación Vehículo Seat León',
-        narrative: 'La actora reclama 13.000€ del vehículo (2014). El vehículo es bien común y fue pagado con fondos de la sociedad de gananciales/comunidad tácita.',
-        status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 3,
-        tags: ['vehiculo', 'bienes_muebles']
+        title: 'IBI Lope de Vega - 1.826,91€ (PRESCRITO)',
+        narrative: 'IBI 2013-2019, PRESCRITO pre-2019. Cuenta BBVA 9397 nutrida por nómina de Juan durante 16 años.',
+        status: 'controvertido', burden: 'demandado', risk: 'bajo', strength: 5,
+        tags: ['prescrito', 'ibi', 'quart']
+      },
+      // HECHO 6: IBI Chalet Montroy
+      {
+        title: 'IBI Chalet Montroy - 530,85€ (DISPUTA)',
+        narrative: 'Fondos comunes para bienes comunes. No cabe reembolso. Extracto BBVA 12/02/2021 muestra cargo directo de cuenta común.',
+        status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 4,
+        tags: ['disputa', 'ibi', 'montroy']
+      },
+      // HECHO 7: IBI Fincas Rústicas
+      {
+        title: 'IBI Fincas Rústicas - 151,81€ (COMPENSABLE)',
+        narrative: 'Compensación Art. 1196 CC. Juan pagó fitosanitarios 308,24€. Deuda ella > este IBI.',
+        status: 'a_probar', burden: 'demandado', risk: 'bajo', strength: 4,
+        tags: ['compensable', 'ibi', 'rusticas']
+      },
+      // HECHO 8: Comunidad Loma de los Caballeros
+      {
+        title: 'Comunidad Loma Caballeros - 19,39€ (COMPENSABLE)',
+        narrative: 'Compensación directa. Juan pagó Q1/2024 (36,06€). Saldo neto a favor de Juan.',
+        status: 'a_probar', burden: 'demandado', risk: 'bajo', strength: 5,
+        tags: ['compensable', 'comunidad']
+      },
+      // HECHO 9: Amortización Hipoteca Previa
+      {
+        title: 'Amortización Hipoteca Previa - 16.979€ (PRESCRITO)',
+        narrative: 'Prescrito 19 años. Condición del banco para préstamo 310K terrenos comunes. Vicenta aceptó en 2006 para comprar Montroy.',
+        status: 'controvertido', burden: 'demandado', risk: 'bajo', strength: 5,
+        tags: ['prescrito', 'hipoteca', 'amortizacion']
+      },
+      // HECHO 10: Maquinaria Agrícola
+      {
+        title: 'Maquinaria Agrícola Olivar - 5.801€ (DISPUTA)',
+        narrative: 'Inversión en negocio de olivos. Vicenta cobró 10.887,57€ beneficios 2023 (Factura Oleos Dels Alforins). Si se reclama la inversión, también los beneficios.',
+        status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 4,
+        tags: ['disputa', 'maquinaria', 'olivar']
       }
     ];
 
