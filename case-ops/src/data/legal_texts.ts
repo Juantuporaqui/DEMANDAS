@@ -3,6 +3,13 @@
 // ============================================
 // Este archivo conecta los IDs de la aplicación con los textos completos
 // que residen en la carpeta /docs para mantener el código limpio.
+//
+// DOCUMENTOS AUTO-DETECTADOS:
+// Cualquier archivo .html o .txt que subas a estas carpetas se carga automáticamente:
+//   - src/data/quart/       → Caso Quart (ETJ 1428/2025)
+//   - src/data/mislata/     → Caso Mislata (J.V. 1185/2025)
+//   - src/data/picassent/   → Caso Picassent (P.O. 715/2024)
+// ============================================
 
 import { CONTESTACION_PICASSENT_TEXT } from './docs/contestacionPicassent';
 import { DEMANDA_PICASSENT_TEXT } from './docs/demandaPicassent';
@@ -24,7 +31,15 @@ import {
   disputasQuart,
 } from './quart';
 
-export const LEGAL_DOCS_MAP: Record<string, string> = {
+// Importar documentos auto-detectados
+import { createLegalDocsMap, AUTO_DOCS } from './documentLoader';
+
+// Re-exportar para uso en otros componentes
+export { AUTO_DOCS, getDocumentsByCaso, getDocumentById } from './documentLoader';
+export type { AutoDocument } from './documentLoader';
+
+// Documentos manuales (generados desde TypeScript)
+const MANUAL_DOCS: Record<string, string> = {
   // --------------------------------------------------------------------------
   // CASO PICASSENT (715/2024) - Documentos Reales
   // --------------------------------------------------------------------------
@@ -365,4 +380,14 @@ ${p.descripcion}
 💰 Saldo neto a favor Juan: 881,88 €
 💵 Pagos directos Juan: 1.895,65 €
   `,
+};
+
+// ============================================
+// MAPA COMBINADO: Manuales + Auto-detectados
+// ============================================
+// Los documentos auto-detectados tienen prioridad si hay conflicto de IDs
+
+export const LEGAL_DOCS_MAP: Record<string, string> = {
+  ...MANUAL_DOCS,
+  ...createLegalDocsMap(), // Documentos auto-detectados de las carpetas
 };
