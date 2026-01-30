@@ -1,0 +1,304 @@
+// ============================================
+// INFORME ESTRATÉGICO - PICASSENT Y MISLATA
+// Líneas de defensa, ataques, réplicas y preguntas
+// ============================================
+
+export type Procedimiento = 'picassent' | 'mislata';
+export type TipoEstrategia = 'defensa' | 'ataque' | 'replica' | 'pregunta';
+export type Prioridad = 'critica' | 'alta' | 'media' | 'baja';
+export type Estado = 'pendiente' | 'preparado' | 'usado' | 'descartado';
+
+export interface LineaEstrategica {
+  id: string;
+  procedimiento: Procedimiento;
+  tipo: TipoEstrategia;
+  titulo: string;
+  descripcion: string;
+  fundamento: string;
+  prioridad: Prioridad;
+  estado: Estado;
+  articulosRelacionados: string[];
+  documentosSoporte: string[];
+  frasesClave: string[];
+  riesgos?: string;
+  notasInternas?: string;
+}
+
+// ============================================
+// ESTRATEGIA PICASSENT (DEMANDADO)
+// ============================================
+
+export const estrategiaPicassent: LineaEstrategica[] = [
+  // DEFENSAS
+  {
+    id: 'pic-def-1',
+    procedimiento: 'picassent',
+    tipo: 'defensa',
+    titulo: 'PRESCRIPCIÓN RADICAL',
+    descripcion: 'El 70% de las reclamaciones está prescrito. Hechos de 2006, 2008, 2014 superan cualquier plazo.',
+    fundamento: 'Art. 1964 CC (5 años) + DT 5ª Ley 42/2015 (máximo 7/10/2020 para acciones anteriores a 2015)',
+    prioridad: 'critica',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 1964 CC', 'art. 1969 CC', 'DT 5ª Ley 42/2015'],
+    documentosSoporte: [],
+    frasesClave: [
+      '"Señoría, los pagos de 2006 y 2008 prescribieron hace años. No hay interrupción acreditada."',
+      '"La DT 5ª Ley 42/2015 establece que acciones anteriores a 2015 prescribieron el 7/10/2020 como máximo."',
+    ],
+    riesgos: 'Puede alegar que el matrimonio suspendía la prescripción (FALSO en separación de bienes)',
+  },
+  {
+    id: 'pic-def-2',
+    procedimiento: 'picassent',
+    tipo: 'defensa',
+    titulo: 'CARGAS DEL MATRIMONIO',
+    descripcion: 'Las aportaciones a gastos comunes durante la convivencia son cargas del matrimonio, no préstamos.',
+    fundamento: 'Art. 1438 CC - Contribución a cargas matrimoniales',
+    prioridad: 'alta',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 1438 CC', 'art. 1319 CC'],
+    documentosSoporte: [],
+    frasesClave: [
+      '"Esto no fue un préstamo, fue una FAMILIA. Durante 15 años nadie llevaba cuentas."',
+      '"Las aportaciones a gastos comunes se presumen realizadas en cumplimiento del deber de contribuir a las cargas del matrimonio."',
+    ],
+  },
+  {
+    id: 'pic-def-3',
+    procedimiento: 'picassent',
+    tipo: 'defensa',
+    titulo: 'PRUEBA MANIPULADA',
+    descripcion: 'Documentos 39, 41, 43, 45 están recortados. Ocultan información relevante.',
+    fundamento: 'Art. 326 LEC - Valoración de documentos',
+    prioridad: 'alta',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 326 LEC', 'art. 319 LEC'],
+    documentosSoporte: ['Doc. 39', 'Doc. 41', 'Doc. 43', 'Doc. 45'],
+    frasesClave: [
+      '"¿Por qué estos documentos están recortados? ¿Qué ocultan?"',
+      '"Solicitamos que se aporten los documentos completos, no versiones editadas."',
+    ],
+    riesgos: 'Si aportan completos, ver qué información contenían',
+  },
+  {
+    id: 'pic-def-4',
+    procedimiento: 'picassent',
+    tipo: 'defensa',
+    titulo: 'DOC. 4 CONTRADICE LA DEMANDA',
+    descripcion: 'Declaración de Vicenta a Hacienda contradice lo que dice en la demanda sobre sus aportaciones.',
+    fundamento: 'Doctrina de los actos propios',
+    prioridad: 'critica',
+    estado: 'preparado',
+    articulosRelacionados: ['Doctrina actos propios'],
+    documentosSoporte: ['Doc. 4'],
+    frasesClave: [
+      '"En el Doc. 4, Vicenta declaró a Hacienda exactamente lo contrario de lo que ahora reclama."',
+      '"No puede contradecir sus propias declaraciones fiscales cuando le conviene."',
+    ],
+  },
+
+  // ATAQUES
+  {
+    id: 'pic-atk-1',
+    procedimiento: 'picassent',
+    tipo: 'ataque',
+    titulo: 'FALTA DE PRUEBA DE PAGOS',
+    descripcion: 'Vicenta no acredita fehacientemente los pagos que dice haber realizado desde su cuenta.',
+    fundamento: 'Art. 217 LEC - Carga de la prueba',
+    prioridad: 'media',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 217 LEC'],
+    documentosSoporte: [],
+    frasesClave: [
+      '"¿Dónde están los extractos de su cuenta personal acreditando esos pagos?"',
+    ],
+  },
+
+  // PREGUNTAS PARA INTERROGATORIO
+  {
+    id: 'pic-preg-1',
+    procedimiento: 'picassent',
+    tipo: 'pregunta',
+    titulo: 'Sobre declaración a Hacienda',
+    descripcion: 'Preguntar por la contradicción entre Doc. 4 y la demanda',
+    fundamento: 'Interrogatorio de parte',
+    prioridad: 'critica',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 301 LEC'],
+    documentosSoporte: ['Doc. 4'],
+    frasesClave: [
+      '"¿Reconoce su firma en este documento presentado a Hacienda?"',
+      '"¿Por qué declaró entonces algo distinto a lo que ahora reclama?"',
+    ],
+  },
+  {
+    id: 'pic-preg-2',
+    procedimiento: 'picassent',
+    tipo: 'pregunta',
+    titulo: 'Sobre documentos recortados',
+    descripcion: 'Preguntar por qué los documentos están incompletos',
+    fundamento: 'Interrogatorio de parte',
+    prioridad: 'alta',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 301 LEC'],
+    documentosSoporte: ['Docs. 39, 41, 43, 45'],
+    frasesClave: [
+      '"¿Por qué estos documentos aparecen recortados?"',
+      '"¿Tiene usted las versiones completas?"',
+    ],
+  },
+];
+
+// ============================================
+// ESTRATEGIA MISLATA (DEMANDANTE)
+// ============================================
+
+export const estrategiaMislata: LineaEstrategica[] = [
+  // ATAQUES (somos demandantes)
+  {
+    id: 'mis-atk-1',
+    procedimiento: 'mislata',
+    tipo: 'ataque',
+    titulo: 'SOLIDARIDAD CONTRACTUAL',
+    descripcion: 'Ambos firmaron como deudores solidarios. El art. 1145 CC da derecho de regreso.',
+    fundamento: 'Art. 1145 CC - Acción de regreso del deudor solidario',
+    prioridad: 'critica',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 1145 CC', 'art. 1158 CC'],
+    documentosSoporte: ['Escritura préstamo hipotecario'],
+    frasesClave: [
+      '"Ella firmó como deudora solidaria. El art. 1145 me da derecho a reclamarle su mitad."',
+      '"Es una obligación contractual, no negociable."',
+    ],
+  },
+  {
+    id: 'mis-atk-2',
+    procedimiento: 'mislata',
+    tipo: 'ataque',
+    titulo: 'CESE UNILATERAL DE PAGO',
+    descripcion: 'Vicenta dejó de pagar unilateralmente desde agosto 2023.',
+    fundamento: 'Art. 1091 CC - Fuerza de ley de los contratos',
+    prioridad: 'critica',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 1091 CC'],
+    documentosSoporte: ['Doc. 3 - Extractos bancarios'],
+    frasesClave: [
+      '"Desde agosto 2023, no ha aportado un solo euro a la cuenta común."',
+      '"Los extractos bancarios lo demuestran claramente."',
+    ],
+  },
+  {
+    id: 'mis-atk-3',
+    procedimiento: 'mislata',
+    tipo: 'ataque',
+    titulo: 'CUANTÍA LÍQUIDA Y EXIGIBLE',
+    descripcion: '7.119,98 € es una cantidad líquida, vencida y exigible.',
+    fundamento: 'Art. 1145.2 CC',
+    prioridad: 'alta',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 1145.2 CC'],
+    documentosSoporte: ['Doc. 3'],
+    frasesClave: [
+      '"La cantidad es líquida: 7.119,98 €. Las cuotas ya vencieron. Es exigible ahora."',
+    ],
+  },
+
+  // RÉPLICAS (contra argumentos de Vicenta)
+  {
+    id: 'mis-rep-1',
+    procedimiento: 'mislata',
+    tipo: 'replica',
+    titulo: 'CONTRA LITISPENDENCIA',
+    descripcion: 'Las cuotas de Mislata son POSTERIORES a Picassent. No hay identidad objetiva.',
+    fundamento: 'STS 140/2012 - Triple identidad',
+    prioridad: 'critica',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 421 LEC', 'art. 410 LEC'],
+    documentosSoporte: [],
+    frasesClave: [
+      '"Señoría, las cuotas que reclamo son POSTERIORES a la demanda de Picassent. No pueden estar allí porque no habían vencido."',
+      '"La STS 140/2012 exige identidad TOTAL. Aquí falta la identidad objetiva."',
+    ],
+  },
+  {
+    id: 'mis-rep-2',
+    procedimiento: 'mislata',
+    tipo: 'replica',
+    titulo: 'CONTRA PREJUDICIALIDAD',
+    descripcion: 'El art. 43 LEC es facultativo ("podrá"), no obligatorio.',
+    fundamento: 'Art. 43 LEC - Prejudicialidad civil',
+    prioridad: 'critica',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 43 LEC'],
+    documentosSoporte: [],
+    frasesClave: [
+      '"El art. 43 LEC dice \'podrá\', no \'deberá\'. La suspensión es facultativa."',
+      '"Mi crédito es líquido y exigible ahora. No necesito esperar a Picassent."',
+    ],
+  },
+  {
+    id: 'mis-rep-3',
+    procedimiento: 'mislata',
+    tipo: 'replica',
+    titulo: 'CONTRA COMPENSACIÓN',
+    descripcion: 'Su supuesto crédito de Picassent no es líquido ni exigible.',
+    fundamento: 'Art. 1196 CC - Requisitos compensación',
+    prioridad: 'alta',
+    estado: 'preparado',
+    articulosRelacionados: ['art. 1196 CC'],
+    documentosSoporte: [],
+    frasesClave: [
+      '"El art. 1196 CC exige deudas líquidas y exigibles. Su crédito está en disputa, prescrito en su mayoría, y pendiente de sentencia."',
+      '"No puede compensar un crédito CIERTO con uno DISPUTADO."',
+    ],
+  },
+  {
+    id: 'mis-rep-4',
+    procedimiento: 'mislata',
+    tipo: 'replica',
+    titulo: 'CONTRA CONVENIO DIVORCIO',
+    descripcion: 'El convenio habla de "gastos de vivienda", no de la hipoteca que es una DEUDA.',
+    fundamento: 'Interpretación restrictiva de convenios',
+    prioridad: 'alta',
+    estado: 'preparado',
+    articulosRelacionados: ['Sentencia divorcio 362/2023'],
+    documentosSoporte: ['Convenio divorcio'],
+    frasesClave: [
+      '"El convenio habla de gastos de vivienda: IBI, luz, agua. La hipoteca es una DEUDA que ambos contrajimos. No es lo mismo."',
+      '"Si quisieron incluir la hipoteca, debieron pactarlo expresamente."',
+    ],
+  },
+];
+
+// ============================================
+// FUNCIONES DE ACCESO
+// ============================================
+
+export function getEstrategiaPorProcedimiento(proc: Procedimiento): LineaEstrategica[] {
+  return proc === 'picassent' ? estrategiaPicassent : estrategiaMislata;
+}
+
+export function getEstrategiaPorTipo(proc: Procedimiento, tipo: TipoEstrategia): LineaEstrategica[] {
+  const estrategia = getEstrategiaPorProcedimiento(proc);
+  return estrategia.filter((e) => e.tipo === tipo);
+}
+
+export function getEstrategiaCritica(proc: Procedimiento): LineaEstrategica[] {
+  const estrategia = getEstrategiaPorProcedimiento(proc);
+  return estrategia.filter((e) => e.prioridad === 'critica');
+}
+
+export function getAllEstrategias(): LineaEstrategica[] {
+  return [...estrategiaPicassent, ...estrategiaMislata];
+}
+
+export function buscarEstrategia(termino: string): LineaEstrategica[] {
+  const t = termino.toLowerCase();
+  return getAllEstrategias().filter(
+    (e) =>
+      e.titulo.toLowerCase().includes(t) ||
+      e.descripcion.toLowerCase().includes(t) ||
+      e.fundamento.toLowerCase().includes(t) ||
+      e.frasesClave.some((f) => f.toLowerCase().includes(t))
+  );
+}
