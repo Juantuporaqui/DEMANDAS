@@ -518,13 +518,12 @@ function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
       )}
 
       {facts.map((fact) => {
-        // Intentamos obtener el importe del título o resumen
-        const amountDisplay = extractAmount(fact.titulo) || extractAmount(fact.resumenCorto || '') || '--- €';
-        const hasConflict = fact.tesis || fact.antitesisEsperada;
+        // Intentamos obtener el importe del título o narrative
+        const amountDisplay = extractAmount(fact.title || '') || extractAmount(fact.narrative || '') || '--- €';
 
         return (
-            <div 
-            key={fact.id} 
+            <div
+            key={fact.id}
             onClick={() => navigate(`/facts/${fact.id}`)}
             className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden group hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all cursor-pointer relative"
             >
@@ -537,13 +536,13 @@ function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
                 <div className="flex justify-between items-start">
                 <div>
                     <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                        fact.riesgo === 'alto' ? 'bg-rose-900/30 text-rose-400' : 
-                        fact.riesgo === 'bajo' ? 'bg-emerald-900/30 text-emerald-400' : 'bg-amber-900/30 text-amber-400'
+                        fact.risk === 'alto' ? 'bg-rose-900/30 text-rose-400' :
+                        fact.risk === 'bajo' ? 'bg-emerald-900/30 text-emerald-400' : 'bg-amber-900/30 text-amber-400'
                     }`}>
-                    RIESGO {fact.riesgo}
+                    RIESGO {fact.risk?.toUpperCase() || 'N/A'}
                     </span>
                     <h4 className="text-white font-medium mt-2 text-lg group-hover:text-blue-200 transition-colors">
-                    {fact.titulo}
+                    {fact.title}
                     </h4>
                 </div>
                 <div className="text-right mt-1 mr-6">
@@ -552,18 +551,11 @@ function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
                 </div>
                 </div>
             </div>
-            
-            {/* Preview Estratégica */}
-            {hasConflict && (
-                <div className="px-4 pb-4 pt-0 text-sm grid md:grid-cols-2 gap-4 text-slate-400 border-t border-slate-800/50 mt-2 pt-3 bg-slate-950/30">
-                    <div className="flex gap-2">
-                    <span className="text-rose-400 text-xs uppercase font-bold shrink-0 mt-0.5">Antítesis:</span>
-                    <span className="line-clamp-2 text-xs">{fact.antitesisEsperada || "Sin definir"}</span>
-                    </div>
-                    <div className="flex gap-2">
-                    <span className="text-emerald-400 text-xs uppercase font-bold shrink-0 mt-0.5">Tesis:</span>
-                    <span className="line-clamp-2 text-xs">{fact.tesis || "Sin definir"}</span>
-                    </div>
+
+            {/* Preview Narrativa */}
+            {fact.narrative && (
+                <div className="px-4 pb-4 pt-0 text-sm text-slate-400 border-t border-slate-800/50 mt-2 pt-3 bg-slate-950/30">
+                    <p className="line-clamp-2 text-xs">{fact.narrative}</p>
                 </div>
             )}
             </div>
