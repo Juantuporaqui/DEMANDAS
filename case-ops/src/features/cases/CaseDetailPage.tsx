@@ -180,31 +180,60 @@ function TabDocs({ documents, caseId, caseData }: any) {
 }
 
 // ============================================
-// 3. TAB ECONÓMICO Y ESTRATEGIA (Compactos)
+// 3. TAB ECONÓMICO (CON ACCESO A WAR ROOM)
 // ============================================
-function TabEconomico() {
+function TabEconomico({ caseId }: { caseId: string }) {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500">
+      <div className="flex justify-end mb-2">
+         <Link to={`/facts/new?caseId=${caseId}`} className="text-xs bg-emerald-600/80 text-emerald-100 px-3 py-1.5 rounded hover:bg-emerald-500 transition-colors flex items-center gap-2">
+            <span>+</span> Nueva Partida
+         </Link>
+      </div>
+
       {hechosReclamados.map((item, idx) => (
-        <div key={idx} className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden group hover:border-slate-600 transition-colors">
-          <div className="p-4 flex justify-between items-center cursor-default">
-            <div>
-              <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                item.estado === 'prescrito' ? 'bg-emerald-900/30 text-emerald-400' : 
-                item.estado === 'compensable' ? 'bg-blue-900/30 text-blue-400' : 'bg-amber-900/30 text-amber-400'
-              }`}>
-                {item.estado}
-              </span>
-              <h4 className="text-white font-medium mt-1">{item.concepto}</h4>
-            </div>
-            <div className="text-right">
-              <div className="text-lg font-bold text-slate-200">{item.importe.toLocaleString()} €</div>
-              <div className="text-xs text-slate-500">{item.año}</div>
+        <div 
+          key={idx} 
+          onClick={() => navigate(`/facts/${item.id || 'new'}`)}
+          className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden group hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all cursor-pointer relative"
+        >
+          {/* Indicador de Click */}
+          <div className="absolute top-4 right-4 text-slate-600 group-hover:text-blue-400 transition-colors">
+            <ChevronRight size={20} />
+          </div>
+
+          <div className="p-4 pr-12">
+            <div className="flex justify-between items-start">
+              <div>
+                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                  item.estado === 'prescrito' ? 'bg-emerald-900/30 text-emerald-400' : 
+                  item.estado === 'compensable' ? 'bg-blue-900/30 text-blue-400' : 'bg-amber-900/30 text-amber-400'
+                }`}>
+                  {item.estado}
+                </span>
+                <h4 className="text-white font-medium mt-2 text-lg group-hover:text-blue-200 transition-colors">
+                  {item.concepto}
+                </h4>
+              </div>
+              <div className="text-right mt-1 mr-6">
+                <div className="text-xl font-bold text-slate-200 tabular-nums">{item.importe.toLocaleString()} €</div>
+                <div className="text-xs text-slate-500 font-mono">{item.año}</div>
+              </div>
             </div>
           </div>
-          <div className="px-4 pb-4 pt-0 text-sm grid md:grid-cols-2 gap-4 text-slate-400 border-t border-slate-800/50 mt-2 pt-3">
-            <div><strong className="text-rose-400 text-xs uppercase block mb-1">Ataque:</strong>{item.tesisAdversa}</div>
-            <div><strong className="text-emerald-400 text-xs uppercase block mb-1">Defensa:</strong>{item.estrategia}</div>
+          
+          {/* Preview Estratégica */}
+          <div className="px-4 pb-4 pt-0 text-sm grid md:grid-cols-2 gap-4 text-slate-400 border-t border-slate-800/50 mt-2 pt-3 bg-slate-950/30">
+            <div className="flex gap-2">
+              <span className="text-rose-400 text-xs uppercase font-bold shrink-0 mt-0.5">Ataque:</span>
+              <span className="line-clamp-2">{item.tesisAdversa}</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-emerald-400 text-xs uppercase font-bold shrink-0 mt-0.5">Defensa:</span>
+              <span className="line-clamp-2">{item.estrategia}</span>
+            </div>
           </div>
         </div>
       ))}
@@ -303,7 +332,7 @@ export function CaseDetailPage() {
       {/* CONTENIDO */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} partidas={partidas} navigate={navigate} />}
-        {activeTab === 'economico' && <TabEconomico />}
+        {activeTab === 'economico' && <TabEconomico caseId={id!} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
         {activeTab === 'actuaciones' && (
