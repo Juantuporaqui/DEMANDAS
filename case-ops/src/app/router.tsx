@@ -36,6 +36,7 @@ import { PrescripcionPage } from '../features/analytics/pages/PrescripcionPage';
 import { ModoAudienciaPage } from '../features/audiencia/ModoAudienciaPage';
 import { AudienciaPreviaPage } from '../features/audiencia/AudienciaPreviaPage';
 import { ToolsPage } from '../features/tools/ToolsPage';
+import { JurisprudenciaPage } from '../features/jurisprudencia/JurisprudenciaPage';
 
 export const router = createBrowserRouter(
   [
@@ -78,6 +79,11 @@ export const router = createBrowserRouter(
         {
           path: 'tools',
           element: <ToolsPage />,
+        },
+        // Jurisprudencia
+        {
+          path: 'jurisprudencia',
+          element: <JurisprudenciaPage />,
         },
         {
           path: 'analytics/:court',
