@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentencia Divorcio 362/2023</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h2, h3 { text-align: center; text-transform: uppercase; }
+        .header { text-align: center; font-weight: bold; margin-bottom: 2rem; }
+        .info { margin-bottom: 2rem; border: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <p>JUZGADO DE PRIMERA INSTANCIA Nº 1 QUART DE POBLET<br>
+        SENTENCIA Nº 362/2023</p>
+    </div>
+
+    <div class="info">
+        <p><strong>JUEZ QUE LA DICTA:</strong> D/D SANDRA LOZANO LÓPEZ</p>
+        <p><strong>Lugar:</strong> QUART DE POBLET</p>
+        <p><strong>Fecha:</strong> diecisiete de octubre de dos mil veintitrés</p>
+        <p><strong>PARTE DEMANDANTE:</strong> JUAN RODRIGUEZ CRESPO</p>
+        <p><strong>PARTE DEMANDADA:</strong> VICENTA JIMENEZ VERA</p>
+        <p><strong>OBJETO DEL JUICIO:</strong> Derecho de familia</p>
+    </div>
+
+    <p>SANDRA LOZANO LÓPEZ, Juez del JUZGADO DE PRIMERA INSTANCIA E INSTRUCCIÓN Nº 1 DE QUART DE POBLET, ha visto los presentes autos de Familia. Divorcio contencioso [DIC] 000892/2023.</p>
+
+    <h3>ANTECEDENTES DE HECHO</h3>
+    <p>PRIMERO.- La parte actora formuló demanda de divorcio contencioso frente a VICENTA JIMENEZ VERA.</p>
+    <p>SEGUNDO.- Admitida a trámite, se señaló vista.</p>
+    <p>TERCERO.- Al acto de la vista principal, celebrada el día 16 de octubre de 2023, comparecieron las partes manifestando al inicio del acto haber llegado un acuerdo, presentando a tal efecto convenio regulador de divorcio para su homologación.</p>
+
+    <h3>FUNDAMENTOS DE DERECHO</h3>
+    <p>PRIMERO.- Divorcio. El artículo 85 del Código Civil dispone que el matrimonio se disuelve por divorcio.</p>
+    <p>SEGUNDO.- Del acuerdo. En el acto de la vista las partes pusieron de manifiesto el acuerdo alcanzado para regular las consecuencias del divorcio. El artículo 90 del Código Civil dispone que los acuerdos serán aprobados por el Juez salvo si son dañosos.</p>
+    <p>TERCERO.- Costas. No ha lugar a la imposición de costas.</p>
+
+    <h3>FALLO</h3>
+    <p>ESTIMO PARCIALMENTE la demanda interpuesta por D. Juan Rodríguez Crespo contra Dª. Vicenta Jiménez Vera, y en consecuencia, DECLARO disuelto por divorcio el matrimonio formado por ambos, con todos los efectos legales inherentes a este pronunciamiento, y en particular APRUEBO el acuerdo alcanzado por las partes, en relación con las medidas que han de regir sobre los hijos, Guillermo y Raúl, en los términos que son de ver en el convenio regulador que se acompaña a la presente resolución, formando parte de la misma.</p>
+
+    <hr>
+
+    <h3>CONVENIO REGULADOR (Parte Integrante)</h3>
+    
+    <p><strong>4º.- ALIMENTOS Y GASTOS DE LOS HIJOS:</strong> interesamos que cada uno de los progenitores atienda directamente los gastos y atenciones ordinarias de los hijos comunes durante el tiempo que permanezcan en su compañía, incluyéndose en éstos los gastos de alimentación, habitación, vestido, calzado, higiene y ocio de los hijos. Es decir, los gastos ordinarios que se ocasionen durante el periodo en que los hijos se encuentren con cada progenitor serán por cuenta del progenitor custodio en ese momento.</p>
+
+    <p>Los demás gastos necesarios de los hijos, tanto ordinarios como extraordinarios, deberán abonarse por mitad entre ambos progenitores. En todo caso, se considerarán incluidos en este concepto los siguientes: Gastos escolares (matrículas, libros, material, comedor, transporte, excursiones, inglés, música...).</p>
+
+    <p><strong>Ambos progenitores se obligan a aperturar una cuenta bancaria titularidad de ambos, en el que ingresarán la cantidad de 200€ mensuales cada uno de ellos, del uno al cinco de cada mes durante doce mensualidades</strong>, con el fin de hacer frente a los gastos escolares, actividades extraescolares o cualquier otro gasto de los menores.</p>
+
+    <p><strong>5º. ATRIBUCIÓN DEL USO Y DISFRUTE DE LA VIVIENDA FAMILIAR.</strong> Se le atribuye a la esposa, Dº Vicenta Jiménez Vera, e hijos hasta el próximo día 1 de noviembre de 2024. Ese día, deberá dejar libre y a disposición del Sr. Rodríguez la misma.</p>
+
+    <p><strong>6.- NO SE ESTABLEZCA PENSIÓN COMPENSATORIA.</strong></p>
+
+    <p><strong>7.- DE LA DECLARACION DE IRPF.</strong> Los cónyuges cada año realizarán la declaración conjunta con los menores a su favor de manera alternativa.</p>
+
+    <p>Así por esta mi sentencia, la pronuncio, mando y firmo, SANDRA LOZANO LÓPEZ.</p>
+</body>
+</html>
