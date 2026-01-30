@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { settingsRepo } from '../../db/repositories';
 import { checkStorageQuota, formatBytes } from '../../utils/validators';
 import { migrateMislataCase } from '../../db/migrations/updateMislata';
+import { migrateQuartCase } from '../../db/migrations/updateQuart';
 import type { Settings } from '../../types';
 
 export function SettingsPage() {
@@ -16,6 +17,10 @@ export function SettingsPage() {
   const [deviceName, setDeviceName] = useState('');
   const [loading, setLoading] = useState(true);
   const [migrationStatus, setMigrationStatus] = useState<{ running: boolean; message: string | null }>({
+    running: false,
+    message: null,
+  });
+  const [quartMigrationStatus, setQuartMigrationStatus] = useState<{ running: boolean; message: string | null }>({
     running: false,
     message: null,
   });
@@ -34,6 +39,26 @@ export function SettingsPage() {
       setMigrationStatus({ running: false, message: result.message });
     } catch (error) {
       setMigrationStatus({
+        running: false,
+        message: `Error: ${error instanceof Error ? error.message : 'Desconocido'}`,
+      });
+    }
+  }
+
+  async function handleMigrateQuart() {
+    if (quartMigrationStatus.running) return;
+
+    if (!confirm('¿Actualizar caso Quart (ETJ 1428/2025) con datos reales? Esto sobrescribirá eventos, partidas, hechos y estrategias existentes del caso Quart.')) {
+      return;
+    }
+
+    setQuartMigrationStatus({ running: true, message: 'Ejecutando migración Quart...' });
+
+    try {
+      const result = await migrateQuartCase();
+      setQuartMigrationStatus({ running: false, message: result.message });
+    } catch (error) {
+      setQuartMigrationStatus({
         running: false,
         message: `Error: ${error instanceof Error ? error.message : 'Desconocido'}`,
       });
@@ -251,6 +276,32 @@ export function SettingsPage() {
                 }}
               >
                 {migrationStatus.message}
+              </div>
+            )}
+
+            {/* Quart Migration */}
+            <button
+              className="btn btn-block mt-md"
+              style={{
+                backgroundColor: quartMigrationStatus.running ? '#64748b' : '#0284c7',
+                color: 'white',
+                cursor: quartMigrationStatus.running ? 'wait' : 'pointer',
+              }}
+              onClick={handleMigrateQuart}
+              disabled={quartMigrationStatus.running}
+            >
+              {quartMigrationStatus.running ? 'Ejecutando...' : 'Actualizar Caso Quart (ETJ 1428/2025)'}
+            </button>
+            {quartMigrationStatus.message && (
+              <div
+                className="mt-md p-sm rounded"
+                style={{
+                  backgroundColor: quartMigrationStatus.message.includes('Error') ? '#7f1d1d' : '#064e3b',
+                  color: 'white',
+                  fontSize: '0.875rem',
+                }}
+              >
+                {quartMigrationStatus.message}
               </div>
             )}
           </div>
