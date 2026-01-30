@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { settingsRepo } from '../../db/repositories';
 import { checkStorageQuota, formatBytes } from '../../utils/validators';
+import { migrateMislataCase } from '../../db/migrations/updateMislata';
 import type { Settings } from '../../types';
 
 export function SettingsPage() {
@@ -14,6 +15,30 @@ export function SettingsPage() {
   const [storage, setStorage] = useState({ used: 0, available: 0, percentUsed: 0 });
   const [deviceName, setDeviceName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [migrationStatus, setMigrationStatus] = useState<{ running: boolean; message: string | null }>({
+    running: false,
+    message: null,
+  });
+
+  async function handleMigrateMislata() {
+    if (migrationStatus.running) return;
+
+    if (!confirm('¿Actualizar caso Mislata con datos reales? Esto sobrescribirá eventos, partidas, hechos y estrategias existentes del caso Mislata.')) {
+      return;
+    }
+
+    setMigrationStatus({ running: true, message: 'Ejecutando migración...' });
+
+    try {
+      const result = await migrateMislataCase();
+      setMigrationStatus({ running: false, message: result.message });
+    } catch (error) {
+      setMigrationStatus({
+        running: false,
+        message: `Error: ${error instanceof Error ? error.message : 'Desconocido'}`,
+      });
+    }
+  }
 
   useEffect(() => {
     loadSettings();
@@ -192,6 +217,42 @@ export function SettingsPage() {
                 🖥️ Sistema
               </button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Migraciones */}
+      <section className="section">
+        <h2 className="section-title">Migraciones de datos</h2>
+        <div className="card" style={{ borderColor: 'var(--color-warning, #f59e0b)' }}>
+          <div className="card-body">
+            <p className="mb-md text-muted">
+              Actualiza los datos de los casos con la información más reciente.
+            </p>
+            <button
+              className="btn btn-block"
+              style={{
+                backgroundColor: migrationStatus.running ? '#64748b' : '#059669',
+                color: 'white',
+                cursor: migrationStatus.running ? 'wait' : 'pointer',
+              }}
+              onClick={handleMigrateMislata}
+              disabled={migrationStatus.running}
+            >
+              {migrationStatus.running ? 'Ejecutando...' : 'Actualizar Caso Mislata (J.V. 1185/2025)'}
+            </button>
+            {migrationStatus.message && (
+              <div
+                className="mt-md p-sm rounded"
+                style={{
+                  backgroundColor: migrationStatus.message.includes('Error') ? '#7f1d1d' : '#064e3b',
+                  color: 'white',
+                  fontSize: '0.875rem',
+                }}
+              >
+                {migrationStatus.message}
+              </div>
+            )}
           </div>
         </div>
       </section>
