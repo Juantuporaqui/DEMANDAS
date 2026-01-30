@@ -386,108 +386,172 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
 }
 
 // ============================================
-// 2. TAB DOCUMENTOS (El Lector Inteligente - FIXED)
+// 2. TAB DOCUMENTOS (El Lector Inteligente - MÓVIL FULLSCREEN)
 // ============================================
 function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
   // Estado para el documento seleccionado
   const [selectedDocKey, setSelectedDocKey] = useState<string | null>(initialDocKey || null);
-  
+  const [showMobileViewer, setShowMobileViewer] = useState(false);
+
   // Detección robusta: ID del caso, Título o Número de Autos
-  const isPicassent = caseId?.includes('picassent') || 
-                      caseData.title?.toLowerCase().includes('picassent') || 
+  const isPicassent = caseId?.includes('picassent') ||
+                      caseData.title?.toLowerCase().includes('picassent') ||
                       caseData.autosNumber?.includes('715');
-                      
-  const isMislata = caseData.title?.toLowerCase().includes('mislata');
+
+  const isMislata = caseData.title?.toLowerCase().includes('mislata') ||
+                    caseData.autosNumber?.includes('1185');
+
+  const isQuart = caseData.title?.toLowerCase().includes('quart') ||
+                  caseData.autosNumber?.includes('1428');
 
   // Debug: Ver si tenemos textos cargados
   const hasLegalTexts = LEGAL_DOCS_MAP && Object.keys(LEGAL_DOCS_MAP).length > 0;
 
+  // Handler para seleccionar documento (móvil abre fullscreen)
+  const handleSelectDoc = (key: string) => {
+    setSelectedDocKey(key);
+    setShowMobileViewer(true);
+  };
+
+  // Botón de documento reutilizable
+  const DocButton = ({ docKey, icon, label, color }: { docKey: string; icon: string; label: string; color: 'amber' | 'emerald' | 'rose' | 'blue' | 'violet' }) => {
+    const colors = {
+      amber: { active: 'bg-amber-900/40 border-amber-500/50 text-amber-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-amber-500/30' },
+      emerald: { active: 'bg-emerald-900/40 border-emerald-500/50 text-emerald-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-emerald-500/30' },
+      rose: { active: 'bg-rose-900/40 border-rose-500/50 text-rose-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-rose-500/30' },
+      blue: { active: 'bg-blue-900/40 border-blue-500/50 text-blue-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-blue-500/30' },
+      violet: { active: 'bg-violet-900/40 border-violet-500/50 text-violet-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-violet-500/30' },
+    };
+    const isActive = selectedDocKey === docKey;
+    return (
+      <button
+        onClick={() => handleSelectDoc(docKey)}
+        className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${isActive ? colors[color].active : colors[color].inactive}`}
+      >
+        {icon} {label}
+      </button>
+    );
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-240px)] min-h-[600px]">
-      {/* SIDEBAR DOCUMENTOS */}
-      <div className="space-y-6 lg:col-span-1 overflow-y-auto pr-2 custom-scrollbar">
-        
-        {/* Botón Subir */}
-        <Link to={`/documents/new?caseId=${caseId}`} className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-900/20">
-          <Upload size={16} /> Subir Nuevo
-        </Link>
-
-        {/* Escritos Procesales (Textos Limpios) */}
-        <div>
-          <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
-            <Scale size={14} /> Autos y Escritos
-          </h3>
-          
-          <div className="space-y-1">
-            {/* Mensaje de error si no hay textos cargados */}
-            {!hasLegalTexts && (
-               <div className="text-xs text-rose-500 bg-rose-900/20 p-2 rounded mb-2 border border-rose-800">
-                 ⚠️ Error: No se han cargado los textos legales. Verifica src/data/legal_texts.ts
-               </div>
-            )}
-
-            {isPicassent && (
-              <>
-                <button 
-                  onClick={() => setSelectedDocKey('demanda-picassent')} 
-                  className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${selectedDocKey === 'demanda-picassent' ? 'bg-amber-900/40 border-amber-500/50 text-amber-100' : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'}`}
-                >
-                  📜 Demanda Contraria
-                </button>
-                <button 
-                  onClick={() => setSelectedDocKey('contestacion-picassent')} 
-                  className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${selectedDocKey === 'contestacion-picassent' ? 'bg-emerald-900/40 border-emerald-500/50 text-emerald-100' : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500'}`}
-                >
-                  🛡️ Contestación
-                </button>
-              </>
-            )}
-            
-            {isMislata && (
-              <>
-                <button onClick={() => setSelectedDocKey('recurso-reposicion-mislata')} className={`w-full text-left p-3 rounded-lg text-sm border mb-1 transition-all ${selectedDocKey === 'recurso-reposicion-mislata' ? 'bg-rose-900/40 border-rose-500 text-rose-100' : 'bg-slate-800/50 border-slate-700 text-slate-400'}`}>🚨 Recurso Contrario</button>
-                <button onClick={() => setSelectedDocKey('oposicion-mislata')} className={`w-full text-left p-3 rounded-lg text-sm border mb-1 transition-all ${selectedDocKey === 'oposicion-mislata' ? 'bg-emerald-900/40 border-emerald-500 text-emerald-100' : 'bg-slate-800/50 border-slate-700 text-slate-400'}`}>✅ Nuestra Oposición</button>
-              </>
-            )}
-            
-            {!isPicassent && !isMislata && (
-                 <div className="text-xs text-slate-600 p-2 italic">No hay escritos predefinidos para este caso.</div>
-            )}
+    <>
+      {/* VISOR MÓVIL FULLSCREEN */}
+      {showMobileViewer && selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] && (
+        <div className="fixed inset-0 z-50 bg-slate-950 lg:hidden flex flex-col">
+          {/* Header móvil */}
+          <div className="flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800">
+            <button
+              onClick={() => setShowMobileViewer(false)}
+              className="flex items-center gap-2 text-slate-400 hover:text-white"
+            >
+              <ChevronRight className="rotate-180" size={20} />
+              <span className="text-sm">Volver</span>
+            </button>
+            <span className="text-xs text-slate-500 truncate max-w-[200px]">{selectedDocKey}</span>
+          </div>
+          {/* Contenido fullscreen */}
+          <div className="flex-1 overflow-auto">
+            <TextReader content={LEGAL_DOCS_MAP[selectedDocKey]} />
           </div>
         </div>
+      )}
 
-        {/* Archivos PDF Subidos */}
-        <div>
-          <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2 mt-6">
-            <Upload size={14} /> Archivo Digital
-          </h3>
-          {documents.length === 0 && <p className="text-xs text-slate-600 italic">No hay archivos adjuntos.</p>}
-          {documents.map((doc: Document) => (
-            <div key={doc.id} className="p-3 mb-2 bg-slate-900 rounded border border-slate-800 text-xs text-slate-400 hover:text-white hover:border-slate-600 cursor-pointer transition-colors truncate">
-              {doc.title}
+      {/* LAYOUT PRINCIPAL */}
+      <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4 lg:gap-6 lg:h-[calc(100vh-240px)] lg:min-h-[600px]">
+        {/* SIDEBAR DOCUMENTOS */}
+        <div className="space-y-4 lg:space-y-6 lg:col-span-1 lg:overflow-y-auto lg:pr-2 custom-scrollbar">
+
+          {/* Botón Subir */}
+          <Link to={`/documents/new?caseId=${caseId}`} className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-900/20">
+            <Upload size={16} /> Subir Nuevo
+          </Link>
+
+          {/* Escritos Procesales */}
+          <div>
+            <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
+              <Scale size={14} /> Autos y Escritos
+            </h3>
+
+            <div className="space-y-2">
+              {!hasLegalTexts && (
+                 <div className="text-xs text-rose-500 bg-rose-900/20 p-2 rounded mb-2 border border-rose-800">
+                   ⚠️ Error: No se han cargado los textos legales.
+                 </div>
+              )}
+
+              {/* PICASSENT */}
+              {isPicassent && (
+                <>
+                  <DocButton docKey="demanda-picassent" icon="📜" label="Demanda Contraria" color="amber" />
+                  <DocButton docKey="contestacion-picassent" icon="🛡️" label="Contestación" color="emerald" />
+                </>
+              )}
+
+              {/* MISLATA */}
+              {isMislata && (
+                <>
+                  <DocButton docKey="demanda-mislata" icon="📄" label="Nuestra Demanda" color="emerald" />
+                  <DocButton docKey="contestacion-mislata" icon="🚨" label="Contestación Vicenta" color="rose" />
+                  <DocButton docKey="argumentos-mislata" icon="⚔️" label="Argumentos Clave" color="blue" />
+                  <DocButton docKey="frases-vista-mislata" icon="🎯" label="Frases Vista" color="violet" />
+                </>
+              )}
+
+              {/* QUART */}
+              {isQuart && (
+                <>
+                  <DocButton docKey="sentencia-divorcio-quart" icon="⚖️" label="Sentencia Divorcio 362/2023" color="blue" />
+                  <DocButton docKey="demanda-ejecucion-quart" icon="📜" label="Demanda Ejecución (Vicenta)" color="amber" />
+                  <DocButton docKey="oposicion-quart" icon="🛡️" label="Nuestra Oposición" color="emerald" />
+                  <DocButton docKey="impugnacion-quart" icon="🚨" label="Impugnación (Vicenta)" color="rose" />
+                  <DocButton docKey="argumentos-quart" icon="⚔️" label="Argumentos y Riesgos" color="violet" />
+                </>
+              )}
+
+              {!isPicassent && !isMislata && !isQuart && (
+                   <div className="text-xs text-slate-600 p-2 italic">No hay escritos predefinidos para este caso.</div>
+              )}
             </div>
-          ))}
+          </div>
+
+          {/* Archivos PDF Subidos */}
+          <div>
+            <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
+              <Upload size={14} /> Archivo Digital
+            </h3>
+            {documents.length === 0 && <p className="text-xs text-slate-600 italic">No hay archivos adjuntos.</p>}
+            {documents.map((doc: Document) => (
+              <div key={doc.id} className="p-3 mb-2 bg-slate-900 rounded border border-slate-800 text-xs text-slate-400 hover:text-white hover:border-slate-600 cursor-pointer transition-colors truncate">
+                {doc.title}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* VISOR CENTRAL (Desktop) */}
+        <div className="hidden lg:flex lg:col-span-3 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden h-full shadow-2xl relative flex-col">
+          {selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] ? (
+            <TextReader content={LEGAL_DOCS_MAP[selectedDocKey]} />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-slate-600 bg-slate-900/20">
+              <FileText size={48} className="mb-4 opacity-20" />
+              <p className="mt-4">Selecciona un documento para lectura inmersiva</p>
+              <p className="text-xs opacity-50 mt-2">Formatos optimizados para War Room</p>
+              {selectedDocKey && !LEGAL_DOCS_MAP[selectedDocKey] && (
+                 <p className="text-xs text-rose-500 mt-2 bg-rose-900/20 px-2 py-1 rounded">
+                   ⚠️ Error: No se encontró contenido para "{selectedDocKey}"
+                 </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Mensaje móvil cuando no hay documento seleccionado */}
+        <div className="lg:hidden text-center py-8 text-slate-500 text-sm">
+          Pulsa en un documento para abrirlo a pantalla completa
         </div>
       </div>
-      
-      {/* VISOR CENTRAL */}
-      <div className="lg:col-span-3 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden h-full shadow-2xl relative flex flex-col">
-        {selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] ? (
-          <TextReader content={LEGAL_DOCS_MAP[selectedDocKey]} />
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full text-slate-600 bg-slate-900/20">
-            <FileText size={48} className="mb-4 opacity-20" />
-            <p className="mt-4">Selecciona un documento para lectura inmersiva</p>
-            <p className="text-xs opacity-50 mt-2">Formatos optimizados para War Room</p>
-            {selectedDocKey && !LEGAL_DOCS_MAP[selectedDocKey] && (
-               <p className="text-xs text-rose-500 mt-2 bg-rose-900/20 px-2 py-1 rounded">
-                 ⚠️ Error: No se encontró contenido para "{selectedDocKey}"
-               </p>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+    </>
   );
 }
 
