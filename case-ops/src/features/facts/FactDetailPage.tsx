@@ -34,7 +34,6 @@ export function FactDetailPage() {
   const navigate = useNavigate();
   
   // Estado local
-  // Usamos 'any' en fact para que acepte tanto datos viejos como nuevos sin dar error de TS
   const [fact, setFact] = useState<any>(null);
   const [evidence, setEvidence] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,7 +210,6 @@ export function FactDetailPage() {
       </div>
 
       {/* 3. DESGLOSE ESTRATÉGICO (TESIS vs ANTÍTESIS) */}
-      {/* Esta es la parte clave que pedías */}
       {(fact.tesis || fact.antitesis) && (
         <div className="mb-md" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             {/* Tarjeta Verde: Tesis */}
