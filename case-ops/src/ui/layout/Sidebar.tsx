@@ -9,7 +9,8 @@ import {
   Calendar,
   Search,
   Gavel,
-  RefreshCw
+  RefreshCw,
+  Settings
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { to: '/warroom', label: 'Estrategia', icon: <Target size={18} /> },
   { to: '/events', label: 'Agenda', icon: <Calendar size={18} /> },
   { to: '/tasks', label: 'Tareas', icon: <CheckSquare size={18} /> },
+  { to: '/settings', label: 'Ajustes', icon: <Settings size={18} /> },
 ];
 
 export function Sidebar() {

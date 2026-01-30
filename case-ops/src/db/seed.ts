@@ -136,6 +136,76 @@ export async function seedDatabase(): Promise<boolean> {
     } as any);
 
     // =====================================================================
+    // HECHOS, ESTRATEGIAS Y PARTIDAS PARA QUART (ETJ 1428/2025)
+    // =====================================================================
+    const quartFactsData = [
+      { title: 'Cumplimiento / Pago parcial', narrative: 'Juan aportó 1.971,27€ hasta sept 2025. Tras el despacho, transfirió 200€ adicionales. Déficit real es 1.828,73€, no 2.400€.', status: 'a_probar', burden: 'ejecutado', risk: 'bajo', strength: 4, tags: ['pago', 'art-556-LEC'] },
+      { title: 'Compensación de créditos', narrative: 'Vicenta retiró 2.710,61€ de la cuenta común para gastos no autorizados. Juan tiene crédito a su favor: 881,88€.', status: 'controvertido', burden: 'ejecutado', risk: 'medio', strength: 3, tags: ['compensacion', 'art-1195-CC'] },
+      { title: 'Pluspetición', narrative: 'Se reclaman 2.400€ cuando el déficit real es 1.828,73€. Juan realizó pagos directos por 1.895,65€.', status: 'a_probar', burden: 'ejecutado', risk: 'bajo', strength: 4, tags: ['pluspeticion', 'art-558-LEC'] },
+      { title: 'Domicilio erróneo en demanda', narrative: 'Figura C/ Isabel de Villena 2-5 Mislata (domicilio de Vicenta). Juan nunca residió allí.', status: 'controvertido', burden: 'ejecutado', risk: 'medio', strength: 2, tags: ['notificacion', 'art-155-LEC'] },
+      { title: 'Abuso de derecho y mala fe', narrative: 'La cuenta tenía 1.005,42€ al interponer demanda. Vicenta dejó de pagar hipoteca y retira fondos personales.', status: 'controvertido', burden: 'ejecutado', risk: 'medio', strength: 3, tags: ['abuso', 'art-7-2-CC'] },
+      { title: 'Naturaleza no alimenticia', narrative: 'La cuenta común es fondo finalista con reglas de consenso, no alimentos incondicionales.', status: 'controvertido', burden: 'ejecutado', risk: 'alto', strength: 2, tags: ['alimentos', 'convenio'] },
+      { title: 'Email 01/10/2025 - Riesgo', narrative: 'Vicenta alega que Juan reconoció la deuda. Contexto: era propuesta de acuerdo, no reconocimiento.', status: 'controvertido', burden: 'ejecutado', risk: 'alto', strength: 2, tags: ['email', 'riesgo'] },
+    ];
+    for (const f of quartFactsData) await factsRepo.create({ caseId: quartCase.id, ...f } as any);
+
+    const quartStrategiesData = [
+      { attack: 'Reclamación íntegra 2.400€ sin descontar pagos', risk: 'Bajo', rebuttal: 'Acreditar todos los pagos: transferencias Oct-Nov 2025 + aportaciones previas. Déficit real: 1.828,73€.', evidencePlan: 'Extractos Openbank certificados.', tags: ['pago'] },
+      { attack: 'Uso indebido cuenta común (2.710,61€)', risk: 'Medio', rebuttal: 'Detallar cada cargo: efectivo 850€, transferencias 644€, perfumería 415€, ropa 320€, recargas 250€.', evidencePlan: 'Extractos con marcado de cargos.', tags: ['compensacion'] },
+      { attack: 'Pagos directos como "regalos"', risk: 'Medio', rebuttal: 'Son gastos necesarios: ordenador 379€, iPad 375€, gimnasio 219€, móviles 308€.', evidencePlan: 'Tickets y facturas.', tags: ['pagos-directos'] },
+      { attack: 'Calificación como alimentos (STS 55/2016)', risk: 'Alto', rebuttal: 'Literal del convenio: "fondo común con reglas de consenso".', evidencePlan: 'Análisis cláusula 4ª convenio.', tags: ['alimentos'] },
+      { attack: 'Domicilio incorrecto', risk: 'Medio', rebuttal: 'Error deliberado: figuraba domicilio de Vicenta.', evidencePlan: 'Certificado empadronamiento.', tags: ['notificacion'] },
+    ];
+    for (const s of quartStrategiesData) await strategiesRepo.create({ caseId: quartCase.id, ...s } as any);
+
+    const quartPartidasData = [
+      { date: '2024-04-01', concepto: 'Déficit mensualidades (22 meses)', importe: 1828.73, estado: 'reclamada' },
+      { date: '2025-10-01', concepto: 'Uso indebido: Retiradas efectivo', importe: -850, estado: 'compensable' },
+      { date: '2025-10-01', concepto: 'Uso indebido: Transferencias a Vicenta', importe: -644, estado: 'compensable' },
+      { date: '2025-10-01', concepto: 'Uso indebido: Perfumería/Ropa/Otros', importe: -1216.61, estado: 'compensable' },
+      { date: '2024-01-01', concepto: 'Pagos directos Juan: Tecnología', importe: -754, estado: 'reclamable' },
+      { date: '2024-06-01', concepto: 'Pagos directos Juan: Gimnasio/Móviles', importe: -527, estado: 'reclamable' },
+      { date: '2024-06-01', concepto: 'Pagos directos Juan: Otros gastos hijos', importe: -614.65, estado: 'reclamable' },
+    ];
+    for (const p of quartPartidasData) {
+      await partidasRepo.create({ caseId: quartCase.id, date: p.date, amountCents: eurosToCents(Math.abs(p.importe)), concept: p.concepto, payer: 'Juan', beneficiary: 'Cuenta/Hijos', state: p.estado as any, theory: 'Oposición ETJ 1428/2025', notes: '', tags: ['quart'] });
+    }
+
+    // =====================================================================
+    // HECHOS, ESTRATEGIAS Y PARTIDAS PARA MISLATA (J.V. 1185/2025)
+    // =====================================================================
+    const mislataFactsData = [
+      { title: 'Litispendencia (Art. 421 LEC)', narrative: 'Vicenta alega litispendencia con Picassent. FALSO: objeto distinto (cuotas 2023-2025 vs 2009-2023). STS 140/2012 exige identidad TOTAL.', status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 4, tags: ['litispendencia', 'art-421-LEC'] },
+      { title: 'Prejudicialidad Civil (Art. 43 LEC)', narrative: 'Vicenta pide suspensión. Art. 43 es FACULTATIVO. Nuestro crédito es líquido: 7.119,98€.', status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 4, tags: ['prejudicialidad', 'art-43-LEC'] },
+      { title: 'Solidaridad Contractual', narrative: 'Ambos son deudores solidarios. Art. 1145 CC: derecho de regreso.', status: 'a_probar', burden: 'demandante', risk: 'bajo', strength: 5, tags: ['solidaridad', 'art-1145-CC'] },
+      { title: 'Cuotas líquidas y exigibles', narrative: 'Crédito LÍQUIDO (7.119,98€), VENCIDO (oct 2023 - jun 2025) y EXIGIBLE.', status: 'a_probar', burden: 'demandante', risk: 'bajo', strength: 5, tags: ['liquidez', 'exigibilidad'] },
+      { title: 'Cese unilateral de pago', narrative: 'Vicenta dejó de pagar desde agosto 2023. Juan pagó 14.404,88€; Vicenta solo 1.159,05€ netos.', status: 'a_probar', burden: 'demandante', risk: 'bajo', strength: 5, tags: ['incumplimiento'] },
+      { title: 'Convenio divorcio', narrative: 'Vicenta alega que Juan debe pagar "gastos vivienda". FALSO: hipoteca es DEUDA SOLIDARIA, no gasto.', status: 'controvertido', burden: 'demandado', risk: 'bajo', strength: 4, tags: ['convenio'] },
+    ];
+    for (const f of mislataFactsData) await factsRepo.create({ caseId: mislataCase.id, ...f } as any);
+
+    const mislataStrategiesData = [
+      { attack: 'Litispendencia con Picassent', risk: 'Medio', rebuttal: 'NO hay identidad: Picassent = cuotas 2009-2023. Mislata = cuotas 2023-2025.', evidencePlan: 'Cuadro comparativo + STS 140/2012.', tags: ['litispendencia'] },
+      { attack: 'Prejudicialidad civil', risk: 'Medio', rebuttal: 'Art. 43 es FACULTATIVO. Crédito es líquido y exigible.', evidencePlan: 'Literal artículo + extractos.', tags: ['prejudicialidad'] },
+      { attack: 'Falta legitimación activa', risk: 'Bajo', rebuttal: 'Crédito LÍQUIDO, VENCIDO, EXIGIBLE. Acción de regreso autónoma.', evidencePlan: 'SAP Valencia 30.12.2014.', tags: ['legitimacion'] },
+      { attack: 'Compensación con crédito Picassent', risk: 'Bajo', rebuttal: 'NO cabe: su crédito NO es líquido ni exigible (art. 1196 CC).', evidencePlan: 'Art. 1196.4º CC.', tags: ['compensacion'] },
+      { attack: 'Convenio = Juan paga hipoteca', risk: 'Bajo', rebuttal: 'Convenio habla de "gastos vivienda". Hipoteca es DEUDA SOLIDARIA.', evidencePlan: 'Literal convenio + escritura préstamo.', tags: ['convenio'] },
+      { attack: 'Falta acreditación cuotas', risk: 'Bajo', rebuttal: 'Doc. 3 = extractos con TODAS las aportaciones identificadas.', evidencePlan: 'Oficio a CaixaBank.', tags: ['prueba'] },
+    ];
+    for (const s of mislataStrategiesData) await strategiesRepo.create({ caseId: mislataCase.id, ...s } as any);
+
+    const mislataPartidasData = [
+      { date: '2023-10-01', concepto: 'Total pagos préstamo (oct 2023 - jun 2025)', importe: 14268.24, estado: 'pagada' },
+      { date: '2023-10-01', concepto: 'Comisiones bancarias período', importe: 169.03, estado: 'pagada' },
+      { date: '2023-10-01', concepto: 'Obligación 50% Vicenta', importe: -7284.90, estado: 'reclamada' },
+      { date: '2023-10-01', concepto: 'Aportaciones reales Vicenta', importe: 1159.05, estado: 'pagada' },
+      { date: '2025-06-30', concepto: 'EXCESO PAGADO POR JUAN', importe: 7119.98, estado: 'reclamada' },
+    ];
+    for (const p of mislataPartidasData) {
+      await partidasRepo.create({ caseId: mislataCase.id, date: p.date, amountCents: eurosToCents(Math.abs(p.importe)), concept: p.concepto, payer: 'Juan', beneficiary: 'CaixaBank', state: p.estado as any, theory: 'Art. 1145 CC - Acción de regreso', notes: '', tags: ['mislata', 'hipoteca'] });
+    }
+
+    // =====================================================================
     // 4. DOCUMENTOS CLAVE (MOCK) - PICASSENT
     // Para probar la vinculación Hecho <-> Documento
     // =====================================================================

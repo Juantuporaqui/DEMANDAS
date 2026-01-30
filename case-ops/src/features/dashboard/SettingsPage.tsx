@@ -8,6 +8,8 @@ import { settingsRepo } from '../../db/repositories';
 import { checkStorageQuota, formatBytes } from '../../utils/validators';
 import { migrateMislataCase } from '../../db/migrations/updateMislata';
 import { migrateQuartCase } from '../../db/migrations/updateQuart';
+import { db } from '../../db/schema';
+import { seedDatabase } from '../../db/seed';
 import type { Settings } from '../../types';
 
 export function SettingsPage() {
@@ -24,6 +26,44 @@ export function SettingsPage() {
     running: false,
     message: null,
   });
+  const [resetStatus, setResetStatus] = useState<{ running: boolean; message: string | null }>({
+    running: false,
+    message: null,
+  });
+
+  async function handleResetDatabase() {
+    if (resetStatus.running) return;
+
+    if (!confirm('⚠️ ATENCIÓN: Esto eliminará TODOS los datos actuales y cargará los datos reales de los 3 casos (Picassent, Mislata, Quart).\n\n¿Continuar?')) {
+      return;
+    }
+
+    setResetStatus({ running: true, message: 'Eliminando base de datos...' });
+
+    try {
+      // Clear all tables
+      await db.delete();
+      setResetStatus({ running: true, message: 'Recreando base de datos...' });
+
+      // Reopen and reseed
+      await db.open();
+      setResetStatus({ running: true, message: 'Cargando datos reales de los 3 casos...' });
+
+      await seedDatabase();
+
+      setResetStatus({ running: false, message: '✅ Base de datos reiniciada con datos reales de Picassent, Mislata y Quart. Recarga la página.' });
+
+      // Reload after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error) {
+      setResetStatus({
+        running: false,
+        message: `❌ Error: ${error instanceof Error ? error.message : 'Desconocido'}`,
+      });
+    }
+  }
 
   async function handleMigrateMislata() {
     if (migrationStatus.running) return;
@@ -246,13 +286,57 @@ export function SettingsPage() {
         </div>
       </section>
 
+      {/* Reset Database - PRINCIPAL */}
+      <section className="section">
+        <h2 className="section-title">🔄 Cargar Datos Reales</h2>
+        <div className="card" style={{ borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
+          <div className="card-body">
+            <p className="mb-md" style={{ color: '#d1fae5' }}>
+              <strong>¿No ves datos en los expedientes?</strong> Pulsa este botón para cargar los datos reales de los 3 casos:
+            </p>
+            <ul className="mb-md" style={{ color: '#a7f3d0', fontSize: '0.875rem', paddingLeft: '1.5rem' }}>
+              <li>Picassent P.O. 715/2024 (demandado) - 10 hechos, estrategias, partidas</li>
+              <li>Mislata J.V. 1185/2025 (demandante) - 6 hechos, 6 estrategias, 5 partidas</li>
+              <li>Quart ETJ 1428/2025 (ejecutado) - 7 hechos, 5 estrategias, 7 partidas</li>
+            </ul>
+            <button
+              className="btn btn-block"
+              style={{
+                backgroundColor: resetStatus.running ? '#64748b' : '#10b981',
+                color: 'white',
+                cursor: resetStatus.running ? 'wait' : 'pointer',
+                fontSize: '1rem',
+                padding: '0.875rem 1rem',
+                fontWeight: 'bold',
+              }}
+              onClick={handleResetDatabase}
+              disabled={resetStatus.running}
+            >
+              {resetStatus.running ? '⏳ Cargando...' : '🚀 CARGAR DATOS REALES DE LOS 3 CASOS'}
+            </button>
+            {resetStatus.message && (
+              <div
+                className="mt-md p-sm rounded"
+                style={{
+                  backgroundColor: resetStatus.message.includes('Error') ? '#7f1d1d' : '#064e3b',
+                  color: 'white',
+                  fontSize: '0.875rem',
+                }}
+              >
+                {resetStatus.message}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Migraciones */}
       <section className="section">
-        <h2 className="section-title">Migraciones de datos</h2>
+        <h2 className="section-title">Migraciones individuales</h2>
         <div className="card" style={{ borderColor: 'var(--color-warning, #f59e0b)' }}>
           <div className="card-body">
             <p className="mb-md text-muted">
-              Actualiza los datos de los casos con la información más reciente.
+              Actualiza datos de un caso específico sin tocar los demás.
             </p>
             <button
               className="btn btn-block"

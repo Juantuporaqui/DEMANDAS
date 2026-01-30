@@ -9,8 +9,6 @@ import { AnalyticsLayout } from '../layout/AnalyticsLayout';
 import { SectionCard } from '../components/SectionCard';
 import { HechoCard, HechoBadge, type HechoEstado } from '../components/HechoCard';
 import { HechoExpandible } from '../components/HechoExpandible';
-// Importamos el componente de los botones de colores
-import { ReclamacionesTiles } from '../../../components/ReclamacionesTiles';
 import { hechosReclamados, resumenContador, calcularTotales } from '../../../data/hechosReclamados';
 
 type FilterKey = 'todos' | 'prescrito' | 'compensable' | 'disputa';
@@ -132,7 +130,7 @@ export function HechosPage() {
         </div>
       </section>
 
-      {/* 2. Resumen con badges (Tu código original) */}
+      {/* 2. Resumen con badges */}
       <div className="flex flex-wrap items-center gap-2 p-4 rounded-xl border border-slate-800/50 bg-slate-900/30">
         <span className="text-sm text-slate-400 mr-2">Clasificación:</span>
         <HechoBadge count={countByEstado.prescrito} estado="prescrito" />
@@ -140,11 +138,7 @@ export function HechosPage() {
         <HechoBadge count={countByEstado.disputa} estado="disputa" />
       </div>
 
-      {/* 3. NUEVO: BOTONES DE COLORES (ReclamacionesTiles) */}
-      {/* Insertado aquí para que conviva con lo demás */}
-      <ReclamacionesTiles procedimientoId="picassent-715-2024" />
-
-      {/* 4. Filtros tipo app Android - Optimizado móvil */}
+      {/* 3. Filtros tipo app Android - Optimizado móvil */}
       <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0 mt-3 sm:mt-4">
         {filters.map((filter) => {
           const Icon = filter.icon;
