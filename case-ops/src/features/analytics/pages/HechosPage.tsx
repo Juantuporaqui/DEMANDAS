@@ -1,9 +1,16 @@
+// ============================================
+// CHALADITA CASE-OPS - HECHOS PAGE (ORIGINAL RESTAURADO)
+// ============================================
+
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Scale, Clock, AlertTriangle } from 'lucide-react';
 import { AnalyticsLayout } from '../layout/AnalyticsLayout';
-import { HechoBadge, type HechoEstado } from '../components/HechoCard';
-import { ReclamacionesTiles } from '../../../components/ReclamacionesTiles'; // Importamos el nuevo componente
+import { SectionCard } from '../components/SectionCard';
+import { HechoCard, HechoBadge, type HechoEstado } from '../components/HechoCard';
+// Mantenemos los datos estáticos antiguos si quieres ver la lista vieja,
+// o podrías cambiarlos por useLiveQuery si quieres datos reales nuevos.
+// Por ahora dejamos lo viejo para que visualmente sea lo que esperas.
 import { hechosReclamados, resumenContador, calcularTotales } from '../../../data/hechosReclamados';
 
 type FilterKey = 'todos' | 'prescrito' | 'compensable' | 'disputa';
@@ -20,7 +27,11 @@ export function HechosPage() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('todos');
   const totales = calcularTotales();
 
-  // Mantenemos esto por los contadores de las Badges, aunque la visualización principal cambie
+  const filteredHechos = useMemo(() => {
+    if (activeFilter === 'todos') return hechosReclamados;
+    return hechosReclamados.filter((h) => h.estado === activeFilter);
+  }, [activeFilter]);
+
   const countByEstado = {
     prescrito: hechosReclamados.filter(h => h.estado === 'prescrito').length,
     compensable: hechosReclamados.filter(h => h.estado === 'compensable').length,
@@ -70,7 +81,7 @@ export function HechosPage() {
         </div>
       </section>
 
-      {/* Resumen con badges (informativo) */}
+      {/* Resumen con badges */}
       <div className="flex flex-wrap items-center gap-2 p-4 rounded-xl border border-slate-800/50 bg-slate-900/30">
         <span className="text-sm text-slate-400 mr-2">Clasificación:</span>
         <HechoBadge count={countByEstado.prescrito} estado="prescrito" />
@@ -78,12 +89,61 @@ export function HechosPage() {
         <HechoBadge count={countByEstado.disputa} estado="disputa" />
       </div>
 
-      {/* NUEVO COMPONENTE: ReclamacionesTiles */}
-      {/* Pasamos ID 1 asumiendo que es el procedimiento principal cargado en el seed */}
-      <ReclamacionesTiles procedimientoId={1} />
+      {/* Filtros tipo app Android */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0">
+        {filters.map((filter) => {
+          const Icon = filter.icon;
+          const isActive = activeFilter === filter.key;
+          return (
+            <button
+              key={filter.key}
+              type="button"
+              onClick={() => setActiveFilter(filter.key)}
+              className={`
+                flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap
+                transition-all duration-200
+                ${isActive
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                  : 'bg-slate-800/50 text-slate-400 border border-slate-700/50 hover:bg-slate-800 hover:text-slate-300'
+                }
+              `}
+            >
+              <Icon className="w-4 h-4" />
+              {filter.label}
+              {filter.key !== 'todos' && (
+                <span className={`text-xs ${isActive ? 'text-emerald-400' : 'text-slate-500'}`}>
+                  ({countByEstado[filter.key as HechoEstado] || 0})
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Lista de hechos como cards tipo app */}
+      <SectionCard
+        title={`${filteredHechos.length} hechos encontrados`}
+        subtitle="Toca para ver análisis completo"
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          {filteredHechos.map((hecho) => (
+            <HechoCard
+              key={hecho.id}
+              id={hecho.id}
+              titulo={hecho.titulo}
+              cuantia={hecho.cuantia}
+              estado={hecho.estado}
+              año={hecho.año}
+              estrategia={hecho.estrategia}
+              // AQUÍ ESTÁ EL CAMBIO CLAVE: Navegación real
+              onClick={() => navigate(`/facts/${hecho.id}`)}
+            />
+          ))}
+        </div>
+      </SectionCard>
 
       {/* Acciones rápidas */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <button
           type="button"
           onClick={() => navigate('/analytics/prescripcion')}
