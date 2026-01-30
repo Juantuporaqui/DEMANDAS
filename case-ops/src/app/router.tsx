@@ -35,6 +35,8 @@ import { HechosPage } from '../features/analytics/pages/HechosPage';
 import { PrescripcionPage } from '../features/analytics/pages/PrescripcionPage';
 import { ModoAudienciaPage } from '../features/audiencia/ModoAudienciaPage';
 import { AudienciaPreviaPage } from '../features/audiencia/AudienciaPreviaPage';
+import { ModoTelepronter } from '../features/audiencia/ModoTelepronter';
+import { ChecklistAudiencia } from '../features/audiencia/ChecklistAudiencia';
 import { ToolsPage } from '../features/tools/ToolsPage';
 import { JurisprudenciaPage } from '../features/jurisprudencia/JurisprudenciaPage';
 
@@ -75,6 +77,15 @@ export const router = createBrowserRouter(
         {
           path: 'audiencia-previa',
           element: <AudienciaPreviaPage />,
+        },
+        // Audiencia mejorada
+        {
+          path: 'audiencia/telepronter',
+          element: <ModoTelepronter />,
+        },
+        {
+          path: 'audiencia/checklist',
+          element: <ChecklistAudiencia />,
         },
         {
           path: 'tools',
