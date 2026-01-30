@@ -1,26 +1,20 @@
 // ============================================
-// CHALADITA CASE-OPS - DETALLE DEL HECHO (VISTA COMPLETA)
+// CHALADITA CASE-OPS - VISTA DE DETALLE ESTRATÉGICA (FINAL)
 // ============================================
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ListItem, Chips, Modal } from '../../components';
+import { Chips, Modal } from '../../components';
 import { factsRepo, linksRepo, spansRepo, documentsRepo } from '../../db/repositories';
 import { chaladitaDb } from '../../db/chaladitaDb'; 
-import type { Fact, Span, Document, Link as LinkType } from '../../types';
 import { formatDateTime } from '../../utils/dates';
 
+// Mapeo de etiquetas para que se vean bonitas
 const STATUS_LABELS: Record<string, string> = {
   pacifico: 'Pacífico',
   controvertido: 'Controvertido',
   admitido: 'Admitido',
   a_probar: 'A probar',
-};
-
-const BURDEN_LABELS: Record<string, string> = {
-  actora: 'Actora',
-  demandado: 'Demandado',
-  mixta: 'Mixta',
 };
 
 const RISK_LABELS: Record<string, string> = {
@@ -29,49 +23,55 @@ const RISK_LABELS: Record<string, string> = {
   bajo: 'Bajo',
 };
 
+const BURDEN_LABELS: Record<string, string> = {
+  actora: 'Actora',
+  demandado: 'Demandado',
+  mixta: 'Mixta',
+};
+
 export function FactDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  
+  // Estado local
+  // Usamos 'any' en fact para que acepte tanto datos viejos como nuevos sin dar error de TS
   const [fact, setFact] = useState<any>(null);
-  const [evidence, setEvidence] = useState<
-    { link: any; span: any; document: any }[]
-  >([]);
+  const [evidence, setEvidence] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      loadFact(id);
-    }
+    if (id) loadFact(id);
   }, [id]);
 
   async function loadFact(factId: string) {
     try {
       setLoading(true);
       
-      // 1. Carga sistema antiguo
+      // PASO 1: Buscar en el sistema antiguo
       let factData = await factsRepo.getById(factId);
       let isFromNewDb = false;
 
-      // 2. Carga sistema nuevo
+      // PASO 2: Si no está, buscar en el sistema nuevo (chaladitaDb)
       if (!factData) {
         const newFact = await chaladitaDb.hechos.get(factId);
-        
         if (newFact) {
           isFromNewDb = true;
+          // Transformamos los datos nuevos para usarlos en la vista
           factData = {
             id: newFact.id,
             title: newFact.titulo,
-            narrative: newFact.resumenCorto, // Resumen al relato
-            status: 'controvertido', 
-            burden: 'mixta',         
+            narrative: newFact.resumenCorto,
+            status: 'controvertido', // Default
+            burden: 'mixta',         // Default
             risk: newFact.riesgo,
             strength: newFact.fuerza,
             tags: newFact.tags || [],
-            caseId: newFact.procedimientoId, 
+            caseId: newFact.procedimientoId,
             createdAt: new Date(newFact.createdAt).getTime(),
             updatedAt: new Date(newFact.updatedAt).getTime(),
-            // CARGAMOS LOS DATOS ESTRATÉGICOS
+            
+            // --- DATOS DEL DESGLOSE ESTRATÉGICO ---
             tesis: newFact.tesis,
             antitesis: newFact.antitesisEsperada,
             pruebasText: newFact.pruebasEsperadas || [],
@@ -87,9 +87,10 @@ export function FactDetailPage() {
 
       setFact(factData);
 
-      // 3. Cargar evidencias
+      // PASO 3: Cargar Evidencias / Documentos
       const evidenceData = [];
       if (!isFromNewDb) {
+        // Lógica antigua (enlaces manuales)
         const evidenceLinks = await linksRepo.getEvidenceForFact(factId);
         for (const link of evidenceLinks) {
           const span = await spansRepo.getById(link.fromId);
@@ -99,17 +100,23 @@ export function FactDetailPage() {
           }
         }
       } else {
+        // Lógica nueva (documentos por procedimiento)
         if (factData.caseId) {
-            const docs = await chaladitaDb.documentos
-            .where('procedimientoId').equals(factData.caseId)
-            .limit(10)
-            .toArray();
+             const docs = await chaladitaDb.documentos
+                .where('procedimientoId').equals(factData.caseId)
+                .limit(10)
+                .toArray();
             
-            const docsToShow = docs.length > 0 ? docs : [];
+            // Filtramos para mostrar lo relevante
+            const relevantDocs = docs.filter(d => 
+                d.hechosIds?.includes(factData.id) || d.tipo === 'demanda' || d.tipo === 'contestacion'
+            );
+            // Si no hay específicos, mostramos algunos generales para no dejarlo vacío
+            const docsToShow = relevantDocs.length > 0 ? relevantDocs : docs.slice(0, 3);
 
             for (const doc of docsToShow) {
                 evidenceData.push({
-                    link: { id: `lnk-virt-${doc.id}` }, 
+                    link: { id: `lnk-virt-${doc.id}` },
                     span: { label: 'Documento relacionado', pageStart: 1, pageEnd: 1 },
                     document: { id: doc.id, title: doc.descripcion || doc.tipo }
                 });
@@ -119,22 +126,24 @@ export function FactDetailPage() {
       setEvidence(evidenceData);
 
     } catch (error) {
-      console.error('Error loading fact:', error);
+      console.error('Error cargando hecho:', error);
     } finally {
       setLoading(false);
     }
   }
 
+  // Borrar hecho
   async function handleDelete() {
     if (!fact) return;
     try {
       await linksRepo.deleteByEntity('fact', fact.id);
       await factsRepo.delete(fact.id);
-      if (fact.id) await chaladitaDb.hechos.delete(fact.id);
+      if (fact.id) await chaladitaDb.hechos.delete(fact.id); // Borrar también de nueva DB
       navigate('/facts');
     } catch (error) { console.error(error); }
   }
 
+  // Quitar evidencia de la lista
   async function handleRemoveEvidence(linkId: string) {
     try {
         if (linkId.startsWith('lnk-virt-')) {
@@ -146,14 +155,17 @@ export function FactDetailPage() {
     } catch (error) { console.error(error); }
   }
 
+  // --- RENDERIZADO VISUAL ---
+
   if (loading) return <div className="page"><div className="flex justify-center p-md"><div className="spinner" /></div></div>;
-  if (!fact) return <div className="page"><div className="p-md text-muted">Hecho no encontrado</div></div>;
+  if (!fact) return <div className="page"><div className="p-md text-muted">Hecho no encontrado ({id})</div></div>;
 
   const needsEvidence = fact.status === 'controvertido' || fact.status === 'a_probar';
   const hasEvidence = evidence.length > 0;
 
   return (
     <div className="page">
+      {/* 1. CABECERA */}
       <div className="page-header">
         <button className="btn btn-ghost btn-icon" onClick={() => navigate(-1)}>←</button>
         <h1 className="page-title" style={{ flex: 1, fontSize: '1.25rem' }}>
@@ -173,7 +185,7 @@ export function FactDetailPage() {
         </div>
       )}
 
-      {/* 1. INFORMACIÓN PRINCIPAL */}
+      {/* 2. DATOS PRINCIPALES Y RESUMEN */}
       <div className="card mb-md">
         <div className="card-body">
           <div className="flex flex-wrap gap-sm mb-md">
@@ -187,22 +199,22 @@ export function FactDetailPage() {
             <span className="chip">Fuerza: {fact.strength}/5</span>
           </div>
 
-          {fact.narrative && (
-            <div className="mt-md">
-              <p className="text-muted" style={{ fontSize: '0.875rem', fontWeight: 600 }}>RELATO:</p>
-              <p style={{ whiteSpace: 'pre-wrap', marginTop: '4px' }}>{fact.narrative}</p>
-            </div>
-          )}
-
+          <div className="mt-md">
+            <p className="text-muted" style={{ fontSize: '0.875rem', fontWeight: 600 }}>RELATO DE HECHOS:</p>
+            <p style={{ whiteSpace: 'pre-wrap', marginTop: '4px', fontSize: '1rem', lineHeight: '1.6' }}>
+              {fact.narrative || "Sin descripción disponible."}
+            </p>
+          </div>
+          
           {fact.tags?.length > 0 && <div className="mt-md"><Chips items={fact.tags} /></div>}
         </div>
       </div>
 
-      {/* 2. NUEVA SECCIÓN: ANÁLISIS ESTRATÉGICO (TESIS / ANTÍTESIS) */}
+      {/* 3. DESGLOSE ESTRATÉGICO (TESIS vs ANTÍTESIS) */}
+      {/* Esta es la parte clave que pedías */}
       {(fact.tesis || fact.antitesis) && (
         <div className="mb-md" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            
-            {/* Tesis (Verde) */}
+            {/* Tarjeta Verde: Tesis */}
             <div className="card" style={{ borderLeft: '4px solid #10b981' }}>
                 <div className="card-body">
                     <h3 style={{ fontSize: '0.9rem', color: '#10b981', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase' }}>
@@ -213,12 +225,11 @@ export function FactDetailPage() {
                     </p>
                 </div>
             </div>
-
-            {/* Antítesis (Rojo) */}
+            {/* Tarjeta Roja: Antítesis */}
             <div className="card" style={{ borderLeft: '4px solid #ef4444' }}>
                 <div className="card-body">
                     <h3 style={{ fontSize: '0.9rem', color: '#ef4444', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase' }}>
-                        ⚔️ Antítesis
+                        ⚔️ Antítesis / Riesgo
                     </h3>
                     <p style={{ fontSize: '0.95rem', lineHeight: '1.5' }}>
                         {fact.antitesis || "No definida."}
@@ -228,7 +239,7 @@ export function FactDetailPage() {
         </div>
       )}
 
-      {/* 3. NUEVA SECCIÓN: ESTRATEGIA Y PRUEBAS */}
+      {/* 4. ESTRATEGIA Y DOCUMENTAL */}
       {fact.pruebasText && fact.pruebasText.length > 0 && (
           <div className="card mb-md">
               <div className="card-body">
@@ -242,15 +253,15 @@ export function FactDetailPage() {
           </div>
       )}
 
-      {/* 4. EVIDENCIAS VINCULADAS */}
+      {/* 5. LISTADO DE DOCUMENTOS */}
       <section className="section">
         <div className="section-header">
-          <h2 className="section-title">Documentos en Expediente ({evidence.length})</h2>
+          <h2 className="section-title">Documentos ({evidence.length})</h2>
         </div>
         {evidence.length === 0 ? (
           <div className="card">
             <div className="card-body text-center text-muted">
-              <p>No hay evidencias vinculadas</p>
+              <p>No hay documentos vinculados.</p>
             </div>
           </div>
         ) : (
@@ -271,18 +282,19 @@ export function FactDetailPage() {
         )}
       </section>
 
-      {/* Metadatos y Borrado */}
+      {/* FOOTER: METADATOS Y BORRADO */}
       <section className="section">
-        <div className="card">
+        <div className="card mb-md">
             <div className="card-body text-muted" style={{ fontSize: '0.75rem' }}>
                 <p><strong>Actualizado:</strong> {formatDateTime(fact.updatedAt)}</p>
             </div>
         </div>
-        <button className="btn btn-danger btn-block mt-md" onClick={() => setShowDeleteModal(true)}>
+        <button className="btn btn-danger btn-block" onClick={() => setShowDeleteModal(true)}>
           Eliminar hecho
         </button>
       </section>
 
+      {/* MODAL DE CONFIRMACIÓN */}
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -294,7 +306,7 @@ export function FactDetailPage() {
           </>
         }
       >
-        <p>¿Eliminar <strong>{fact.title}</strong>?</p>
+        <p>¿Seguro que quieres eliminar <strong>{fact.title}</strong>?</p>
       </Modal>
     </div>
   );
