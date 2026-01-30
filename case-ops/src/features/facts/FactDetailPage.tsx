@@ -6,8 +6,9 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Chips, Modal } from '../../components';
 import { factsRepo, linksRepo, spansRepo, documentsRepo } from '../../db/repositories';
-import { chaladitaDb } from '../../db/chaladitaDb'; 
+import { chaladitaDb } from '../../db/chaladitaDb';
 import { formatDateTime } from '../../utils/dates';
+import { hechosReclamados, type HechoReclamado } from '../../data/hechosReclamados';
 
 // Mapeo de etiquetas para que se vean bonitas
 const STATUS_LABELS: Record<string, string> = {
@@ -46,7 +47,47 @@ export function FactDetailPage() {
   async function loadFact(factId: string) {
     try {
       setLoading(true);
-      
+
+      // PASO 0: Si es un ID numérico simple (1-10), buscar en hechosReclamados (datos del caso Picassent)
+      const numericId = parseInt(factId);
+      if (!isNaN(numericId) && numericId >= 1 && numericId <= 10) {
+        const hechoReclamado = hechosReclamados.find(h => h.id === numericId);
+        if (hechoReclamado) {
+          const factFromHechos = {
+            id: String(hechoReclamado.id),
+            title: hechoReclamado.titulo,
+            narrative: hechoReclamado.realidadHechos,
+            status: hechoReclamado.estado === 'disputa' ? 'controvertido' :
+                    hechoReclamado.estado === 'prescrito' ? 'admitido' : 'a_probar',
+            burden: 'actora',
+            risk: hechoReclamado.cuantia > 50000 ? 'alto' : hechoReclamado.cuantia > 20000 ? 'medio' : 'bajo',
+            strength: hechoReclamado.estado === 'prescrito' ? 5 : hechoReclamado.estado === 'compensable' ? 4 : 2,
+            tags: [hechoReclamado.estado, `${hechoReclamado.año}`],
+            caseId: 'CAS001',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            // DATOS ESTRATÉGICOS COMPLETOS
+            tesis: hechoReclamado.realidadHechos,
+            antitesis: hechoReclamado.hechoActora,
+            pruebasText: hechoReclamado.oposicion || [],
+            customAmount: `${hechoReclamado.cuantia.toLocaleString('es-ES')}€`,
+            // DATOS ADICIONALES DEL HECHO
+            estrategia: hechoReclamado.estrategia,
+            documentosRef: hechoReclamado.documentosRef,
+            tareas: hechoReclamado.tareas,
+            vinculadoA: hechoReclamado.vinculadoA,
+            hechoActora: hechoReclamado.hechoActora,
+            estado: hechoReclamado.estado,
+            año: hechoReclamado.año,
+            cuantia: hechoReclamado.cuantia,
+          };
+          setFact(factFromHechos);
+          setEvidence([]); // Los documentos se mostrarán de otra forma
+          setLoading(false);
+          return;
+        }
+      }
+
       // PASO 1: Buscar en el sistema antiguo
       let factData = await factsRepo.getById(factId);
       let isFromNewDb = false;
@@ -69,7 +110,7 @@ export function FactDetailPage() {
             caseId: newFact.procedimientoId,
             createdAt: new Date(newFact.createdAt).getTime(),
             updatedAt: new Date(newFact.updatedAt).getTime(),
-            
+
             // --- DATOS DEL DESGLOSE ESTRATÉGICO ---
             tesis: newFact.tesis,
             antitesis: newFact.antitesisEsperada,
@@ -80,7 +121,7 @@ export function FactDetailPage() {
       }
 
       if (!factData) {
-        setFact(null); 
+        setFact(null);
         return;
       }
 
@@ -237,16 +278,99 @@ export function FactDetailPage() {
         </div>
       )}
 
-      {/* 4. ESTRATEGIA Y DOCUMENTAL */}
-      {fact.pruebasText && fact.pruebasText.length > 0 && (
-          <div className="card mb-md">
+      {/* 4. ESTRATEGIA DE DEFENSA */}
+      {fact.estrategia && (
+          <div className="card mb-md" style={{ borderLeft: '4px solid #f59e0b' }}>
               <div className="card-body">
-                  <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '12px' }}>📋 Estrategia Probatoria</h3>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '12px', color: '#f59e0b' }}>⚡ Estrategia de Defensa</h3>
+                  <p style={{ fontSize: '1rem', lineHeight: '1.6', fontWeight: 500 }}>{fact.estrategia}</p>
+              </div>
+          </div>
+      )}
+
+      {/* 5. ARGUMENTOS DE OPOSICIÓN */}
+      {fact.pruebasText && fact.pruebasText.length > 0 && (
+          <div className="card mb-md" style={{ borderLeft: '4px solid #3b82f6' }}>
+              <div className="card-body">
+                  <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '12px', color: '#3b82f6' }}>📋 Argumentos de Oposición</h3>
                   <ul style={{ paddingLeft: '20px', margin: 0 }}>
                       {fact.pruebasText.map((p: string, i: number) => (
-                          <li key={i} style={{ marginBottom: '6px' }}>{p}</li>
+                          <li key={i} style={{ marginBottom: '8px', lineHeight: '1.5' }}>
+                            <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>•</span> {p}
+                          </li>
                       ))}
                   </ul>
+              </div>
+          </div>
+      )}
+
+      {/* 6. DOCUMENTOS DE REFERENCIA */}
+      {fact.documentosRef && fact.documentosRef.length > 0 && (
+          <div className="card mb-md" style={{ borderLeft: '4px solid #06b6d4' }}>
+              <div className="card-body">
+                  <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '12px', color: '#06b6d4' }}>📁 Documentos de Prueba</h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {fact.documentosRef.map((doc: string, i: number) => (
+                          <span key={i} style={{
+                            padding: '6px 12px',
+                            background: 'rgba(6, 182, 212, 0.1)',
+                            border: '1px solid rgba(6, 182, 212, 0.3)',
+                            borderRadius: '8px',
+                            fontSize: '0.85rem',
+                            fontFamily: 'monospace',
+                            color: '#06b6d4'
+                          }}>{doc}</span>
+                      ))}
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {/* 7. TAREAS PENDIENTES */}
+      {fact.tareas && fact.tareas.length > 0 && (
+          <div className="card mb-md" style={{ borderLeft: '4px solid #a855f7' }}>
+              <div className="card-body">
+                  <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '12px', color: '#a855f7' }}>✅ Tareas Pendientes</h3>
+                  <ul style={{ paddingLeft: '0', margin: 0, listStyle: 'none' }}>
+                      {fact.tareas.map((tarea: string, i: number) => (
+                          <li key={i} style={{
+                            marginBottom: '10px',
+                            padding: '10px 14px',
+                            background: 'rgba(168, 85, 247, 0.1)',
+                            border: '1px solid rgba(168, 85, 247, 0.2)',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '10px'
+                          }}>
+                            <span style={{
+                              width: '20px',
+                              height: '20px',
+                              borderRadius: '4px',
+                              border: '2px solid #a855f7',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '11px',
+                              color: '#a855f7',
+                              flexShrink: 0
+                            }}>{i + 1}</span>
+                            <span>{tarea}</span>
+                          </li>
+                      ))}
+                  </ul>
+              </div>
+          </div>
+      )}
+
+      {/* 8. VINCULACIÓN */}
+      {fact.vinculadoA && (
+          <div className="card mb-md" style={{ background: 'rgba(100, 100, 100, 0.1)' }}>
+              <div className="card-body">
+                  <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                    🔗 Vinculado al Hecho #{fact.vinculadoA} —{' '}
+                    <Link to={`/facts/${fact.vinculadoA}`} style={{ color: '#60a5fa' }}>Ver hecho relacionado →</Link>
+                  </p>
               </div>
           </div>
       )}

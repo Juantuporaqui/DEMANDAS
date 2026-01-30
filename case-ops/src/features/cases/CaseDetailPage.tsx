@@ -3,7 +3,7 @@
 // ============================================
 
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Scale, FileText, Calendar, Gavel, ChevronRight, Upload, ListChecks, RefreshCw, Eye, AlertTriangle
 } from 'lucide-react';
@@ -62,137 +62,140 @@ function TabResumen({ caseData, strategies, events, facts, navigate, setActiveTa
           </div>
         </div>
 
-        {/* ACCESOS RÁPIDOS CON HECHOS RELEVANTES - Responsive */}
+        {/* ACCESOS RÁPIDOS - BOTONES TIPO APP MÓVIL */}
         <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2">
           {/* TARJETA DESGLOSE DE HECHOS */}
-          <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 hover:border-emerald-500/30 transition-all">
-            <div className="flex items-center gap-3 mb-3">
+          <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-4 sm:p-5 hover:border-emerald-500/30 transition-all">
+            <div className="flex items-center gap-3 mb-4">
               <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400"><ListChecks size={20} /></div>
-              <h3 className="font-bold text-white">Desglose de Hechos</h3>
+              <div>
+                <h3 className="font-bold text-white text-sm">Desglose de Hechos</h3>
+                <p className="text-[10px] text-slate-500">{isPicassent ? '10' : facts.length} partidas analizadas</p>
+              </div>
             </div>
-            <p className="text-sm text-slate-400 mb-4">{isPicassent ? '10' : facts.length} partidas analizadas al detalle.</p>
 
-            {/* HECHOS RELEVANTES - BOTONES */}
-            <div className="space-y-2 mb-4">
-              {hechosRelevantes.slice(0, 3).map((hecho) => (
+            {/* HECHOS RELEVANTES - GRID TIPO APP */}
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              {hechosRelevantes.slice(0, 4).map((hecho) => (
                 <button
                   key={hecho.id}
                   onClick={() => navigate(`/facts/${hecho.id}`)}
-                  className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/60 border border-slate-700/50 hover:border-emerald-500/40 hover:bg-slate-800/60 transition-all text-left group"
+                  className={`flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl border transition-all hover:scale-105 active:scale-95 ${
+                    hecho.estado === 'disputa'
+                      ? 'bg-orange-500/10 border-orange-500/30 hover:border-orange-500/60'
+                      : hecho.estado === 'prescrito'
+                      ? 'bg-rose-500/10 border-rose-500/30 hover:border-rose-500/60'
+                      : 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60'
+                  }`}
                 >
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                    hecho.estado === 'disputa' ? 'bg-orange-500/20 text-orange-400' :
-                    hecho.estado === 'prescrito' ? 'bg-rose-500/20 text-rose-400' :
-                    'bg-amber-500/20 text-amber-400'
+                  <span className={`text-base sm:text-xl font-bold ${
+                    hecho.estado === 'disputa' ? 'text-orange-400' :
+                    hecho.estado === 'prescrito' ? 'text-rose-400' : 'text-amber-400'
                   }`}>
                     #{hecho.id}
                   </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs text-white font-medium truncate">{hecho.titulo}</div>
-                    <div className="text-[10px] text-slate-500">{hecho.cuantia.toLocaleString('es-ES')} €</div>
-                  </div>
-                  <ChevronRight size={14} className="text-slate-600 group-hover:text-emerald-400 transition-colors" />
+                  <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight line-clamp-2">
+                    {hecho.titulo.split(' ').slice(0, 2).join(' ')}
+                  </span>
+                  <span className="text-[8px] text-slate-600 font-mono">
+                    {(hecho.cuantia / 1000).toFixed(0)}k€
+                  </span>
                 </button>
               ))}
             </div>
 
             <button
               onClick={() => navigate('/analytics/hechos')}
-              className="w-full text-xs text-emerald-400 font-medium py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors"
+              className="w-full text-xs text-emerald-400 font-medium py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors flex items-center justify-center gap-2"
             >
-              Ver análisis completo →
+              <ListChecks size={14} />
+              Ver los 10 hechos →
             </button>
           </div>
 
           {/* TARJETA AUDIENCIA PREVIA */}
-          <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 hover:border-amber-500/30 transition-all relative">
-            <div className="absolute top-4 right-4"><span className="bg-amber-500/20 text-amber-300 text-[10px] px-2 py-1 rounded-full border border-amber-500/30">URGENTE</span></div>
-            <div className="flex items-center gap-3 mb-3">
+          <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-4 sm:p-5 hover:border-amber-500/30 transition-all relative">
+            <div className="absolute top-3 right-3"><span className="bg-rose-500/20 text-rose-300 text-[9px] px-2 py-0.5 rounded-full border border-rose-500/30 animate-pulse">URGENTE</span></div>
+            <div className="flex items-center gap-3 mb-4">
               <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400"><Gavel size={20} /></div>
-              <h3 className="font-bold text-white">Audiencia Previa</h3>
+              <div>
+                <h3 className="font-bold text-white text-sm">Audiencia Previa</h3>
+                <p className="text-[10px] text-slate-500">Puntos clave de defensa</p>
+              </div>
             </div>
-            <p className="text-sm text-slate-400 mb-4">Preparación de prueba y alegaciones.</p>
 
-            {/* PUNTOS CLAVE AUDIENCIA */}
-            <div className="space-y-2 mb-4">
+            {/* PUNTOS CLAVE - GRID TIPO APP */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
               <button
                 onClick={() => navigate('/facts/4')}
-                className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/60 border border-slate-700/50 hover:border-amber-500/40 hover:bg-slate-800/60 transition-all text-left group"
+                className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:border-rose-500/60 transition-all hover:scale-105 active:scale-95"
               >
-                <AlertTriangle size={14} className="text-rose-400" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs text-white font-medium">Hipoteca Lope de Vega</div>
-                  <div className="text-[10px] text-slate-500">122.282€ - Reclamar prescripción</div>
-                </div>
-                <ChevronRight size={14} className="text-slate-600 group-hover:text-amber-400 transition-colors" />
+                <AlertTriangle size={20} className="text-rose-400" />
+                <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight">Hipoteca</span>
+                <span className="text-[8px] text-rose-400 font-bold">122k€</span>
               </button>
               <button
                 onClick={() => navigate('/facts/3')}
-                className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/60 border border-slate-700/50 hover:border-amber-500/40 hover:bg-slate-800/60 transition-all text-left group"
+                className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:border-amber-500/60 transition-all hover:scale-105 active:scale-95"
               >
-                <Scale size={14} className="text-amber-400" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs text-white font-medium">Artur Piera (Compensación)</div>
-                  <div className="text-[10px] text-slate-500">Ella retiró 38.500€ vs 32.000€</div>
-                </div>
-                <ChevronRight size={14} className="text-slate-600 group-hover:text-amber-400 transition-colors" />
+                <Scale size={20} className="text-amber-400" />
+                <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight">Compensa</span>
+                <span className="text-[8px] text-amber-400 font-bold">38.5k€</span>
               </button>
               <button
                 onClick={() => navigate('/facts/10')}
-                className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/60 border border-slate-700/50 hover:border-amber-500/40 hover:bg-slate-800/60 transition-all text-left group"
+                className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 hover:border-cyan-500/60 transition-all hover:scale-105 active:scale-95"
               >
-                <FileText size={14} className="text-cyan-400" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs text-white font-medium">Maquinaria Agrícola</div>
-                  <div className="text-[10px] text-slate-500">Ella cobró 10.887€ beneficios</div>
-                </div>
-                <ChevronRight size={14} className="text-slate-600 group-hover:text-amber-400 transition-colors" />
+                <FileText size={20} className="text-cyan-400" />
+                <span className="text-[8px] sm:text-[10px] text-slate-400 text-center leading-tight">Agrícola</span>
+                <span className="text-[8px] text-cyan-400 font-bold">10.8k€</span>
               </button>
             </div>
 
             <button
               onClick={() => navigate('/analytics/audiencia')}
-              className="w-full text-xs text-amber-400 font-medium py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
+              className="w-full text-xs text-amber-400 font-medium py-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors flex items-center justify-center gap-2"
             >
-              Ir al modo juicio →
+              <Gavel size={14} />
+              Modo juicio →
             </button>
           </div>
         </div>
 
-        {/* ACCESO RÁPIDO A DOCUMENTOS */}
+        {/* ACCESO RÁPIDO A DOCUMENTOS - CON NAVEGACIÓN DIRECTA */}
         <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400"><Eye size={18} /></div>
             <h3 className="font-bold text-white text-sm">Documentos del Procedimiento</h3>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <button
-              onClick={() => { navigate(`/cases/${caseData.id}`); setTimeout(() => document.querySelector('[data-tab="docs"]')?.dispatchEvent(new Event('click')), 100); }}
-              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/20 transition-all"
+              onClick={() => navigate(`/cases/${caseData.id}?tab=docs&doc=demanda-picassent`)}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/20 transition-all hover:scale-105 active:scale-95"
             >
-              <span className="text-lg">📜</span>
-              <span className="text-[10px] text-amber-400 font-medium">Demanda</span>
+              <span className="text-xl sm:text-2xl">📜</span>
+              <span className="text-[9px] sm:text-[10px] text-amber-400 font-medium">Demanda</span>
             </button>
             <button
-              onClick={() => { navigate(`/cases/${caseData.id}`); setTimeout(() => document.querySelector('[data-tab="docs"]')?.dispatchEvent(new Event('click')), 100); }}
-              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/20 transition-all"
+              onClick={() => navigate(`/cases/${caseData.id}?tab=docs&doc=contestacion-picassent`)}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/20 transition-all hover:scale-105 active:scale-95"
             >
-              <span className="text-lg">🛡️</span>
-              <span className="text-[10px] text-emerald-400 font-medium">Contestación</span>
+              <span className="text-xl sm:text-2xl">🛡️</span>
+              <span className="text-[9px] sm:text-[10px] text-emerald-400 font-medium">Contest.</span>
             </button>
             <button
               onClick={() => setActiveTab('docs')}
-              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 hover:border-cyan-500/50 hover:bg-cyan-500/20 transition-all"
+              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 hover:border-cyan-500/50 hover:bg-cyan-500/20 transition-all hover:scale-105 active:scale-95"
             >
-              <span className="text-lg">📂</span>
-              <span className="text-[10px] text-cyan-400 font-medium">Ver Todos</span>
+              <span className="text-xl sm:text-2xl">📂</span>
+              <span className="text-[9px] sm:text-[10px] text-cyan-400 font-medium">Todos</span>
             </button>
             <button
               onClick={() => navigate(`/documents/new?caseId=${caseData.id}`)}
-              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-slate-700/50 border border-slate-600/50 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all"
+              className="flex flex-col items-center gap-1 p-3 rounded-xl bg-slate-700/50 border border-slate-600/50 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all hover:scale-105 active:scale-95"
             >
-              <Upload size={18} className="text-slate-400" />
-              <span className="text-[10px] text-slate-400 font-medium">Subir</span>
+              <Upload size={20} className="text-slate-400 sm:w-6 sm:h-6" />
+              <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium">Subir</span>
             </button>
           </div>
         </div>
@@ -226,8 +229,8 @@ function TabResumen({ caseData, strategies, events, facts, navigate, setActiveTa
 // ============================================
 // 2. TAB DOCUMENTOS (El Lector Inteligente)
 // ============================================
-function TabDocs({ documents, caseId, caseData }: any) {
-  const [selectedDocKey, setSelectedDocKey] = useState<string | null>(null);
+function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
+  const [selectedDocKey, setSelectedDocKey] = useState<string | null>(initialDocKey || null);
   const isPicassent = caseData.title.toLowerCase().includes('picassent');
   const isMislata = caseData.title.toLowerCase().includes('mislata');
 
@@ -412,7 +415,11 @@ function TabEstrategia({ strategies, caseId }: any) {
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('resumen');
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const docParam = searchParams.get('doc');
+  const [activeTab, setActiveTab] = useState(tabParam || 'resumen');
+  const [initialDoc, setInitialDoc] = useState<string | null>(docParam);
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
   const [docs, setDocs] = useState<Document[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -493,7 +500,7 @@ export function CaseDetailPage() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} navigate={navigate} setActiveTab={setActiveTab} />}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} />}
-        {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
+        {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} initialDocKey={initialDoc} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
         {activeTab === 'actuaciones' && (
           <div className="space-y-4">
