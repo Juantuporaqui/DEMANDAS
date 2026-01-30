@@ -50,16 +50,16 @@ export async function seedDatabase(): Promise<boolean> {
     // 2. CASOS SECUNDARIOS
     // =====================================================================
     const quartCase = await casesRepo.create({
-      title: 'P.O. 362/2023 · Ejecución Familia',
-      court: 'JPI nº 2 de Quart de Poblet',
-      autosNumber: '362/2023',
+      title: 'ETJ 1428/2025 · Ejecución Cuenta Hijos',
+      court: 'Juzgado de Primera Instancia nº 1 de Quart de Poblet',
+      autosNumber: '1428/2025',
       type: 'ejecucion',
       status: 'activo',
-      clientRole: 'ejecutante',
-      judge: '[Pendiente]',
-      opposingCounsel: 'Mª Carmen Gómez',
-      notes: 'Ejecución de sentencia de divorcio. Liquidación de gananciales pendiente.',
-      tags: ['familia', 'ejecucion', 'gananciales']
+      clientRole: 'ejecutado',
+      judge: 'Sandra Lozano López',
+      opposingCounsel: 'Isabel Luzzy Aguilar (Vicenta Jiménez Vera)',
+      notes: 'Ejecución por supuestos impagos 200€/mes cuenta hijos. Reclamación: 2.400€. Oposición presentada. Vista: 23/04/2026 09:30. NIG: 4610241120230002538',
+      tags: ['ejecucion', 'familia', 'cuenta-hijos', 'oposicion', 'vista']
     });
 
     const mislataCase = await casesRepo.create({
@@ -75,20 +75,41 @@ export async function seedDatabase(): Promise<boolean> {
       tags: ['hipoteca', 'cuotas', 'solidaridad', 'regreso', 'art-1145-CC']
     });
 
-    // Eventos básicos para Quart
+    // Eventos básicos para Quart (ETJ 1428/2025)
     await eventsRepo.create({
       caseId: quartCase.id,
-      date: '2023-06-15',
+      date: '2023-10-17',
       type: 'procesal',
-      title: 'Sentencia Divorcio Firme',
-      description: 'Sentencia de divorcio con liquidación de gananciales pendiente.'
+      title: 'Sentencia Divorcio 362/2023',
+      description: 'Sentencia aprobando convenio regulador. Juez: Sandra Lozano López. Base del título ejecutivo.'
     } as any);
     await eventsRepo.create({
       caseId: quartCase.id,
-      date: '2024-03-20',
+      date: '2025-10-30',
       type: 'procesal',
-      title: 'Demanda de Ejecución',
-      description: 'Inicio del procedimiento de ejecución.'
+      title: 'Auto y Decreto Despacho Ejecución',
+      description: 'Se despacha ejecución por 2.400€ y se decreta embargo de cuentas y devoluciones tributarias.'
+    } as any);
+    await eventsRepo.create({
+      caseId: quartCase.id,
+      date: '2025-11-06',
+      type: 'procesal',
+      title: 'Notificación a Juan',
+      description: 'Juan es notificado del Auto y Decreto de ejecución.'
+    } as any);
+    await eventsRepo.create({
+      caseId: quartCase.id,
+      date: '2026-01-14',
+      type: 'procesal',
+      title: 'Providencia señalando Vista',
+      description: 'Se señala vista para el 23/04/2026 a las 09:30. Se tiene por impugnada la oposición.'
+    } as any);
+    await eventsRepo.create({
+      caseId: quartCase.id,
+      date: '2026-04-23',
+      type: 'procesal',
+      title: 'VISTA ORAL',
+      description: 'Celebración de la vista oral en el procedimiento de oposición a la ejecución 1428.1/2025. Hora: 09:30.'
     } as any);
 
     // Eventos básicos para Mislata (J.V. 1185/2025)
