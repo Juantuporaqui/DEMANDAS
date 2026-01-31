@@ -18,6 +18,10 @@ import { LEGAL_DOCS_MAP, AUTO_DOCS } from '../../data/legal_texts';
 import type { AutoDocument } from '../../data/legal_texts';
 import { formatCurrency } from '../../utils/validators';
 import { getCaseAmounts } from '../../utils/moneyCase';
+// Análisis financiero específico para Quart
+import { QuartFinancialAnalysis } from './QuartFinancialAnalysis';
+// Timeline específico para Picassent
+import { PicassentTimeline } from './PicassentTimeline';
 
 // ============================================
 // 1. DASHBOARD EJECUTIVO (Tab Resumen) - DINÁMICO
@@ -670,8 +674,27 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
 // ============================================
 // 3. TAB ECONÓMICO (CON ACCESO A WAR ROOM)
 // ============================================
-function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
+function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact[], caseData?: Case }) {
   const navigate = useNavigate();
+
+  // Detectar tipo de caso para mostrar análisis específico
+  const isQuart = caseId?.includes('quart') ||
+                  caseData?.title?.toLowerCase().includes('quart') ||
+                  caseData?.autosNumber?.includes('1428');
+
+  const isPicassent = caseId?.includes('picassent') ||
+                      caseData?.title?.toLowerCase().includes('picassent') ||
+                      caseData?.autosNumber?.includes('715');
+
+  // Para Quart, mostrar análisis financiero dedicado
+  if (isQuart) {
+    return <QuartFinancialAnalysis />;
+  }
+
+  // Para Picassent, mostrar timeline con hipoteca y pagos
+  if (isPicassent) {
+    return <PicassentTimeline />;
+  }
 
   // Helper para sacar un importe estimado del texto si existe
   const extractAmount = (text: string) => {
@@ -815,7 +838,11 @@ export function CaseDetailPage() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 pt-3 sm:pt-4 pb-0">
           <div className="flex justify-between items-start mb-3 sm:mb-4 gap-2">
             <div className="min-w-0 flex-1">
-              <Link to="/cases" className="text-xs text-slate-500 hover:text-white mb-1 block transition-colors">← Volver</Link>
+              <div className="flex items-center gap-3 mb-1">
+                <Link to="/dashboard" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">Dashboard</Link>
+                <span className="text-slate-600">/</span>
+                <Link to="/cases" className="text-xs text-slate-500 hover:text-white transition-colors">Casos</Link>
+              </div>
               <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight leading-tight truncate">{currentCase.title}</h1>
               <div className="flex gap-2 mt-2 items-center flex-wrap">
                 <span className="text-[10px] sm:text-xs font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">{currentCase.autosNumber}</span>
@@ -875,7 +902,7 @@ export function CaseDetailPage() {
       {/* CONTENIDO */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} partidas={partidas} documents={docs} navigate={navigate} setActiveTab={setActiveTab} isReadMode={isReadMode} />}
-        {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} />}
+        {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} initialDocKey={initialDoc} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
         {activeTab === 'actuaciones' && (

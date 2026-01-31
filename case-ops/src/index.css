@@ -1,11 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  /* Tipografía */
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  /* ========================================
+   * PALETA "LEGAL PRO" - Plan Maestro FASE 2
+   * ======================================== */
+
+  /* Tipografía Profesional */
+  --font-sans: "Inter", "Roboto", system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* Paleta Slate Oscura (OKLCH) - La base del modo War Room */
+  /* Paleta Slate Oscura (OKLCH) - Base War Room */
   --color-slate-200: oklch(92.9% .013 255.508);
   --color-slate-300: oklch(86.9% .022 252.894);
   --color-slate-400: oklch(70.4% .04 256.788);
@@ -16,16 +20,66 @@
   --color-slate-900: oklch(20.8% .042 265.755);
   --color-slate-950: oklch(15.4% .035 264.8);
 
-  /* Variables Semánticas que usa la app */
-  --color-fondo: var(--color-slate-950);
-  --color-text-main: #e2e8f0;
-  --color-border: var(--color-slate-800);
+  /* ==========================================
+   * COLORES SEMÁNTICOS - PLAN MAESTRO
+   * ========================================== */
 
-  /* Animaciones */
+  /* Fondo Principal: Gris Azulado Oscuro */
+  --color-fondo: #1a202c;
+  --color-fondo-card: #2d3748;
+  --color-fondo-elevado: #4a5568;
+
+  /* Texto Principal: Blanco Hueso */
+  --color-text-main: #e2e8f0;
+  --color-text-muted: #a0aec0;
+  --color-text-dim: #718096;
+
+  /* Bordes */
+  --color-border: #4a5568;
+  --color-border-subtle: #2d3748;
+
+  /* ==========================================
+   * COLORES DE ACENTO - ESTADOS LEGALES
+   * ========================================== */
+
+  /* Dorado - Alertas y Urgencias */
+  --color-gold: #f9ca24;
+  --color-gold-muted: #d69e2e;
+  --color-gold-bg: rgba(249, 202, 36, 0.15);
+
+  /* Verde - Positivo / Prescrito / Ganado */
+  --color-success: #38a169;
+  --color-success-muted: #2f855a;
+  --color-success-bg: rgba(56, 161, 105, 0.15);
+
+  /* Rojo - Riesgo / Alerta / En Disputa */
+  --color-danger: #e53e3e;
+  --color-danger-muted: #c53030;
+  --color-danger-bg: rgba(229, 62, 62, 0.15);
+
+  /* Azul - Info / Procesal */
+  --color-info: #3182ce;
+  --color-info-muted: #2b6cb0;
+  --color-info-bg: rgba(49, 130, 206, 0.15);
+
+  /* Violeta - Especial */
+  --color-accent: #805ad5;
+  --color-accent-muted: #6b46c1;
+  --color-accent-bg: rgba(128, 90, 213, 0.15);
+
+  /* ==========================================
+   * ANIMACIONES
+   * ========================================== */
   --animate-fade-in: fadeIn 0.5s ease-out forwards;
+  --animate-slide-up: slideUp 0.3s ease-out forwards;
 
   @keyframes fadeIn {
     0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    0% { opacity: 0; transform: translateY(20px); }
     100% { opacity: 1; transform: translateY(0); }
   }
 }
@@ -48,4 +102,217 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* ==========================================
+ * COMPONENTES GLOBALES - LEGAL PRO
+ * ========================================== */
+
+/* Navegación Global Superior */
+.nav-global {
+  background: linear-gradient(to bottom, #1a202c, #2d3748);
+  border-bottom: 1px solid var(--color-border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.nav-global-item {
+  color: var(--color-text-muted);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-global-item:hover {
+  color: var(--color-text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-global-item.active {
+  color: var(--color-gold);
+  border-bottom-color: var(--color-gold);
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+}
+
+.breadcrumbs a {
+  color: var(--color-text-muted);
+  transition: color 0.2s;
+}
+
+.breadcrumbs a:hover {
+  color: var(--color-gold);
+}
+
+.breadcrumbs .separator {
+  color: var(--color-border);
+}
+
+.breadcrumbs .current {
+  color: var(--color-text-main);
+  font-weight: 500;
+}
+
+/* Cards de Frentes Judiciales */
+.case-card {
+  background: var(--color-fondo-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.case-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-border);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.case-card.urgente {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 20px -5px var(--color-gold-bg);
+}
+
+.case-card.en-riesgo {
+  border-color: var(--color-danger);
+}
+
+.case-card.favorable {
+  border-color: var(--color-success);
+}
+
+/* Badge de Estado */
+.badge-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-estado.urgente {
+  background: var(--color-gold-bg);
+  color: var(--color-gold);
+  border: 1px solid var(--color-gold-muted);
+}
+
+.badge-estado.activo {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid var(--color-success-muted);
+}
+
+.badge-estado.riesgo {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-muted);
+}
+
+.badge-estado.info {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+  border: 1px solid var(--color-info-muted);
+}
+
+/* KPI Cards */
+.kpi-card {
+  background: var(--color-fondo-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.kpi-card .label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.kpi-card .value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.kpi-card .value.success { color: var(--color-success); }
+.kpi-card .value.danger { color: var(--color-danger); }
+.kpi-card .value.gold { color: var(--color-gold); }
+.kpi-card .value.info { color: var(--color-info); }
+
+/* Tabs para Expediente */
+.tabs-expediente {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--color-fondo-card);
+  padding: 0.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border-subtle);
+}
+
+.tabs-expediente button {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tabs-expediente button:hover {
+  color: var(--color-text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tabs-expediente button.active {
+  color: var(--color-text-main);
+  background: var(--color-fondo);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar personalizada */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--color-fondo);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-dim);
+}
+
+/* Ocultar scrollbar horizontal en móvil */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

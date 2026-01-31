@@ -119,6 +119,16 @@ export function CasesPage() {
 
   return (
     <div className="space-y-8">
+      {/* Navegación de retorno */}
+      <div className="flex items-center gap-4">
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
+        >
+          ← Dashboard
+        </Link>
+      </div>
+
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
