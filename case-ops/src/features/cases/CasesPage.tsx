@@ -65,6 +65,17 @@ function getNextEvent(events: Event[]) {
   return upcoming?.event ?? null;
 }
 
+// Función auxiliar para identificar la ubicación radialmente
+function getCaseLocationLabel(caseItem: Case) {
+  const text = (caseItem.title + ' ' + caseItem.court).toLowerCase();
+  
+  if (text.includes('picassent')) return 'PICASSENT';
+  if (text.includes('quart')) return 'QUART DE POBLET';
+  if (text.includes('mislata')) return 'MISLATA';
+  
+  return 'JUZGADO'; // Valor por defecto
+}
+
 export function CasesPage() {
   const [cases, setCases] = useState<Case[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -164,6 +175,9 @@ export function CasesPage() {
             const totalAmount = casePartidas.reduce((sum, partida) => sum + partida.amountCents, 0);
             const nextEvent = getNextEvent(caseEvents);
             const children = childCases.filter((child) => child.parentCaseId === caseItem.id);
+            
+            // Calculamos la etiqueta de ubicación
+            const locationLabel = getCaseLocationLabel(caseItem);
 
             return (
               <Link
@@ -172,31 +186,42 @@ export function CasesPage() {
                 className="group flex h-full"
               >
                 <div
-                  className={`flex h-full w-full flex-col gap-6 rounded-2xl border bg-gradient-to-br ${accent.accent} ${accent.border} p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-xl`}
+                  className={`flex h-full w-full flex-col gap-6 rounded-2xl border bg-gradient-to-br ${accent.accent} ${accent.border} p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-xl relative overflow-hidden`}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-2xl">
-                        {accent.icon}
+                  {/* --- NUEVO: Header Radial de Ubicación --- */}
+                  <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-white/70">
+                            📍 {locationLabel}
+                        </span>
                       </div>
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="text-lg font-semibold text-white">{caseItem.title}</h2>
-                          <span
-                            className={`rounded-full border px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] ${
+                      {/* Movemos el status badge aquí arriba para limpiar el layout */}
+                      <span
+                            className={`rounded-full border px-3 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.1em] ${
                               STATUS_BADGES[caseItem.status] || 'border-white/10 bg-white/5 text-slate-300'
                             }`}
                           >
                             {STATUS_LABELS[caseItem.status] || caseItem.status}
-                          </span>
+                      </span>
+                  </div>
+                  {/* ----------------------------------------- */}
+
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-2xl shrink-0">
+                        {accent.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="text-lg font-semibold text-white truncate pr-2">{caseItem.title}</h2>
                         </div>
                         <p className="mt-1 text-xs uppercase tracking-[0.3em] text-slate-400">
                           {caseItem.type} · {caseItem.autosNumber || 'Sin autos'}
                         </p>
-                        <p className="mt-2 text-sm text-slate-300">{caseItem.court}</p>
+                        <p className="mt-2 text-sm text-slate-300 line-clamp-1">{caseItem.court}</p>
                       </div>
                     </div>
-                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200 whitespace-nowrap">
                       {formatCurrency(totalAmount)}
                     </span>
                   </div>
@@ -236,7 +261,7 @@ export function CasesPage() {
                     )}
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300">
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300 mt-auto">
                     <div>
                       <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
                         Próximo hito
@@ -245,7 +270,7 @@ export function CasesPage() {
                         {nextEvent ? `${nextEvent.title} · ${formatDate(nextEvent.date)}` : 'Sin eventos próximos'}
                       </div>
                     </div>
-                    <span className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
+                    <span className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200 group-hover:translate-x-1 transition-transform">
                       Ver dossier →
                     </span>
                   </div>
