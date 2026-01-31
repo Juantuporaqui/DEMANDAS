@@ -18,6 +18,10 @@ import { LEGAL_DOCS_MAP, AUTO_DOCS } from '../../data/legal_texts';
 import type { AutoDocument } from '../../data/legal_texts';
 import { formatCurrency } from '../../utils/validators';
 import { getCaseAmounts } from '../../utils/moneyCase';
+// Análisis financiero específico para Quart
+import { QuartFinancialAnalysis } from './QuartFinancialAnalysis';
+// Timeline específico para Picassent
+import { PicassentTimeline } from './PicassentTimeline';
 
 // ============================================
 // 1. DASHBOARD EJECUTIVO (Tab Resumen) - DINÁMICO
@@ -670,8 +674,27 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
 // ============================================
 // 3. TAB ECONÓMICO (CON ACCESO A WAR ROOM)
 // ============================================
-function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
+function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact[], caseData?: Case }) {
   const navigate = useNavigate();
+
+  // Detectar tipo de caso para mostrar análisis específico
+  const isQuart = caseId?.includes('quart') ||
+                  caseData?.title?.toLowerCase().includes('quart') ||
+                  caseData?.autosNumber?.includes('1428');
+
+  const isPicassent = caseId?.includes('picassent') ||
+                      caseData?.title?.toLowerCase().includes('picassent') ||
+                      caseData?.autosNumber?.includes('715');
+
+  // Para Quart, mostrar análisis financiero dedicado
+  if (isQuart) {
+    return <QuartFinancialAnalysis />;
+  }
+
+  // Para Picassent, mostrar timeline con hipoteca y pagos
+  if (isPicassent) {
+    return <PicassentTimeline />;
+  }
 
   // Helper para sacar un importe estimado del texto si existe
   const extractAmount = (text: string) => {
@@ -879,7 +902,7 @@ export function CaseDetailPage() {
       {/* CONTENIDO */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} partidas={partidas} documents={docs} navigate={navigate} setActiveTab={setActiveTab} isReadMode={isReadMode} />}
-        {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} />}
+        {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} initialDocKey={initialDoc} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
         {activeTab === 'actuaciones' && (
