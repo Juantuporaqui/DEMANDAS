@@ -1,16 +1,23 @@
 // ============================================
 // REGISTRO DE PDFs - Documentos del Expediente
 // ============================================
-// Cuando subas un PDF a public/docs/{caso}/, añádelo aquí
-// para que aparezca en la pestaña Documentos.
+//
+// INSTRUCCIONES SIMPLIFICADAS:
+// 1. Sube tu PDF a:  public/docs/{caso}/  (ej: public/docs/quart/MiDocumento.pdf)
+// 2. Añade UNA línea abajo usando la función pdf():
+//    pdf('MiDocumento.pdf', 'Título visible', 'escrito')
+//
+// Tipos disponibles: 'demanda' | 'contestacion' | 'sentencia' | 'escrito' | 'prueba' | 'otro'
+//
+// ============================================
 
 export interface PDFDocument {
   id: string;
   titulo: string;
-  archivo: string;  // Nombre del archivo en public/docs/{caso}/
+  archivo: string;
   descripcion?: string;
   tipo: 'demanda' | 'contestacion' | 'sentencia' | 'escrito' | 'prueba' | 'otro';
-  fecha?: string;   // YYYY-MM-DD
+  fecha?: string;
   paginas?: number;
 }
 
@@ -18,6 +25,26 @@ export interface PDFRegistroCaso {
   caso: 'picassent' | 'mislata' | 'quart';
   titulo: string;
   documentos: PDFDocument[];
+}
+
+// ============================================
+// FUNCIÓN HELPER - Simplifica añadir PDFs
+// ============================================
+let pdfCounter = 0;
+function pdf(
+  archivo: string,
+  titulo: string,
+  tipo: PDFDocument['tipo'] = 'otro',
+  extras?: { descripcion?: string; fecha?: string }
+): PDFDocument {
+  pdfCounter++;
+  return {
+    id: `pdf-${pdfCounter.toString().padStart(3, '0')}`,
+    archivo,
+    titulo,
+    tipo,
+    ...extras
+  };
 }
 
 // ============================================
@@ -51,36 +78,12 @@ export const pdfsMislata: PDFDocument[] = [
 // ============================================
 // CASO QUART - ETJ 1428/2025
 // ============================================
+// Usa pdf('archivo.pdf', 'Título', 'tipo') para añadir más
 export const pdfsQuart: PDFDocument[] = [
-   {
-    id: 'pdf-qua-001',
-    titulo: 'Sentencia de Divorcio 362/2023',
-    archivo: 'Doc_01_SentenciaDivorcio.pdf',
-    tipo: 'sentencia',
-    fecha: '2023-10-17',
-    descripcion: 'Título judicial que se ejecuta'
-   },
-   {
-    id: 'pdf-qua-002',
-    titulo: 'Demanda de Ejecución',
-    archivo: 'Doc_02_DemandaEjecucion.pdf',
-    tipo: 'demanda',
-    descripcion: 'Escrito inicial de ejecución de títulos judiciales'
-   },
-   {
-    id: 'pdf-qua-003',
-    titulo: 'Oposición a la Ejecución',
-    archivo: 'Doc_03_OposicionEjecucion.pdf',
-    tipo: 'contestacion',
-    descripcion: 'Oposición presentada por la parte ejecutada'
-   },
-   {
-    id: 'pdf-qua-004',
-    titulo: 'Impugnación de la Oposición',
-    archivo: 'Doc_04_ImpugnacionOposicion.pdf',
-    tipo: 'escrito',
-    descripcion: 'Escrito impugnando los motivos de oposición'
-   }
+  pdf('Doc_01_SentenciaDivorcio.pdf', 'Sentencia de Divorcio 362/2023', 'sentencia', { fecha: '2023-10-17', descripcion: 'Título judicial que se ejecuta' }),
+  pdf('Doc_02_DemandaEjecucion.pdf', 'Demanda de Ejecución', 'demanda', { descripcion: 'Escrito inicial de ejecución' }),
+  pdf('Doc_03_OposicionEjecucion.pdf', 'Oposición a la Ejecución', 'contestacion', { descripcion: 'Nuestra oposición' }),
+  pdf('Doc_04_ImpugnacionOposicion.pdf', 'Impugnación de la Oposición', 'escrito', { descripcion: 'Escrito de la contraria' }),
 ];
 
 // ============================================
@@ -97,7 +100,9 @@ export function getPDFsByCaso(caso: 'picassent' | 'mislata' | 'quart'): PDFDocum
 }
 
 export function getPDFUrl(caso: 'picassent' | 'mislata' | 'quart', archivo: string): string {
-  return `/docs/${caso}/${archivo}`;
+  // Usar BASE_URL de Vite para que funcione en GitHub Pages (subpath /DEMANDAS/)
+  const base = import.meta.env.BASE_URL || '/';
+  return `${base}docs/${caso}/${archivo}`;
 }
 
 export function getAllPDFs(): PDFDocument[] {
