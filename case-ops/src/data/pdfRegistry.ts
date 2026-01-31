@@ -51,45 +51,71 @@ function pdf(
 // CASO PICASSENT - P.O. 715/2024
 // ============================================
 export const pdfsPicassent: PDFDocument[] = [
-  // Ejemplo - descomenta y modifica cuando subas PDFs:
-  // {
-  //   id: 'pdf-pic-001',
-  //   titulo: 'Demanda de División de Cosa Común',
-  //   archivo: 'Doc_01_Demanda.pdf',
-  //   descripcion: 'Demanda presentada por Vicenta',
-  //   tipo: 'demanda',
-  //   fecha: '2024-06-20',
-  // },
+  // pendiente de carga
 ];
 
 // ============================================
 // CASO MISLATA - J.V. 1185/2025
 // ============================================
 export const pdfsMislata: PDFDocument[] = [
-  // Ejemplo:
-  // {
-  //   id: 'pdf-mis-001',
-  //   titulo: 'Demanda de Reclamación de Cantidad',
-  //   archivo: 'Demanda_Reclamacion.pdf',
-  //   tipo: 'demanda',
-  // },
+  pdf('Doc_02_RecursoReposicion.pdf', 'Recurso de reposición', 'escrito', {
+    descripcion: 'Recurso de reposición presentado en el procedimiento',
+  }),
+
+  pdf('Doc_03_Impugnacion.pdf', 'Impugnación', 'escrito', {
+    descripcion: 'Impugnación al escrito presentado por la parte contraria',
+  }),
+
+  pdf('Doc_04_ContestacionDemanda.pdf', 'Contestación a la demanda', 'contestacion', {
+    descripcion: 'Escrito de contestación a la demanda principal',
+  }),
+
+  pdf('Doc_06_AlegacionesImpugnacion.pdf', 'Alegaciones a la impugnación', 'escrito', {
+    descripcion: 'Alegaciones frente a la impugnación presentada',
+  }),
+
+  pdf('Doc_07_ContrPrueba.pdf', 'Contradicción / impugnación de prueba', 'prueba', {
+    descripcion: 'Escrito de oposición o contradicción a la prueba propuesta',
+  }),
+
+  pdf('Doc_08_SolPrueva.pdf', 'Solicitud de prueba', 'prueba', {
+    descripcion: 'Escrito de proposición de prueba',
+  }),
 ];
 
 // ============================================
 // CASO QUART - ETJ 1428/2025
 // ============================================
-// Usa pdf('archivo.pdf', 'Título', 'tipo') para añadir más
 export const pdfsQuart: PDFDocument[] = [
-  pdf('Doc_01_SentenciaDivorcio.pdf', 'Sentencia de Divorcio 362/2023', 'sentencia', { fecha: '2023-10-17', descripcion: 'Título judicial que se ejecuta' }),
-  pdf('Doc_02_DemandaEjecucion.pdf', 'Demanda de Ejecución', 'demanda', { descripcion: 'Escrito inicial de ejecución' }),
-  pdf('Doc_03_OposicionEjecucion.pdf', 'Oposición a la Ejecución', 'contestacion', { descripcion: 'Nuestra oposición' }),
-  pdf('Doc_04_ImpugnacionOposicion.pdf', 'Impugnación de la Oposición', 'escrito', { descripcion: 'Escrito de la contraria' }),
+  pdf(
+    'Doc_01_SentenciaDivorcio.pdf',
+    'Sentencia de Divorcio 362/2023',
+    'sentencia',
+    { fecha: '2023-10-17', descripcion: 'Título judicial que se ejecuta' }
+  ),
+  pdf(
+    'Doc_02_DemandaEjecucion.pdf',
+    'Demanda de Ejecución',
+    'demanda',
+    { descripcion: 'Escrito inicial de ejecución' }
+  ),
+  pdf(
+    'Doc_03_OposicionEjecucion.pdf',
+    'Oposición a la Ejecución',
+    'contestacion',
+    { descripcion: 'Oposición formulada a la ejecución' }
+  ),
+  pdf(
+    'Doc_04_ImpugnacionOposicion.pdf',
+    'Impugnación de la Oposición',
+    'escrito',
+    { descripcion: 'Impugnación presentada por la parte contraria' }
+  ),
 ];
 
 // ============================================
 // FUNCIONES DE ACCESO
 // ============================================
-
 export function getPDFsByCaso(caso: 'picassent' | 'mislata' | 'quart'): PDFDocument[] {
   switch (caso) {
     case 'picassent': return pdfsPicassent;
@@ -99,10 +125,11 @@ export function getPDFsByCaso(caso: 'picassent' | 'mislata' | 'quart'): PDFDocum
   }
 }
 
-export function getPDFUrl(caso: 'picassent' | 'mislata' | 'quart', archivo: string): string {
-  // Usar BASE_URL de Vite para que funcione en GitHub Pages (subpath /DEMANDAS/)
+export function getPDFUrl(
+  caso: 'picassent' | 'mislata' | 'quart',
+  archivo: string
+): string {
   const base = import.meta.env.BASE_URL || '/';
-  // Aseguramos que base termine en / y eliminamos / inicial de docs si existiera
   const cleanBase = base.endsWith('/') ? base : `${base}/`;
   return `${cleanBase}docs/${caso}/${archivo}`;
 }
@@ -111,7 +138,9 @@ export function getAllPDFs(): PDFDocument[] {
   return [...pdfsPicassent, ...pdfsMislata, ...pdfsQuart];
 }
 
-// Tipos de documento con iconos
+// ============================================
+// ICONOS Y COLORES
+// ============================================
 export const tipoDocIcons: Record<PDFDocument['tipo'], string> = {
   demanda: '📜',
   contestacion: '🛡️',
