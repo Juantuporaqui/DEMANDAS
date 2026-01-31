@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2025-01-31",
+  "casos": {
+    "picassent": {
+      "id": "picassent",
+      "titulo": "P.O. 715/2024 - División Patrimonial",
+      "documentos": []
+    },
+    "mislata": {
+      "id": "mislata",
+      "titulo": "J.V. 1185/2025 - Reclamación Hipoteca",
+      "documentos": []
+    },
+    "quart": {
+      "id": "quart",
+      "titulo": "ETJ 1428/2025 - Ejecución Cuenta Hijos",
+      "documentos": []
+    }
+  },
+  "_instrucciones": "Para añadir un PDF: 1) Sube el archivo a public/docs/{caso}/, 2) Añade una entrada en el array 'documentos' correspondiente con { id, titulo, archivo, descripcion }"
+}
