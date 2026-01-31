@@ -60,13 +60,13 @@ export const pdfsMislata: PDFDocument[] = [
 // ============================================
 export const pdfsQuart: PDFDocument[] = [
   // Ejemplo:
-  // {
-  //   id: 'pdf-qua-001',
-  //   titulo: 'DSentencia de Divorcio 362/2023',
-  //   archivo: 'sentencia.pdf',
-  //   tipo: 'sentencia',
-  //   fecha: '2023-10-17',
-  // },
+   {
+    id: 'pdf-qua-001',
+    titulo: 'DSentencia de Divorcio 362/2023',
+    archivo: 'Doc_01_entenciaDivorcio.pdf',
+     tipo: 'sentencia',
+    fecha: '2023-10-17',
+    },
 ];
 
 // ============================================
