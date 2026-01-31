@@ -63,7 +63,7 @@ export const pdfsQuart: PDFDocument[] = [
   // {
   //   id: 'pdf-qua-001',
   //   titulo: 'Sentencia de Divorcio 362/2023',
-  //   archivo: 'Sentencia_362_2023.pdf',
+  //   archivo: 'sentencia.pdf',
   //   tipo: 'sentencia',
   //   fecha: '2023-10-17',
   // },
