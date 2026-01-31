@@ -17,13 +17,15 @@ import { TextReader } from '../../ui/components/TextReader';
 import { LEGAL_DOCS_MAP, AUTO_DOCS } from '../../data/legal_texts';
 import type { AutoDocument } from '../../data/legal_texts';
 import { formatCurrency } from '../../utils/validators';
+import { getCaseAmounts } from '../../utils/moneyCase';
 
 // ============================================
 // 1. DASHBOARD EJECUTIVO (Tab Resumen) - DINÁMICO
 // ============================================
-function TabResumen({ caseData, strategies, events, facts, partidas, documents, navigate, setActiveTab }: any) {
-  // Calcular totales desde partidas reales
-  const totalPartidas = partidas.reduce((sum: number, p: Partida) => sum + (p.amountCents || 0), 0);
+function TabResumen({ caseData, strategies, events, facts, partidas, documents, navigate, setActiveTab, isReadMode }: any) {
+  // Motor de cuantías (Anti-Fantasmas)
+  const amounts = getCaseAmounts(caseData, partidas);
+  const totalPartidas = amounts.analytic;
 
   // Hechos ordenados por riesgo
   const factsByRisk = [...facts].sort((a: Fact, b: Fact) => {
@@ -59,30 +61,101 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
   );
   const diasHastaVista = vistaEvent ? Math.ceil((new Date(vistaEvent.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
 
+  // TODO: Indicadores probatorios - pendiente implementar enlaces
+  // Por ahora contamos hechos sin evidencia como aquellos sin enlaces (simplificado)
+  const hechosCount = facts.length;
+  const hechosSinEvidencia = facts.length; // TODO: filtrar por enlaces reales
+  const partidasSinSoporte = partidas.length; // TODO: filtrar por enlaces reales
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* INFO DEL CASO */}
-      <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/40 to-slate-900/60 p-4">
-        <div className="flex flex-wrap gap-3 text-xs">
-          <span className="bg-slate-700/50 px-3 py-1 rounded-full text-slate-300">
-            <strong>Juzgado:</strong> {caseData.court}
-          </span>
-          <span className="bg-slate-700/50 px-3 py-1 rounded-full text-slate-300">
-            <strong>Rol:</strong> {caseData.clientRole}
-          </span>
-          {caseData.judge && caseData.judge !== '[Pendiente]' && (
-            <span className="bg-slate-700/50 px-3 py-1 rounded-full text-slate-300">
-              <strong>Juez:</strong> {caseData.judge}
-            </span>
+      {/* RESUMEN EJECUTIVO */}
+      <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-slate-900/60 p-4 sm:p-5">
+        <h2 className="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <Eye size={16} /> Resumen ejecutivo
+        </h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          {/* Parte contraria */}
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Parte contraria</div>
+            <div className="text-sm font-medium text-rose-300">{caseData.opposingPartyName || caseData.opposingCounsel?.split('(')[1]?.replace(')', '') || 'No especificada'}</div>
+          </div>
+          {/* Letrada contraria */}
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Letrada contraria</div>
+            <div className="text-sm font-medium text-rose-300">{caseData.opposingLawyerName || caseData.opposingCounsel?.split('(')[0]?.trim() || 'No especificada'}</div>
+          </div>
+          {/* Juzgado */}
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Juzgado</div>
+            <div className="text-sm font-medium text-slate-200">{caseData.court}</div>
+          </div>
+          {/* Autos */}
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Autos</div>
+            <div className="text-sm font-medium text-slate-200 font-mono">{caseData.autosNumber}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          {/* NIG */}
+          {caseData.nig && (
+            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">NIG</div>
+              <div className="text-xs font-medium text-slate-300 font-mono">{caseData.nig}</div>
+            </div>
           )}
-          {caseData.opposingCounsel && (
-            <span className="bg-rose-500/20 px-3 py-1 rounded-full text-rose-300">
-              <strong>Contrario:</strong> {caseData.opposingCounsel}
-            </span>
+          {/* Rol */}
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Rol procesal</div>
+            <div className={`text-sm font-bold uppercase ${
+              caseData.clientRole === 'demandante' || caseData.clientRole === 'ejecutante'
+                ? 'text-emerald-400'
+                : 'text-amber-400'
+            }`}>{caseData.clientRole || 'No especificado'}</div>
+          </div>
+          {/* Próximo hito */}
+          {vistaEvent && (
+            <div className="bg-slate-800/50 rounded-lg p-3 border border-amber-500/30">
+              <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Próximo hito</div>
+              <div className="text-sm font-medium text-amber-300">{formatDate(vistaEvent.date)}</div>
+              <div className="text-[10px] text-slate-500">{vistaEvent.title}</div>
+            </div>
+          )}
+          {/* Cuantía Procesal */}
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-rose-500/30">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Cuantía procesal (demanda)</div>
+            <div className="text-lg font-bold text-rose-400">{formatCurrency(amounts.totalDemand)}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Sumatorio Analítico */}
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Sumatorio analítico (partidas)</div>
+            <div className="text-lg font-bold text-emerald-400">{formatCurrency(amounts.analytic)}</div>
+          </div>
+          {/* Delta */}
+          {amounts.delta !== 0 && (
+            <div className="bg-amber-900/30 rounded-lg p-3 border border-amber-500/50">
+              <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Delta pendiente de justificar</div>
+              <div className="text-lg font-bold text-amber-400">{formatCurrency(Math.abs(amounts.delta))}</div>
+            </div>
+          )}
+          {/* Nº Hechos */}
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nº hechos</div>
+            <div className="text-lg font-bold text-slate-200">{hechosCount}</div>
+            <div className="text-[10px] text-slate-500">{factsControvertidos} controvertidos</div>
+          </div>
+          {/* Judge si existe */}
+          {caseData.judge && caseData.judge !== '[Pendiente]' && (
+            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Juez</div>
+              <div className="text-sm font-medium text-slate-200">{caseData.judge}</div>
+            </div>
           )}
         </div>
-        {caseData.notes && (
-          <p className="mt-3 text-sm text-slate-400 leading-relaxed">{caseData.notes}</p>
+        {caseData.notes && !isReadMode && (
+          <p className="mt-4 text-sm text-slate-400 leading-relaxed border-t border-slate-700/50 pt-3">{caseData.notes}</p>
         )}
       </div>
 
@@ -201,11 +274,14 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
       {/* KPIs DINÁMICOS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
-          <div className="text-[10px] uppercase tracking-wider text-slate-500">Cuantía Total</div>
+          <div className="text-[10px] uppercase tracking-wider text-slate-500">Cuantía procesal (demanda)</div>
           <div className="text-2xl font-bold text-rose-400 mt-1">
-            {formatCurrency(totalPartidas)}
+            {formatCurrency(amounts.totalDemand)}
           </div>
           <div className="text-[10px] text-slate-600">{partidas.length} partidas</div>
+          {amounts.delta !== 0 && (
+            <div className="text-[10px] text-amber-400 mt-1">Delta pendiente de justificar</div>
+          )}
         </div>
         <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Hechos</div>
@@ -260,13 +336,19 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
                     </span>
                     <span className="text-white text-sm ml-2 line-clamp-1">{fact.title || fact.titulo}</span>
                   </div>
-                  <span className={`text-[10px] uppercase px-2 py-0.5 rounded ${
-                    fact.status === 'controvertido' ? 'bg-rose-500/20 text-rose-300' :
-                    fact.status === 'a_probar' ? 'bg-amber-500/20 text-amber-300' :
-                    'bg-emerald-500/20 text-emerald-300'
-                  }`}>
-                    {fact.status}
-                  </span>
+                  <div className="flex gap-1 items-center shrink-0">
+                    {/* FASE 6: Indicador probatorio - Sin evidencia */}
+                    <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-rose-600/30 text-rose-300 border border-rose-500/50">
+                      Sin evidencia
+                    </span>
+                    <span className={`text-[10px] uppercase px-2 py-0.5 rounded ${
+                      fact.status === 'controvertido' ? 'bg-rose-500/20 text-rose-300' :
+                      fact.status === 'a_probar' ? 'bg-amber-500/20 text-amber-300' :
+                      'bg-emerald-500/20 text-emerald-300'
+                    }`}>
+                      {fact.status}
+                    </span>
+                  </div>
                 </div>
               </button>
             ))}
@@ -629,13 +711,19 @@ function TabEconomico({ caseId, facts }: { caseId: string, facts: Fact[] }) {
             <div className="p-4 pr-12">
                 <div className="flex justify-between items-start">
                 <div>
-                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                        fact.risk === 'alto' ? 'bg-rose-900/30 text-rose-400' :
-                        fact.risk === 'bajo' ? 'bg-emerald-900/30 text-emerald-400' : 'bg-amber-900/30 text-amber-400'
-                    }`}>
-                    RIESGO {fact.risk?.toUpperCase() || 'N/A'}
-                    </span>
-                    <h4 className="text-white font-medium mt-2 text-lg group-hover:text-blue-200 transition-colors">
+                    <div className="flex gap-2 items-center mb-2">
+                      <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                          fact.risk === 'alto' ? 'bg-rose-900/30 text-rose-400' :
+                          fact.risk === 'bajo' ? 'bg-emerald-900/30 text-emerald-400' : 'bg-amber-900/30 text-amber-400'
+                      }`}>
+                      RIESGO {fact.risk?.toUpperCase() || 'N/A'}
+                      </span>
+                      {/* FASE 6: Indicador probatorio - Sin soporte */}
+                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-rose-600/30 text-rose-300 border border-rose-500/50">
+                        Sin soporte
+                      </span>
+                    </div>
+                    <h4 className="text-white font-medium text-lg group-hover:text-blue-200 transition-colors">
                     {fact.title}
                     </h4>
                 </div>
@@ -690,6 +778,8 @@ export function CaseDetailPage() {
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const docParam = searchParams.get('doc');
+  // Modo lector: oculta botones de edición y acciones destructivas
+  const isReadMode = searchParams.get('read') === '1';
   const [activeTab, setActiveTab] = useState(tabParam || 'resumen');
   const [initialDoc, setInitialDoc] = useState<string | null>(docParam);
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
@@ -732,23 +822,31 @@ export function CaseDetailPage() {
                 <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${currentCase.status === 'activo' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>{currentCase.status}</span>
               </div>
             </div>
-            {/* Acciones Globales */}
-            <div className="flex gap-1 sm:gap-2 shrink-0">
-              <button
-                onClick={() => {
-                  if ('caches' in window) {
-                    caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))));
-                  }
-                  window.location.reload();
-                }}
-                title="Limpiar caché y recargar"
-                className="p-1.5 sm:p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 rounded-lg border border-slate-700 transition-colors"
-              >
-                <RefreshCw size={16} className="sm:w-[18px] sm:h-[18px]" />
-              </button>
-              <Link to={`/events/new?caseId=${id}`} className="p-1.5 sm:p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 hidden sm:flex"><Calendar size={18} /></Link>
-              <Link to={`/documents/new?caseId=${id}`} className="p-1.5 sm:p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-900/20"><Upload size={16} className="sm:w-[18px] sm:h-[18px]" /></Link>
-            </div>
+            {/* Acciones Globales - Ocultas en modo lector */}
+            {!isReadMode && (
+              <div className="flex gap-1 sm:gap-2 shrink-0">
+                <button
+                  onClick={() => {
+                    if ('caches' in window) {
+                      caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))));
+                    }
+                    window.location.reload();
+                  }}
+                  title="Limpiar caché y recargar"
+                  className="p-1.5 sm:p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 rounded-lg border border-slate-700 transition-colors"
+                >
+                  <RefreshCw size={16} className="sm:w-[18px] sm:h-[18px]" />
+                </button>
+                <Link to={`/events/new?caseId=${id}`} className="p-1.5 sm:p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 hidden sm:flex"><Calendar size={18} /></Link>
+                <Link to={`/documents/new?caseId=${id}`} className="p-1.5 sm:p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-900/20"><Upload size={16} className="sm:w-[18px] sm:h-[18px]" /></Link>
+              </div>
+            )}
+            {/* Badge modo lector */}
+            {isReadMode && (
+              <span className="px-3 py-1 bg-violet-500/20 border border-violet-500/50 rounded-full text-xs font-medium text-violet-300">
+                Modo lector
+              </span>
+            )}
           </div>
 
           {/* TABS - Scroll horizontal en móvil */}
@@ -776,7 +874,7 @@ export function CaseDetailPage() {
 
       {/* CONTENIDO */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} partidas={partidas} documents={docs} navigate={navigate} setActiveTab={setActiveTab} />}
+        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} partidas={partidas} documents={docs} navigate={navigate} setActiveTab={setActiveTab} isReadMode={isReadMode} />}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} initialDocKey={initialDoc} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
