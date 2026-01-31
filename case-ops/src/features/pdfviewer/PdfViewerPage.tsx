@@ -81,22 +81,42 @@ export function PdfViewerPage() {
 
       setDocument(doc);
 
-      // Load PDF file
-      const file = await docFilesRepo.getById(doc.fileId);
-      if (!file) {
-        alert('Archivo PDF no encontrado');
-        navigate(`/documents/${docId}`);
-        return;
-      }
+      // Load PDF file - FASE 4: Usar filePath si existe
+      let arrayBuffer: ArrayBuffer;
 
-      setDocFile(file);
+      if (doc.filePath) {
+        // Cargar desde filePath usando Vite
+        try {
+          const url = new URL(doc.filePath, import.meta.url).href;
+          const response = await fetch(url);
+          if (!response.ok) {
+            alert(`Documento no encontrado en: ${doc.filePath}`);
+            navigate(`/documents/${docId}`);
+            return;
+          }
+          arrayBuffer = await response.arrayBuffer();
+        } catch (e) {
+          alert(`Error cargando documento: ${doc.filePath}`);
+          navigate(`/documents/${docId}`);
+          return;
+        }
+      } else {
+        // Fallback: cargar desde docFilesRepo (blob)
+        const file = await docFilesRepo.getById(doc.fileId);
+        if (!file) {
+          alert('Archivo PDF no encontrado');
+          navigate(`/documents/${docId}`);
+          return;
+        }
+        setDocFile(file);
+        arrayBuffer = await file.blob.arrayBuffer();
+      }
 
       // Load spans
       const docSpans = await spansRepo.getByDocumentId(docId);
       setSpans(docSpans);
 
       // Load PDF
-      const arrayBuffer = await file.blob.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       setPdfDoc(pdf);
       setTotalPages(pdf.numPages);
