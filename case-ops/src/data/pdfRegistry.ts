@@ -62,7 +62,7 @@ export const pdfsQuart: PDFDocument[] = [
   // Ejemplo:
   // {
   //   id: 'pdf-qua-001',
-  //   titulo: 'Sentencia de Divorcio 362/2023',
+  //   titulo: 'DSentencia de Divorcio 362/2023',
   //   archivo: 'sentencia.pdf',
   //   tipo: 'sentencia',
   //   fecha: '2023-10-17',
