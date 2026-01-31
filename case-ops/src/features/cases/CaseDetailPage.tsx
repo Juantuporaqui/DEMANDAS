@@ -815,7 +815,11 @@ export function CaseDetailPage() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 pt-3 sm:pt-4 pb-0">
           <div className="flex justify-between items-start mb-3 sm:mb-4 gap-2">
             <div className="min-w-0 flex-1">
-              <Link to="/cases" className="text-xs text-slate-500 hover:text-white mb-1 block transition-colors">← Volver</Link>
+              <div className="flex items-center gap-3 mb-1">
+                <Link to="/dashboard" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">Dashboard</Link>
+                <span className="text-slate-600">/</span>
+                <Link to="/cases" className="text-xs text-slate-500 hover:text-white transition-colors">Casos</Link>
+              </div>
               <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight leading-tight truncate">{currentCase.title}</h1>
               <div className="flex gap-2 mt-2 items-center flex-wrap">
                 <span className="text-[10px] sm:text-xs font-mono bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">{currentCase.autosNumber}</span>

@@ -27,12 +27,41 @@ export interface HechoReclamado {
 }
 
 /**
- * Resumen contable del caso
+ * Calcula el resumen contable dinámicamente basado en los hechos
+ * Fórmula: Deuda Real = Reclamado - Prescrito - Compensable
  */
+export const getResumenContador = () => {
+  const totales = calcularTotalesInterno();
+  const totalReclamado = totales.prescrito + totales.compensable + totales.disputa;
+  const deudaReal = totales.disputa; // Lo que queda en disputa activa
+  const reduccion = totalReclamado > 0
+    ? Math.round(((totales.prescrito + totales.compensable) / totalReclamado) * 100)
+    : 0;
+
+  return {
+    totalReclamado,
+    prescrito: totales.prescrito,
+    compensable: totales.compensable,
+    cifraRiesgoReal: deudaReal, // Deuda Real = Reclamado - Prescrito - Compensable
+    reduccionObjetivo: reduccion,
+    fundamentoLegal: 'Art. 1964.2 CC',
+  };
+};
+
+// Función interna para evitar dependencia circular
+const calcularTotalesInterno = () => {
+  const totales = { prescrito: 0, compensable: 0, disputa: 0 };
+  hechosReclamados.forEach(h => {
+    totales[h.estado] += h.cuantia;
+  });
+  return totales;
+};
+
+// Mantener compatibilidad con código existente (valores calculados, no hardcoded)
 export const resumenContador = {
-  totalReclamado: 212677.08,
-  cifraRiesgoReal: 62000.00,
-  reduccionObjetivo: 70, // porcentaje
+  get totalReclamado() { return getResumenContador().totalReclamado; },
+  get cifraRiesgoReal() { return getResumenContador().cifraRiesgoReal; },
+  get reduccionObjetivo() { return getResumenContador().reduccionObjetivo; },
   fundamentoLegal: 'Art. 1964.2 CC',
 };
 

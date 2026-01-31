@@ -9,7 +9,7 @@ import Card from '../../ui/components/Card';
 import SectionTitle from '../../ui/components/SectionTitle';
 import { formatCurrency } from '../../utils/validators';
 import { AlertasPanel } from '../../components/AlertasPanel';
-import { hechosReclamados, resumenContador, calcularTotales } from '../../data/hechosReclamados';
+import { hechosReclamados, getResumenContador, calcularTotales } from '../../data/hechosReclamados';
 import { RefreshCw, Scale, FileText, Gavel, AlertTriangle, Clock, TrendingDown } from 'lucide-react';
 
 // Convertir hechosReclamados a formato de claims para el dashboard
@@ -42,6 +42,10 @@ export function DashboardPage() {
   , []);
 
   const totales = calcularTotales();
+  const resumen = getResumenContador();
+
+  // Validación para evitar NaN o valores negativos
+  const safeNumber = (n: number) => (isNaN(n) || n < 0) ? 0 : n;
 
   // Agrupar hechos por estado
   const prescritos = CLAIMS_REALES.filter(c => c.estado === 'prescrito');
@@ -86,33 +90,67 @@ export function DashboardPage() {
       {/* Alertas */}
       <AlertasPanel />
 
+      {/* FÓRMULA FINANCIERA: Reclamado - Prescrito - Compensable = Deuda Real */}
+      <section className="rounded-xl border border-slate-700/50 bg-slate-800/20 p-4">
+        <div className="text-[10px] uppercase text-slate-400 mb-3 tracking-wider">Balance Financiero</div>
+        <div className="grid grid-cols-5 gap-2 items-center text-center">
+          <div>
+            <div className="text-lg font-bold text-rose-400">
+              {safeNumber(resumen.totalReclamado).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€
+            </div>
+            <div className="text-[9px] text-slate-500">Reclamado</div>
+          </div>
+          <div className="text-xl text-slate-500">−</div>
+          <div>
+            <div className="text-lg font-bold text-emerald-400">
+              {safeNumber(resumen.prescrito).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€
+            </div>
+            <div className="text-[9px] text-slate-500">Prescrito</div>
+          </div>
+          <div className="text-xl text-slate-500">−</div>
+          <div>
+            <div className="text-lg font-bold text-blue-400">
+              {safeNumber(resumen.compensable).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€
+            </div>
+            <div className="text-[9px] text-slate-500">Compensable</div>
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-slate-700/50 text-center">
+          <div className="text-[9px] text-slate-400 uppercase mb-1">= Deuda Real (En Disputa)</div>
+          <div className="text-2xl font-bold text-amber-400">
+            {safeNumber(resumen.cifraRiesgoReal).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€
+          </div>
+        </div>
+      </section>
+
       {/* KPIs PRINCIPALES */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card className="p-4 bg-gradient-to-br from-rose-500/10 to-transparent border-rose-500/20">
-          <div className="text-[10px] text-rose-300/70 uppercase tracking-wider">Reclamado</div>
+          <div className="text-[10px] text-rose-300/70 uppercase tracking-wider">Total Reclamado</div>
           <div className="text-xl font-bold text-rose-400">
-            {resumenContador.totalReclamado.toLocaleString('es-ES', { maximumFractionDigits: 0 })}€
+            {safeNumber(resumen.totalReclamado).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€
           </div>
         </Card>
         <Card className="p-4 bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-500/20">
           <div className="text-[10px] text-emerald-300/70 uppercase tracking-wider">Prescrito</div>
           <div className="text-xl font-bold text-emerald-400">
-            {totales.prescrito.toLocaleString('es-ES', { maximumFractionDigits: 0 })}€
+            {safeNumber(totales.prescrito).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€
           </div>
           <div className="text-[9px] text-slate-500 mt-1">Art. 1964.2 CC</div>
         </Card>
         <Card className="p-4 bg-gradient-to-br from-amber-500/10 to-transparent border-amber-500/20">
-          <div className="text-[10px] text-amber-300/70 uppercase tracking-wider">Riesgo Real</div>
+          <div className="text-[10px] text-amber-300/70 uppercase tracking-wider">Deuda Real</div>
           <div className="text-xl font-bold text-amber-400">
-            {resumenContador.cifraRiesgoReal.toLocaleString('es-ES', { maximumFractionDigits: 0 })}€
+            {safeNumber(resumen.cifraRiesgoReal).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€
           </div>
+          <div className="text-[9px] text-slate-500 mt-1">En disputa activa</div>
         </Card>
         <Card className="p-4 bg-gradient-to-br from-cyan-500/10 to-transparent border-cyan-500/20">
           <div className="text-[10px] text-cyan-300/70 uppercase tracking-wider flex items-center gap-1">
             <TrendingDown size={10} /> Reducción
           </div>
-          <div className="text-xl font-bold text-cyan-400">{resumenContador.reduccionObjetivo}%</div>
-          <div className="text-[9px] text-slate-500 mt-1">Objetivo de defensa</div>
+          <div className="text-xl font-bold text-cyan-400">{safeNumber(resumen.reduccionObjetivo)}%</div>
+          <div className="text-[9px] text-slate-500 mt-1">Defensas activas</div>
         </Card>
       </section>
 
