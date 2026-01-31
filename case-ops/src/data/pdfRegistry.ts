@@ -2,12 +2,11 @@
 // REGISTRO DE PDFs - Documentos del Expediente
 // ============================================
 //
-// INSTRUCCIONES SIMPLIFICADAS:
-// 1. Sube tu PDF a:  public/docs/{caso}/  (ej: public/docs/quart/MiDocumento.pdf)
-// 2. Añade UNA línea abajo usando la función pdf():
-//    pdf('MiDocumento.pdf', 'Título visible', 'escrito')
+// INSTRUCCIONES:
+// 1. Sube tu PDF a: public/docs/{caso}/
+// 2. Añade UNA línea usando pdf('archivo.pdf','Título','tipo')
 //
-// Tipos disponibles: 'demanda' | 'contestacion' | 'sentencia' | 'escrito' | 'prueba' | 'otro'
+// Tipos: 'demanda' | 'contestacion' | 'sentencia' | 'escrito' | 'prueba' | 'otro'
 //
 // ============================================
 
@@ -28,7 +27,7 @@ export interface PDFRegistroCaso {
 }
 
 // ============================================
-// FUNCIÓN HELPER - Simplifica añadir PDFs
+// HELPER
 // ============================================
 let pdfCounter = 0;
 function pdf(
@@ -51,70 +50,67 @@ function pdf(
 // CASO PICASSENT - P.O. 715/2024
 // ============================================
 export const pdfsPicassent: PDFDocument[] = [
-  // pendiente de carga
+  pdf('Doc-03-retirada 38500_Vicen.pdf', 'Retirada de 38.500 € en efectivo (Vicenta)', 'prueba', {
+    descripcion: 'Justificante de retirada en efectivo atribuida a la demandada',
+  }),
+
+  pdf('Doc-04_Respuesta_reque Hacienda.pdf', 'Respuesta a requerimiento de Hacienda', 'prueba', {
+    descripcion: 'Documento de la AEAT sobre movimientos económicos',
+  }),
+
+  pdf('Doc-13_Retiradas_Efectivo_BBVA_2008.pdf', 'Extracto de retiradas de efectivo BBVA (2008)', 'prueba', {
+    descripcion: 'Relación de disposiciones en efectivo relevantes',
+  }),
+
+  pdf('Doc-15_EXTRACTO_RETIRADA VOLVO.pdf', 'Extracto retirada vehículo Volvo', 'prueba', {
+    descripcion: 'Movimiento bancario asociado a retirada para adquisición de vehículo',
+  }),
+
+  pdf('Doc-18_Deposito_subasta.pdf', 'Depósito para subasta judicial', 'prueba', {
+    descripcion: 'Justificante de consignación judicial',
+  }),
+
+  pdf('Doc-26_Demostracion_grafica_manipulacion.pdf', 'Demostración gráfica de manipulación económica', 'prueba', {
+    descripcion: 'Informe gráfico explicativo de inconsistencias contables',
+  }),
 ];
 
 // ============================================
 // CASO MISLATA - J.V. 1185/2025
 // ============================================
 export const pdfsMislata: PDFDocument[] = [
-  pdf('Doc_02_RecursoReposicion.pdf', 'Recurso de reposición', 'escrito', {
-    descripcion: 'Recurso de reposición presentado en el procedimiento',
-  }),
-
-  pdf('Doc_03_Impugnacion.pdf', 'Impugnación', 'escrito', {
-    descripcion: 'Impugnación al escrito presentado por la parte contraria',
-  }),
-
-  pdf('Doc_04_ContestacionDemanda.pdf', 'Contestación a la demanda', 'contestacion', {
-    descripcion: 'Escrito de contestación a la demanda principal',
-  }),
-
-  pdf('Doc_06_AlegacionesImpugnacion.pdf', 'Alegaciones a la impugnación', 'escrito', {
-    descripcion: 'Alegaciones frente a la impugnación presentada',
-  }),
-
-  pdf('Doc_07_ContrPrueba.pdf', 'Contradicción / impugnación de prueba', 'prueba', {
-    descripcion: 'Escrito de oposición o contradicción a la prueba propuesta',
-  }),
-
-  pdf('Doc_08_SolPrueva.pdf', 'Solicitud de prueba', 'prueba', {
-    descripcion: 'Escrito de proposición de prueba',
-  }),
+  pdf('Doc_02_RecursoReposicion.pdf', 'Recurso de reposición', 'escrito'),
+  pdf('Doc_03_Impugnacion.pdf', 'Impugnación', 'escrito'),
+  pdf('Doc_04_ContestacionDemanda.pdf', 'Contestación a la demanda', 'contestacion'),
+  pdf('Doc_06_AlegacionesImpugnacion.pdf', 'Alegaciones a la impugnación', 'escrito'),
+  pdf('Doc_07_ContrPrueba.pdf', 'Contradicción / impugnación de prueba', 'prueba'),
+  pdf('Doc_08_SolPrueva.pdf', 'Solicitud de prueba', 'prueba'),
 ];
 
 // ============================================
 // CASO QUART - ETJ 1428/2025
 // ============================================
 export const pdfsQuart: PDFDocument[] = [
-  pdf(
-    'Doc_01_SentenciaDivorcio.pdf',
-    'Sentencia de Divorcio 362/2023',
-    'sentencia',
-    { fecha: '2023-10-17', descripcion: 'Título judicial que se ejecuta' }
-  ),
-  pdf(
-    'Doc_02_DemandaEjecucion.pdf',
-    'Demanda de Ejecución',
-    'demanda',
-    { descripcion: 'Escrito inicial de ejecución' }
-  ),
-  pdf(
-    'Doc_03_OposicionEjecucion.pdf',
-    'Oposición a la Ejecución',
-    'contestacion',
-    { descripcion: 'Oposición formulada a la ejecución' }
-  ),
-  pdf(
-    'Doc_04_ImpugnacionOposicion.pdf',
-    'Impugnación de la Oposición',
-    'escrito',
-    { descripcion: 'Impugnación presentada por la parte contraria' }
-  ),
+  pdf('Doc_01_SentenciaDivorcio.pdf', 'Sentencia de Divorcio 362/2023', 'sentencia', {
+    fecha: '2023-10-17',
+    descripcion: 'Título judicial ejecutado',
+  }),
+
+  pdf('Doc_02_DemandaEjecucion.pdf', 'Demanda de Ejecución', 'demanda', {
+    descripcion: 'Escrito inicial de ejecución',
+  }),
+
+  pdf('Doc_03_OposicionEjecucion.pdf', 'Oposición a la ejecución', 'contestacion', {
+    descripcion: 'Oposición formulada por la parte ejecutada',
+  }),
+
+  pdf('Doc_04_ImpugnacionOposicion.pdf', 'Impugnación de la oposición', 'escrito', {
+    descripcion: 'Impugnación presentada por la parte contraria',
+  }),
 ];
 
 // ============================================
-// FUNCIONES DE ACCESO
+// FUNCIONES
 // ============================================
 export function getPDFsByCaso(caso: 'picassent' | 'mislata' | 'quart'): PDFDocument[] {
   switch (caso) {
@@ -125,10 +121,7 @@ export function getPDFsByCaso(caso: 'picassent' | 'mislata' | 'quart'): PDFDocum
   }
 }
 
-export function getPDFUrl(
-  caso: 'picassent' | 'mislata' | 'quart',
-  archivo: string
-): string {
+export function getPDFUrl(caso: 'picassent' | 'mislata' | 'quart', archivo: string): string {
   const base = import.meta.env.BASE_URL || '/';
   const cleanBase = base.endsWith('/') ? base : `${base}/`;
   return `${cleanBase}docs/${caso}/${archivo}`;
