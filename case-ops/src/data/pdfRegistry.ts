@@ -102,7 +102,9 @@ export function getPDFsByCaso(caso: 'picassent' | 'mislata' | 'quart'): PDFDocum
 export function getPDFUrl(caso: 'picassent' | 'mislata' | 'quart', archivo: string): string {
   // Usar BASE_URL de Vite para que funcione en GitHub Pages (subpath /DEMANDAS/)
   const base = import.meta.env.BASE_URL || '/';
-  return `${base}docs/${caso}/${archivo}`;
+  // Aseguramos que base termine en / y eliminamos / inicial de docs si existiera
+  const cleanBase = base.endsWith('/') ? base : `${base}/`;
+  return `${cleanBase}docs/${caso}/${archivo}`;
 }
 
 export function getAllPDFs(): PDFDocument[] {
