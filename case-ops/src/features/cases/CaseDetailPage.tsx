@@ -20,6 +20,8 @@ import { formatCurrency } from '../../utils/validators';
 import { getCaseAmounts } from '../../utils/moneyCase';
 // Análisis financiero específico para Quart
 import { QuartFinancialAnalysis } from './QuartFinancialAnalysis';
+// Registro de PDFs
+import { getPDFsByCaso, getPDFUrl, tipoDocIcons, tipoDocColors, type PDFDocument } from '../../data/pdfRegistry';
 // Timeline específico para Picassent
 import { PicassentTimeline } from './PicassentTimeline';
 
@@ -479,6 +481,8 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
   // Estado para el documento seleccionado
   const [selectedDocKey, setSelectedDocKey] = useState<string | null>(initialDocKey || null);
   const [showMobileViewer, setShowMobileViewer] = useState(false);
+  // Estado para PDF seleccionado (separado de docs de texto)
+  const [selectedPDF, setSelectedPDF] = useState<PDFDocument | null>(null);
 
   // Detección robusta: ID del caso, Título o Número de Autos
   const isPicassent = caseId?.includes('picassent') ||
@@ -491,12 +495,24 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
   const isQuart = caseData.title?.toLowerCase().includes('quart') ||
                   caseData.autosNumber?.includes('1428');
 
+  // Obtener PDFs del caso actual
+  const casoKeyPDF = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
+  const pdfDocuments = casoKeyPDF ? getPDFsByCaso(casoKeyPDF) : [];
+
   // Debug: Ver si tenemos textos cargados
   const hasLegalTexts = LEGAL_DOCS_MAP && Object.keys(LEGAL_DOCS_MAP).length > 0;
 
-  // Handler para seleccionar documento (móvil abre fullscreen)
+  // Handler para seleccionar documento de texto (móvil abre fullscreen)
   const handleSelectDoc = (key: string) => {
     setSelectedDocKey(key);
+    setSelectedPDF(null); // Deseleccionar PDF
+    setShowMobileViewer(true);
+  };
+
+  // Handler para seleccionar PDF
+  const handleSelectPDF = (pdf: PDFDocument) => {
+    setSelectedPDF(pdf);
+    setSelectedDocKey(null); // Deseleccionar texto
     setShowMobileViewer(true);
   };
 
@@ -522,8 +538,39 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
 
   return (
     <>
-      {/* VISOR MÓVIL FULLSCREEN */}
-      {showMobileViewer && selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] && (
+      {/* VISOR MÓVIL FULLSCREEN - PDF */}
+      {showMobileViewer && selectedPDF && casoKeyPDF && (
+        <div className="fixed inset-0 z-50 bg-slate-950 lg:hidden flex flex-col">
+          {/* Header móvil */}
+          <div className="flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800">
+            <button
+              onClick={() => setShowMobileViewer(false)}
+              className="flex items-center gap-2 text-slate-400 hover:text-white"
+            >
+              <ChevronRight className="rotate-180" size={20} />
+              <span className="text-sm">Volver</span>
+            </button>
+            <span className="text-xs text-slate-500 truncate max-w-[150px]">{selectedPDF.titulo}</span>
+            <a
+              href={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-2 py-1 text-[10px] bg-blue-600 text-white rounded"
+            >
+              Abrir
+            </a>
+          </div>
+          {/* Iframe del PDF fullscreen */}
+          <iframe
+            src={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
+            className="flex-1 w-full bg-white"
+            title={selectedPDF.titulo}
+          />
+        </div>
+      )}
+
+      {/* VISOR MÓVIL FULLSCREEN - Texto */}
+      {showMobileViewer && selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] && !selectedPDF && (
         <div className="fixed inset-0 z-50 bg-slate-950 lg:hidden flex flex-col">
           {/* Header móvil */}
           <div className="flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800">
@@ -630,7 +677,61 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
             );
           })()}
 
-          {/* Archivos PDF Subidos */}
+          {/* PDFs DEL EXPEDIENTE (desde public/docs/{caso}/) */}
+          {pdfDocuments.length > 0 && (
+            <div>
+              <h3 className="text-xs font-bold text-rose-400 uppercase mb-3 flex items-center gap-2">
+                <FileText size={14} /> PDFs del Expediente ({pdfDocuments.length})
+              </h3>
+              <div className="space-y-2">
+                {pdfDocuments.map((pdf) => {
+                  const colorKey = tipoDocColors[pdf.tipo] || 'slate';
+                  const colorClasses: Record<string, { active: string; inactive: string }> = {
+                    amber: { active: 'bg-amber-900/40 border-amber-500/50 text-amber-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-amber-500/30' },
+                    emerald: { active: 'bg-emerald-900/40 border-emerald-500/50 text-emerald-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-emerald-500/30' },
+                    blue: { active: 'bg-blue-900/40 border-blue-500/50 text-blue-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-blue-500/30' },
+                    violet: { active: 'bg-violet-900/40 border-violet-500/50 text-violet-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-violet-500/30' },
+                    cyan: { active: 'bg-cyan-900/40 border-cyan-500/50 text-cyan-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-cyan-500/30' },
+                    slate: { active: 'bg-slate-700/40 border-slate-500/50 text-slate-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500/30' },
+                  };
+                  const colors = colorClasses[colorKey] || colorClasses.slate;
+                  const isActive = selectedPDF?.id === pdf.id;
+                  return (
+                    <button
+                      key={pdf.id}
+                      onClick={() => handleSelectPDF(pdf)}
+                      className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${isActive ? colors.active : colors.inactive}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{tipoDocIcons[pdf.tipo] || '📄'}</span>
+                        <span className="truncate">{pdf.titulo}</span>
+                      </div>
+                      {pdf.fecha && (
+                        <div className="text-[10px] text-slate-500 mt-1 ml-6">{pdf.fecha}</div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Instrucciones para añadir PDFs (si no hay ninguno) */}
+          {pdfDocuments.length === 0 && casoKeyPDF && (
+            <div className="p-3 rounded-lg border border-dashed border-slate-700 bg-slate-900/30">
+              <h3 className="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">
+                <FileText size={14} /> PDFs del Expediente
+              </h3>
+              <p className="text-[10px] text-slate-600 leading-relaxed">
+                Para ver PDFs aquí:
+                <br />1. Sube el archivo a <code className="text-cyan-400">public/docs/{casoKeyPDF}/</code>
+                <br />2. Edita <code className="text-cyan-400">src/data/pdfRegistry.ts</code>
+                <br />3. Recarga la web
+              </p>
+            </div>
+          )}
+
+          {/* Archivos Adjuntos de IndexedDB */}
           <div>
             <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
               <Upload size={14} /> Archivo Digital
@@ -646,13 +747,48 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
 
         {/* VISOR CENTRAL (Desktop) */}
         <div className="hidden lg:flex lg:col-span-3 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden h-full shadow-2xl relative flex-col">
-          {selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] ? (
+          {/* Visor de PDF */}
+          {selectedPDF && casoKeyPDF ? (
+            <div className="flex flex-col h-full">
+              {/* Header del PDF */}
+              <div className="flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{tipoDocIcons[selectedPDF.tipo] || '📄'}</span>
+                  <div>
+                    <h3 className="text-sm font-medium text-white">{selectedPDF.titulo}</h3>
+                    {selectedPDF.descripcion && (
+                      <p className="text-[10px] text-slate-500">{selectedPDF.descripcion}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {selectedPDF.fecha && (
+                    <span className="text-[10px] text-slate-500">{selectedPDF.fecha}</span>
+                  )}
+                  <a
+                    href={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors"
+                  >
+                    Abrir en nueva pestaña
+                  </a>
+                </div>
+              </div>
+              {/* Iframe del PDF */}
+              <iframe
+                src={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
+                className="flex-1 w-full bg-white"
+                title={selectedPDF.titulo}
+              />
+            </div>
+          ) : selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] ? (
             <TextReader content={LEGAL_DOCS_MAP[selectedDocKey]} />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-slate-600 bg-slate-900/20">
               <FileText size={48} className="mb-4 opacity-20" />
               <p className="mt-4">Selecciona un documento para lectura inmersiva</p>
-              <p className="text-xs opacity-50 mt-2">Formatos optimizados para War Room</p>
+              <p className="text-xs opacity-50 mt-2">Soporta PDFs y textos legales</p>
               {selectedDocKey && !LEGAL_DOCS_MAP[selectedDocKey] && (
                  <p className="text-xs text-rose-500 mt-2 bg-rose-900/20 px-2 py-1 rounded">
                    ⚠️ Error: No se encontró contenido para "{selectedDocKey}"
