@@ -41,7 +41,11 @@ export async function seedDatabase(): Promise<boolean> {
       status: 'activo',
       clientRole: 'demandado',
       judge: '[Pendiente]',
+      opposingPartyName: 'Vicenta Jiménez Vera',
+      opposingLawyerName: 'Isabel Luzzy Aguilar',
       opposingCounsel: 'Isabel Luzzy Aguilar',
+      amountClaimedCents: eurosToCents(212677),
+      amountTotalCents: eurosToCents(212677),
       notes: 'Reclamación de 212.677€ por Vicenta. Defensa basada en Prescripción (71% cuantía), Naturaleza de Hipoteca y Compensación de saldos.',
       tags: ['familia', 'civil', 'complejo', 'prescripcion']
     });
@@ -57,7 +61,12 @@ export async function seedDatabase(): Promise<boolean> {
       status: 'activo',
       clientRole: 'ejecutado',
       judge: 'Sandra Lozano López',
+      nig: '4610241120230002538',
+      opposingPartyName: 'Vicenta Jiménez Vera',
+      opposingLawyerName: 'Isabel Luzzy Aguilar',
       opposingCounsel: 'Isabel Luzzy Aguilar (Vicenta Jiménez Vera)',
+      amountClaimedCents: eurosToCents(2400),
+      amountTotalCents: eurosToCents(2400),
       notes: 'Ejecución por supuestos impagos 200€/mes cuenta hijos. Reclamación: 2.400€. Oposición presentada. Vista: 23/04/2026 09:30. NIG: 4610241120230002538',
       tags: ['ejecucion', 'familia', 'cuenta-hijos', 'oposicion', 'vista']
     });
@@ -70,7 +79,11 @@ export async function seedDatabase(): Promise<boolean> {
       status: 'activo',
       clientRole: 'demandante',
       judge: '[Pendiente]',
+      opposingPartyName: 'Vicenta Jiménez Vera',
+      opposingLawyerName: 'Isabel Luzzy Aguilar',
       opposingCounsel: 'Isabel Luzzy Aguilar (Vicenta Jiménez Vera)',
+      amountClaimedCents: eurosToCents(7119.98),
+      amountTotalCents: eurosToCents(7119.98),
       notes: 'Reclamación de 7.119,98€ por cuotas hipotecarias pagadas en exceso (oct 2023 - jun 2025). Art. 1145 CC - Acción de regreso deudor solidario. Pendiente resolución recurso reposición contra litispendencia.',
       tags: ['hipoteca', 'cuotas', 'solidaridad', 'regreso', 'art-1145-CC']
     });
@@ -139,13 +152,13 @@ export async function seedDatabase(): Promise<boolean> {
     // HECHOS, ESTRATEGIAS Y PARTIDAS PARA QUART (ETJ 1428/2025)
     // =====================================================================
     const quartFactsData = [
-      { title: 'Cumplimiento / Pago parcial', narrative: 'Juan aportó 1.971,27€ hasta sept 2025. Tras el despacho, transfirió 200€ adicionales. Déficit real es 1.828,73€, no 2.400€.', status: 'a_probar', burden: 'ejecutado', risk: 'bajo', strength: 4, tags: ['pago', 'art-556-LEC'] },
-      { title: 'Compensación de créditos', narrative: 'Vicenta retiró 2.710,61€ de la cuenta común para gastos no autorizados. Juan tiene crédito a su favor: 881,88€.', status: 'controvertido', burden: 'ejecutado', risk: 'medio', strength: 3, tags: ['compensacion', 'art-1195-CC'] },
-      { title: 'Pluspetición', narrative: 'Se reclaman 2.400€ cuando el déficit real es 1.828,73€. Juan realizó pagos directos por 1.895,65€.', status: 'a_probar', burden: 'ejecutado', risk: 'bajo', strength: 4, tags: ['pluspeticion', 'art-558-LEC'] },
-      { title: 'Domicilio erróneo en demanda', narrative: 'Figura C/ Isabel de Villena 2-5 Mislata (domicilio de Vicenta). Juan nunca residió allí.', status: 'controvertido', burden: 'ejecutado', risk: 'medio', strength: 2, tags: ['notificacion', 'art-155-LEC'] },
-      { title: 'Abuso de derecho y mala fe', narrative: 'La cuenta tenía 1.005,42€ al interponer demanda. Vicenta dejó de pagar hipoteca y retira fondos personales.', status: 'controvertido', burden: 'ejecutado', risk: 'medio', strength: 3, tags: ['abuso', 'art-7-2-CC'] },
-      { title: 'Naturaleza no alimenticia', narrative: 'La cuenta común es fondo finalista con reglas de consenso, no alimentos incondicionales.', status: 'controvertido', burden: 'ejecutado', risk: 'alto', strength: 2, tags: ['alimentos', 'convenio'] },
-      { title: 'Email 01/10/2025 - Riesgo', narrative: 'Vicenta alega que Juan reconoció la deuda. Contexto: era propuesta de acuerdo, no reconocimiento.', status: 'controvertido', burden: 'ejecutado', risk: 'alto', strength: 2, tags: ['email', 'riesgo'] },
+      { title: 'Cumplimiento / Pago parcial', narrative: 'Juan aportó 1.971,27€ hasta sept 2025. Tras el despacho, transfirió 200€ adicionales. Déficit real es 1.828,73€, no 2.400€.', status: 'a_probar', burden: 'demandado', risk: 'bajo', strength: 4, tags: ['pago', 'art-556-LEC'] },
+      { title: 'Compensación de créditos', narrative: 'Vicenta retiró 2.710,61€ de la cuenta común para gastos no autorizados. Juan tiene crédito a su favor: 881,88€.', status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 3, tags: ['compensacion', 'art-1195-CC'] },
+      { title: 'Pluspetición', narrative: 'Se reclaman 2.400€ cuando el déficit real es 1.828,73€. Juan realizó pagos directos por 1.895,65€.', status: 'a_probar', burden: 'demandado', risk: 'bajo', strength: 4, tags: ['pluspeticion', 'art-558-LEC'] },
+      { title: 'Domicilio erróneo en demanda', narrative: 'Figura C/ Isabel de Villena 2-5 Mislata (domicilio de Vicenta). Juan nunca residió allí.', status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 2, tags: ['notificacion', 'art-155-LEC'] },
+      { title: 'Abuso de derecho y mala fe', narrative: 'La cuenta tenía 1.005,42€ al interponer demanda. Vicenta dejó de pagar hipoteca y retira fondos personales.', status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 3, tags: ['abuso', 'art-7-2-CC'] },
+      { title: 'Naturaleza no alimenticia', narrative: 'La cuenta común es fondo finalista con reglas de consenso, no alimentos incondicionales.', status: 'controvertido', burden: 'demandado', risk: 'alto', strength: 2, tags: ['alimentos', 'convenio'] },
+      { title: 'Email 01/10/2025 - Riesgo', narrative: 'Vicenta alega que Juan reconoció la deuda. Contexto: era propuesta de acuerdo, no reconocimiento.', status: 'controvertido', burden: 'demandado', risk: 'alto', strength: 2, tags: ['email', 'riesgo'] },
     ];
     for (const f of quartFactsData) await factsRepo.create({ caseId: quartCase.id, ...f } as any);
 
@@ -168,7 +181,7 @@ export async function seedDatabase(): Promise<boolean> {
       { date: '2024-06-01', concepto: 'Pagos directos Juan: Otros gastos hijos', importe: -614.65, estado: 'reclamable' },
     ];
     for (const p of quartPartidasData) {
-      await partidasRepo.create({ caseId: quartCase.id, date: p.date, amountCents: eurosToCents(Math.abs(p.importe)), concept: p.concepto, payer: 'Juan', beneficiary: 'Cuenta/Hijos', state: p.estado as any, theory: 'Oposición ETJ 1428/2025', notes: '', tags: ['quart'] });
+      await partidasRepo.create({ caseId: quartCase.id, date: p.date, amountCents: eurosToCents(p.importe), concept: p.concepto, payer: 'Juan', beneficiary: 'Cuenta/Hijos', state: p.estado as any, theory: 'Oposición ETJ 1428/2025', notes: '', tags: ['quart'] });
     }
 
     // =====================================================================
@@ -202,35 +215,80 @@ export async function seedDatabase(): Promise<boolean> {
       { date: '2025-06-30', concepto: 'EXCESO PAGADO POR JUAN', importe: 7119.98, estado: 'reclamada' },
     ];
     for (const p of mislataPartidasData) {
-      await partidasRepo.create({ caseId: mislataCase.id, date: p.date, amountCents: eurosToCents(Math.abs(p.importe)), concept: p.concepto, payer: 'Juan', beneficiary: 'CaixaBank', state: p.estado as any, theory: 'Art. 1145 CC - Acción de regreso', notes: '', tags: ['mislata', 'hipoteca'] });
+      await partidasRepo.create({ caseId: mislataCase.id, date: p.date, amountCents: eurosToCents(p.importe), concept: p.concepto, payer: 'Juan', beneficiary: 'CaixaBank', state: p.estado as any, theory: 'Art. 1145 CC - Acción de regreso', notes: '', tags: ['mislata', 'hipoteca'] });
     }
 
     // =====================================================================
-    // 4. DOCUMENTOS CLAVE (MOCK) - PICASSENT
-    // Para probar la vinculación Hecho <-> Documento
+    // 4. DOCUMENTOS CON FILEPATH (FASE 3) - PICASSENT
     // =====================================================================
-    const docsData = [
-      { title: 'Doc. 25 - Recibos Oficiales CaixaBank', docType: 'prueba', description: 'Recibos íntegros que identifican a Juan como ordenante real.' },
-      { title: 'Doc. 26 - Cuadro Comparativo Visual', docType: 'prueba', description: 'Gráfico enfrentando captura recortada vs recibo real.' },
-      { title: 'Escritura Compraventa Piso Madrid (2000)', docType: 'prueba', description: 'Prueba del carácter privativo y origen de fondos.' },
-      { title: 'Resolución AEAT 2012 Reinversión', docType: 'sentencia', description: 'Prueba oficial del destino de los fondos a la obra común.' },
-      { title: 'Demanda Contraria', docType: 'demanda', description: 'Escrito inicial de la actora.' },
-      { title: 'Extracto Cuenta Común (Retirada 38.500)', docType: 'prueba', description: 'Doc. 3 Contestación. Acredita la retirada de fondos de ella.' },
-      { title: 'STS 458/2025 (Doctrina Cuentas)', docType: 'sentencia', description: 'Jurisprudencia sobre caja única familiar.' }
+    const picassentDocsData = [
+      { title: 'Demanda División Cosa Común', docType: 'demanda', filePath: '/src/data/PO-715-2024-picassent/docs/2024-06-24__DEMANDA__division_cosa_comun__v01.pdf', status: 'pending' },
+      { title: 'Contestación a la Demanda', docType: 'contestacion', filePath: '/src/data/PO-715-2024-picassent/docs/2025-02-19__CONTESTACION__defensa__v01.pdf', status: 'pending' },
+      { title: 'Auto Admisión a Trámite', docType: 'auto', filePath: '/src/data/PO-715-2024-picassent/docs/2024-07-15__AUTO__admision_tramite__v01.pdf', status: 'pending' },
+      { title: 'Señalamiento Audiencia Previa', docType: 'escrito', filePath: '/src/data/PO-715-2024-picassent/docs/2025-10-24__PROVIDENCIA__señalamiento__v01.pdf', status: 'pending' },
+      { title: 'Extracto Cuenta Común (38.500€)', docType: 'extracto', filePath: '/src/data/PO-715-2024-picassent/docs/2023-11-01__EXTRACTO__cuenta_comun__v01.pdf', status: 'pending' },
+      { title: 'Recibos CaixaBank Originales', docType: 'prueba', filePath: '/src/data/PO-715-2024-picassent/docs/2024-01-01__RECIBOS__caixabank__v01.pdf', status: 'pending' },
+      { title: 'Escritura Préstamo Hipotecario', docType: 'contrato', filePath: '/src/data/PO-715-2024-picassent/docs/2006-08-22__ESCRITURA__prestamo_310k__v01.pdf', status: 'pending' },
+      { title: 'Cálculo Cuantías Prescripción', docType: 'informe', filePath: '/src/data/PO-715-2024-picassent/docs/2025-01-01__CALCULO__cuantias__v01.pdf', status: 'pending' },
     ];
 
-    const docIds: Record<string, string> = {}; // Para vincular luego
-    for (const d of docsData) {
+    const docIds: Record<string, string> = {};
+    for (const d of picassentDocsData) {
       const doc = await documentsRepo.create({
         caseId: mainCase.id,
         title: d.title,
         docType: d.docType as any,
-        mime: 'application/pdf',
-        size: 1024 * 500, // Fake size
-        path: 'mock/path',
+        filePath: d.filePath,
+        status: d.status as any,
         tags: ['importante']
       });
       docIds[d.title] = doc.id;
+    }
+
+    // =====================================================================
+    // DOCUMENTOS CON FILEPATH - QUART (ETJ 1428/2025)
+    // =====================================================================
+    const quartDocsData = [
+      { title: 'Sentencia Divorcio 362/2023', docType: 'sentencia', filePath: '/src/data/ETJ-1428-2025-quart/docs/2023-10-17__SENTENCIA__divorcio__v01.pdf', status: 'pending' },
+      { title: 'Auto Despacho Ejecución', docType: 'auto', filePath: '/src/data/ETJ-1428-2025-quart/docs/2025-10-30__AUTO__despacho_ejecucion__v01.pdf', status: 'pending' },
+      { title: 'Escrito Oposición a Ejecución', docType: 'contestacion', filePath: '/src/data/ETJ-1428-2025-quart/docs/2025-11-15__OPOSICION__ejecucion__v01.pdf', status: 'pending' },
+      { title: 'Providencia Señalamiento Vista', docType: 'escrito', filePath: '/src/data/ETJ-1428-2025-quart/docs/2026-01-14__PROVIDENCIA__señalamiento_vista__v01.pdf', status: 'pending' },
+      { title: 'Extractos Openbank Aportaciones', docType: 'extracto', filePath: '/src/data/ETJ-1428-2025-quart/docs/2024-01-01__EXTRACTO__openbank__v01.pdf', status: 'pending' },
+      { title: 'Cálculo Compensación Pagos', docType: 'informe', filePath: '/src/data/ETJ-1428-2025-quart/docs/2025-11-01__CALCULO__compensacion__v01.pdf', status: 'pending' },
+    ];
+
+    for (const d of quartDocsData) {
+      await documentsRepo.create({
+        caseId: quartCase.id,
+        title: d.title,
+        docType: d.docType as any,
+        filePath: d.filePath,
+        status: d.status as any,
+        tags: ['quart']
+      });
+    }
+
+    // =====================================================================
+    // DOCUMENTOS CON FILEPATH - MISLATA (J.V. 1185/2025)
+    // =====================================================================
+    const mislataDocsData = [
+      { title: 'Demanda Reclamación Cuotas', docType: 'demanda', filePath: '/src/data/JV-1185-2025-mislata/docs/2025-09-24__DEMANDA__reclamacion_cuotas__v01.pdf', status: 'pending' },
+      { title: 'Auto Admisión a Trámite', docType: 'auto', filePath: '/src/data/JV-1185-2025-mislata/docs/2025-11-19__AUTO__admision__v01.pdf', status: 'pending' },
+      { title: 'Contestación de Vicenta', docType: 'contestacion', filePath: '/src/data/JV-1185-2025-mislata/docs/2025-12-01__CONTESTACION__vicenta__v01.pdf', status: 'pending' },
+      { title: 'Impugnación Recurso Reposición', docType: 'escrito', filePath: '/src/data/JV-1185-2025-mislata/docs/2025-12-19__ESCRITO__impugnacion__v01.pdf', status: 'pending' },
+      { title: 'Extractos CaixaBank Cuotas', docType: 'extracto', filePath: '/src/data/JV-1185-2025-mislata/docs/2023-10-01__EXTRACTO__cuotas_hipoteca__v01.pdf', status: 'pending' },
+      { title: 'Cálculo Art. 1145 CC', docType: 'informe', filePath: '/src/data/JV-1185-2025-mislata/docs/2025-09-01__CALCULO__accion_regreso__v01.pdf', status: 'pending' },
+    ];
+
+    for (const d of mislataDocsData) {
+      await documentsRepo.create({
+        caseId: mislataCase.id,
+        title: d.title,
+        docType: d.docType as any,
+        filePath: d.filePath,
+        status: d.status as any,
+        tags: ['mislata']
+      });
     }
 
     // =====================================================================
@@ -405,152 +463,7 @@ export async function seedDatabase(): Promise<boolean> {
       await eventsRepo.create({ caseId: mainCase.id, ...e } as any);
     }
 
-    // =====================================================================
-    // PARTIDAS DE LOS 10 HECHOS RECLAMADOS
-    // Fuente: hechosReclamados.ts (extraído de rama claude/setup-litigation-system-yDgIX)
-    // =====================================================================
-
-    // Hecho 1: Préstamos Personales BBVA (PRESCRITO)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2008-09-05',
-      amountCents: eurosToCents(20085),
-      concept: 'Préstamos Personales BBVA - Cancelación',
-      payer: 'Vicenta (alega)',
-      beneficiary: 'BBVA',
-      state: 'prescrita_interna',
-      theory: 'Prescrito +15 años. Art. 1964 CC. Sin justificante de ingreso.',
-      notes: 'Docs. 13, 11, 4. Contradicción AEAT: préstamos para chalet común.',
-      tags: ['prescrito', 'bbva', 'prestamo']
-    });
-
-    // Hecho 2: Vehículo Seat León (PRESCRITO)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2014-01-01',
-      amountCents: eurosToCents(13000),
-      concept: 'Vehículo Seat León',
-      payer: 'Cuenta Barclays Común',
-      beneficiary: 'Concesionario',
-      state: 'prescrita_interna',
-      theory: 'Prescrito +10 años. Liberalidad familiar. Juan pagó Renault Scenic 4.500€.',
-      notes: 'Docs. 2, 17, 16. Doble rasero: reclama 100% sin mencionar Scenic.',
-      tags: ['prescrito', 'vehiculo', 'liberalidad']
-    });
-
-    // Hecho 3: Venta Vivienda Artur Piera (DISPUTA)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2022-09-01',
-      amountCents: eurosToCents(32000),
-      concept: 'Retirada Juan - Venta Artur Piera',
-      payer: 'Cuenta Común',
-      beneficiary: 'Juan (Privativo)',
-      state: 'discutida',
-      theory: 'Compensación: Vicenta retiró 38.500€ (6.500€ más). Inversión común en subasta.',
-      notes: 'Docs. 20, 3, 22. Juan hizo reforma física. Mala fe de actora al omitir su retirada mayor.',
-      tags: ['disputa', 'artur_piera', 'compensacion']
-    });
-
-    // Hecho 4: Hipoteca Vivienda Lope de Vega (PRESCRITO parcial)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2009-07-01',
-      amountCents: eurosToCents(122282.28),
-      concept: 'Cuotas Hipoteca Lope de Vega (2009-2024)',
-      payer: 'Cuentas Comunes',
-      beneficiary: 'Entidad Bancaria',
-      state: 'prescrita_interna',
-      theory: 'Pre-2019 prescrito. Préstamo 310K para terrenos comunes, no para vivienda privativa.',
-      notes: 'Doc. 6. Lope de Vega solo fue garantía, no destino. Ella pide 50% terrenos.',
-      tags: ['prescrito', 'hipoteca', 'lope_de_vega']
-    });
-
-    // Hecho 5: IBI Lope de Vega (PRESCRITO)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2013-01-01',
-      amountCents: eurosToCents(1826.91),
-      concept: 'IBI Lope de Vega (2013-2019)',
-      payer: 'Cuenta BBVA 9397',
-      beneficiary: 'Ayuntamiento Quart',
-      state: 'prescrita_interna',
-      theory: 'Prescrito pre-2019. Cuenta nutrida por nómina de Juan 16 años.',
-      notes: 'Doc. 12. Vincular recibos a historial nóminas Juan.',
-      tags: ['prescrito', 'ibi', 'quart']
-    });
-
-    // Hecho 6: IBI Chalet Montroy (DISPUTA)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2020-02-12',
-      amountCents: eurosToCents(530.85),
-      concept: 'IBI Chalet Montroy (50%)',
-      payer: 'Cuenta Común BBVA',
-      beneficiary: 'Ayuntamiento',
-      state: 'discutida',
-      theory: 'Fondos comunes para bienes comunes. No cabe reembolso.',
-      notes: 'Doc. 1. Extracto BBVA 12/02/2021 muestra cargo directo.',
-      tags: ['disputa', 'ibi', 'montroy']
-    });
-
-    // Hecho 7: IBI Fincas Rústicas (COMPENSABLE)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2020-01-01',
-      amountCents: eurosToCents(151.81),
-      concept: 'IBI Fincas Rústicas',
-      payer: 'Vicenta (Privativo)',
-      beneficiary: 'Ayuntamiento',
-      state: 'reclamable',
-      theory: 'Compensación Art. 1196 CC. Juan pagó fitosanitarios 308,24€.',
-      notes: 'Doc. 27. Deuda ella > este IBI.',
-      tags: ['compensable', 'ibi', 'rusticas']
-    });
-
-    // Hecho 8: Comunidad Loma de los Caballeros (COMPENSABLE)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2023-10-01',
-      amountCents: eurosToCents(19.39),
-      concept: 'Comunidad Loma Caballeros Q4/2023',
-      payer: 'Vicenta',
-      beneficiary: 'Comunidad',
-      state: 'reclamable',
-      theory: 'Compensación. Juan pagó Q1/2024 (36,06€).',
-      notes: 'Doc. 28. Compensación directa.',
-      tags: ['compensable', 'comunidad']
-    });
-
-    // Hecho 9: Amortización Hipoteca Previa (PRESCRITO)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2006-08-22',
-      amountCents: eurosToCents(16979.59),
-      concept: 'Amortización Hipoteca Previa Juan',
-      payer: 'Fondos Comunes',
-      beneficiary: 'Entidad Bancaria',
-      state: 'prescrita_interna',
-      theory: 'Prescrito 19 años. Condición banco para préstamo 310K terrenos comunes.',
-      notes: 'Vicenta aceptó en 2006 para comprar Montroy. Vinculado a Hecho 4.',
-      tags: ['prescrito', 'hipoteca', 'amortizacion']
-    });
-
-    // Hecho 10: Maquinaria Agrícola (DISPUTA)
-    await partidasRepo.create({
-      caseId: mainCase.id,
-      date: '2018-01-01',
-      amountCents: eurosToCents(5801.25),
-      concept: 'Maquinaria Agrícola Olivar',
-      payer: 'Fondos Comunes',
-      beneficiary: 'Proveedor',
-      state: 'discutida',
-      theory: 'Inversión negocio olivos. Vicenta cobró 10.887,57€ beneficios 2023.',
-      notes: 'Doc. 29. Factura Oleos Dels Alforins a nombre Vicenta.',
-      tags: ['disputa', 'maquinaria', 'olivar']
-    });
-
-    console.log('Database seeded successfully with REAL DATA + 10 HECHOS RECLAMADOS');
+    console.log('Database seeded successfully with REAL DATA');
     return true;
   } catch (error) {
     console.error('Error seeding database:', error);

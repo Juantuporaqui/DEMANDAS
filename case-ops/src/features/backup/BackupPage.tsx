@@ -1,5 +1,5 @@
 // ============================================
-// CASE OPS - Backup/Restore Page
+// CASE OPS - Backup/Restore Page (FASE 7: Export/Import JSON)
 // ============================================
 
 import { useState, useRef } from 'react';
@@ -15,16 +15,175 @@ import {
 } from '../../utils/zip';
 import { formatDateTime } from '../../utils/dates';
 import { formatBytes } from '../../utils/validators';
+import {
+  casesRepo,
+  factsRepo,
+  documentsRepo,
+  partidasRepo,
+  eventsRepo,
+  linksRepo,
+} from '../../db/repositories';
 
 export function BackupPage() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const jsonInputRef = useRef<HTMLInputElement>(null);
 
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [exportingJson, setExportingJson] = useState(false);
+  const [importingJson, setImportingJson] = useState(false);
   const [exportProgress, setExportProgress] = useState<ExportProgress | null>(null);
   const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+
+  // FASE 7: Export JSON
+  async function handleExportJson() {
+    setExportingJson(true);
+    try {
+      const [cases, facts, documents, partidas, events, links] = await Promise.all([
+        casesRepo.getAll(),
+        factsRepo.getAll(),
+        documentsRepo.getAll(),
+        partidasRepo.getAll(),
+        eventsRepo.getAll(),
+        linksRepo.getAll(),
+      ]);
+
+      const data = {
+        exportedAt: new Date().toISOString(),
+        version: '1.0',
+        cases,
+        facts,
+        documents: documents.map(d => ({ ...d, blob: undefined })), // Sin blobs
+        partidas,
+        events,
+        links,
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const filename = `case-ops-export-${new Date().toISOString().slice(0, 10)}.json`;
+      downloadBlob(blob, filename);
+      alert(`Exportado: ${filename}`);
+    } catch (error) {
+      console.error('Export JSON error:', error);
+      alert('Error al exportar JSON: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+    } finally {
+      setExportingJson(false);
+    }
+  }
+
+  // FASE 7: Import JSON
+  async function handleImportJson(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.json')) {
+      alert('Selecciona un archivo JSON');
+      return;
+    }
+
+    const confirmed = confirm(
+      `¿Importar datos desde "${file.name}"?\n\nLos registros existentes con el mismo ID serán actualizados.`
+    );
+
+    if (!confirmed) {
+      if (jsonInputRef.current) jsonInputRef.current.value = '';
+      return;
+    }
+
+    setImportingJson(true);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      let imported = { cases: 0, facts: 0, documents: 0, partidas: 0, events: 0, links: 0 };
+
+      // Importar casos
+      if (data.cases) {
+        for (const c of data.cases) {
+          const existing = await casesRepo.getById(c.id);
+          if (existing) {
+            await casesRepo.update(c.id, c);
+          } else {
+            await casesRepo.create(c);
+          }
+          imported.cases++;
+        }
+      }
+
+      // Importar hechos
+      if (data.facts) {
+        for (const f of data.facts) {
+          const existing = await factsRepo.getById(f.id);
+          if (existing) {
+            await factsRepo.update(f.id, f);
+          } else {
+            await factsRepo.create(f);
+          }
+          imported.facts++;
+        }
+      }
+
+      // Importar documentos (metadatos)
+      if (data.documents) {
+        for (const d of data.documents) {
+          const existing = await documentsRepo.getById(d.id);
+          if (existing) {
+            await documentsRepo.update(d.id, d);
+          } else {
+            await documentsRepo.create(d);
+          }
+          imported.documents++;
+        }
+      }
+
+      // Importar partidas
+      if (data.partidas) {
+        for (const p of data.partidas) {
+          const existing = await partidasRepo.getById(p.id);
+          if (existing) {
+            await partidasRepo.update(p.id, p);
+          } else {
+            await partidasRepo.create(p);
+          }
+          imported.partidas++;
+        }
+      }
+
+      // Importar eventos
+      if (data.events) {
+        for (const ev of data.events) {
+          const existing = await eventsRepo.getById(ev.id);
+          if (existing) {
+            await eventsRepo.update(ev.id, ev);
+          } else {
+            await eventsRepo.create(ev);
+          }
+          imported.events++;
+        }
+      }
+
+      // Importar links
+      if (data.links) {
+        for (const l of data.links) {
+          const existing = await linksRepo.getById(l.id);
+          if (!existing) {
+            await linksRepo.create(l.fromType, l.fromId, l.toType, l.toId, l.meta?.role, l.meta?.comment);
+          }
+          imported.links++;
+        }
+      }
+
+      alert(`Importación completada:\n- Casos: ${imported.cases}\n- Hechos: ${imported.facts}\n- Documentos: ${imported.documents}\n- Partidas: ${imported.partidas}\n- Eventos: ${imported.events}\n- Links: ${imported.links}`);
+    } catch (error) {
+      console.error('Import JSON error:', error);
+      alert('Error al importar JSON: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+    } finally {
+      setImportingJson(false);
+      if (jsonInputRef.current) jsonInputRef.current.value = '';
+    }
+  }
 
   async function handleExport() {
     setExporting(true);
@@ -296,6 +455,61 @@ export function BackupPage() {
           </div>
         </section>
       )}
+
+      {/* FASE 7: Export/Import JSON */}
+      <section className="section">
+        <h2 className="section-title">Export / Import JSON (Mantenimiento sin agentes)</h2>
+        <div className="card">
+          <div className="card-body">
+            <p className="mb-md">
+              Exporta o importa los datos en formato JSON para mantenimiento del sistema sin necesidad de agentes externos.
+            </p>
+
+            <div className="grid grid-2 gap-md">
+              <button
+                className="btn btn-primary btn-lg"
+                onClick={handleExportJson}
+                disabled={exportingJson}
+              >
+                {exportingJson ? (
+                  <>
+                    <span className="spinner" style={{ width: 20, height: 20 }} />
+                    Exportando...
+                  </>
+                ) : (
+                  <>📤 Exportar JSON</>
+                )}
+              </button>
+
+              <input
+                ref={jsonInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleImportJson}
+                style={{ display: 'none' }}
+              />
+              <button
+                className="btn btn-secondary btn-lg"
+                onClick={() => jsonInputRef.current?.click()}
+                disabled={importingJson}
+              >
+                {importingJson ? (
+                  <>
+                    <span className="spinner" style={{ width: 20, height: 20 }} />
+                    Importando...
+                  </>
+                ) : (
+                  <>📥 Importar JSON</>
+                )}
+              </button>
+            </div>
+
+            <p className="form-hint mt-md">
+              El archivo JSON incluye: cases, facts, documents (metadatos), partidas, events, links
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Instructions */}
       <section className="section">
