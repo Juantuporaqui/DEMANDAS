@@ -59,7 +59,6 @@ export const pdfsMislata: PDFDocument[] = [
 // CASO QUART - ETJ 1428/2025
 // ============================================
 export const pdfsQuart: PDFDocument[] = [
-  // Ejemplo:
    {
     id: 'pdf-qua-001',
     titulo: 'Sentencia de Divorcio 362/2023',
