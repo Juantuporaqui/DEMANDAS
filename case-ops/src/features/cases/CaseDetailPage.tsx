@@ -22,6 +22,8 @@ import { getCaseAmounts } from '../../utils/moneyCase';
 import { QuartFinancialAnalysis } from './QuartFinancialAnalysis';
 // Registro de PDFs
 import { getPDFsByCaso, getPDFUrl, tipoDocIcons, tipoDocColors, type PDFDocument } from '../../data/pdfRegistry';
+// Visor PDF embebido (evita que React Router intercepte las URLs)
+import { EmbeddedPDFViewer } from '../../components/EmbeddedPDFViewer';
 // Timeline específico para Picassent
 import { PicassentTimeline } from './PicassentTimeline';
 
@@ -551,20 +553,12 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
               <span className="text-sm">Volver</span>
             </button>
             <span className="text-xs text-slate-500 truncate max-w-[150px]">{selectedPDF.titulo}</span>
-            <a
-              href={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-2 py-1 text-[10px] bg-blue-600 text-white rounded"
-            >
-              Abrir
-            </a>
           </div>
-          {/* Iframe del PDF fullscreen */}
-          <iframe
-            src={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
-            className="flex-1 w-full bg-white"
+          {/* Visor PDF embebido */}
+          <EmbeddedPDFViewer
+            url={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
             title={selectedPDF.titulo}
+            className="flex-1"
           />
         </div>
       )}
@@ -761,25 +755,15 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {selectedPDF.fecha && (
-                    <span className="text-[10px] text-slate-500">{selectedPDF.fecha}</span>
-                  )}
-                  <a
-                    href={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors"
-                  >
-                    Abrir en nueva pestaña
-                  </a>
-                </div>
+                {selectedPDF.fecha && (
+                  <span className="text-[10px] text-slate-500">{selectedPDF.fecha}</span>
+                )}
               </div>
-              {/* Iframe del PDF */}
-              <iframe
-                src={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
-                className="flex-1 w-full bg-white"
+              {/* Visor PDF embebido con pdfjs */}
+              <EmbeddedPDFViewer
+                url={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
                 title={selectedPDF.titulo}
+                className="flex-1"
               />
             </div>
           ) : selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] ? (
