@@ -137,6 +137,18 @@ export interface Case {
   notes: string;
   tags: string[];
   parentCaseId?: string;
+  // Campos añadidos FASE 0
+  clientRole?: 'demandante' | 'demandado' | 'ejecutante' | 'ejecutado';
+  judge?: string;
+  nig?: string;
+  opposingPartyName?: string;
+  opposingLawyerName?: string;
+  amountClaimedCents?: number;
+  amountInterestCents?: number;
+  amountCostsCents?: number;
+  amountTotalCents?: number;
+  // Campos legacy (mantener compatibilidad)
+  opposingCounsel?: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -154,6 +166,9 @@ export interface Document {
   pagesCount: number;
   annexCode?: string; // A-1, A-2...
   notes: string;
+  // Campos añadidos FASE 0
+  filePath?: string;
+  status?: 'pending' | 'ready';
   createdAt: number;
   updatedAt: number;
 }
