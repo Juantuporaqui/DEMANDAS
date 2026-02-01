@@ -1,5 +1,5 @@
 // ============================================
-// CASE OPS - Seed Data (CASO REAL: PICASSENT 715/2024 - VERSIÓN EXTENDIDA)
+// CASE OPS - Seed Data (CASO REAL: PICASSENT 715/2024 - VERSIÓN EXTENDIDA & CORREGIDA)
 // ============================================
 
 import {
@@ -13,7 +13,6 @@ import {
   documentsRepo
 } from './repositories';
 import { eurosToCents } from '../utils/validators';
-import { nanoid } from 'nanoid';
 
 export async function seedDatabase(): Promise<boolean> {
   const settings = await settingsRepo.get();
@@ -22,7 +21,7 @@ export async function seedDatabase(): Promise<boolean> {
     return false;
   }
 
-  console.log('Seeding database with EXTENDED REAL CASE DATA...');
+  console.log('Seeding database with EXTENDED REAL CASE DATA (FIXED VISUALIZATIONS)...');
 
   try {
     // 1. Configuración Inicial
@@ -31,7 +30,7 @@ export async function seedDatabase(): Promise<boolean> {
     for (const c of counters) await counterRepo.setCounter(c, 0);
 
     // =====================================================================
-    // 1. CASO PRINCIPAL
+    // 1. CASO PRINCIPAL - PICASSENT
     // =====================================================================
     const mainCase = await casesRepo.create({
       title: 'P.O. 715/2024 · División Cosa Común y Reclamación',
@@ -51,7 +50,7 @@ export async function seedDatabase(): Promise<boolean> {
     });
 
     // =====================================================================
-    // 2. CASOS SECUNDARIOS
+    // 2. CASOS SECUNDARIOS - QUART Y MISLATA
     // =====================================================================
     const quartCase = await casesRepo.create({
       title: 'ETJ 1428/2025 · Ejecución Cuenta Hijos',
@@ -150,15 +149,79 @@ export async function seedDatabase(): Promise<boolean> {
 
     // =====================================================================
     // HECHOS, ESTRATEGIAS Y PARTIDAS PARA QUART (ETJ 1428/2025)
+    // FIX: Se han añadido los campos 'amountCents' y ajustado 'status'
     // =====================================================================
     const quartFactsData = [
-      { title: 'Cumplimiento / Pago parcial', narrative: 'Juan aportó 1.971,27€ hasta sept 2025. Tras el despacho, transfirió 200€ adicionales. Déficit real es 1.828,73€, no 2.400€.', status: 'a_probar', burden: 'demandado', risk: 'bajo', strength: 4, tags: ['pago', 'art-556-LEC'] },
-      { title: 'Compensación de créditos', narrative: 'Vicenta retiró 2.710,61€ de la cuenta común para gastos no autorizados. Juan tiene crédito a su favor: 881,88€.', status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 3, tags: ['compensacion', 'art-1195-CC'] },
-      { title: 'Pluspetición', narrative: 'Se reclaman 2.400€ cuando el déficit real es 1.828,73€. Juan realizó pagos directos por 1.895,65€.', status: 'a_probar', burden: 'demandado', risk: 'bajo', strength: 4, tags: ['pluspeticion', 'art-558-LEC'] },
-      { title: 'Domicilio erróneo en demanda', narrative: 'Figura C/ Isabel de Villena 2-5 Mislata (domicilio de Vicenta). Juan nunca residió allí.', status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 2, tags: ['notificacion', 'art-155-LEC'] },
-      { title: 'Abuso de derecho y mala fe', narrative: 'La cuenta tenía 1.005,42€ al interponer demanda. Vicenta dejó de pagar hipoteca y retira fondos personales.', status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 3, tags: ['abuso', 'art-7-2-CC'] },
-      { title: 'Naturaleza no alimenticia', narrative: 'La cuenta común es fondo finalista con reglas de consenso, no alimentos incondicionales.', status: 'controvertido', burden: 'demandado', risk: 'alto', strength: 2, tags: ['alimentos', 'convenio'] },
-      { title: 'Email 01/10/2025 - Riesgo', narrative: 'Vicenta alega que Juan reconoció la deuda. Contexto: era propuesta de acuerdo, no reconocimiento.', status: 'controvertido', burden: 'demandado', risk: 'alto', strength: 2, tags: ['email', 'riesgo'] },
+      { 
+        title: 'Cumplimiento / Pago parcial', 
+        narrative: 'Juan aportó 1.971,27€ hasta sept 2025. Tras el despacho, transfirió 200€ adicionales. Déficit real es 1.828,73€, no 2.400€.', 
+        status: 'a_probar', 
+        burden: 'demandado', 
+        risk: 'bajo', 
+        strength: 4, 
+        amountCents: eurosToCents(571.27), // Diferencia a favor de Juan respecto a lo reclamado (aprox)
+        tags: ['pago', 'art-556-LEC'] 
+      },
+      { 
+        title: 'Compensación de créditos', 
+        narrative: 'Vicenta retiró 2.710,61€ de la cuenta común para gastos no autorizados. Juan tiene crédito a su favor: 881,88€.', 
+        status: 'compensable', // FIX: Estado corregido para visualización
+        burden: 'demandado', 
+        risk: 'medio', 
+        strength: 3, 
+        amountCents: eurosToCents(2710.61), // Importe del uso indebido
+        tags: ['compensacion', 'art-1195-CC'] 
+      },
+      { 
+        title: 'Pluspetición', 
+        narrative: 'Se reclaman 2.400€ cuando el déficit real es 1.828,73€. Juan realizó pagos directos por 1.895,65€.', 
+        status: 'a_probar', 
+        burden: 'demandado', 
+        risk: 'bajo', 
+        strength: 4, 
+        amountCents: eurosToCents(1895.65), // Importe de pagos directos
+        tags: ['pluspeticion', 'art-558-LEC'] 
+      },
+      { 
+        title: 'Domicilio erróneo en demanda', 
+        narrative: 'Figura C/ Isabel de Villena 2-5 Mislata (domicilio de Vicenta). Juan nunca residió allí.', 
+        status: 'controvertido', 
+        burden: 'demandado', 
+        risk: 'medio', 
+        strength: 2, 
+        amountCents: 0, // No económico
+        tags: ['notificacion', 'art-155-LEC'] 
+      },
+      { 
+        title: 'Abuso de derecho y mala fe', 
+        narrative: 'La cuenta tenía 1.005,42€ al interponer demanda. Vicenta dejó de pagar hipoteca y retira fondos personales.', 
+        status: 'controvertido', 
+        burden: 'demandado', 
+        risk: 'medio', 
+        strength: 3, 
+        amountCents: eurosToCents(1005.42), // Saldo existente
+        tags: ['abuso', 'art-7-2-CC'] 
+      },
+      { 
+        title: 'Naturaleza no alimenticia', 
+        narrative: 'La cuenta común es fondo finalista con reglas de consenso, no alimentos incondicionales.', 
+        status: 'controvertido', 
+        burden: 'demandado', 
+        risk: 'alto', 
+        strength: 2, 
+        amountCents: 0,
+        tags: ['alimentos', 'convenio'] 
+      },
+      { 
+        title: 'Email 01/10/2025 - Riesgo', 
+        narrative: 'Vicenta alega que Juan reconoció la deuda. Contexto: era propuesta de acuerdo, no reconocimiento.', 
+        status: 'controvertido', 
+        burden: 'demandado', 
+        risk: 'alto', 
+        strength: 2, 
+        amountCents: 0,
+        tags: ['email', 'riesgo'] 
+      },
     ];
     for (const f of quartFactsData) await factsRepo.create({ caseId: quartCase.id, ...f } as any);
 
@@ -186,14 +249,69 @@ export async function seedDatabase(): Promise<boolean> {
 
     // =====================================================================
     // HECHOS, ESTRATEGIAS Y PARTIDAS PARA MISLATA (J.V. 1185/2025)
+    // FIX: Se han añadido los campos 'amountCents' y ajustado 'status'
     // =====================================================================
     const mislataFactsData = [
-      { title: 'Litispendencia (Art. 421 LEC)', narrative: 'Vicenta alega litispendencia con Picassent. FALSO: objeto distinto (cuotas 2023-2025 vs 2009-2023). STS 140/2012 exige identidad TOTAL.', status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 4, tags: ['litispendencia', 'art-421-LEC'] },
-      { title: 'Prejudicialidad Civil (Art. 43 LEC)', narrative: 'Vicenta pide suspensión. Art. 43 es FACULTATIVO. Nuestro crédito es líquido: 7.119,98€.', status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 4, tags: ['prejudicialidad', 'art-43-LEC'] },
-      { title: 'Solidaridad Contractual', narrative: 'Ambos son deudores solidarios. Art. 1145 CC: derecho de regreso.', status: 'a_probar', burden: 'demandante', risk: 'bajo', strength: 5, tags: ['solidaridad', 'art-1145-CC'] },
-      { title: 'Cuotas líquidas y exigibles', narrative: 'Crédito LÍQUIDO (7.119,98€), VENCIDO (oct 2023 - jun 2025) y EXIGIBLE.', status: 'a_probar', burden: 'demandante', risk: 'bajo', strength: 5, tags: ['liquidez', 'exigibilidad'] },
-      { title: 'Cese unilateral de pago', narrative: 'Vicenta dejó de pagar desde agosto 2023. Juan pagó 14.404,88€; Vicenta solo 1.159,05€ netos.', status: 'a_probar', burden: 'demandante', risk: 'bajo', strength: 5, tags: ['incumplimiento'] },
-      { title: 'Convenio divorcio', narrative: 'Vicenta alega que Juan debe pagar "gastos vivienda". FALSO: hipoteca es DEUDA SOLIDARIA, no gasto.', status: 'controvertido', burden: 'demandado', risk: 'bajo', strength: 4, tags: ['convenio'] },
+      { 
+        title: 'Litispendencia (Art. 421 LEC)', 
+        narrative: 'Vicenta alega litispendencia con Picassent. FALSO: objeto distinto (cuotas 2023-2025 vs 2009-2023). STS 140/2012 exige identidad TOTAL.', 
+        status: 'controvertido', 
+        burden: 'demandado', 
+        risk: 'medio', 
+        strength: 4, 
+        amountCents: 0,
+        tags: ['litispendencia', 'art-421-LEC'] 
+      },
+      { 
+        title: 'Prejudicialidad Civil (Art. 43 LEC)', 
+        narrative: 'Vicenta pide suspensión. Art. 43 es FACULTATIVO. Nuestro crédito es líquido: 7.119,98€.', 
+        status: 'controvertido', 
+        burden: 'demandado', 
+        risk: 'medio', 
+        strength: 4, 
+        amountCents: 0,
+        tags: ['prejudicialidad', 'art-43-LEC'] 
+      },
+      { 
+        title: 'Solidaridad Contractual', 
+        narrative: 'Ambos son deudores solidarios. Art. 1145 CC: derecho de regreso.', 
+        status: 'a_probar', 
+        burden: 'demandante', 
+        risk: 'bajo', 
+        strength: 5, 
+        amountCents: eurosToCents(7119.98), // El importe principal reclamado
+        tags: ['solidaridad', 'art-1145-CC'] 
+      },
+      { 
+        title: 'Cuotas líquidas y exigibles', 
+        narrative: 'Crédito LÍQUIDO (7.119,98€), VENCIDO (oct 2023 - jun 2025) y EXIGIBLE.', 
+        status: 'a_probar', 
+        burden: 'demandante', 
+        risk: 'bajo', 
+        strength: 5, 
+        amountCents: eurosToCents(7119.98),
+        tags: ['liquidez', 'exigibilidad'] 
+      },
+      { 
+        title: 'Cese unilateral de pago', 
+        narrative: 'Vicenta dejó de pagar desde agosto 2023. Juan pagó 14.404,88€; Vicenta solo 1.159,05€ netos.', 
+        status: 'a_probar', 
+        burden: 'demandante', 
+        risk: 'bajo', 
+        strength: 5, 
+        amountCents: eurosToCents(14404.88), // Total pagado por Juan
+        tags: ['incumplimiento'] 
+      },
+      { 
+        title: 'Compensación alegada (Picassent)', 
+        narrative: 'Vicenta intenta compensar con supuesta deuda de 2009. NO ES LÍQUIDA ni EXIGIBLE (Art. 1196 CC) y está en disputa en Picassent.', 
+        status: 'disputa', 
+        burden: 'demandado', 
+        risk: 'bajo', 
+        strength: 4, 
+        amountCents: eurosToCents(122282), // El importe que ella intenta usar para compensar
+        tags: ['compensacion', 'picassent'] 
+      },
     ];
     for (const f of mislataFactsData) await factsRepo.create({ caseId: mislataCase.id, ...f } as any);
 
@@ -292,80 +410,79 @@ export async function seedDatabase(): Promise<boolean> {
     }
 
     // =====================================================================
-    // 3. HECHOS CONTROVERTIDOS (FACTS) - 10 HECHOS COMPLETOS PICASSENT
-    // Fuentes: FIJAR.docx, APORTACIÓN DE TESTIGOS.docx
+    // 3. HECHOS PICASSENT (10 HECHOS COMPLETOS - YA TENÍAN IMPORTE EN EL SEED ORIGINAL)
     // =====================================================================
     const factsData = [
-      // HECHO 1: Préstamos Personales BBVA
       {
         title: 'Préstamos Personales BBVA - 20.085€ (PRESCRITO)',
         narrative: 'Vicenta alega que pagó préstamos personales en 2008. PRESCRITO +15 años (Art. 1964 CC). Sin justificante de ingreso. AEAT: préstamos para chalet común.',
-        status: 'controvertido', burden: 'demandado', risk: 'bajo', strength: 5,
+        status: 'prescrito', burden: 'demandado', risk: 'bajo', strength: 5,
+        amountCents: eurosToCents(20085),
         tags: ['prescrito', 'bbva', 'prestamo'],
         linkedDocIds: [docIds['Doc. 25 - Recibos Oficiales CaixaBank']]
       },
-      // HECHO 2: Vehículo Seat León
       {
         title: 'Vehículo Seat León - 13.000€ (PRESCRITO)',
         narrative: 'Compra 2014, prescrito +10 años. Cuenta Barclays común. Liberalidad familiar. Juan pagó Renault Scenic 4.500€. Doble rasero de la actora.',
-        status: 'controvertido', burden: 'demandado', risk: 'bajo', strength: 5,
+        status: 'prescrito', burden: 'demandado', risk: 'bajo', strength: 5,
+        amountCents: eurosToCents(13000),
         tags: ['prescrito', 'vehiculo', 'liberalidad']
       },
-      // HECHO 3: Venta Vivienda Artur Piera
       {
         title: 'Retirada de Fondos: 38.500€ (Ella) vs 32.000€ (Él)',
         narrative: 'En la ruptura, Juan retiró 32.000€ (que se reclaman) pero Vicenta retiró 38.500€ de la cuenta común (6.500€ MÁS). Se opone compensación.',
-        status: 'a_probar', burden: 'demandado', risk: 'medio', strength: 5,
+        status: 'compensable', burden: 'demandado', risk: 'medio', strength: 5,
+        amountCents: eurosToCents(38500),
         tags: ['compensacion', 'cuentas', 'artur_piera'],
         linkedDocIds: [docIds['Extracto Cuenta Común (Retirada 38.500)']]
       },
-      // HECHO 4: Hipoteca Lope de Vega
       {
         title: 'Hipoteca Lope de Vega - 122.282€ (PRESCRITO parcial)',
         narrative: 'Cuotas 2009-2024. Pre-2019 PRESCRITO. Préstamo 310K fue para terrenos comunes, no para vivienda privativa. Lope de Vega solo fue garantía, no destino.',
-        status: 'controvertido', burden: 'mixta', risk: 'alto', strength: 4,
+        status: 'prescrito', burden: 'mixta', risk: 'alto', strength: 4,
+        amountCents: eurosToCents(122282),
         tags: ['prescrito', 'hipoteca', 'lope_de_vega']
       },
-      // HECHO 5: IBI Lope de Vega
       {
         title: 'IBI Lope de Vega - 1.826,91€ (PRESCRITO)',
         narrative: 'IBI 2013-2019, PRESCRITO pre-2019. Cuenta BBVA 9397 nutrida por nómina de Juan durante 16 años.',
-        status: 'controvertido', burden: 'demandado', risk: 'bajo', strength: 5,
+        status: 'prescrito', burden: 'demandado', risk: 'bajo', strength: 5,
+        amountCents: eurosToCents(1826.91),
         tags: ['prescrito', 'ibi', 'quart']
       },
-      // HECHO 6: IBI Chalet Montroy
       {
         title: 'IBI Chalet Montroy - 530,85€ (DISPUTA)',
         narrative: 'Fondos comunes para bienes comunes. No cabe reembolso. Extracto BBVA 12/02/2021 muestra cargo directo de cuenta común.',
-        status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 4,
+        status: 'disputa', burden: 'demandado', risk: 'medio', strength: 4,
+        amountCents: eurosToCents(530.85),
         tags: ['disputa', 'ibi', 'montroy']
       },
-      // HECHO 7: IBI Fincas Rústicas
       {
         title: 'IBI Fincas Rústicas - 151,81€ (COMPENSABLE)',
         narrative: 'Compensación Art. 1196 CC. Juan pagó fitosanitarios 308,24€. Deuda ella > este IBI.',
-        status: 'a_probar', burden: 'demandado', risk: 'bajo', strength: 4,
+        status: 'compensable', burden: 'demandado', risk: 'bajo', strength: 4,
+        amountCents: eurosToCents(151.81),
         tags: ['compensable', 'ibi', 'rusticas']
       },
-      // HECHO 8: Comunidad Loma de los Caballeros
       {
-        title: 'Comunidad Loma Caballeros - 19,39€ (COMPENSABLE)',
+        title: 'Comunidad Loma de los Caballeros - 19,39€ (COMPENSABLE)',
         narrative: 'Compensación directa. Juan pagó Q1/2024 (36,06€). Saldo neto a favor de Juan.',
-        status: 'a_probar', burden: 'demandado', risk: 'bajo', strength: 5,
+        status: 'compensable', burden: 'demandado', risk: 'bajo', strength: 5,
+        amountCents: eurosToCents(19.39),
         tags: ['compensable', 'comunidad']
       },
-      // HECHO 9: Amortización Hipoteca Previa
       {
         title: 'Amortización Hipoteca Previa - 16.979€ (PRESCRITO)',
         narrative: 'Prescrito 19 años. Condición del banco para préstamo 310K terrenos comunes. Vicenta aceptó en 2006 para comprar Montroy.',
-        status: 'controvertido', burden: 'demandado', risk: 'bajo', strength: 5,
+        status: 'prescrito', burden: 'demandado', risk: 'bajo', strength: 5,
+        amountCents: eurosToCents(16979),
         tags: ['prescrito', 'hipoteca', 'amortizacion']
       },
-      // HECHO 10: Maquinaria Agrícola
       {
         title: 'Maquinaria Agrícola Olivar - 5.801€ (DISPUTA)',
         narrative: 'Inversión en negocio de olivos. Vicenta cobró 10.887,57€ beneficios 2023 (Factura Oleos Dels Alforins). Si se reclama la inversión, también los beneficios.',
-        status: 'controvertido', burden: 'demandado', risk: 'medio', strength: 4,
+        status: 'disputa', burden: 'demandado', risk: 'medio', strength: 4,
+        amountCents: eurosToCents(5801),
         tags: ['disputa', 'maquinaria', 'olivar']
       }
     ];
@@ -375,8 +492,7 @@ export async function seedDatabase(): Promise<boolean> {
     }
 
     // =====================================================================
-    // 4. ESTRATEGIAS (WAR ROOM)
-    // Fuentes: PRESCRIPCIÓN.docx, DEFENSA ARTURO PIERA.docx
+    // 4. ESTRATEGIAS (WAR ROOM) - PICASSENT
     // =====================================================================
     const strategiesData = [
       {
@@ -407,8 +523,7 @@ export async function seedDatabase(): Promise<boolean> {
     }
 
     // =====================================================================
-    // 5. PARTIDAS ECONÓMICAS (DESGLOSE COMPLETO)
-    // Fuente: FIJAR.docx, Defensa_STS_458_2025.docx
+    // 5. PARTIDAS ECONÓMICAS (DESGLOSE COMPLETO) - PICASSENT
     // =====================================================================
     const partidasList = [
       // Bloque Prescrito
@@ -446,8 +561,7 @@ export async function seedDatabase(): Promise<boolean> {
     }
 
     // =====================================================================
-    // 6. CRONOLOGÍA (EVENTS)
-    // Fuente: INFORME_ESTRATEGICO.pdf
+    // 6. CRONOLOGÍA (EVENTS) - PICASSENT
     // =====================================================================
     const eventsData = [
       { date: '2006-08-22', type: 'factico', title: 'Cancelación Carga Previa', description: 'Origen de la reclamación de 16.979€.' },
