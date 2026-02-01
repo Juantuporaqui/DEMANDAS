@@ -7,9 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import { FileText, Scale, Clock, AlertTriangle, RefreshCw, Eye, List, Grid3X3 } from 'lucide-react';
 import { AnalyticsLayout } from '../layout/AnalyticsLayout';
 import { SectionCard } from '../components/SectionCard';
-import { HechoCard, HechoBadge, type HechoEstado } from '../components/HechoCard';
+import { HechoCard, HechoBadge } from '../components/HechoCard';
 import { HechoExpandible } from '../components/HechoExpandible';
-import { hechosReclamados, resumenContador, calcularTotales } from '../../../data/hechosReclamados';
+import { hechosReclamados, resumenContador, calcularTotales, type EstadoHecho } from '../../../data/hechosReclamados';
 
 type FilterKey = 'todos' | 'prescrito' | 'compensable' | 'disputa';
 
@@ -162,7 +162,7 @@ export function HechosPage() {
               <span className="sm:hidden">{filter.key === 'todos' ? 'Todo' : filter.key === 'prescrito' ? 'Presc.' : filter.key === 'compensable' ? 'Comp.' : 'Disp.'}</span>
               {filter.key !== 'todos' && (
                 <span className={`text-[10px] sm:text-xs ${isActive ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  ({countByEstado[filter.key as HechoEstado] || 0})
+                  ({countByEstado[filter.key as EstadoHecho] || 0})
                 </span>
               )}
             </button>
@@ -186,16 +186,7 @@ export function HechosPage() {
           /* VISTA COMPACTA - Grid de tarjetas */
           <div className="grid gap-3 sm:grid-cols-2">
             {filteredHechos.map((hecho) => (
-              <HechoCard
-                key={hecho.id}
-                id={hecho.id}
-                titulo={hecho.titulo}
-                cuantia={hecho.cuantia}
-                estado={hecho.estado}
-                año={hecho.año}
-                estrategia={hecho.estrategia}
-                onClick={() => navigate(`/facts/${hecho.id}`)}
-              />
+              <HechoCard key={hecho.id} hecho={hecho} />
             ))}
           </div>
         )}
