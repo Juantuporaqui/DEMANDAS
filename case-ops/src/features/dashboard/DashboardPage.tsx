@@ -82,6 +82,14 @@ export function DashboardPage() {
 
   const safeNumber = (n: number) => (isNaN(n) || n < 0) ? 0 : n;
 
+  const getCaseLabel = (frente: { id: string; titulo: string; juzgado: string }) => {
+    const combined = `${frente.id} ${frente.titulo} ${frente.juzgado}`.toLowerCase();
+    if (combined.includes('picassent')) return 'PICASSENT';
+    if (combined.includes('mislata')) return 'MISLATA';
+    if (combined.includes('quart')) return 'QUART';
+    return 'CASO';
+  };
+
   const handleClearCache = () => {
     if ('caches' in window) {
       caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))));
@@ -156,6 +164,7 @@ export function DashboardPage() {
           const dias = frente.proximoHito ? getDiasHasta(frente.proximoHito) : null;
           const isUrgente = frente.urgencia === 'urgente';
           const isRiesgo = frente.urgencia === 'riesgo';
+          const caseLabel = getCaseLabel(frente);
 
           return (
             <button
@@ -198,7 +207,12 @@ export function DashboardPage() {
                   <Scale size={24} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-white truncate">{frente.titulo}</h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-base font-bold text-white truncate">{frente.titulo}</h3>
+                    <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-100">
+                      {caseLabel}
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-400 truncate">{frente.juzgado}</p>
                 </div>
               </div>
