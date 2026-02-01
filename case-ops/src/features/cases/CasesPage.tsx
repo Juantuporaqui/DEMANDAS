@@ -65,6 +65,15 @@ function getNextEvent(events: Event[]) {
   return upcoming?.event ?? null;
 }
 
+function getCaseLabel(caseItem: Case) {
+  const title = caseItem.title?.toLowerCase() || '';
+  const autos = caseItem.autosNumber || '';
+  if (title.includes('picassent') || autos.includes('715')) return 'PICASSENT';
+  if (title.includes('mislata') || autos.includes('1185')) return 'MISLATA';
+  if (title.includes('quart') || autos.includes('1428')) return 'QUART';
+  return 'CASO';
+}
+
 export function CasesPage() {
   const [cases, setCases] = useState<Case[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -164,6 +173,7 @@ export function CasesPage() {
             const totalAmount = casePartidas.reduce((sum, partida) => sum + partida.amountCents, 0);
             const nextEvent = getNextEvent(caseEvents);
             const children = childCases.filter((child) => child.parentCaseId === caseItem.id);
+            const caseLabel = getCaseLabel(caseItem);
 
             return (
               <Link
@@ -188,6 +198,9 @@ export function CasesPage() {
                             }`}
                           >
                             {STATUS_LABELS[caseItem.status] || caseItem.status}
+                          </span>
+                          <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-slate-200">
+                            {caseLabel}
                           </span>
                         </div>
                         <p className="mt-1 text-xs uppercase tracking-[0.3em] text-slate-400">

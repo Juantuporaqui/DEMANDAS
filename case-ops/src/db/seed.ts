@@ -40,9 +40,9 @@ export async function seedDatabase(): Promise<boolean> {
       status: 'activo',
       clientRole: 'demandado',
       judge: '[Pendiente]',
-      opposingPartyName: 'Vicenta Jiménez Vera',
-      opposingLawyerName: 'Isabel Luzzy Aguilar',
-      opposingCounsel: 'Isabel Luzzy Aguilar',
+      opposingPartyName: 'Vicenta Jiménez',
+      opposingLawyerName: 'Auxiliadora Gómez',
+      opposingCounsel: 'Auxiliadora Gómez',
       amountClaimedCents: eurosToCents(212677),
       amountTotalCents: eurosToCents(212677),
       notes: 'Reclamación de 212.677€ por Vicenta. Defensa basada en Prescripción (71% cuantía), Naturaleza de Hipoteca y Compensación de saldos.',
@@ -62,8 +62,8 @@ export async function seedDatabase(): Promise<boolean> {
       judge: 'Sandra Lozano López',
       nig: '4610241120230002538',
       opposingPartyName: 'Vicenta Jiménez Vera',
-      opposingLawyerName: 'Isabel Luzzy Aguilar',
-      opposingCounsel: 'Isabel Luzzy Aguilar (Vicenta Jiménez Vera)',
+      opposingLawyerName: 'Auxiliadora Gómez',
+      opposingCounsel: 'Auxiliadora Gómez (Vicenta Jiménez Vera)',
       amountClaimedCents: eurosToCents(2400),
       amountTotalCents: eurosToCents(2400),
       notes: 'Ejecución por supuestos impagos 200€/mes cuenta hijos. Reclamación: 2.400€. Oposición presentada. Vista: 23/04/2026 09:30. NIG: 4610241120230002538',
@@ -79,8 +79,8 @@ export async function seedDatabase(): Promise<boolean> {
       clientRole: 'demandante',
       judge: '[Pendiente]',
       opposingPartyName: 'Vicenta Jiménez Vera',
-      opposingLawyerName: 'Isabel Luzzy Aguilar',
-      opposingCounsel: 'Isabel Luzzy Aguilar (Vicenta Jiménez Vera)',
+      opposingLawyerName: 'Auxiliadora Gómez',
+      opposingCounsel: 'Auxiliadora Gómez (Vicenta Jiménez Vera)',
       amountClaimedCents: eurosToCents(7119.98),
       amountTotalCents: eurosToCents(7119.98),
       notes: 'Reclamación de 7.119,98€ por cuotas hipotecarias pagadas en exceso (oct 2023 - jun 2025). Art. 1145 CC - Acción de regreso deudor solidario. Pendiente resolución recurso reposición contra litispendencia.',
@@ -570,7 +570,7 @@ export async function seedDatabase(): Promise<boolean> {
       { date: '2023-11-01', type: 'factico', title: 'Inicio Pago Hipoteca Exclusivo', description: 'Juan asume el 100% de la cuota (850€/mes).' },
       { date: '2024-01-20', type: 'procesal', title: 'Presentación Demanda', description: 'Vicenta reclama 212.677€.' },
       { date: '2025-02-19', type: 'procesal', title: 'Contestación Demanda', description: 'Presentación del escrito de defensa.' },
-      { date: '2025-10-24', type: 'procesal', title: 'Señalamiento Audiencia Previa', description: 'Fecha prevista para la vista preliminar.' }
+      { date: '2026-03-10T09:45:00', type: 'procesal', title: 'Audiencia Previa', description: 'Señalada para el 10/03/2026 a las 09:45.' }
     ];
 
     for (const e of eventsData) {
