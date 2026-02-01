@@ -199,7 +199,7 @@ export function CasesPage() {
                           >
                             {STATUS_LABELS[caseItem.status] || caseItem.status}
                           </span>
-                          <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-slate-200">
+                          <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-100">
                             {caseLabel}
                           </span>
                         </div>

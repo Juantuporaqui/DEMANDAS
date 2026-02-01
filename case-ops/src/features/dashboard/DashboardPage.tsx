@@ -209,7 +209,7 @@ export function DashboardPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-base font-bold text-white truncate">{frente.titulo}</h3>
-                    <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-[0.25em] text-slate-200">
+                    <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-100">
                       {caseLabel}
                     </span>
                   </div>
