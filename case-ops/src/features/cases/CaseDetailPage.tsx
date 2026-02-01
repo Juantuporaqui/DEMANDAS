@@ -1,5 +1,5 @@
 // ============================================
-// CASE OPS - Case Detail Page (MASTER FINAL MERGED)
+// CASE OPS - Case Detail Page (MASTER FINAL MERGED & REPAIRED)
 // ============================================
 
 import { useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ import {
 import {
   casesRepo, documentsRepo, eventsRepo, factsRepo, partidasRepo, strategiesRepo
 } from '../../db/repositories';
+import { repairCaseLinks } from '../../db/repair'; // <--- NUEVO IMPORT (FIX: Reparación enlaces)
 import type { Case, Document, Event, Fact, Partida, Strategy } from '../../types';
 import { formatDate } from '../../utils/dates';
 import { TextReader } from '../../ui/components/TextReader';
@@ -913,7 +914,7 @@ function TabEstrategia({ strategies, caseId }: any) {
 }
 
 // ============================================
-// COMPONENTE PRINCIPAL
+// COMPONENTE PRINCIPAL (FIXED WITH AUTO-REPAIR)
 // ============================================
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -932,15 +933,49 @@ export function CaseDetailPage() {
   const [partidas, setPartidas] = useState<Partida[]>([]);
   const [facts, setFacts] = useState<Fact[]>([]); 
 
+  // FIX: UseEffect con auto-reparación integrada
   useEffect(() => {
     if (!id) return;
-    casesRepo.getById(id).then(c => c ? setCurrentCase(c) : navigate('/cases'));
-    documentsRepo.getAll().then(all => setDocs(all.filter(d => d.caseId === id)));
-    eventsRepo.getAll().then(all => setEvents(all.filter(e => e.caseId === id)));
-    strategiesRepo.getAll().then(all => setStrategies(all.filter(s => s.caseId === id)));
-    partidasRepo.getAll().then(all => setPartidas(all.filter(p => p.caseId === id)));
-    // Cargar hechos reales
-    factsRepo.getAll().then(all => setFacts(all.filter(f => f.caseId === id)));
+
+    (async () => {
+      try {
+        // 1. Intentar reparar enlaces rotos por duplicados (Integridad de datos)
+        try {
+          const result = await repairCaseLinks(id);
+          if (result.repaired) {
+            console.log('Case links repaired:', result.movedCounts);
+          }
+        } catch (repairError) {
+          console.warn('Auto-repair skipped due to error:', repairError);
+        }
+
+        // 2. Carga normal de datos
+        const c = await casesRepo.getById(id);
+        if (c) {
+          setCurrentCase(c);
+          
+          // Cargar entidades relacionadas en paralelo para mayor velocidad
+          const [allDocs, allEvents, allStrategies, allPartidas, allFacts] = await Promise.all([
+            documentsRepo.getAll(),
+            eventsRepo.getAll(),
+            strategiesRepo.getAll(),
+            partidasRepo.getAll(),
+            factsRepo.getAll()
+          ]);
+
+          setDocs(allDocs.filter(d => d.caseId === id));
+          setEvents(allEvents.filter(e => e.caseId === id));
+          setStrategies(allStrategies.filter(s => s.caseId === id));
+          setPartidas(allPartidas.filter(p => p.caseId === id));
+          setFacts(allFacts.filter(f => f.caseId === id));
+          
+        } else {
+            navigate('/cases');
+        }
+      } catch (error) {
+        console.error('Error loading case details:', error);
+      }
+    })();
   }, [id, navigate]);
 
   // Si cambia la URL (por ejemplo al volver de ver un documento), actualizar el tab
