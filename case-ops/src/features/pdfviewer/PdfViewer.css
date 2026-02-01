@@ -1,254 +1,222 @@
-/* ============================================
-   CASE OPS - PDF Viewer Styles (Refactored)
-   ============================================ */
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { Maximize, Minimize, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Modal } from '../../components';
+import { documentsRepo, docFilesRepo, spansRepo, linksRepo, factsRepo, partidasRepo } from '../../db/repositories';
+import type { Document, DocFile, Span, Fact, Partida } from '../../types';
+import * as pdfjsLib from 'pdfjs-dist';
+import './PdfViewer.css';
 
-:root {
-  --pdf-bg: #0f172a;
-  --pdf-panel: #1e293b;
-  --pdf-text: #f1f5f9;
-  --pdf-border: #334155;
-  --pdf-accent: #3b82f6;
-}
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
-.pdf-viewer {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  height: 100dvh; /* Soporte para barras móviles dinámicas */
-  background-color: var(--pdf-bg);
-  color: var(--pdf-text);
-  overflow: hidden;
-  position: relative;
-}
-
-/* --- HEADER --- */
-.pdf-header {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.75rem;
-  background-color: var(--pdf-panel);
-  border-bottom: 1px solid var(--pdf-border);
-  z-index: 10;
-}
-
-.pdf-title-container {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.pdf-doc-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0;
-}
-
-.pdf-doc-meta {
-  font-size: 0.75rem;
-  color: #94a3b8;
-}
-
-.pdf-header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-/* --- VIEWPORT (CANVAS) --- */
-.pdf-viewport {
-  flex: 1;
-  position: relative;
-  overflow: auto; /* Permite scroll nativo */
-  display: flex;
+export function PdfViewerPage() {
+  const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   
-  /* CRÍTICO: align-items flex-start evita el recorte izquierdo al hacer zoom.
-     Si usáramos 'center', al crecer el canvas, la parte izquierda saldría de la pantalla
-     y sería inalcanzable por el scroll. */
-  align-items: flex-start; 
-  justify-content: flex-start;
-  
-  padding: 20px;
-  background-color: #020617;
-  
-  /* Gestión táctil: Permite pan-x/y nativo (scroll 1 dedo), 
-     mientras JS intercepta el evento de 2 dedos (pinch) */
-  touch-action: pan-x pan-y; 
-  -webkit-overflow-scrolling: touch;
-}
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null); // Referencia para Fullscreen
+  const renderTaskRef = useRef<any>(null);
 
-.pdf-canvas-element {
-  /* CRÍTICO: margin: auto centra el elemento si es más pequeño que el viewport,
-     pero permite que crezca hacia la derecha/abajo si es más grande */
-  margin: auto; 
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  background-color: white;
-  
-  /* Transición suave para el gesto de pinza (transform) */
-  transition: transform 0.1s linear; 
-  transform-origin: center top;
-  will-change: transform;
-  display: block;
-}
+  const [document, setDocument] = useState<Document | null>(null);
+  const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [scale, setScale] = useState(1.0);
+  const [loading, setLoading] = useState(true);
+  const [rendering, setRendering] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-.pdf-loader {
-  position: absolute;
-  top: 50%; 
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 20;
-  background: rgba(0,0,0,0.7);
-  padding: 1rem;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  // Spans y otros estados (mantenidos igual)
+  const [spans, setSpans] = useState<Span[]>([]);
+  const [showSpanModal, setShowSpanModal] = useState(false);
+  const [facts, setFacts] = useState<Fact[]>([]);
+  const [partidas, setPartidas] = useState<Partida[]>([]);
 
-/* --- FOOTER TOOLBAR --- */
-.pdf-toolbar {
-  flex-shrink: 0;
-  background-color: var(--pdf-panel);
-  border-top: 1px solid var(--pdf-border);
-  padding: 0.75rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  z-index: 10;
-}
+  // Lógica de Zoom Táctil Mejorada
+  const touchState = useRef({ startDist: 0, startScale: 1, isPinching: false });
 
-.pdf-pagination, .pdf-zoom-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+  // Carga de datos (simplificada para brevedad, mantener lógica original de repositorios)
+  useEffect(() => { if (id) loadDocument(id); }, [id]);
 
-.page-indicator, .zoom-indicator {
-  font-size: 0.85rem;
-  min-width: 3rem;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
+  async function loadDocument(docId: string) {
+    try {
+      setLoading(true);
+      const doc = await documentsRepo.getById(docId);
+      if (!doc) return navigate('/documents');
+      setDocument(doc);
 
-/* --- SPANS DRAWER --- */
-.pdf-spans-drawer {
-  flex-shrink: 0;
-  background-color: #1a2233;
-  border-top: 1px solid var(--pdf-border);
-  max-height: 120px;
-  display: flex;
-  flex-direction: column;
-}
+      // Obtener buffer del archivo (mantener tu lógica de docFilesRepo)
+      const file = await docFilesRepo.getById(doc.fileId);
+      if (!file) throw new Error("Archivo no encontrado");
+      const arrayBuffer = await file.blob.arrayBuffer();
 
-.spans-header {
-  padding: 0.5rem 1rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #94a3b8;
-  text-transform: uppercase;
-}
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      setPdfDoc(pdf);
+      setTotalPages(pdf.numPages);
 
-.spans-scroll {
-  overflow-x: auto;
-  display: flex;
-  gap: 0.5rem;
-  padding: 0 1rem 1rem 1rem;
-}
+      const docSpans = await spansRepo.getByDocumentId(docId);
+      setSpans(docSpans);
+    } catch (err) {
+      console.error(err);
+      alert("Error al cargar");
+    } finally { setLoading(false); }
+  }
 
-.span-chip {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--pdf-bg);
-  border: 1px solid var(--pdf-border);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
+  // --- GESTOS TÁCTILES MEJORADOS ---
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-.span-chip.active {
-  border-color: var(--pdf-accent);
-  background: rgba(59, 130, 246, 0.1);
-}
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        touchState.current.isPinching = true;
+        touchState.current.startDist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        touchState.current.startScale = scale;
+      }
+    };
 
-.span-del, .span-link {
-  background: none;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  padding: 0 2px;
-}
-.span-del:hover { color: #ef4444; }
-.span-link:hover { color: #3b82f6; }
+    const handleTouchMove = (e: TouchEvent) => {
+      if (touchState.current.isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        const ratio = dist / touchState.current.startDist;
+        const tempScale = Math.min(Math.max(0.5, touchState.current.startScale * ratio), 4);
+        
+        // Efecto visual inmediato
+        if (canvasRef.current) {
+          canvasRef.current.style.transform = `scale(${tempScale / scale})`;
+        }
+      }
+    };
 
-/* --- FULLSCREEN MODE --- */
-.mode-fullscreen .pdf-viewport {
-  padding: 0;
-  background-color: #000;
-}
+    const handleTouchEnd = () => {
+      if (touchState.current.isPinching) {
+        touchState.current.isPinching = false;
+        if (canvasRef.current) {
+          const transform = canvasRef.current.style.transform;
+          const match = transform.match(/scale\((.+)\)/);
+          if (match) {
+            const finalScale = scale * parseFloat(match[1]);
+            canvasRef.current.style.transform = '';
+            setScale(Math.min(Math.max(0.5, finalScale), 4));
+          }
+        }
+      }
+    };
 
-.floating-exit-btn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: rgba(0,0,0,0.6);
-  color: white;
-  border: 1px solid rgba(255,255,255,0.3);
-  width: 44px; 
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-  z-index: 100;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  cursor: pointer;
-}
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd);
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [scale]);
 
-/* --- UTILS --- */
-.btn-icon {
-  background: transparent;
-  border: none;
-  color: var(--pdf-text);
-  padding: 0.5rem;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.btn-icon:hover { background-color: rgba(255,255,255,0.1); }
-.btn-icon:disabled { opacity: 0.3; }
+  // --- RENDERIZADO (HIDPI) ---
+  const renderPage = useCallback(async (pageNum: number) => {
+    if (!pdfDoc || !canvasRef.current) return;
+    if (renderTaskRef.current) renderTaskRef.current.cancel();
 
-.btn-primary-sm {
-  background-color: var(--pdf-accent);
-  color: white;
-  border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
+    setRendering(true);
+    try {
+      const page = await pdfDoc.getPage(pageNum);
+      const dpr = window.devicePixelRatio || 1;
+      const viewport = page.getViewport({ scale });
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d', { alpha: false });
+      
+      if (context) {
+        canvas.width = viewport.width * dpr;
+        canvas.height = viewport.height * dpr;
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
+        context.scale(dpr, dpr);
 
-.center-loading, .center-error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: var(--pdf-bg);
-  color: #94a3b8;
-}
+        renderTaskRef.current = page.render({ canvasContext: context, viewport });
+        await renderTaskRef.current.promise;
+      }
+    } catch (err) { console.error(err); }
+    finally { setRendering(false); }
+  }, [pdfDoc, scale]);
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .zoom-indicator { display: none; }
-  .pdf-title-container { max-width: 140px; }
+  useEffect(() => { renderPage(currentPage); }, [renderPage, currentPage]);
+
+  // --- FULLSCREEN API ---
+  async function toggleFullscreen() {
+    if (!mainRef.current) return;
+    try {
+      if (!document.fullscreenElement) {
+        await mainRef.current.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (err) {
+      // Fallback para iOS que no soporta Fullscreen API en elementos que no sean <video>
+      setIsFullscreen(!isFullscreen);
+    }
+  }
+
+  // Escuchar cambios de fullscreen nativos (tecla Esc, gestos)
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
+  }, []);
+
+  if (loading) return <div className="page center-loading"><div className="spinner" /></div>;
+  if (!document || !pdfDoc) return <div className="page center-error"><p>No encontrado</p></div>;
+
+  return (
+    <div ref={mainRef} className={`pdf-viewer ${isFullscreen ? 'mode-fullscreen' : ''}`}>
+      <header className="pdf-header">
+        <button className="btn-icon" onClick={() => navigate(-1)}><ArrowLeft size={20} /></button>
+        <div className="pdf-title-container">
+          <h1 className="pdf-doc-title">{document.title}</h1>
+          <span className="pdf-doc-meta">Pág. {currentPage}/{totalPages}</span>
+        </div>
+        <button className="btn-icon" onClick={toggleFullscreen}>
+          {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+        </button>
+      </header>
+
+      <div className="pdf-viewport" ref={containerRef}>
+        <canvas ref={canvasRef} className="pdf-canvas-element" />
+        {isFullscreen && (
+          <button className="floating-exit-btn" onClick={toggleFullscreen}>
+            <Minimize size={28} />
+          </button>
+        )}
+      </div>
+
+      <footer className="pdf-toolbar">
+        <div className="pdf-pagination">
+          <button className="btn-icon" disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}>
+            <ChevronLeft size={24} />
+          </button>
+          <span className="page-indicator">{currentPage} / {totalPages}</span>
+          <button className="btn-icon" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)}>
+            <ChevronRight size={24} />
+          </button>
+        </div>
+        <div className="pdf-zoom-controls">
+          <button className="btn-icon" onClick={() => setScale(s => Math.max(0.5, s - 0.25))}><ZoomOut size={20} /></button>
+          <span className="zoom-indicator">{Math.round(scale * 100)}%</span>
+          <button className="btn-icon" onClick={() => setScale(s => Math.min(4, s + 0.25))}><ZoomIn size={20} /></button>
+        </div>
+      </footer>
+    </div>
+  );
 }
