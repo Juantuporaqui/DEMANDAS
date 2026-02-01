@@ -1,19 +1,26 @@
 // ============================================
-// CHALADITA CASE-OPS - HECHOS PAGE (FUSIÓN COMPLETA)
+// CHALADITA CASE-OPS - HECHOS PAGE (VERSIÓN MAESTRA INTEGRADA)
 // ============================================
 
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Scale, Clock, AlertTriangle, RefreshCw, Eye, List, Grid3X3 } from 'lucide-react';
+import { 
+  FileText, Scale, Clock, AlertTriangle, RefreshCw, List, Grid3X3 
+} from 'lucide-react';
 import { AnalyticsLayout } from '../layout/AnalyticsLayout';
 import { SectionCard } from '../components/SectionCard';
 import { HechoCard, HechoBadge } from '../components/HechoCard';
 import { HechoExpandible } from '../components/HechoExpandible';
-import { hechosReclamados, resumenContador, calcularTotales, type EstadoHecho } from '../../../data/hechosReclamados';
+import { 
+  hechosReclamados, 
+  resumenContador, 
+  calcularTotales, 
+  type EstadoHecho 
+} from '../../../data/hechosReclamados';
 
 type FilterKey = 'todos' | 'prescrito' | 'compensable' | 'disputa';
 
-const filters: { key: FilterKey; label: string; icon: typeof Clock }[] = [
+const filters: { key: FilterKey; label: string; icon: any }[] = [
   { key: 'todos', label: 'Todos', icon: FileText },
   { key: 'prescrito', label: 'Prescritos', icon: Clock },
   { key: 'compensable', label: 'Compensables', icon: Scale },
@@ -47,11 +54,11 @@ export function HechosPage() {
   return (
     <AnalyticsLayout
       title="Desglose de Hechos"
-      subtitle="10 partidas reclamadas con análisis detallado"
+      subtitle="Análisis estratégico y refutación de partidas"
       actions={
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Toggle Vista */}
-          <div className="flex rounded-lg border border-slate-700 overflow-hidden">
+          {/* Toggle de Vista: Detalle vs Grid */}
+          <div className="flex rounded-lg border border-slate-700 overflow-hidden bg-slate-900/50">
             <button
               type="button"
               onClick={() => setViewMode('expandible')}
@@ -60,10 +67,9 @@ export function HechosPage() {
                   ? 'bg-emerald-500/20 text-emerald-400'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
-              title="Vista detallada expandible"
             >
               <List size={14} />
-              <span className="hidden sm:inline">Detalle</span>
+              <span className="hidden sm:inline">Modo Lista</span>
             </button>
             <button
               type="button"
@@ -73,159 +79,117 @@ export function HechosPage() {
                   ? 'bg-emerald-500/20 text-emerald-400'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
-              title="Vista compacta en grid"
             >
               <Grid3X3 size={14} />
-              <span className="hidden sm:inline">Grid</span>
+              <span className="hidden sm:inline">Modo War Room</span>
             </button>
           </div>
 
-          {/* Botón Caché */}
           <button
             type="button"
             onClick={handleClearCache}
-            title="Limpiar caché y recargar"
-            className="p-2 rounded-lg border border-slate-700 text-slate-400 hover:text-amber-400 hover:border-amber-500/50 hover:bg-amber-500/10 transition-all"
+            className="p-2 rounded-lg border border-slate-700 text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 transition-all"
           >
             <RefreshCw size={16} />
           </button>
 
-          {/* Volver */}
           <button
             type="button"
             onClick={() => navigate('/analytics')}
-            className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:bg-white/5 transition"
+            className="rounded-full border border-white/10 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-200 hover:bg-white/5 transition"
           >
             ← Dashboard
           </button>
         </div>
       }
     >
-      {/* 1. KPIs principales - Optimizado para móvil */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-        <div className="rounded-xl sm:rounded-2xl border border-rose-500/20 bg-gradient-to-br from-rose-500/10 to-transparent p-3 sm:p-4">
-          <div className="text-[10px] sm:text-xs text-rose-300/70 uppercase tracking-wider mb-1">Total Reclamado</div>
-          <div className="text-lg sm:text-2xl font-bold text-rose-400">
-            {resumenContador.totalReclamado.toLocaleString('es-ES', { maximumFractionDigits: 0 })} €
+      {/* 1. Panel de Control de Riesgos (KPIs) */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4">
+          <div className="text-[10px] text-rose-300/70 uppercase font-bold tracking-widest mb-1">Total Demandado</div>
+          <div className="text-2xl font-black text-rose-400">
+            {resumenContador.totalReclamado.toLocaleString('es-ES')} €
           </div>
         </div>
-        <div className="rounded-xl sm:rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-transparent p-3 sm:p-4">
-          <div className="text-[10px] sm:text-xs text-emerald-300/70 uppercase tracking-wider mb-1">Prescrito (~)</div>
-          <div className="text-lg sm:text-2xl font-bold text-emerald-400">
-            {totales.prescrito.toLocaleString('es-ES', { maximumFractionDigits: 0 })} €
-          </div>
-          <div className="text-[9px] sm:text-[10px] text-slate-500 mt-1 hidden sm:block">Art. 1964.2 CC</div>
-        </div>
-        <div className="rounded-xl sm:rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-transparent p-3 sm:p-4">
-          <div className="text-[10px] sm:text-xs text-amber-300/70 uppercase tracking-wider mb-1">Riesgo Real</div>
-          <div className="text-lg sm:text-2xl font-bold text-amber-400">
-            {resumenContador.cifraRiesgoReal.toLocaleString('es-ES', { maximumFractionDigits: 0 })} €
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+          <div className="text-[10px] text-emerald-300/70 uppercase font-bold tracking-widest mb-1">Potencial Prescrito</div>
+          <div className="text-2xl font-black text-emerald-400">
+            {totales.prescrito.toLocaleString('es-ES')} €
           </div>
         </div>
-        <div className="rounded-xl sm:rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-transparent p-3 sm:p-4">
-          <div className="text-[10px] sm:text-xs text-cyan-300/70 uppercase tracking-wider mb-1">Reducción</div>
-          <div className="text-lg sm:text-2xl font-bold text-cyan-400">
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
+          <div className="text-[10px] text-amber-300/70 uppercase font-bold tracking-widest mb-1">Exposición Real</div>
+          <div className="text-2xl font-black text-amber-400">
+            {resumenContador.cifraRiesgoReal.toLocaleString('es-ES')} €
+          </div>
+        </div>
+        <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+          <div className="text-[10px] text-cyan-300/70 uppercase font-bold tracking-widest mb-1">% Éxito Objetivo</div>
+          <div className="text-2xl font-black text-cyan-400">
             {resumenContador.reduccionObjetivo}%
           </div>
         </div>
       </section>
 
-      {/* 2. Resumen con badges */}
-      <div className="flex flex-wrap items-center gap-2 p-4 rounded-xl border border-slate-800/50 bg-slate-900/30">
-        <span className="text-sm text-slate-400 mr-2">Clasificación:</span>
-        <HechoBadge count={countByEstado.prescrito} estado="prescrito" />
-        <HechoBadge count={countByEstado.compensable} estado="compensable" />
-        <HechoBadge count={countByEstado.disputa} estado="disputa" />
-      </div>
-
-      {/* 3. Filtros tipo app Android - Optimizado móvil */}
-      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0 mt-3 sm:mt-4">
+      {/* 2. Filtros de Estado */}
+      <div className="flex gap-2 overflow-x-auto pb-2 mt-4 no-scrollbar">
         {filters.map((filter) => {
           const Icon = filter.icon;
           const isActive = activeFilter === filter.key;
           return (
             <button
               key={filter.key}
-              type="button"
               onClick={() => setActiveFilter(filter.key)}
               className={`
-                flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap
-                transition-all duration-200 shrink-0
-                ${isActive
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                  : 'bg-slate-800/50 text-slate-400 border border-slate-700/50 hover:bg-slate-800 hover:text-slate-300'
-                }
+                flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all
+                ${isActive 
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/10' 
+                  : 'bg-slate-800/40 text-slate-500 border border-slate-700 hover:text-slate-300'}
               `}
             >
-              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">{filter.label}</span>
-              <span className="sm:hidden">{filter.key === 'todos' ? 'Todo' : filter.key === 'prescrito' ? 'Presc.' : filter.key === 'compensable' ? 'Comp.' : 'Disp.'}</span>
+              <Icon size={14} />
+              {filter.label}
               {filter.key !== 'todos' && (
-                <span className={`text-[10px] sm:text-xs ${isActive ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  ({countByEstado[filter.key as EstadoHecho] || 0})
-                </span>
+                <span className="opacity-50">({countByEstado[filter.key as EstadoHecho]})</span>
               )}
             </button>
           );
         })}
       </div>
 
-      {/* 5. Lista de hechos - VISTA EXPANDIBLE o COMPACTA */}
+      {/* 3. Listado Dinámico de Hechos */}
       <SectionCard
-        title={`${filteredHechos.length} hechos encontrados`}
-        subtitle={viewMode === 'expandible' ? "Toca para expandir y ver análisis completo" : "Toca para navegar al detalle"}
+        title={`${filteredHechos.length} Hechos en Análisis`}
+        subtitle="Visualización de contranarrativa y defensa legal"
       >
-        {viewMode === 'expandible' ? (
-          /* VISTA EXPANDIBLE - Toda la información en acordeón */
-          <div className="space-y-3">
-            {filteredHechos.map((hecho) => (
+        <div className={viewMode === 'compact' ? "grid gap-4 sm:grid-cols-1" : "space-y-3"}>
+          {filteredHechos.map((hecho) => (
+            viewMode === 'expandible' ? (
               <HechoExpandible key={hecho.id} hecho={hecho} />
-            ))}
-          </div>
-        ) : (
-          /* VISTA COMPACTA - Grid de tarjetas */
-          <div className="grid gap-3 sm:grid-cols-2">
-            {filteredHechos.map((hecho) => (
+            ) : (
               <HechoCard key={hecho.id} hecho={hecho} />
-            ))}
-          </div>
-        )}
+            )
+          ))}
+        </div>
       </SectionCard>
 
-      {/* 6. Acciones rápidas - Optimizado móvil */}
-      <div className="grid grid-cols-4 gap-2 sm:gap-3 mt-4 sm:mt-6">
-        <button
-          type="button"
-          onClick={() => navigate('/analytics/prescripcion')}
-          className="flex flex-col items-center gap-1.5 sm:gap-2 p-2.5 sm:p-4 rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 hover:border-emerald-500/30 transition-all"
-        >
-          <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
-          <span className="text-[10px] sm:text-xs font-medium text-slate-300">Prescr.</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate('/analytics/audiencia')}
-          className="flex flex-col items-center gap-1.5 sm:gap-2 p-2.5 sm:p-4 rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 hover:border-amber-500/30 transition-all"
-        >
-          <Scale className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
-          <span className="text-[10px] sm:text-xs font-medium text-slate-300">Audiencia</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate('/partidas')}
-          className="flex flex-col items-center gap-1.5 sm:gap-2 p-2.5 sm:p-4 rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 hover:border-cyan-500/30 transition-all"
-        >
-          <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
-          <span className="text-[10px] sm:text-xs font-medium text-slate-300">Partidas</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate('/warroom')}
-          className="flex flex-col items-center gap-1.5 sm:gap-2 p-2.5 sm:p-4 rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 hover:border-rose-500/30 transition-all"
-        >
-          <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-rose-400" />
-          <span className="text-[10px] sm:text-xs font-medium text-slate-300">War Room</span>
-        </button>
+      {/* 4. Accesos Rápidos Estratégicos */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+        {[
+          { label: 'Prescripción', icon: Clock, path: '/analytics/prescripcion', color: 'text-emerald-400' },
+          { label: 'Audiencia', icon: Scale, path: '/analytics/audiencia', color: 'text-amber-400' },
+          { label: 'Partidas', icon: FileText, path: '/partidas', color: 'text-cyan-400' },
+          { label: 'War Room', icon: AlertTriangle, path: '/warroom', color: 'text-rose-400' }
+        ].map((btn) => (
+          <button
+            key={btn.label}
+            onClick={() => navigate(btn.path)}
+            className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-slate-700/50 bg-slate-800/20 hover:bg-slate-800/50 hover:border-slate-500 transition-all group"
+          >
+            <btn.icon className={`w-6 h-6 ${btn.color} group-hover:scale-110 transition-transform`} />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{btn.label}</span>
+          </button>
+        ))}
       </div>
     </AnalyticsLayout>
   );
