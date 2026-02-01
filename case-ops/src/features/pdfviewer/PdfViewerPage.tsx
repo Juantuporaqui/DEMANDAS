@@ -1,10 +1,6 @@
-// ============================================
-// CASE OPS - PDF Viewer Optimizado Mobile & Touch
-// ============================================
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Maximize, Minimize } from 'lucide-react';
+import { Maximize, Minimize, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Modal } from '../../components';
 import {
   documentsRepo,
@@ -18,7 +14,7 @@ import type { Document, DocFile, Span, Fact, Partida } from '../../types';
 import * as pdfjsLib from 'pdfjs-dist';
 import './PdfViewer.css';
 
-// Configuración del Worker para procesar el PDF en segundo plano
+// Configuración del Worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
   import.meta.url
@@ -29,14 +25,13 @@ export function PdfViewerPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
-  // Referencias DOM y de control
+  // Referencias al DOM
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const renderTaskRef = useRef<any>(null);
 
-  // Estado del Documento
+  // Estado de Datos
   const [document, setDocument] = useState<Document | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [docFile, setDocFile] = useState<DocFile | null>(null);
   const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
   
@@ -48,14 +43,14 @@ export function PdfViewerPage() {
   const [rendering, setRendering] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Estado para Gestos Táctiles (Pinch Zoom)
+  // Estado de Gestos Táctiles (Mutable para rendimiento)
   const touchState = useRef({
-    initialDistance: 0,
-    initialScale: 1,
+    startDist: 0,
+    startScale: 1,
     isPinching: false,
   });
 
-  // Estado de Spans (Anotaciones)
+  // Estado de Spans y Links (Negocio)
   const [spans, setSpans] = useState<Span[]>([]);
   const [showSpanModal, setShowSpanModal] = useState(false);
   const [spanForm, setSpanForm] = useState({
@@ -66,7 +61,6 @@ export function PdfViewerPage() {
     tags: '',
   });
 
-  // Estado de Enlaces (Links)
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [selectedSpan, setSelectedSpan] = useState<Span | null>(null);
   const [linkType, setLinkType] = useState<'fact' | 'partida'>('fact');
@@ -74,15 +68,15 @@ export function PdfViewerPage() {
   const [partidas, setPartidas] = useState<Partida[]>([]);
   const [selectedLinkTarget, setSelectedLinkTarget] = useState('');
 
-  // 1. Carga Inicial del Documento
+  // ------------------------------------------------------------------
+  // 1. CARGA DE DATOS
+  // ------------------------------------------------------------------
   useEffect(() => {
     if (id) {
       loadDocument(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Sincronización de página por URL
   useEffect(() => {
     const initialPage = parseInt(searchParams.get('page') || '1', 10);
     if (totalPages > 0 && initialPage > 0 && initialPage <= totalPages) {
@@ -90,154 +84,6 @@ export function PdfViewerPage() {
     }
   }, [searchParams, totalPages]);
 
-  // 2. Lógica de Gestos Táctiles (Pinch to Zoom)
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        // Solo prevenimos el comportamiento por defecto si hay 2 dedos (zoom)
-        // Esto permite que el scroll con 1 dedo funcione nativamente (pan-x pan-y en CSS)
-        e.preventDefault();
-        const dist = Math.hypot(
-          e.touches[0].pageX - e.touches[1].pageX,
-          e.touches[0].pageY - e.touches[1].pageY
-        );
-        touchState.current.isPinching = true;
-        touchState.current.initialDistance = dist;
-        touchState.current.initialScale = scale;
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (touchState.current.isPinching && e.touches.length === 2 && canvasRef.current) {
-        e.preventDefault();
-        const dist = Math.hypot(
-          e.touches[0].pageX - e.touches[1].pageX,
-          e.touches[0].pageY - e.touches[1].pageY
-        );
-        
-        // Calcular nueva escala temporal basada en la distancia
-        const ratio = dist / touchState.current.initialDistance;
-        const newTempScale = Math.min(Math.max(0.5, touchState.current.initialScale * ratio), 5.0);
-        
-        // Aplicar transformación visual CSS (Rendimiento 60fps)
-        // Calculamos la escala relativa al renderizado actual del canvas
-        const cssScale = newTempScale / scale;
-        canvasRef.current.style.transform = `scale(${cssScale})`;
-        // El origen 'center top' suele dar mejor sensación al hacer zoom y scroll a la vez
-        canvasRef.current.style.transformOrigin = 'center top'; 
-      }
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (touchState.current.isPinching && e.touches.length < 2) {
-        touchState.current.isPinching = false;
-        
-        if (canvasRef.current) {
-          // Leer la escala final de la transformación CSS
-          const transform = canvasRef.current.style.transform;
-          const match = transform.match(/scale\((.+)\)/);
-          
-          if (match) {
-            const cssScaleRatio = parseFloat(match[1]);
-            const finalScale = Math.min(Math.max(0.5, scale * cssScaleRatio), 5.0);
-            
-            // Limpiar estilos temporales del canvas
-            canvasRef.current.style.transform = '';
-            canvasRef.current.style.transformOrigin = '';
-            
-            // Disparar renderizado real con la nueva escala (Calidad nítida)
-            setScale(finalScale);
-          }
-        }
-      }
-    };
-
-    // { passive: false } es necesario para poder llamar a preventDefault()
-    container.addEventListener('touchstart', handleTouchStart, { passive: false });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [scale]);
-
-  // 3. Renderizado del PDF (Page Rendering)
-  const renderPage = useCallback(
-    async (pageNum: number) => {
-      if (!pdfDoc || !canvasRef.current) return;
-
-      // Cancelar tarea anterior si existe (Mejora la agilidad al cambiar rápido)
-      if (renderTaskRef.current) {
-        try {
-          renderTaskRef.current.cancel();
-        } catch (err) {
-          // Ignoramos error de cancelación
-        }
-      }
-
-      setRendering(true);
-
-      try {
-        const page = await pdfDoc.getPage(pageNum);
-        
-        // Soporte HiDPI (Retina Display) para texto nítido en móviles
-        const outputScale = window.devicePixelRatio || 1;
-        const viewport = page.getViewport({ scale: scale });
-
-        const canvas = canvasRef.current;
-        const context = canvas.getContext('2d', { alpha: false });
-        
-        if (!context) return;
-
-        // Dimensiones físicas del buffer (multiplicadas por densidad de píxeles)
-        canvas.width = Math.floor(viewport.width * outputScale);
-        canvas.height = Math.floor(viewport.height * outputScale);
-        
-        // Dimensiones visuales CSS (tamaño en pantalla)
-        canvas.style.width = `${Math.floor(viewport.width)}px`;
-        canvas.style.height = `${Math.floor(viewport.height)}px`;
-
-        // Matriz de transformación para corregir el escalado HiDPI
-        const transform = outputScale !== 1 
-          ? [outputScale, 0, 0, outputScale, 0, 0] 
-          : null;
-
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport,
-          transform: transform as any,
-        };
-
-        // Guardamos referencia a la tarea para poder cancelarla
-        renderTaskRef.current = page.render(renderContext);
-
-        await renderTaskRef.current.promise;
-      } catch (error: any) {
-        if (error.name !== 'RenderingCancelledException') {
-          console.error('Error rendering page:', error);
-        }
-      } finally {
-        setRendering(false);
-        renderTaskRef.current = null;
-      }
-    },
-    [pdfDoc, scale]
-  );
-
-  // Efecto que dispara el renderizado cuando cambia página o doc
-  useEffect(() => {
-    if (pdfDoc && currentPage > 0) {
-      renderPage(currentPage);
-    }
-  }, [pdfDoc, currentPage, renderPage]);
-
-  // 4. Carga de datos
   async function loadDocument(docId: string) {
     try {
       setLoading(true);
@@ -249,7 +95,7 @@ export function PdfViewerPage() {
 
       setDocument(doc);
 
-      // Obtener el ArrayBuffer del archivo
+      // Carga del Buffer
       let arrayBuffer: ArrayBuffer;
 
       if (doc.filePath) {
@@ -257,18 +103,23 @@ export function PdfViewerPage() {
           const url = new URL(doc.filePath, import.meta.url).href;
           const response = await fetch(url);
           if (!response.ok) {
-            alert(`Documento no encontrado en: ${doc.filePath}`);
-            navigate(`/documents/${docId}`);
-            return;
+            throw new Error('Network response was not ok');
           }
           arrayBuffer = await response.arrayBuffer();
         } catch (e) {
-          alert(`Error cargando documento: ${doc.filePath}`);
-          navigate(`/documents/${docId}`);
-          return;
+          console.error(e);
+          // Fallback o manejo de error
+          const file = await docFilesRepo.getById(doc.fileId);
+          if (file) {
+             setDocFile(file);
+             arrayBuffer = await file.blob.arrayBuffer();
+          } else {
+             alert(`Error cargando documento: ${doc.filePath}`);
+             navigate(`/documents/${docId}`);
+             return;
+          }
         }
       } else {
-        // Fallback: cargar desde DB (Blob)
         const file = await docFilesRepo.getById(doc.fileId);
         if (!file) {
           alert('Archivo PDF no encontrado');
@@ -279,11 +130,11 @@ export function PdfViewerPage() {
         arrayBuffer = await file.blob.arrayBuffer();
       }
 
-      // Cargar Spans existentes
+      // Cargar Spans
       const docSpans = await spansRepo.getByDocumentId(docId);
       setSpans(docSpans);
 
-      // Iniciar carga de PDFjs
+      // Cargar PDF con options
       const loadingTask = pdfjsLib.getDocument({ 
         data: arrayBuffer,
         cMapUrl: 'https://unpkg.com/pdfjs-dist@5.4.530/cmaps/',
@@ -294,7 +145,7 @@ export function PdfViewerPage() {
       setPdfDoc(pdf);
       setTotalPages(pdf.numPages);
 
-      // Cargar datos para enlaces (Hechos y Partidas)
+      // Cargar hechos/partidas para enlaces
       if (doc.caseId) {
         const [caseFacts, casePartidas] = await Promise.all([
           factsRepo.getByCaseId(doc.caseId),
@@ -311,14 +162,161 @@ export function PdfViewerPage() {
     }
   }
 
-  // Navegación
+  // ------------------------------------------------------------------
+  // 2. GESTIÓN DE GESTOS TÁCTILES (FIXED PINCH ZOOM)
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        // Prevenir zoom nativo del navegador para controlar nosotros el canvas
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        touchState.current.isPinching = true;
+        touchState.current.startDist = dist;
+        touchState.current.startScale = scale;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (touchState.current.isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        
+        const ratio = dist / touchState.current.startDist;
+        // Limitamos el zoom visual temporal (0.5x a 5.0x)
+        const newTempScale = Math.min(Math.max(0.5, touchState.current.startScale * ratio), 5.0);
+        
+        // Aplicamos transformación CSS al canvas para feedback inmediato (60fps)
+        if (canvasRef.current) {
+          const cssScale = newTempScale / scale;
+          canvasRef.current.style.transform = `scale(${cssScale})`;
+          // 'center top' suele funcionar mejor para la experiencia de usuario en listas largas
+          canvasRef.current.style.transformOrigin = 'center top';
+        }
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (touchState.current.isPinching && e.touches.length < 2) {
+        touchState.current.isPinching = false;
+        
+        if (canvasRef.current) {
+          // Leer la escala final aplicada via CSS
+          const transform = canvasRef.current.style.transform;
+          const match = transform.match(/scale\((.+)\)/);
+          
+          if (match) {
+            const cssRatio = parseFloat(match[1]);
+            const finalScale = Math.min(Math.max(0.5, scale * cssRatio), 5.0);
+            
+            // Limpiar estilos temporales
+            canvasRef.current.style.transform = '';
+            canvasRef.current.style.transformOrigin = '';
+            
+            // Disparar renderizado real con la nueva escala para nitidez
+            setScale(finalScale);
+          }
+        }
+      }
+    };
+
+    // Añadir listeners con { passive: false } es CRÍTICO para que preventDefault funcione
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [scale]); 
+
+  // ------------------------------------------------------------------
+  // 3. RENDERIZADO DEL PDF
+  // ------------------------------------------------------------------
+  const renderPage = useCallback(
+    async (pageNum: number) => {
+      if (!pdfDoc || !canvasRef.current) return;
+
+      // Cancelar renderizado previo si existe
+      if (renderTaskRef.current) {
+        try {
+          renderTaskRef.current.cancel();
+        } catch (err) {
+          // Ignorar error de cancelación
+        }
+      }
+
+      setRendering(true);
+
+      try {
+        const page = await pdfDoc.getPage(pageNum);
+        
+        // Usar devicePixelRatio para pantallas retina/móviles
+        const outputScale = window.devicePixelRatio || 1;
+        const viewport = page.getViewport({ scale: scale });
+
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d', { alpha: false });
+        
+        if (!context) return;
+
+        // Dimensiones físicas (Buffer)
+        canvas.width = Math.floor(viewport.width * outputScale);
+        canvas.height = Math.floor(viewport.height * outputScale);
+        
+        // Dimensiones visuales (CSS)
+        canvas.style.width = `${Math.floor(viewport.width)}px`;
+        canvas.style.height = `${Math.floor(viewport.height)}px`;
+
+        const transform = outputScale !== 1 
+          ? [outputScale, 0, 0, outputScale, 0, 0] 
+          : null;
+
+        renderTaskRef.current = page.render({
+          canvasContext: context,
+          viewport: viewport,
+          transform: transform as any,
+        });
+
+        await renderTaskRef.current.promise;
+      } catch (error: any) {
+        if (error.name !== 'RenderingCancelledException') {
+          console.error('Error rendering page:', error);
+        }
+      } finally {
+        setRendering(false);
+        renderTaskRef.current = null;
+      }
+    },
+    [pdfDoc, scale]
+  );
+
+  useEffect(() => {
+    if (pdfDoc && currentPage > 0) {
+      renderPage(currentPage);
+    }
+  }, [pdfDoc, currentPage, renderPage]);
+
+  // ------------------------------------------------------------------
+  // 4. LÓGICA DE NEGOCIO (SPANS, LINKS, UI)
+  // ------------------------------------------------------------------
+
   function goToPage(page: number) {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   }
-
-  // --- Funciones de Gestión de Spans y Links ---
 
   function handleCreateSpan() {
     setSpanForm({
@@ -345,10 +343,7 @@ export function PdfViewerPage() {
         pageEnd: spanForm.pageEnd,
         label: spanForm.label.trim(),
         note: spanForm.note.trim(),
-        tags: spanForm.tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean),
+        tags: spanForm.tags.split(',').map((t) => t.trim()).filter(Boolean),
       });
 
       setSpans([...spans, span]);
@@ -404,21 +399,12 @@ export function PdfViewerPage() {
 
   function toggleFullscreen() {
     setIsFullscreen(!isFullscreen);
-    // Intentar activar pantalla completa nativa del navegador si es posible
-    if (!isFullscreen && containerRef.current?.requestFullscreen) {
-      containerRef.current.requestFullscreen().catch(() => {});
-    } else if (document.exitFullscreen) {
-      // @ts-ignore - document.exitFullscreen puede no existir en TS estricto a veces
-      document.exitFullscreen().catch(() => {});
-    }
   }
 
-  // Renderizados de Carga y Error
   if (loading) {
     return (
       <div className="page center-loading">
         <div className="spinner" />
-        <span style={{ marginLeft: '1rem' }}>Cargando documento...</span>
       </div>
     );
   }
@@ -432,162 +418,121 @@ export function PdfViewerPage() {
   }
 
   return (
-    <div className={`pdf-viewer ${isFullscreen ? 'pdf-fullscreen-mode' : ''}`}>
-      {/* Header - Oculto en modo inmersivo */}
+    <div className={`pdf-viewer ${isFullscreen ? 'mode-fullscreen' : ''}`}>
+      
+      {/* HEADER (Visible si no es fullscreen) */}
       {!isFullscreen && (
-        <div className="pdf-header">
-          <button className="btn btn-ghost btn-icon" onClick={() => navigate(-1)}>
-            ←
+        <header className="pdf-header">
+          <button className="btn-icon" onClick={() => navigate(-1)}>
+            <ArrowLeft size={20} />
           </button>
-          <div className="pdf-title">
-            <span className="truncate">{document.title}</span>
-            <span className="text-muted" style={{ fontSize: '0.75rem' }}>
-              {document.id}
-            </span>
+          <div className="pdf-title-container">
+            <h1 className="pdf-doc-title">{document.title}</h1>
+            <span className="pdf-doc-meta">Página {currentPage} de {totalPages}</span>
           </div>
-          <div className="flex gap-2">
-            <button 
-              className="btn btn-ghost btn-icon" 
-              onClick={toggleFullscreen}
-              title="Pantalla completa"
-            >
-              <Maximize size={18} />
+          <div className="pdf-header-actions">
+            <button className="btn-icon" onClick={toggleFullscreen} title="Pantalla completa">
+              <Maximize size={20} />
             </button>
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={handleCreateSpan}
-            >
+            <button className="btn-primary-sm" onClick={handleCreateSpan}>
               + Span
             </button>
           </div>
-        </div>
+        </header>
       )}
 
-      {/* Canvas Container - Maneja Scroll y Gestos */}
-      <div 
-        className="pdf-canvas-container" 
-        ref={containerRef}
-      >
+      {/* VIEWPORT (Área de Canvas con Scroll) */}
+      <div className="pdf-viewport" ref={containerRef}>
         {rendering && (
-          <div className="pdf-loading">
+          <div className="pdf-loader">
             <div className="spinner" />
           </div>
         )}
         
-        {/* Botón flotante para salir de Fullscreen */}
+        {/* Botón flotante para salir de fullscreen */}
         {isFullscreen && (
-          <button 
-            className="pdf-floating-exit-btn"
-            onClick={toggleFullscreen}
-          >
-            <Minimize size={20} />
+          <button className="floating-exit-btn" onClick={toggleFullscreen}>
+            <Minimize size={24} />
           </button>
         )}
-
-        <canvas ref={canvasRef} className="pdf-canvas" />
+        
+        <canvas ref={canvasRef} className="pdf-canvas-element" />
       </div>
 
-      {/* Navigation - Oculto en modo inmersivo */}
+      {/* FOOTER TOOLBAR (Visible si no es fullscreen) */}
       {!isFullscreen && (
-        <div className="pdf-nav">
-          <button
-            className="btn btn-secondary btn-icon"
-            onClick={() => goToPage(currentPage - 1)}
-            disabled={currentPage <= 1}
-          >
-            ‹
-          </button>
-
-          <div className="pdf-page-info">
-            <input
-              type="number"
-              className="pdf-page-input"
-              value={currentPage}
-              onChange={(e) => goToPage(parseInt(e.target.value, 10))}
-              min={1}
-              max={totalPages}
-            />
-            <span>/ {totalPages}</span>
-          </div>
-
-          <button
-            className="btn btn-secondary btn-icon"
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage >= totalPages}
-          >
-            ›
-          </button>
-
-          <div className="pdf-zoom">
-            <button
-              className="btn btn-ghost btn-icon-sm"
-              onClick={() => setScale(Math.max(0.5, scale - 0.25))}
+        <footer className="pdf-toolbar">
+          <div className="pdf-pagination">
+            <button 
+              className="btn-icon" 
+              disabled={currentPage <= 1} 
+              onClick={() => goToPage(currentPage - 1)}
             >
-              −
+              <ChevronLeft size={24} />
             </button>
-            <span>{Math.round(scale * 100)}%</span>
-            <button
-              className="btn btn-ghost btn-icon-sm"
-              onClick={() => setScale(Math.min(5, scale + 0.25))}
+            <span className="page-indicator">{currentPage} / {totalPages}</span>
+            <button 
+              className="btn-icon" 
+              disabled={currentPage >= totalPages} 
+              onClick={() => goToPage(currentPage + 1)}
             >
-              +
+              <ChevronRight size={24} />
             </button>
           </div>
-        </div>
+          
+          <div className="pdf-zoom-controls">
+            <button className="btn-icon" onClick={() => setScale(s => Math.max(0.5, s - 0.25))}>
+              <ZoomOut size={20} />
+            </button>
+            <span className="zoom-indicator">{Math.round(scale * 100)}%</span>
+            <button className="btn-icon" onClick={() => setScale(s => Math.min(5, s + 0.25))}>
+              <ZoomIn size={20} />
+            </button>
+          </div>
+        </footer>
       )}
 
-      {/* Spans Panel - Oculto en modo inmersivo */}
-      {!isFullscreen && (
-        <div className="pdf-spans">
-          <h3 className="section-title">Spans ({spans.length})</h3>
-          {spans.length === 0 ? (
-            <p className="text-muted" style={{ fontSize: '0.875rem' }}>
-              No hay spans. Pulsa "+ Span" para crear uno.
-            </p>
-          ) : (
-            <div className="spans-list">
-              {spans.map((span) => (
-                <div
-                  key={span.id}
-                  className={`span-item ${
-                    currentPage >= span.pageStart && currentPage <= span.pageEnd
-                      ? 'span-item-active'
-                      : ''
-                  }`}
+      {/* SPANS DRAWER (Visible si no es fullscreen y hay spans) */}
+      {!isFullscreen && spans.length > 0 && (
+        <div className="pdf-spans-drawer">
+          <div className="spans-header">Marcadores ({spans.length})</div>
+          <div className="spans-scroll">
+            {spans.map((span) => (
+              <div
+                key={span.id}
+                className={`span-chip ${
+                  currentPage >= span.pageStart && currentPage <= span.pageEnd
+                    ? 'active'
+                    : ''
+                }`}
+                onClick={() => goToPage(span.pageStart)}
+              >
+                <span className="span-label">{span.label}</span>
+                <button
+                  className="span-del"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteSpan(span);
+                  }}
                 >
-                  <div
-                    className="span-item-content"
-                    onClick={() => goToPage(span.pageStart)}
-                  >
-                    <div className="span-item-label">{span.label}</div>
-                    <div className="span-item-pages">
-                      {span.id} · Págs. {span.pageStart}-{span.pageEnd}
-                    </div>
-                  </div>
-                  <div className="span-item-actions">
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => handleLinkSpan(span)}
-                      title="Enlazar a hecho/partida"
-                    >
-                      🔗
-                    </button>
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => handleDeleteSpan(span)}
-                      title="Eliminar"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                  ×
+                </button>
+                <button
+                  className="span-link"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLinkSpan(span);
+                  }}
+                >
+                  🔗
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Create Span Modal */}
+      {/* MODALES */}
       <Modal
         isOpen={showSpanModal}
         onClose={() => setShowSpanModal(false)}
@@ -615,14 +560,14 @@ export function PdfViewerPage() {
             onChange={(e) =>
               setSpanForm((prev) => ({ ...prev, label: e.target.value }))
             }
-            placeholder="Ej: Firma del contrato, Cláusula 5..."
+            placeholder="Ej: Firma del contrato"
             autoFocus
           />
         </div>
 
-        <div className="grid grid-2">
+        <div className="grid grid-cols-2 gap-4">
           <div className="form-group">
-            <label className="form-label">Página inicio</label>
+            <label className="form-label">Pág. Inicio</label>
             <input
               type="number"
               className="form-input"
@@ -633,12 +578,10 @@ export function PdfViewerPage() {
                   pageStart: parseInt(e.target.value, 10) || 1,
                 }))
               }
-              min={1}
-              max={totalPages}
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Página fin</label>
+            <label className="form-label">Pág. Fin</label>
             <input
               type="number"
               className="form-input"
@@ -649,44 +592,15 @@ export function PdfViewerPage() {
                   pageEnd: parseInt(e.target.value, 10) || 1,
                 }))
               }
-              min={spanForm.pageStart}
-              max={totalPages}
             />
           </div>
         </div>
-
-        <div className="form-group">
-          <label className="form-label">Nota</label>
-          <textarea
-            className="form-textarea"
-            value={spanForm.note}
-            onChange={(e) =>
-              setSpanForm((prev) => ({ ...prev, note: e.target.value }))
-            }
-            placeholder="Descripción o contexto..."
-            rows={3}
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Tags</label>
-          <input
-            type="text"
-            className="form-input"
-            value={spanForm.tags}
-            onChange={(e) =>
-              setSpanForm((prev) => ({ ...prev, tags: e.target.value }))
-            }
-            placeholder="Separados por comas"
-          />
-        </div>
       </Modal>
 
-      {/* Link Modal */}
       <Modal
         isOpen={showLinkModal}
         onClose={() => setShowLinkModal(false)}
-        title={`Enlazar span: ${selectedSpan?.label}`}
+        title="Enlazar Span"
         footer={
           <>
             <button
@@ -702,35 +616,27 @@ export function PdfViewerPage() {
         }
       >
         <div className="form-group">
-          <label className="form-label">Enlazar a</label>
-          <div className="flex gap-sm mb-md">
+          <label className="form-label">Tipo</label>
+          <div className="flex gap-2 mb-4">
             <button
-              className={`btn ${linkType === 'fact' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => {
-                setLinkType('fact');
-                setSelectedLinkTarget('');
-              }}
+              className={`btn flex-1 ${linkType === 'fact' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setLinkType('fact')}
             >
-              📋 Hecho
+              Hecho
             </button>
             <button
-              className={`btn ${linkType === 'partida' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => {
-                setLinkType('partida');
-                setSelectedLinkTarget('');
-              }}
+              className={`btn flex-1 ${linkType === 'partida' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setLinkType('partida')}
             >
-              💰 Partida
+              Partida
             </button>
           </div>
         </div>
 
         <div className="form-group">
-          <label className="form-label">
-            Seleccionar {linkType === 'fact' ? 'hecho' : 'partida'}
-          </label>
+          <label className="form-label">Seleccionar destino</label>
           <select
-            className="form-select"
+            className="form-select w-full"
             value={selectedLinkTarget}
             onChange={(e) => setSelectedLinkTarget(e.target.value)}
           >
@@ -738,12 +644,12 @@ export function PdfViewerPage() {
             {linkType === 'fact'
               ? facts.map((f) => (
                   <option key={f.id} value={f.id}>
-                    {f.id} - {f.title}
+                    {f.title}
                   </option>
                 ))
               : partidas.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.id} - {p.concept}
+                    {p.concept}
                   </option>
                 ))}
           </select>
