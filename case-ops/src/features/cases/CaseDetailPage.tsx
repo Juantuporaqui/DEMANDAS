@@ -62,6 +62,9 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
                   caseData.title?.toLowerCase().includes('quart') ||
                   caseData.autosNumber?.includes('1428');
 
+  const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
+  const showAnalytic = !isPicassent && !isMislata && !isQuart;
+
   // Calcular días hasta vista/audiencia
   const vistaEvent = events.find((e: Event) =>
     e.title?.toLowerCase().includes('vista') ||
@@ -82,6 +85,9 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
       <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-slate-900/60 p-4 sm:p-5">
         <h2 className="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-4 flex items-center gap-2">
           <Eye size={16} /> Resumen ejecutivo
+          <span className="text-[10px] font-bold tracking-widest bg-slate-800/60 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
+            {caseLabel}
+          </span>
         </h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           {/* Parte contraria */}
@@ -138,14 +144,14 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Sumatorio Analítico */}
-          {!isPicassent && (
+          {showAnalytic && (
             <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
               <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Sumatorio analítico (partidas)</div>
               <div className="text-lg font-bold text-emerald-400">{formatCurrency(amounts.analytic)}</div>
             </div>
           )}
           {/* Delta */}
-          {!isPicassent && amounts.delta !== 0 && (
+          {showAnalytic && amounts.delta !== 0 && (
             <div className="bg-amber-900/30 rounded-lg p-3 border border-amber-500/50">
               <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Delta pendiente de justificar</div>
               <div className="text-lg font-bold text-amber-400">{formatCurrency(Math.abs(amounts.delta))}</div>
@@ -290,7 +296,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             {formatCurrency(amounts.totalDemand)}
           </div>
           <div className="text-[10px] text-slate-600">{partidas.length} partidas</div>
-          {!isPicassent && amounts.delta !== 0 && (
+          {showAnalytic && amounts.delta !== 0 && (
             <div className="text-[10px] text-amber-400 mt-1">Delta pendiente de justificar</div>
           )}
         </div>
@@ -322,6 +328,9 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
                 <p className="text-[10px] text-slate-500">{facts.length} puntos registrados</p>
               </div>
             </div>
+            <span className="text-[10px] font-bold tracking-widest bg-slate-800/60 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
+              {caseLabel}
+            </span>
           </div>
 
           <div className="space-y-2 mb-4">
@@ -497,6 +506,8 @@ function TabDocs({ documents, caseId, caseData }: any) {
   const isQuart = caseData.title?.toLowerCase().includes('quart') ||
                   caseData.autosNumber?.includes('1428');
 
+  const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
+
   // Obtener PDFs del caso actual
   const casoKeyPDF = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
   const pdfDocuments = casoKeyPDF ? getPDFsByCaso(casoKeyPDF) : [];
@@ -643,7 +654,12 @@ function TabDocs({ documents, caseId, caseData }: any) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-bold text-white">Documentos</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold text-white">Documentos</h3>
+            <span className="text-[10px] font-bold tracking-widest bg-slate-800/60 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
+              {caseLabel}
+            </span>
+          </div>
           <p className="text-xs text-slate-500">Selecciona un documento para abrir el visor</p>
         </div>
         <Link
@@ -755,6 +771,12 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
                       caseData?.title?.toLowerCase().includes('picassent') ||
                       caseData?.autosNumber?.includes('715');
 
+  const isMislata = caseId?.includes('mislata') ||
+                    caseData?.title?.toLowerCase().includes('mislata') ||
+                    caseData?.autosNumber?.includes('1185');
+
+  const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
+
   // Para Quart, mostrar análisis financiero dedicado
   if (isQuart) {
     return <QuartFinancialAnalysis />;
@@ -773,10 +795,16 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
 
   return (
     <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="flex justify-end mb-2">
-         <Link to={`/facts/new?caseId=${caseId}`} className="text-xs bg-emerald-600/80 text-emerald-100 px-3 py-1.5 rounded hover:bg-emerald-500 transition-colors flex items-center gap-2">
-            <span>+</span> Nuevo Hecho / Partida
-         </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-bold text-white">Hechos y Partidas</h3>
+          <span className="text-[10px] font-bold tracking-widest bg-slate-800/60 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
+            {caseLabel}
+          </span>
+        </div>
+        <Link to={`/facts/new?caseId=${caseId}`} className="text-xs bg-emerald-600/80 text-emerald-100 px-3 py-1.5 rounded hover:bg-emerald-500 transition-colors flex items-center gap-2">
+          <span>+</span> Nuevo Hecho / Partida
+        </Link>
       </div>
 
       {facts.length === 0 && (
@@ -842,10 +870,23 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
 }
 
 function TabEstrategia({ strategies, caseId }: any) {
+  const caseLabel = caseId?.includes('picassent')
+    ? 'PICASSENT'
+    : caseId?.includes('mislata')
+    ? 'MISLATA'
+    : caseId?.includes('quart')
+    ? 'QUART'
+    : 'CASO';
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="font-bold text-white">Estrategias Activas</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-bold text-white">Estrategias Activas</h3>
+          <span className="text-[10px] font-bold tracking-widest bg-slate-800/60 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
+            {caseLabel}
+          </span>
+        </div>
         <Link to={`/warroom/new?caseId=${caseId}`} className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-500">+ Nueva</Link>
       </div>
       {strategies.length > 0 ? (
@@ -1041,13 +1082,20 @@ export function CaseDetailPage() {
         {activeTab === 'actuaciones' && (
           <div className="space-y-4">
             {/* Botón añadir nuevo evento */}
-            <div className="flex justify-end">
+            <div className="flex flex-wrap justify-end gap-2">
               <Link
                 to={`/events/new?caseId=${id}`}
                 className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 <Calendar size={16} />
-                + Nuevo Evento
+                + Nuevo hito procesal
+              </Link>
+              <Link
+                to={`/events/new?caseId=${id}`}
+                className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                <Calendar size={16} />
+                + Nuevo hito fáctico
               </Link>
             </div>
 
