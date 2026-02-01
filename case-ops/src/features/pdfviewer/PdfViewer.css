@@ -14,7 +14,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  height: 100dvh; /* Soporte para barras móviles dinámicas */
+  height: 100dvh;
   background-color: var(--pdf-bg);
   color: var(--pdf-text);
   overflow: hidden;
@@ -63,32 +63,20 @@
 .pdf-viewport {
   flex: 1;
   position: relative;
-  overflow: auto; /* Permite scroll nativo */
+  overflow: auto;
   display: flex;
-  
-  /* CRÍTICO: align-items flex-start evita el recorte izquierdo al hacer zoom.
-     Si usáramos 'center', al crecer el canvas, la parte izquierda saldría de la pantalla
-     y sería inalcanzable por el scroll. */
   align-items: flex-start; 
   justify-content: flex-start;
-  
   padding: 20px;
   background-color: #020617;
-  
-  /* Gestión táctil: Permite pan-x/y nativo (scroll 1 dedo), 
-     mientras JS intercepta el evento de 2 dedos (pinch) */
   touch-action: pan-x pan-y; 
   -webkit-overflow-scrolling: touch;
 }
 
 .pdf-canvas-element {
-  /* CRÍTICO: margin: auto centra el elemento si es más pequeño que el viewport,
-     pero permite que crezca hacia la derecha/abajo si es más grande */
   margin: auto; 
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   background-color: white;
-  
-  /* Transición suave para el gesto de pinza (transform) */
   transition: transform 0.1s linear; 
   transform-origin: center top;
   will-change: transform;
@@ -247,7 +235,6 @@
   color: #94a3b8;
 }
 
-/* Responsive adjustments */
 @media (max-width: 600px) {
   .zoom-indicator { display: none; }
   .pdf-title-container { max-width: 140px; }
