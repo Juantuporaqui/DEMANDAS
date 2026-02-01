@@ -40,9 +40,9 @@ export async function seedDatabase(): Promise<boolean> {
       status: 'activo',
       clientRole: 'demandado',
       judge: '[Pendiente]',
-      opposingPartyName: 'Vicenta Jiménez Vera',
-      opposingLawyerName: 'Isabel Luzzy Aguilar',
-      opposingCounsel: 'Isabel Luzzy Aguilar',
+      opposingPartyName: 'Vicenta Jiménez',
+      opposingLawyerName: 'Auxiliadora Gómez',
+      opposingCounsel: 'Auxiliadora Gómez',
       amountClaimedCents: eurosToCents(212677),
       amountTotalCents: eurosToCents(212677),
       notes: 'Reclamación de 212.677€ por Vicenta. Defensa basada en Prescripción (71% cuantía), Naturaleza de Hipoteca y Compensación de saldos.',
@@ -570,7 +570,7 @@ export async function seedDatabase(): Promise<boolean> {
       { date: '2023-11-01', type: 'factico', title: 'Inicio Pago Hipoteca Exclusivo', description: 'Juan asume el 100% de la cuota (850€/mes).' },
       { date: '2024-01-20', type: 'procesal', title: 'Presentación Demanda', description: 'Vicenta reclama 212.677€.' },
       { date: '2025-02-19', type: 'procesal', title: 'Contestación Demanda', description: 'Presentación del escrito de defensa.' },
-      { date: '2025-10-24', type: 'procesal', title: 'Señalamiento Audiencia Previa', description: 'Fecha prevista para la vista preliminar.' }
+      { date: '2026-03-10T09:45:00', type: 'procesal', title: 'Audiencia Previa', description: 'Señalada para el 10/03/2026 a las 09:45.' }
     ];
 
     for (const e of eventsData) {

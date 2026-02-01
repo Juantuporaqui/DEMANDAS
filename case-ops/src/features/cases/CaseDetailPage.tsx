@@ -138,12 +138,14 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Sumatorio Analítico */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Sumatorio analítico (partidas)</div>
-            <div className="text-lg font-bold text-emerald-400">{formatCurrency(amounts.analytic)}</div>
-          </div>
+          {!isPicassent && (
+            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Sumatorio analítico (partidas)</div>
+              <div className="text-lg font-bold text-emerald-400">{formatCurrency(amounts.analytic)}</div>
+            </div>
+          )}
           {/* Delta */}
-          {amounts.delta !== 0 && (
+          {!isPicassent && amounts.delta !== 0 && (
             <div className="bg-amber-900/30 rounded-lg p-3 border border-amber-500/50">
               <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Delta pendiente de justificar</div>
               <div className="text-lg font-bold text-amber-400">{formatCurrency(Math.abs(amounts.delta))}</div>
@@ -288,7 +290,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             {formatCurrency(amounts.totalDemand)}
           </div>
           <div className="text-[10px] text-slate-600">{partidas.length} partidas</div>
-          {amounts.delta !== 0 && (
+          {!isPicassent && amounts.delta !== 0 && (
             <div className="text-[10px] text-amber-400 mt-1">Delta pendiente de justificar</div>
           )}
         </div>
@@ -480,12 +482,9 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
 // ============================================
 // 2. TAB DOCUMENTOS (El Lector Inteligente - MÓVIL FULLSCREEN)
 // ============================================
-function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
-  // Estado para el documento seleccionado
-  const [selectedDocKey, setSelectedDocKey] = useState<string | null>(initialDocKey || null);
-  const [showMobileViewer, setShowMobileViewer] = useState(false);
-  // Estado para PDF seleccionado (separado de docs de texto)
-  const [selectedPDF, setSelectedPDF] = useState<PDFDocument | null>(null);
+function TabDocs({ documents, caseId, caseData }: any) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedDocKey = searchParams.get('doc');
 
   // Detección robusta: ID del caso, Título o Número de Autos
   const isPicassent = caseId?.includes('picassent') ||
@@ -501,258 +500,118 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
   // Obtener PDFs del caso actual
   const casoKeyPDF = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
   const pdfDocuments = casoKeyPDF ? getPDFsByCaso(casoKeyPDF) : [];
+  const autoDocs = casoKeyPDF ? AUTO_DOCS[casoKeyPDF] : [];
 
-  // Debug: Ver si tenemos textos cargados
-  const hasLegalTexts = LEGAL_DOCS_MAP && Object.keys(LEGAL_DOCS_MAP).length > 0;
+  const manualDocItems = [
+    ...(isPicassent
+      ? [
+          { id: 'demanda-picassent', label: 'Demanda Contraria', icon: '📜', color: 'amber' },
+          { id: 'contestacion-picassent', label: 'Contestación', icon: '🛡️', color: 'emerald' },
+        ]
+      : []),
+    ...(isMislata
+      ? [
+          { id: 'demanda-mislata', label: 'Nuestra Demanda', icon: '📄', color: 'emerald' },
+          { id: 'contestacion-mislata', label: 'Contestación Vicenta', icon: '🚨', color: 'rose' },
+          { id: 'argumentos-mislata', label: 'Argumentos Clave', icon: '⚔️', color: 'blue' },
+          { id: 'frases-vista-mislata', label: 'Frases Vista', icon: '🎯', color: 'violet' },
+        ]
+      : []),
+    ...(isQuart
+      ? [
+          { id: 'sentencia-divorcio-quart', label: 'Sentencia Divorcio 362/2023', icon: '⚖️', color: 'blue' },
+          { id: 'demanda-ejecucion-quart', label: 'Demanda Ejecución (Vicenta)', icon: '📜', color: 'amber' },
+          { id: 'oposicion-quart', label: 'Nuestra Oposición', icon: '🛡️', color: 'emerald' },
+          { id: 'impugnacion-quart', label: 'Impugnación (Vicenta)', icon: '🚨', color: 'rose' },
+          { id: 'argumentos-quart', label: 'Argumentos y Riesgos', icon: '⚔️', color: 'violet' },
+        ]
+      : []),
+  ];
 
-  // Handler para seleccionar documento de texto (móvil abre fullscreen)
-  const handleSelectDoc = (key: string) => {
-    setSelectedDocKey(key);
-    setSelectedPDF(null); // Deseleccionar PDF
-    setShowMobileViewer(true);
+  const docTitleMap = new Map<string, string>([
+    ...manualDocItems.map((doc) => [doc.id, doc.label]),
+    ...autoDocs.map((doc) => [doc.id, doc.title]),
+    ...pdfDocuments.map((doc) => [doc.id, doc.titulo]),
+  ]);
+
+  const selectedPDF = selectedDocKey ? pdfDocuments.find((pdf) => pdf.id === selectedDocKey) : null;
+  const selectedContent = selectedDocKey ? LEGAL_DOCS_MAP[selectedDocKey] : null;
+  const selectedTitle = selectedDocKey ? docTitleMap.get(selectedDocKey) : null;
+
+  const handleSelectDoc = (docKey: string) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('tab', 'documentos');
+    nextParams.set('doc', docKey);
+    setSearchParams(nextParams);
   };
 
-  // Handler para seleccionar PDF
-  const handleSelectPDF = (pdf: PDFDocument) => {
-    setSelectedPDF(pdf);
-    setSelectedDocKey(null); // Deseleccionar texto
-    setShowMobileViewer(true);
+  const handleBackToGrid = () => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('tab', 'documentos');
+    nextParams.delete('doc');
+    setSearchParams(nextParams);
   };
 
-  // Botón de documento reutilizable
-  const DocButton = ({ docKey, icon, label, color }: { docKey: string; icon: string; label: string; color: 'amber' | 'emerald' | 'rose' | 'blue' | 'violet' }) => {
-    const colors = {
-      amber: { active: 'bg-amber-900/40 border-amber-500/50 text-amber-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-amber-500/30' },
-      emerald: { active: 'bg-emerald-900/40 border-emerald-500/50 text-emerald-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-emerald-500/30' },
-      rose: { active: 'bg-rose-900/40 border-rose-500/50 text-rose-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-rose-500/30' },
-      blue: { active: 'bg-blue-900/40 border-blue-500/50 text-blue-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-blue-500/30' },
-      violet: { active: 'bg-violet-900/40 border-violet-500/50 text-violet-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-violet-500/30' },
+  const DocGridButton = ({
+    docKey,
+    icon,
+    label,
+    color,
+    meta,
+  }: {
+    docKey: string;
+    icon: string;
+    label: string;
+    color: 'amber' | 'emerald' | 'rose' | 'blue' | 'violet' | 'cyan' | 'slate';
+    meta?: string;
+  }) => {
+    const colorClasses: Record<string, string> = {
+      amber: 'border-amber-500/30 hover:border-amber-500/60 text-amber-100',
+      emerald: 'border-emerald-500/30 hover:border-emerald-500/60 text-emerald-100',
+      rose: 'border-rose-500/30 hover:border-rose-500/60 text-rose-100',
+      blue: 'border-blue-500/30 hover:border-blue-500/60 text-blue-100',
+      violet: 'border-violet-500/30 hover:border-violet-500/60 text-violet-100',
+      cyan: 'border-cyan-500/30 hover:border-cyan-500/60 text-cyan-100',
+      slate: 'border-slate-600/40 hover:border-slate-500/60 text-slate-100',
     };
-    const isActive = selectedDocKey === docKey;
+
     return (
       <button
         onClick={() => handleSelectDoc(docKey)}
-        className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${isActive ? colors[color].active : colors[color].inactive}`}
+        className={`group w-full aspect-square rounded-2xl border bg-slate-900/40 p-4 text-left transition-all hover:-translate-y-0.5 hover:bg-slate-900/70 ${colorClasses[color]}`}
       >
-        {icon} {label}
+        <div className="flex flex-col justify-between h-full">
+          <div className="text-2xl">{icon}</div>
+          <div>
+            <div className="text-xs sm:text-sm font-semibold text-white leading-snug line-clamp-2">{label}</div>
+            {meta && <div className="text-[10px] text-slate-400 mt-1 line-clamp-1">{meta}</div>}
+          </div>
+        </div>
       </button>
     );
   };
 
-  return (
-    <>
-      {/* VISOR MÓVIL FULLSCREEN - PDF */}
-      {showMobileViewer && selectedPDF && casoKeyPDF && (
-        <div className="fixed inset-0 z-50 bg-slate-950 lg:hidden flex flex-col">
-          {/* Header móvil */}
-          <div className="flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800">
-            <button
-              onClick={() => setShowMobileViewer(false)}
-              className="flex items-center gap-2 text-slate-400 hover:text-white"
-            >
-              <ChevronRight className="rotate-180" size={20} />
-              <span className="text-sm">Volver</span>
-            </button>
-            <span className="text-xs text-slate-500 truncate max-w-[150px]">{selectedPDF.titulo}</span>
-          </div>
-          {/* Visor PDF embebido */}
-          <EmbeddedPDFViewer
-            url={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
-            title={selectedPDF.titulo}
-            className="flex-1"
-          />
-        </div>
-      )}
+  if (selectedDocKey) {
+    return (
+      <div className="space-y-4">
+        <button
+          onClick={handleBackToGrid}
+          className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white"
+        >
+          <ChevronRight className="rotate-180" size={18} />
+          Volver a documentos
+        </button>
 
-      {/* VISOR MÓVIL FULLSCREEN - Texto */}
-      {showMobileViewer && selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] && !selectedPDF && (
-        <div className="fixed inset-0 z-50 bg-slate-950 lg:hidden flex flex-col">
-          {/* Header móvil */}
-          <div className="flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800">
-            <button
-              onClick={() => setShowMobileViewer(false)}
-              className="flex items-center gap-2 text-slate-400 hover:text-white"
-            >
-              <ChevronRight className="rotate-180" size={20} />
-              <span className="text-sm">Volver</span>
-            </button>
-            <span className="text-xs text-slate-500 truncate max-w-[200px]">{selectedDocKey}</span>
-          </div>
-          {/* Contenido fullscreen */}
-          <div className="flex-1 overflow-auto">
-            <TextReader content={LEGAL_DOCS_MAP[selectedDocKey]} />
-          </div>
-        </div>
-      )}
-
-      {/* LAYOUT PRINCIPAL */}
-      <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4 lg:gap-6 lg:h-[calc(100vh-240px)] lg:min-h-[600px]">
-        {/* SIDEBAR DOCUMENTOS */}
-        <div className="space-y-4 lg:space-y-6 lg:col-span-1 lg:overflow-y-auto lg:pr-2 custom-scrollbar">
-
-          {/* Botón Subir */}
-          <Link to={`/documents/new?caseId=${caseId}`} className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-900/20">
-            <Upload size={16} /> Subir Nuevo
-          </Link>
-
-          {/* Escritos Procesales */}
-          <div>
-            <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
-              <Scale size={14} /> Autos y Escritos
-            </h3>
-
-            <div className="space-y-2">
-              {!hasLegalTexts && (
-                 <div className="text-xs text-rose-500 bg-rose-900/20 p-2 rounded mb-2 border border-rose-800">
-                   ⚠️ Error: No se han cargado los textos legales.
-                 </div>
-              )}
-
-              {/* PICASSENT */}
-              {isPicassent && (
-                <>
-                  <DocButton docKey="demanda-picassent" icon="📜" label="Demanda Contraria" color="amber" />
-                  <DocButton docKey="contestacion-picassent" icon="🛡️" label="Contestación" color="emerald" />
-                </>
-              )}
-
-              {/* MISLATA */}
-              {isMislata && (
-                <>
-                  <DocButton docKey="demanda-mislata" icon="📄" label="Nuestra Demanda" color="emerald" />
-                  <DocButton docKey="contestacion-mislata" icon="🚨" label="Contestación Vicenta" color="rose" />
-                  <DocButton docKey="argumentos-mislata" icon="⚔️" label="Argumentos Clave" color="blue" />
-                  <DocButton docKey="frases-vista-mislata" icon="🎯" label="Frases Vista" color="violet" />
-                </>
-              )}
-
-              {/* QUART */}
-              {isQuart && (
-                <>
-                  <DocButton docKey="sentencia-divorcio-quart" icon="⚖️" label="Sentencia Divorcio 362/2023" color="blue" />
-                  <DocButton docKey="demanda-ejecucion-quart" icon="📜" label="Demanda Ejecución (Vicenta)" color="amber" />
-                  <DocButton docKey="oposicion-quart" icon="🛡️" label="Nuestra Oposición" color="emerald" />
-                  <DocButton docKey="impugnacion-quart" icon="🚨" label="Impugnación (Vicenta)" color="rose" />
-                  <DocButton docKey="argumentos-quart" icon="⚔️" label="Argumentos y Riesgos" color="violet" />
-                </>
-              )}
-
-              {!isPicassent && !isMislata && !isQuart && (
-                   <div className="text-xs text-slate-600 p-2 italic">No hay escritos predefinidos para este caso.</div>
-              )}
-            </div>
-          </div>
-
-          {/* DOCUMENTOS AUTO-DETECTADOS */}
-          {(() => {
-            const casoKey = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
-            const autoDocs = casoKey ? AUTO_DOCS[casoKey] : [];
-            if (autoDocs.length === 0) return null;
-            return (
-              <div>
-                <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
-                  <FileText size={14} /> Documentos Subidos ({autoDocs.length})
-                </h3>
-                <div className="space-y-2">
-                  {autoDocs.map((doc: AutoDocument) => (
-                    <button
-                      key={doc.id}
-                      onClick={() => handleSelectDoc(doc.id)}
-                      className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${
-                        selectedDocKey === doc.id
-                          ? 'bg-cyan-900/40 border-cyan-500/50 text-cyan-100'
-                          : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-cyan-500/30'
-                      }`}
-                    >
-                      {doc.extension === 'html' ? '🌐' : '📄'} {doc.title}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* PDFs DEL EXPEDIENTE (desde public/docs/{caso}/) */}
-          {pdfDocuments.length > 0 && (
-            <div>
-              <h3 className="text-xs font-bold text-rose-400 uppercase mb-3 flex items-center gap-2">
-                <FileText size={14} /> PDFs del Expediente ({pdfDocuments.length})
-              </h3>
-              <div className="space-y-2">
-                {pdfDocuments.map((pdf) => {
-                  const colorKey = tipoDocColors[pdf.tipo] || 'slate';
-                  const colorClasses: Record<string, { active: string; inactive: string }> = {
-                    amber: { active: 'bg-amber-900/40 border-amber-500/50 text-amber-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-amber-500/30' },
-                    emerald: { active: 'bg-emerald-900/40 border-emerald-500/50 text-emerald-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-emerald-500/30' },
-                    blue: { active: 'bg-blue-900/40 border-blue-500/50 text-blue-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-blue-500/30' },
-                    violet: { active: 'bg-violet-900/40 border-violet-500/50 text-violet-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-violet-500/30' },
-                    cyan: { active: 'bg-cyan-900/40 border-cyan-500/50 text-cyan-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-cyan-500/30' },
-                    slate: { active: 'bg-slate-700/40 border-slate-500/50 text-slate-100', inactive: 'bg-slate-800/50 border-slate-700 text-slate-400 hover:border-slate-500/30' },
-                  };
-                  const colors = colorClasses[colorKey] || colorClasses.slate;
-                  const isActive = selectedPDF?.id === pdf.id;
-                  return (
-                    <button
-                      key={pdf.id}
-                      onClick={() => handleSelectPDF(pdf)}
-                      className={`w-full text-left p-3 rounded-lg text-sm border transition-all ${isActive ? colors.active : colors.inactive}`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span>{tipoDocIcons[pdf.tipo] || '📄'}</span>
-                        <span className="truncate">{pdf.titulo}</span>
-                      </div>
-                      {pdf.fecha && (
-                        <div className="text-[10px] text-slate-500 mt-1 ml-6">{pdf.fecha}</div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Instrucciones para añadir PDFs (si no hay ninguno) */}
-          {pdfDocuments.length === 0 && casoKeyPDF && (
-            <div className="p-3 rounded-lg border border-dashed border-slate-700 bg-slate-900/30">
-              <h3 className="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">
-                <FileText size={14} /> PDFs del Expediente
-              </h3>
-              <p className="text-[10px] text-slate-600 leading-relaxed">
-                Para ver PDFs aquí:
-                <br />1. Sube el archivo a <code className="text-cyan-400">public/docs/{casoKeyPDF}/</code>
-                <br />2. Edita <code className="text-cyan-400">src/data/pdfRegistry.ts</code>
-                <br />3. Recarga la web
-              </p>
-            </div>
-          )}
-
-          {/* Archivos Adjuntos de IndexedDB */}
-          <div>
-            <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
-              <Upload size={14} /> Archivo Digital
-            </h3>
-            {documents.length === 0 && <p className="text-xs text-slate-600 italic">No hay archivos adjuntos.</p>}
-            {documents.map((doc: Document) => (
-              <div key={doc.id} className="p-3 mb-2 bg-slate-900 rounded border border-slate-800 text-xs text-slate-400 hover:text-white hover:border-slate-600 cursor-pointer transition-colors truncate">
-                {doc.title}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* VISOR CENTRAL (Desktop) */}
-        <div className="hidden lg:flex lg:col-span-3 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden h-full shadow-2xl relative flex-col">
-          {/* Visor de PDF */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden min-h-[60vh]">
           {selectedPDF && casoKeyPDF ? (
-            <div className="flex flex-col h-full">
-              {/* Header del PDF */}
+            <div className="flex flex-col h-[70vh]">
               <div className="flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 min-w-0">
                   <span className="text-lg">{tipoDocIcons[selectedPDF.tipo] || '📄'}</span>
-                  <div>
-                    <h3 className="text-sm font-medium text-white">{selectedPDF.titulo}</h3>
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-medium text-white truncate">{selectedPDF.titulo}</h3>
                     {selectedPDF.descripcion && (
-                      <p className="text-[10px] text-slate-500">{selectedPDF.descripcion}</p>
+                      <p className="text-[10px] text-slate-500 line-clamp-1">{selectedPDF.descripcion}</p>
                     )}
                   </div>
                 </div>
@@ -760,35 +619,124 @@ function TabDocs({ documents, caseId, caseData, initialDocKey }: any) {
                   <span className="text-[10px] text-slate-500">{selectedPDF.fecha}</span>
                 )}
               </div>
-              {/* Visor PDF embebido con pdfjs */}
               <EmbeddedPDFViewer
                 url={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
                 title={selectedPDF.titulo}
                 className="flex-1"
               />
             </div>
-          ) : selectedDocKey && LEGAL_DOCS_MAP[selectedDocKey] ? (
-            <TextReader content={LEGAL_DOCS_MAP[selectedDocKey]} />
+          ) : selectedContent ? (
+            <TextReader content={selectedContent} />
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-slate-600 bg-slate-900/20">
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-500">
               <FileText size={48} className="mb-4 opacity-20" />
-              <p className="mt-4">Selecciona un documento para lectura inmersiva</p>
-              <p className="text-xs opacity-50 mt-2">Soporta PDFs y textos legales</p>
-              {selectedDocKey && !LEGAL_DOCS_MAP[selectedDocKey] && (
-                 <p className="text-xs text-rose-500 mt-2 bg-rose-900/20 px-2 py-1 rounded">
-                   ⚠️ Error: No se encontró contenido para "{selectedDocKey}"
-                 </p>
-              )}
+              <p className="text-sm">No se encontró contenido para este documento.</p>
+              {selectedTitle && <p className="text-xs text-slate-600 mt-2">{selectedTitle}</p>}
             </div>
           )}
         </div>
-
-        {/* Mensaje móvil cuando no hay documento seleccionado */}
-        <div className="lg:hidden text-center py-8 text-slate-500 text-sm">
-          Pulsa en un documento para abrirlo a pantalla completa
-        </div>
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-bold text-white">Documentos</h3>
+          <p className="text-xs text-slate-500">Selecciona un documento para abrir el visor</p>
+        </div>
+        <Link
+          to={`/documents/new?caseId=${caseId}`}
+          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white shadow-lg shadow-blue-900/20 hover:bg-blue-500"
+        >
+          <Upload size={14} /> Subir nuevo
+        </Link>
+      </div>
+
+      {manualDocItems.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
+            <Scale size={12} /> Autos y escritos
+          </h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {manualDocItems.map((doc) => (
+              <DocGridButton key={doc.id} docKey={doc.id} icon={doc.icon} label={doc.label} color={doc.color} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {autoDocs.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
+            <FileText size={12} /> Documentos subidos ({autoDocs.length})
+          </h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {autoDocs.map((doc: AutoDocument) => (
+              <DocGridButton
+                key={doc.id}
+                docKey={doc.id}
+                icon={doc.extension === 'html' ? '🌐' : '📄'}
+                label={doc.title}
+                meta={doc.extension.toUpperCase()}
+                color="cyan"
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {pdfDocuments.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
+            <FileText size={12} /> PDFs del expediente ({pdfDocuments.length})
+          </h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {pdfDocuments.map((pdf) => (
+              <DocGridButton
+                key={pdf.id}
+                docKey={pdf.id}
+                icon={tipoDocIcons[pdf.tipo] || '📄'}
+                label={pdf.titulo}
+                meta={pdf.fecha || pdf.tipo.toUpperCase()}
+                color={(tipoDocColors[pdf.tipo] || 'slate') as 'amber' | 'emerald' | 'rose' | 'blue' | 'violet' | 'cyan' | 'slate'}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {documents.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
+            <Upload size={12} /> Archivo digital ({documents.length})
+          </h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {documents.map((doc: Document) => (
+              <div
+                key={doc.id}
+                className="w-full aspect-square rounded-2xl border border-slate-700/50 bg-slate-900/40 p-4 text-left text-slate-300"
+              >
+                <div className="flex flex-col justify-between h-full">
+                  <div className="text-xl">📎</div>
+                  <div>
+                    <div className="text-xs font-semibold text-white line-clamp-2">{doc.title}</div>
+                    <div className="text-[10px] text-slate-500 mt-1">Adjunto</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {manualDocItems.length === 0 && autoDocs.length === 0 && pdfDocuments.length === 0 && documents.length === 0 && (
+        <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/30 p-8 text-center text-slate-500">
+          No hay documentos disponibles para este caso.
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -824,7 +772,7 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
   };
 
   return (
-    <div className="space-y-3 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-end mb-2">
          <Link to={`/facts/new?caseId=${caseId}`} className="text-xs bg-emerald-600/80 text-emerald-100 px-3 py-1.5 rounded hover:bg-emerald-500 transition-colors flex items-center gap-2">
             <span>+</span> Nuevo Hecho / Partida
@@ -837,56 +785,58 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
           </div>
       )}
 
-      {facts.map((fact) => {
-        // Intentamos obtener el importe del título o narrative
-        const amountDisplay = extractAmount(fact.title || '') || extractAmount(fact.narrative || '') || '--- €';
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+        {facts.map((fact) => {
+          const amountDisplay = extractAmount(fact.title || '') || extractAmount(fact.narrative || '');
+          const riskBadge = fact.risk
+            ? {
+                label: `Riesgo ${fact.risk.toUpperCase()}`,
+                className:
+                  fact.risk === 'alto'
+                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                    : fact.risk === 'bajo'
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    : 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+              }
+            : null;
+          const statusBadge = fact.status
+            ? {
+                label: fact.status.replace('_', ' ').toUpperCase(),
+                className:
+                  fact.status === 'controvertido'
+                    ? 'bg-rose-500/10 text-rose-300 border-rose-500/30'
+                    : fact.status === 'a_probar'
+                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                    : 'bg-slate-700/40 text-slate-300 border-slate-600/40',
+              }
+            : null;
 
-        return (
-            <div
-            key={fact.id}
-            onClick={() => navigate(`/facts/${fact.id}`)}
-            className="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden group hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.15)] transition-all cursor-pointer relative"
+          return (
+            <button
+              key={fact.id}
+              onClick={() => navigate(`/facts/${fact.id}`)}
+              aria-label={amountDisplay ? `${fact.title} (${amountDisplay})` : fact.title}
+              className="group w-full aspect-square rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-blue-500/50 hover:bg-slate-900/70"
             >
-            {/* Indicador de Click */}
-            <div className="absolute top-4 right-4 text-slate-600 group-hover:text-blue-400 transition-colors">
-                <ChevronRight size={20} />
-            </div>
-
-            <div className="p-4 pr-12">
-                <div className="flex justify-between items-start">
-                <div>
-                    <div className="flex gap-2 items-center mb-2">
-                      <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                          fact.risk === 'alto' ? 'bg-rose-900/30 text-rose-400' :
-                          fact.risk === 'bajo' ? 'bg-emerald-900/30 text-emerald-400' : 'bg-amber-900/30 text-amber-400'
-                      }`}>
-                      RIESGO {fact.risk?.toUpperCase() || 'N/A'}
-                      </span>
-                      {/* FASE 6: Indicador probatorio - Sin soporte */}
-                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-rose-600/30 text-rose-300 border border-rose-500/50">
-                        Sin soporte
-                      </span>
-                    </div>
-                    <h4 className="text-white font-medium text-lg group-hover:text-blue-200 transition-colors">
-                    {fact.title}
-                    </h4>
+              <div className="flex flex-col justify-between h-full">
+                <div className="flex flex-wrap gap-1">
+                  {riskBadge && (
+                    <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded border ${riskBadge.className}`}>
+                      {riskBadge.label}
+                    </span>
+                  )}
+                  {statusBadge && (
+                    <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded border ${statusBadge.className}`}>
+                      {statusBadge.label}
+                    </span>
+                  )}
                 </div>
-                <div className="text-right mt-1 mr-6">
-                    <div className="text-xl font-bold text-slate-200 tabular-nums">{amountDisplay}</div>
-                    <div className="text-xs text-slate-500 font-mono">ESTIMADO</div>
-                </div>
-                </div>
-            </div>
-
-            {/* Preview Narrativa */}
-            {fact.narrative && (
-                <div className="px-4 pb-4 pt-0 text-sm text-slate-400 border-t border-slate-800/50 mt-2 pt-3 bg-slate-950/30">
-                    <p className="line-clamp-2 text-xs">{fact.narrative}</p>
-                </div>
-            )}
-            </div>
-        );
-      })}
+                <div className="text-sm font-semibold text-white leading-snug line-clamp-3">{fact.title}</div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -898,17 +848,35 @@ function TabEstrategia({ strategies, caseId }: any) {
         <h3 className="font-bold text-white">Estrategias Activas</h3>
         <Link to={`/warroom/new?caseId=${caseId}`} className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-500">+ Nueva</Link>
       </div>
-      {strategies.map((s: Strategy, i: number) => (
-        <div key={s.id} className="p-5 rounded-xl border border-slate-700 bg-slate-900">
-          <div className="flex justify-between mb-3">
-            <h4 className="font-bold text-white flex items-center gap-2"><span className="bg-slate-700 text-xs px-2 py-0.5 rounded">#{i+1}</span> Estrategia</h4>
-            <span className="text-xs bg-slate-800 px-2 py-1 rounded text-slate-400 uppercase">{s.risk} Risk</span>
-          </div>
-          <p className="text-rose-400 text-sm mb-2">⚠️ <strong>Ataque:</strong> {s.attack}</p>
-          <p className="text-emerald-400 text-sm">🛡️ <strong>Defensa:</strong> {s.rebuttal}</p>
+      {strategies.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+          {strategies.map((s: Strategy, i: number) => (
+            <div
+              key={s.id}
+              className="w-full aspect-square rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-amber-500/40 hover:bg-slate-900/70"
+            >
+              <div className="flex flex-col justify-between h-full">
+                <div className="flex flex-wrap gap-1">
+                  <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-slate-600/40 bg-slate-700/40 text-slate-200">
+                    Estrategia #{i + 1}
+                  </span>
+                  {s.risk && (
+                    <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-300">
+                      {s.risk}
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs text-rose-300 line-clamp-2">⚠️ {s.attack}</p>
+                  <p className="text-xs text-emerald-300 line-clamp-2">🛡️ {s.rebuttal}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
-      {strategies.length === 0 && <div className="text-center text-slate-500 py-10 border border-dashed border-slate-800 rounded">Sin estrategias definidas.</div>}
+      ) : (
+        <div className="text-center text-slate-500 py-10 border border-dashed border-slate-800 rounded">Sin estrategias definidas.</div>
+      )}
     </div>
   );
 }
@@ -919,13 +887,12 @@ function TabEstrategia({ strategies, caseId }: any) {
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const docParam = searchParams.get('doc');
   // Modo lector: oculta botones de edición y acciones destructivas
   const isReadMode = searchParams.get('read') === '1';
-  const [activeTab, setActiveTab] = useState(tabParam || 'resumen');
-  const [initialDoc, setInitialDoc] = useState<string | null>(docParam);
+  const resolvedTabParam = tabParam === 'documentos' ? 'docs' : tabParam;
+  const [activeTab, setActiveTab] = useState(resolvedTabParam || 'resumen');
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
   const [docs, setDocs] = useState<Document[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -980,9 +947,20 @@ export function CaseDetailPage() {
 
   // Si cambia la URL (por ejemplo al volver de ver un documento), actualizar el tab
   useEffect(() => {
-    if (tabParam) setActiveTab(tabParam);
-    if (docParam) setInitialDoc(docParam);
-  }, [tabParam, docParam]);
+    if (resolvedTabParam) setActiveTab(resolvedTabParam);
+  }, [resolvedTabParam]);
+
+  const handleTabChange = (tabId: string) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (tabId === 'docs') {
+      nextParams.set('tab', 'documentos');
+    } else {
+      nextParams.set('tab', tabId);
+    }
+    nextParams.delete('doc');
+    setSearchParams(nextParams);
+    setActiveTab(tabId);
+  };
 
   if (!currentCase) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Cargando War Room...</div>;
 
@@ -1043,7 +1021,7 @@ export function CaseDetailPage() {
               <button
                 key={tab.id}
                 data-tab={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`pb-2 sm:pb-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
               >
                 <span className="hidden sm:inline">{tab.label}</span>
@@ -1058,7 +1036,7 @@ export function CaseDetailPage() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} partidas={partidas} documents={docs} navigate={navigate} setActiveTab={setActiveTab} isReadMode={isReadMode} />}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
-        {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} initialDocKey={initialDoc} />}
+        {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
         {activeTab === 'actuaciones' && (
           <div className="space-y-4">
