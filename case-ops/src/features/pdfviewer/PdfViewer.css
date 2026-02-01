@@ -2,23 +2,35 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Maximize, Minimize, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Modal } from '../../components';
-import { documentsRepo, docFilesRepo, spansRepo, linksRepo, factsRepo, partidasRepo } from '../../db/repositories';
+import {
+  documentsRepo,
+  docFilesRepo,
+  spansRepo,
+  linksRepo,
+  factsRepo,
+  partidasRepo,
+} from '../../db/repositories';
 import type { Document, DocFile, Span, Fact, Partida } from '../../types';
 import * as pdfjsLib from 'pdfjs-dist';
 import './PdfViewer.css';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).toString();
 
 export function PdfViewerPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
+  // Referencias
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const mainRef = useRef<HTMLDivElement>(null); // Referencia para Fullscreen
+  const mainRef = useRef<HTMLDivElement>(null); // Para Fullscreen
   const renderTaskRef = useRef<any>(null);
 
+  // Estado
   const [document, setDocument] = useState<Document | null>(null);
   const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,44 +40,84 @@ export function PdfViewerPage() {
   const [rendering, setRendering] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Spans y otros estados (mantenidos igual)
+  // Estado Táctil
+  const touchState = useRef({
+    startDist: 0,
+    startScale: 1,
+    isPinching: false,
+  });
+
+  // Otros estados (Spans/Links)
   const [spans, setSpans] = useState<Span[]>([]);
   const [showSpanModal, setShowSpanModal] = useState(false);
+  const [spanForm, setSpanForm] = useState({
+    pageStart: 1, pageEnd: 1, label: '', note: '', tags: '',
+  });
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [selectedSpan, setSelectedSpan] = useState<Span | null>(null);
+  const [linkType, setLinkType] = useState<'fact' | 'partida'>('fact');
   const [facts, setFacts] = useState<Fact[]>([]);
   const [partidas, setPartidas] = useState<Partida[]>([]);
+  const [selectedLinkTarget, setSelectedLinkTarget] = useState('');
 
-  // Lógica de Zoom Táctil Mejorada
-  const touchState = useRef({ startDist: 0, startScale: 1, isPinching: false });
-
-  // Carga de datos (simplificada para brevedad, mantener lógica original de repositorios)
-  useEffect(() => { if (id) loadDocument(id); }, [id]);
+  // 1. CARGA DE DATOS
+  useEffect(() => {
+    if (id) loadDocument(id);
+  }, [id]);
 
   async function loadDocument(docId: string) {
     try {
       setLoading(true);
       const doc = await documentsRepo.getById(docId);
-      if (!doc) return navigate('/documents');
+      if (!doc) {
+        navigate('/documents');
+        return;
+      }
       setDocument(doc);
 
-      // Obtener buffer del archivo (mantener tu lógica de docFilesRepo)
+      // Obtener el buffer del PDF
+      let arrayBuffer: ArrayBuffer;
       const file = await docFilesRepo.getById(doc.fileId);
-      if (!file) throw new Error("Archivo no encontrado");
-      const arrayBuffer = await file.blob.arrayBuffer();
+      if (file) {
+        arrayBuffer = await file.blob.arrayBuffer();
+      } else if (doc.filePath) {
+        const response = await fetch(new URL(doc.filePath, import.meta.url).href);
+        arrayBuffer = await response.arrayBuffer();
+      } else {
+        throw new Error("No se pudo localizar el archivo");
+      }
 
-      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const loadingTask = pdfjsLib.getDocument({ 
+        data: arrayBuffer,
+        cMapUrl: 'https://unpkg.com/pdfjs-dist@5.4.530/cmaps/',
+        cMapPacked: true,
+      });
+      
       const pdf = await loadingTask.promise;
       setPdfDoc(pdf);
       setTotalPages(pdf.numPages);
 
+      // Cargar metadatos del caso
       const docSpans = await spansRepo.getByDocumentId(docId);
       setSpans(docSpans);
-    } catch (err) {
-      console.error(err);
-      alert("Error al cargar");
-    } finally { setLoading(false); }
+
+      if (doc.caseId) {
+        const [f, p] = await Promise.all([
+          factsRepo.getByCaseId(doc.caseId),
+          partidasRepo.getByCaseId(doc.caseId),
+        ]);
+        setFacts(f);
+        setPartidas(p);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al cargar el documento');
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // --- GESTOS TÁCTILES MEJORADOS ---
+  // 2. GESTIÓN DE PINCH ZOOM (MEJORADA)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -88,12 +140,13 @@ export function PdfViewerPage() {
           e.touches[0].pageX - e.touches[1].pageX,
           e.touches[0].pageY - e.touches[1].pageY
         );
-        const ratio = dist / touchState.current.startDist;
-        const tempScale = Math.min(Math.max(0.5, touchState.current.startScale * ratio), 4);
         
-        // Efecto visual inmediato
+        const ratio = dist / touchState.current.startDist;
+        const newTempScale = Math.min(Math.max(0.5, touchState.current.startScale * ratio), 4.0);
+        
         if (canvasRef.current) {
-          canvasRef.current.style.transform = `scale(${tempScale / scale})`;
+          // Aplicamos escala visual (feedback instantáneo)
+          canvasRef.current.style.transform = `scale(${newTempScale / scale})`;
         }
       }
     };
@@ -101,13 +154,18 @@ export function PdfViewerPage() {
     const handleTouchEnd = () => {
       if (touchState.current.isPinching) {
         touchState.current.isPinching = false;
+        
         if (canvasRef.current) {
           const transform = canvasRef.current.style.transform;
           const match = transform.match(/scale\((.+)\)/);
+          
           if (match) {
-            const finalScale = scale * parseFloat(match[1]);
+            const cssRatio = parseFloat(match[1]);
+            const finalScale = Math.min(Math.max(0.5, scale * cssRatio), 4.0);
+            
+            // Limpiar y disparar renderizado de alta calidad
             canvasRef.current.style.transform = '';
-            setScale(Math.min(Math.max(0.5, finalScale), 4));
+            setScale(finalScale);
           }
         }
       }
@@ -116,45 +174,66 @@ export function PdfViewerPage() {
     container.addEventListener('touchstart', handleTouchStart, { passive: false });
     container.addEventListener('touchmove', handleTouchMove, { passive: false });
     container.addEventListener('touchend', handleTouchEnd);
+
     return () => {
       container.removeEventListener('touchstart', handleTouchStart);
       container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [scale]);
+  }, [scale]); 
 
-  // --- RENDERIZADO (HIDPI) ---
+  // 3. RENDERIZADO DEL PDF (HiDPI / Retina Ready)
   const renderPage = useCallback(async (pageNum: number) => {
     if (!pdfDoc || !canvasRef.current) return;
-    if (renderTaskRef.current) renderTaskRef.current.cancel();
+
+    if (renderTaskRef.current) {
+      try { renderTaskRef.current.cancel(); } catch (err) {}
+    }
 
     setRendering(true);
+
     try {
       const page = await pdfDoc.getPage(pageNum);
       const dpr = window.devicePixelRatio || 1;
-      const viewport = page.getViewport({ scale });
+      const viewport = page.getViewport({ scale: scale });
+
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d', { alpha: false });
       
-      if (context) {
-        canvas.width = viewport.width * dpr;
-        canvas.height = viewport.height * dpr;
-        canvas.style.width = `${viewport.width}px`;
-        canvas.style.height = `${viewport.height}px`;
-        context.scale(dpr, dpr);
+      if (!context) return;
 
-        renderTaskRef.current = page.render({ canvasContext: context, viewport });
-        await renderTaskRef.current.promise;
+      // Ajuste para nitidez extrema en móviles (HiDPI)
+      canvas.width = Math.floor(viewport.width * dpr);
+      canvas.height = Math.floor(viewport.height * dpr);
+      canvas.style.width = `${Math.floor(viewport.width)}px`;
+      canvas.style.height = `${Math.floor(viewport.height)}px`;
+
+      context.scale(dpr, dpr);
+
+      renderTaskRef.current = page.render({
+        canvasContext: context,
+        viewport: viewport,
+      });
+
+      await renderTaskRef.current.promise;
+    } catch (error: any) {
+      if (error.name !== 'RenderingCancelledException') {
+        console.error('Error rendering:', error);
       }
-    } catch (err) { console.error(err); }
-    finally { setRendering(false); }
+    } finally {
+      setRendering(false);
+      renderTaskRef.current = null;
+    }
   }, [pdfDoc, scale]);
 
-  useEffect(() => { renderPage(currentPage); }, [renderPage, currentPage]);
+  useEffect(() => {
+    if (pdfDoc) renderPage(currentPage);
+  }, [pdfDoc, currentPage, renderPage]);
 
-  // --- FULLSCREEN API ---
-  async function toggleFullscreen() {
+  // 4. FULLSCREEN API REAL
+  const toggleFullscreen = async () => {
     if (!mainRef.current) return;
+
     try {
       if (!document.fullscreenElement) {
         await mainRef.current.requestFullscreen();
@@ -164,43 +243,78 @@ export function PdfViewerPage() {
         setIsFullscreen(false);
       }
     } catch (err) {
-      // Fallback para iOS que no soporta Fullscreen API en elementos que no sean <video>
+      // Fallback para iOS (donde requestFullscreen a veces falla en elementos no-video)
       setIsFullscreen(!isFullscreen);
     }
-  }
+  };
 
-  // Escuchar cambios de fullscreen nativos (tecla Esc, gestos)
+  // Escuchar el evento de cambio para sincronizar estado (tecla ESC, etc)
   useEffect(() => {
-    const handler = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handler);
-    return () => document.removeEventListener('fullscreenchange', handler);
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
   }, []);
 
-  if (loading) return <div className="page center-loading"><div className="spinner" /></div>;
-  if (!document || !pdfDoc) return <div className="page center-error"><p>No encontrado</p></div>;
+  // 5. ACCIONES DE NEGOCIO
+  const handleSaveSpan = async () => {
+    if (!document || !spanForm.label.trim()) return;
+    try {
+      const span = await spansRepo.create({
+        documentId: document.id,
+        caseId: document.caseId,
+        pageStart: spanForm.pageStart,
+        pageEnd: spanForm.pageEnd,
+        label: spanForm.label.trim(),
+        note: spanForm.note.trim(),
+        tags: spanForm.tags.split(',').map(t => t.trim()).filter(Boolean),
+      });
+      setSpans([...spans, span]);
+      setShowSpanModal(false);
+    } catch (e) { alert("Error al crear marcador"); }
+  };
+
+  if (loading) return <div className="center-loading"><div className="spinner" /><p className="mt-4">Abriendo expediente...</p></div>;
+  if (!document || !pdfDoc) return <div className="center-error"><p>Documento no disponible</p></div>;
 
   return (
     <div ref={mainRef} className={`pdf-viewer ${isFullscreen ? 'mode-fullscreen' : ''}`}>
+      
+      {/* HEADER */}
       <header className="pdf-header">
-        <button className="btn-icon" onClick={() => navigate(-1)}><ArrowLeft size={20} /></button>
+        <button className="btn-icon" onClick={() => navigate(-1)}>
+          <ArrowLeft size={20} />
+        </button>
         <div className="pdf-title-container">
           <h1 className="pdf-doc-title">{document.title}</h1>
-          <span className="pdf-doc-meta">Pág. {currentPage}/{totalPages}</span>
+          <span className="pdf-doc-meta">Página {currentPage} de {totalPages}</span>
         </div>
-        <button className="btn-icon" onClick={toggleFullscreen}>
-          {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-        </button>
+        <div className="pdf-header-actions">
+          <button className="btn-icon" onClick={toggleFullscreen}>
+            {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+          </button>
+          <button className="btn-primary-sm" onClick={() => {
+            setSpanForm({ ...spanForm, pageStart: currentPage, pageEnd: currentPage });
+            setShowSpanModal(true);
+          }}>
+            + Span
+          </button>
+        </div>
       </header>
 
+      {/* VIEWPORT */}
       <div className="pdf-viewport" ref={containerRef}>
-        <canvas ref={canvasRef} className="pdf-canvas-element" />
+        {rendering && <div className="pdf-loader"><div className="spinner" /></div>}
+        
         {isFullscreen && (
           <button className="floating-exit-btn" onClick={toggleFullscreen}>
             <Minimize size={28} />
           </button>
         )}
+        
+        <canvas ref={canvasRef} className="pdf-canvas-element" />
       </div>
 
+      {/* FOOTER */}
       <footer className="pdf-toolbar">
         <div className="pdf-pagination">
           <button className="btn-icon" disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}>
@@ -211,12 +325,57 @@ export function PdfViewerPage() {
             <ChevronRight size={24} />
           </button>
         </div>
+        
         <div className="pdf-zoom-controls">
-          <button className="btn-icon" onClick={() => setScale(s => Math.max(0.5, s - 0.25))}><ZoomOut size={20} /></button>
+          <button className="btn-icon" onClick={() => setScale(s => Math.max(0.5, s - 0.25))}>
+            <ZoomOut size={20} />
+          </button>
           <span className="zoom-indicator">{Math.round(scale * 100)}%</span>
-          <button className="btn-icon" onClick={() => setScale(s => Math.min(4, s + 0.25))}><ZoomIn size={20} /></button>
+          <button className="btn-icon" onClick={() => setScale(s => Math.min(4, s + 0.25))}>
+            <ZoomIn size={20} />
+          </button>
         </div>
       </footer>
+
+      {/* SPANS DRAWER */}
+      {spans.length > 0 && (
+        <div className="pdf-spans-drawer">
+          <div className="spans-header">Marcadores</div>
+          <div className="spans-scroll">
+            {spans.map((s) => (
+              <div key={s.id} 
+                   className={`span-chip ${currentPage >= s.pageStart && currentPage <= s.pageEnd ? 'active' : ''}`}
+                   onClick={() => setCurrentPage(s.pageStart)}>
+                <span>{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CREAR SPAN */}
+      <Modal
+        isOpen={showSpanModal}
+        onClose={() => setShowSpanModal(false)}
+        title="Crear Marcador"
+        footer={<button className="btn btn-primary" onClick={handleSaveSpan}>Guardar</button>}
+      >
+        <div className="form-group">
+          <label className="form-label">Etiqueta</label>
+          <input type="text" className="form-input" value={spanForm.label} 
+                 onChange={e => setSpanForm({...spanForm, label: e.target.value})} />
+        </div>
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="form-group">
+            <label className="form-label">Pág. Inicio</label>
+            <input type="number" className="form-input" value={spanForm.pageStart} readOnly />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Pág. Fin</label>
+            <input type="number" className="form-input" value={spanForm.pageEnd} readOnly />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
