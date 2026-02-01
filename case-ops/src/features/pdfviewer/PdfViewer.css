@@ -5,11 +5,12 @@
 .pdf-viewer {
   display: flex;
   flex-direction: column;
-  /* dvh (Dynamic Viewport Height) es crítico para móviles con barras de navegación retráctiles */
+  /* Usamos dvh para adaptarnos a las barras dinámicas del navegador móvil */
   height: 100vh;
   height: 100dvh; 
   background-color: var(--color-bg-primary, #0f172a);
-  overflow: hidden; /* Evita scroll en el contenedor principal */
+  overflow: hidden;
+  position: relative;
 }
 
 /* Header */
@@ -40,30 +41,40 @@
   font-size: 0.95rem;
 }
 
-/* Canvas Container */
+.pdf-title .text-muted {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #64748b);
+}
+
+/* Canvas Container - CORRECCIONES MOBILE CRÍTICAS */
 .pdf-canvas-container {
   flex: 1;
-  overflow: auto; /* Permite scroll natural */
+  overflow: auto; /* Permite scroll nativo */
   display: flex;
-  justify-content: center;
-  align-items: flex-start; /* Alineación superior para documentos largos */
+  /* IMPORTANTÍSIMO: align-items flex-start para evitar que el contenido se recorte 
+     por la izquierda al hacer zoom si es más grande que el contenedor */
+  align-items: flex-start; 
   padding: 1.5rem;
   background-color: var(--color-bg-tertiary, #0f172a);
   position: relative;
   
-  /* Optimizaciones Mobile */
-  -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
-  touch-action: none; /* CRÍTICO: Permite que nuestro JS maneje el pinch sin interferencia del navegador */
-  overscroll-behavior: none; /* Evita el "rebote" de toda la página */
+  /* Permite scroll horizontal (pan-x) y vertical (pan-y) nativo con un dedo.
+     Nosotros controlamos solo el gesto de 2 dedos (pinch) en JS. */
+  touch-action: pan-x pan-y; 
+  -webkit-overflow-scrolling: touch;
 }
 
 .pdf-canvas {
-  /* No max-width 100% aquí porque controlamos el tamaño vía JS/Scale */
+  /* margin: auto centra el elemento si es pequeño, pero permite scroll correcto si es grande */
+  margin: auto; 
+  max-width: none; /* Quitamos restricción para permitir zoom real */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5),
               0 4px 6px -2px rgba(0, 0, 0, 0.3);
   background-color: white;
-  transition: transform 0.05s linear; /* Suavidad extrema durante el gesto */
-  will-change: transform; /* Hint para el navegador para optimizar capas */
+  
+  /* Transición suave solo para transformaciones (zoom visual) */
+  transition: transform 0.05s linear;
+  will-change: transform;
 }
 
 .pdf-loading {
@@ -72,17 +83,20 @@
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 20;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(15, 23, 42, 0.9);
   padding: 1rem;
   border-radius: 0.5rem;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Navigation */
 .pdf-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Mejor distribución en móvil */
+  justify-content: space-between;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   background-color: var(--color-bg-secondary, #1e293b);
@@ -100,14 +114,19 @@
 }
 
 .pdf-page-input {
-  width: 3rem;
-  padding: 0.25rem;
+  width: 3.5rem;
+  padding: 0.25rem 0.5rem;
   text-align: center;
   background-color: var(--color-bg-primary, #0f172a);
   border: 1px solid var(--color-border, #334155);
   border-radius: 0.375rem;
   color: var(--color-text-primary, #f1f5f9);
   font-size: 0.875rem;
+}
+
+.pdf-page-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #f59e0b);
 }
 
 .pdf-zoom {
@@ -123,7 +142,7 @@
   padding: 1rem;
   background-color: var(--color-bg-secondary, #1e293b);
   border-top: 1px solid var(--color-border, #334155);
-  max-height: 180px; /* Un poco menos para dejar espacio en pantallas pequeñas */
+  max-height: 180px;
   overflow-y: auto;
   flex-shrink: 0;
 }
@@ -142,6 +161,10 @@
   border: 1px solid var(--color-border, #334155);
   border-radius: 0.5rem;
   transition: all 0.15s ease;
+}
+
+.span-item:hover {
+  border-color: var(--color-border-hover, #475569);
 }
 
 .span-item-active {
@@ -174,6 +197,49 @@
   display: flex;
   gap: 0.25rem;
   flex-shrink: 0;
+}
+
+/* ESTILOS DE MODO FULLSCREEN (Inmersivo) */
+.pdf-fullscreen-mode .pdf-canvas-container {
+  padding: 0;
+  background-color: #000; /* Fondo negro para mejor contraste */
+  align-items: center; /* En fullscreen sí queremos centrar si cabe */
+  justify-content: center; /* Pero mantendremos el manejo de overflow si crece */
+}
+
+/* Ajuste específico para cuando el canvas es más grande que la pantalla en fullscreen */
+.pdf-fullscreen-mode .pdf-canvas-container:has(.pdf-canvas[style*="width:"]) {
+   /* Si tiene zoom aplicado, volvemos a align-start para evitar recorte */
+   align-items: flex-start;
+   justify-content: flex-start;
+}
+
+.pdf-floating-exit-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 0.75rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
+/* Utilidades de carga y error */
+.center-loading, .center-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: #94a3b8;
+  background-color: var(--color-bg-primary, #0f172a);
 }
 
 /* Responsive adjustments */
