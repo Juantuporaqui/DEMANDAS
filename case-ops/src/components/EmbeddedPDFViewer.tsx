@@ -1,11 +1,16 @@
 // ============================================
-// Visor PDF embebido - Usa fetch + pdfjs-dist
-// Evita que React Router intercepte las URLs
+// Visor PDF embebido optimizado
 // ============================================
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, ExternalLink, Loader2 } from 'lucide-react';
+
+// Configurar Worker también aquí por si se usa de forma aislada
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).toString();
 
 interface EmbeddedPDFViewerProps {
   url: string;
@@ -16,16 +21,17 @@ interface EmbeddedPDFViewerProps {
 export function EmbeddedPDFViewer({ url, title, className = '' }: EmbeddedPDFViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const renderTaskRef = useRef<any>(null);
 
   const [pdfDoc, setPdfDoc] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [scale, setScale] = useState(1);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [rendering, setRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Cargar PDF con fetch
   useEffect(() => {
     let cancelled = false;
 
@@ -34,16 +40,13 @@ export function EmbeddedPDFViewer({ url, title, className = '' }: EmbeddedPDFVie
       setError(null);
 
       try {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: No se pudo cargar el PDF`);
-        }
+        const loadingTask = pdfjsLib.getDocument({
+          url,
+          cMapUrl: 'https://unpkg.com/pdfjs-dist@5.4.530/cmaps/',
+          cMapPacked: true,
+        });
 
-        const arrayBuffer = await response.arrayBuffer();
-
-        if (cancelled) return;
-
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const pdf = await loadingTask.promise;
 
         if (cancelled) return;
 
@@ -68,33 +71,51 @@ export function EmbeddedPDFViewer({ url, title, className = '' }: EmbeddedPDFVie
     };
   }, [url]);
 
-  // Renderizar página
   const renderPage = useCallback(async (pageNum: number) => {
-    if (!pdfDoc || !canvasRef.current || rendering) return;
+    if (!pdfDoc || !canvasRef.current) return;
+
+    if (renderTaskRef.current) {
+        try { renderTaskRef.current.cancel(); } catch { /* ignore */ }
+    }
 
     setRendering(true);
 
     try {
       const page = await pdfDoc.getPage(pageNum);
+      
+      // HiDPI Support
+      const outputScale = window.devicePixelRatio || 1;
       const viewport = page.getViewport({ scale });
 
       const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext('2d', { alpha: false });
       if (!context) return;
 
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
+      canvas.width = Math.floor(viewport.width * outputScale);
+      canvas.height = Math.floor(viewport.height * outputScale);
+      canvas.style.width = `${Math.floor(viewport.width)}px`;
+      canvas.style.height = `${Math.floor(viewport.height)}px`;
 
-      await page.render({
+      const transform = outputScale !== 1 
+        ? [outputScale, 0, 0, outputScale, 0, 0] 
+        : null;
+
+      renderTaskRef.current = page.render({
         canvasContext: context,
         viewport,
-      }).promise;
-    } catch (err) {
-      console.error('Error rendering page:', err);
+        transform: transform as any,
+      });
+
+      await renderTaskRef.current.promise;
+    } catch (err: any) {
+        if (err.name !== 'RenderingCancelledException') {
+            console.error('Error rendering page:', err);
+        }
     } finally {
       setRendering(false);
+      renderTaskRef.current = null;
     }
-  }, [pdfDoc, scale, rendering]);
+  }, [pdfDoc, scale]);
 
   useEffect(() => {
     if (pdfDoc && currentPage > 0) {
@@ -102,16 +123,20 @@ export function EmbeddedPDFViewer({ url, title, className = '' }: EmbeddedPDFVie
     }
   }, [pdfDoc, currentPage, scale, renderPage]);
 
-  // Ajustar escala al contenedor
+  // Ajustar escala al contenedor (Mejorado)
   useEffect(() => {
     if (!containerRef.current || !pdfDoc) return;
 
     async function fitToWidth() {
-      const page = await pdfDoc!.getPage(1);
-      const viewport = page.getViewport({ scale: 1 });
-      const containerWidth = containerRef.current!.clientWidth - 32; // padding
-      const newScale = Math.min(containerWidth / viewport.width, 1.5);
-      setScale(newScale);
+      try {
+        const page = await pdfDoc!.getPage(1);
+        const viewport = page.getViewport({ scale: 1 });
+        const containerWidth = containerRef.current!.clientWidth - 32;
+        if (containerWidth > 0 && viewport.width > 0) {
+            const newScale = Math.min(containerWidth / viewport.width, 1.5);
+            setScale(newScale);
+        }
+      } catch (e) { console.error(e); }
     }
 
     fitToWidth();
@@ -147,9 +172,7 @@ export function EmbeddedPDFViewer({ url, title, className = '' }: EmbeddedPDFVie
 
   return (
     <div className={`flex flex-col h-full bg-slate-950 ${className}`} ref={containerRef}>
-      {/* Toolbar */}
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-900 border-b border-slate-800">
-        {/* Navegación */}
+      <div className="flex items-center justify-between px-3 py-2 bg-slate-900 border-b border-slate-800 shrink-0">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -159,7 +182,7 @@ export function EmbeddedPDFViewer({ url, title, className = '' }: EmbeddedPDFVie
             <ChevronLeft size={18} className="text-slate-300" />
           </button>
 
-          <span className="text-sm text-slate-400 min-w-[80px] text-center">
+          <span className="text-sm text-slate-400 min-w-[60px] text-center">
             {currentPage} / {totalPages}
           </span>
 
@@ -172,7 +195,6 @@ export function EmbeddedPDFViewer({ url, title, className = '' }: EmbeddedPDFVie
           </button>
         </div>
 
-        {/* Zoom */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setScale(s => Math.max(0.5, s - 0.25))}
@@ -180,11 +202,6 @@ export function EmbeddedPDFViewer({ url, title, className = '' }: EmbeddedPDFVie
           >
             <ZoomOut size={16} className="text-slate-300" />
           </button>
-
-          <span className="text-xs text-slate-500 min-w-[45px] text-center">
-            {Math.round(scale * 100)}%
-          </span>
-
           <button
             onClick={() => setScale(s => Math.min(3, s + 0.25))}
             className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 transition-colors"
@@ -192,32 +209,15 @@ export function EmbeddedPDFViewer({ url, title, className = '' }: EmbeddedPDFVie
             <ZoomIn size={16} className="text-slate-300" />
           </button>
         </div>
-
-        {/* Abrir en nueva pestaña */}
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs transition-colors"
-        >
-          <ExternalLink size={14} />
-          <span className="hidden sm:inline">Nueva pestaña</span>
-        </a>
       </div>
 
-      {/* Canvas */}
-      <div className="flex-1 overflow-auto p-4 flex justify-center">
+      <div className="flex-1 overflow-auto p-4 flex justify-center bg-slate-950">
         <div className="relative">
-          {rendering && (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50 z-10">
-              <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
-            </div>
-          )}
-          <canvas
-            ref={canvasRef}
-            className="shadow-2xl rounded"
-            style={{ maxWidth: '100%', height: 'auto' }}
-          />
+            {/* Sin spinner aquí para evitar parpadeos molestos en actualizaciones rápidas */}
+            <canvas
+                ref={canvasRef}
+                className="shadow-2xl rounded bg-white"
+            />
         </div>
       </div>
     </div>
