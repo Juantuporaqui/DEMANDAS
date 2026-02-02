@@ -28,6 +28,7 @@ import { MorePage } from '../features/dashboard/MorePage';
 import { SettingsPage } from '../features/dashboard/SettingsPage';
 import { CasesPage } from '../features/cases/CasesPage';
 import { CaseDetailPage } from '../features/cases/CaseDetailPage';
+import { CasePrescripcionPage } from '../features/cases/CasePrescripcionPage';
 import { AnalyticsDashboardPage } from '../features/analytics/pages/AnalyticsDashboard';
 import { AnalyticsAdminPage } from '../features/analytics/pages/AnalyticsAdminPage';
 import { CourtDashboard } from '../features/analytics/pages/CourtDashboard';
@@ -112,6 +113,10 @@ export const router = createBrowserRouter(
         {
           path: 'cases/:id',
           element: <CaseDetailPage />,
+        },
+        {
+          path: 'cases/:caseId/prescripcion',
+          element: <CasePrescripcionPage />,
         },
         // Documents
         {
