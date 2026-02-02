@@ -899,6 +899,36 @@ function TabEstrategia({ strategies, caseId }: any) {
         </div>
         <Link to={`/warroom/new?caseId=${caseId}`} className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-500">+ Nueva</Link>
       </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Link
+          to={`/cases/${caseId}/prescripcion`}
+          className="group rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left transition-all hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/5 active:scale-[0.98]"
+        >
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 mb-3">
+            <RefreshCw className="w-6 h-6 text-emerald-400" />
+          </div>
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <h4 className="text-lg font-bold text-white">Prescripción</h4>
+            <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+              4 escenarios
+            </span>
+          </div>
+          <p className="text-sm text-slate-400 mb-3">
+            Matriz STS 458/2025, riesgos y guion de audiencia previa.
+          </p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              STS 458/2025
+            </span>
+            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              Audiencia previa
+            </span>
+          </div>
+          <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
+            Abrir prescripción <ChevronRight className="w-4 h-4 ml-1" />
+          </div>
+        </Link>
+      </div>
       {strategies.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
           {strategies.map((s: Strategy, i: number) => (
