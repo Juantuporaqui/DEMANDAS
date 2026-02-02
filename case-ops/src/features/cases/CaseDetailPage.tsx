@@ -26,7 +26,7 @@ import { getPDFsByCaso, getPDFUrl, tipoDocIcons, tipoDocColors, type PDFDocument
 // Visor PDF embebido (evita que React Router intercepte las URLs)
 import { EmbeddedPDFViewer } from '../../components/EmbeddedPDFViewer';
 // Timeline específico para Picassent
-import { PicassentTimeline } from './PicassentTimeline';
+import { PicassentHechosReclamados, PicassentHipotecaResumen, PicassentTimeline } from './PicassentTimeline';
 
 // ============================================
 // 1. DASHBOARD EJECUTIVO (Tab Resumen) - DINÁMICO
@@ -64,6 +64,13 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
 
   const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
   const showAnalytic = !isPicassent && !isMislata && !isQuart;
+  const opposingParty = caseData.opposingPartyName || caseData.opposingCounsel?.split('(')[1]?.replace(')', '');
+  const opposingLawyer = caseData.opposingLawyerName || caseData.opposingCounsel?.split('(')[0]?.trim();
+  const opposingSummary = [opposingParty, opposingLawyer].filter(Boolean).join(' y ');
+  const picassentSummary = {
+    objeto: 'Objeto: Reclamación de la propia cuota hipotecaria, IBIS, vehículos y aportaciones por 212.677€ además división de bienes en común.',
+    defensa: 'Defensa: prescripción parcial, calificación hipotecaria de las aportaciones y compensación de saldos.',
+  };
 
   // Calcular días hasta vista/audiencia
   const vistaEvent = events.find((e: Event) =>
@@ -89,16 +96,11 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             {caseLabel}
           </span>
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           {/* Parte contraria */}
           <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Parte contraria</div>
-            <div className="text-sm font-medium text-rose-300">{caseData.opposingPartyName || caseData.opposingCounsel?.split('(')[1]?.replace(')', '') || 'No especificada'}</div>
-          </div>
-          {/* Letrada contraria */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Letrada contraria</div>
-            <div className="text-sm font-medium text-rose-300">{caseData.opposingLawyerName || caseData.opposingCounsel?.split('(')[0]?.trim() || 'No especificada'}</div>
+            <div className="text-sm font-medium text-rose-300">{opposingSummary || 'No especificada'}</div>
           </div>
           {/* Juzgado */}
           <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
@@ -111,7 +113,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             <div className="text-sm font-medium text-slate-200 font-mono">{caseData.autosNumber}</div>
           </div>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
           {/* NIG */}
           {caseData.nig && (
             <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
@@ -141,6 +143,12 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Cuantía procesal (demanda)</div>
             <div className="text-lg font-bold text-rose-400">{formatCurrency(amounts.totalDemand)}</div>
           </div>
+          {/* Nº Hechos */}
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nº hechos</div>
+            <div className="text-lg font-bold text-slate-200">{hechosCount}</div>
+            <div className="text-[10px] text-slate-500">{factsControvertidos} controvertidos</div>
+          </div>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Sumatorio Analítico */}
@@ -157,12 +165,6 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
               <div className="text-lg font-bold text-amber-400">{formatCurrency(Math.abs(amounts.delta))}</div>
             </div>
           )}
-          {/* Nº Hechos */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nº hechos</div>
-            <div className="text-lg font-bold text-slate-200">{hechosCount}</div>
-            <div className="text-[10px] text-slate-500">{factsControvertidos} controvertidos</div>
-          </div>
           {/* Judge si existe */}
           {caseData.judge && caseData.judge !== '[Pendiente]' && (
             <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
@@ -171,8 +173,17 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             </div>
           )}
         </div>
-        {caseData.notes && !isReadMode && (
-          <p className="mt-4 text-sm text-slate-400 leading-relaxed border-t border-slate-700/50 pt-3">{caseData.notes}</p>
+        {(caseData.notes || isPicassent) && !isReadMode && (
+          <div className="mt-4 text-sm text-slate-400 leading-relaxed border-t border-slate-700/50 pt-3 space-y-2">
+            {isPicassent ? (
+              <>
+                <p>{picassentSummary.objeto}</p>
+                <p>{picassentSummary.defensa}</p>
+              </>
+            ) : (
+              <p>{caseData.notes}</p>
+            )}
+          </div>
         )}
       </div>
 
@@ -316,6 +327,8 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           <div className="text-[10px] text-slate-600">líneas de defensa</div>
         </div>
       </div>
+
+      {isPicassent && <PicassentHechosReclamados />}
 
       {/* HECHOS DEL CASO */}
       {facts.length > 0 && (
@@ -782,11 +795,6 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
     return <QuartFinancialAnalysis />;
   }
 
-  // Para Picassent, mostrar timeline con hipoteca y pagos
-  if (isPicassent) {
-    return <PicassentTimeline />;
-  }
-
   // Helper para sacar un importe estimado del texto si existe
   const extractAmount = (text: string) => {
     const match = text.match(/(\d{1,3}(?:\.\d{3})*(?:,\d+)?)\s?€/);
@@ -795,6 +803,8 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
 
   return (
     <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
+      {isPicassent && <PicassentHipotecaResumen />}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-bold text-white">Hechos y Partidas</h3>
@@ -1004,6 +1014,9 @@ export function CaseDetailPage() {
   };
 
   if (!currentCase) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Cargando War Room...</div>;
+  const isPicassent = currentCase.id?.includes('picassent') ||
+                      currentCase.title?.toLowerCase().includes('picassent') ||
+                      currentCase.autosNumber?.includes('715');
 
   return (
     <div className="min-h-screen bg-slate-950 pb-20 font-sans">
@@ -1054,6 +1067,7 @@ export function CaseDetailPage() {
           <div className="flex gap-3 sm:gap-6 overflow-x-auto no-scrollbar pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
             {[
               { id: 'resumen', label: '📊 Resumen', shortLabel: '📊' },
+              { id: 'cronologia', label: '🕒 Cronología', shortLabel: '🕒' },
               { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
               { id: 'estrategia', label: '♟️ Estrategia', shortLabel: '♟️' },
               { id: 'docs', label: '📂 Documentos', shortLabel: '📂' },
@@ -1066,7 +1080,7 @@ export function CaseDetailPage() {
                 className={`pb-2 sm:pb-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
               >
                 <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.shortLabel} {tab.id === 'resumen' ? 'Resumen' : tab.id === 'economico' ? 'Eco.' : tab.id === 'estrategia' ? 'Estr.' : tab.id === 'docs' ? 'Docs' : 'Actu.'}</span>
+                <span className="sm:hidden">{tab.shortLabel} {tab.id === 'resumen' ? 'Resumen' : tab.id === 'cronologia' ? 'Crono.' : tab.id === 'economico' ? 'Eco.' : tab.id === 'estrategia' ? 'Estr.' : tab.id === 'docs' ? 'Docs' : 'Actu.'}</span>
               </button>
             ))}
           </div>
@@ -1076,6 +1090,18 @@ export function CaseDetailPage() {
       {/* CONTENIDO */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} partidas={partidas} documents={docs} navigate={navigate} setActiveTab={setActiveTab} isReadMode={isReadMode} />}
+        {activeTab === 'cronologia' && (
+          isPicassent ? (
+            <div className="animate-in fade-in duration-500">
+              <PicassentTimeline />
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/40 p-8 text-center text-slate-500 animate-in fade-in duration-500">
+              <Calendar size={40} className="mx-auto text-slate-600 mb-4" />
+              <p className="text-sm">Cronología procesal en fase de carga para este procedimiento</p>
+            </div>
+          )
+        )}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}

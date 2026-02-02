@@ -7,14 +7,12 @@ import {
   timelinePicassent,
   procedimientoPicassent,
   resumenHipoteca,
-  getEventosCriticos,
-  getEventosHipoteca,
   type EventoPicassent
 } from '../../data/picassent/timeline';
 import { hechosReclamados, getResumenContador } from '../../data/hechosReclamados';
 import {
   Calendar, Home, CreditCard, Scale, AlertTriangle, CheckCircle,
-  TrendingDown, FileText, Clock, Building2
+  TrendingDown, FileText, Clock, ChevronRight
 } from 'lucide-react';
 
 // Función para formatear céntimos a euros
@@ -34,9 +32,123 @@ const getEventColor = (tipo: EventoPicassent['tipo']) => {
   }
 };
 
+export function PicassentHipotecaResumen() {
+  return (
+    <div className="rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-500/10 to-slate-900/60 p-5">
+      <h3 className="text-sm font-bold text-violet-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <CreditCard size={16} />
+        Hipoteca Solidaria - El Centro del Conflicto
+      </h3>
+
+      <div className="grid lg:grid-cols-3 gap-4 mb-4">
+        {/* Préstamo Original */}
+        <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50">
+          <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Préstamo Original (2006)</div>
+          <div className="text-2xl font-bold text-violet-300">{formatCents(resumenHipoteca.importeOriginal)}</div>
+          <div className="text-xs text-slate-500 mt-1">Kutxa → Barclays → Caixabank</div>
+        </div>
+
+        {/* Saldo Actual */}
+        <div className="bg-slate-900/50 rounded-lg p-4 border border-rose-500/30">
+          <div className="text-[10px] uppercase tracking-wider text-rose-400 mb-1">Saldo Pendiente Actual</div>
+          <div className="text-2xl font-bold text-rose-300">{formatCents(resumenHipoteca.saldoActual)}</div>
+          <div className="text-xs text-rose-400/70 mt-1">Grava solo vivienda de Juan</div>
+        </div>
+
+        {/* Impago Vicenta */}
+        <div className="bg-rose-500/10 rounded-lg p-4 border border-rose-500/30">
+          <div className="text-[10px] uppercase tracking-wider text-rose-400 mb-1 flex items-center gap-1">
+            <AlertTriangle size={12} /> Impagado por Vicenta
+          </div>
+          <div className="text-2xl font-bold text-rose-300">{formatCents(resumenHipoteca.totalImpagadoVicenta)}</div>
+          <div className="text-xs text-rose-400/70 mt-1">{resumenHipoteca.mesesImpagadosVicenta} meses desde Oct 2023</div>
+        </div>
+      </div>
+
+      {/* Garantía y bienes */}
+      <div className="bg-slate-900/50 rounded-lg p-4 border border-amber-500/30">
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle className="text-amber-400" size={16} />
+          <span className="text-sm font-bold text-amber-300">Punto Clave: Garantía vs. Bienes Adquiridos</span>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <div className="text-xs text-slate-400 mb-2">Garantía Hipotecaria (de Juan):</div>
+            <div className="text-sm text-white font-medium">
+              Vivienda privativa C/ Lope de Vega 7
+            </div>
+            <div className="text-xs text-rose-400 mt-1">
+              ⚠️ Carga actual: {formatCents(resumenHipoteca.saldoActual)}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-400 mb-2">Bienes Adquiridos (comunes, LIBRES de cargas):</div>
+            {resumenHipoteca.inmuebles.map((inm, i) => (
+              <div key={i} className="flex justify-between items-center text-sm mb-1">
+                <span className="text-emerald-300">{inm.nombre}</span>
+                <span className="text-emerald-400 font-mono">{formatCents(inm.valor)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-3 p-2 bg-amber-500/10 rounded text-xs text-amber-300 border border-amber-500/20">
+          <strong>Estrategia:</strong> Vicenta quiere el 50% de los inmuebles pero pretende que Juan pague solo la hipoteca que los financió.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function PicassentHechosReclamados() {
+  return (
+    <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5">
+      <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+        <FileText size={16} className="text-amber-400" />
+        10 Hechos Reclamados por Vicenta
+      </h3>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {hechosReclamados.map((hecho) => (
+          <a
+            key={hecho.id}
+            href={`https://juantuporaqui.github.io/DEMANDAS/analytics/hechos#hecho-${hecho.id}`}
+            target="_blank"
+            rel="noreferrer"
+            className={`group flex flex-col justify-between gap-3 p-4 rounded-xl border transition-all hover:-translate-y-0.5 hover:shadow-lg ${
+              hecho.estado === 'prescrito' ? 'bg-slate-500/10 border-slate-500/30 hover:border-slate-400/60 hover:shadow-slate-500/10' :
+              hecho.estado === 'compensable' ? 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-400/60 hover:shadow-emerald-500/10' :
+              'bg-rose-500/10 border-rose-500/30 hover:border-rose-400/60 hover:shadow-rose-500/10'
+            }`}
+          >
+            <div className="flex justify-between items-start gap-2 mb-1">
+              <span className="text-xs font-bold text-slate-500">#{hecho.id}</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${
+                hecho.estado === 'prescrito' ? 'bg-slate-500/30 text-slate-300' :
+                hecho.estado === 'compensable' ? 'bg-emerald-500/30 text-emerald-300' :
+                'bg-rose-500/30 text-rose-300'
+              }`}>
+                {hecho.estado}
+              </span>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-1 line-clamp-1">{hecho.titulo}</h4>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-500">{hecho.año}</span>
+                <span className="font-mono text-sm text-slate-300">{formatCents(hecho.cuantia * 100)}</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-xs text-slate-400">
+              <span className="text-[10px] uppercase tracking-wider">Ver detalle</span>
+              <ChevronRight size={14} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function PicassentTimeline() {
-  const eventosCriticos = getEventosCriticos();
-  const eventosHipoteca = getEventosHipoteca();
   const resumenFinanciero = getResumenContador();
 
   // Agrupar eventos por año
@@ -100,107 +212,6 @@ export function PicassentTimeline() {
           <div className="text-[10px] uppercase tracking-wider text-emerald-400 mb-1">Reducción Objetivo</div>
           <div className="text-2xl font-bold text-emerald-300">-{resumenFinanciero.reduccionObjetivo}%</div>
           <div className="text-xs text-emerald-400/70 mt-1">Por prescripción</div>
-        </div>
-      </div>
-
-      {/* RESUMEN HIPOTECA */}
-      <div className="rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-500/10 to-slate-900/60 p-5">
-        <h3 className="text-sm font-bold text-violet-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-          <CreditCard size={16} />
-          Hipoteca Solidaria - El Centro del Conflicto
-        </h3>
-
-        <div className="grid lg:grid-cols-3 gap-4 mb-4">
-          {/* Préstamo Original */}
-          <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Préstamo Original (2006)</div>
-            <div className="text-2xl font-bold text-violet-300">{formatCents(resumenHipoteca.importeOriginal)}</div>
-            <div className="text-xs text-slate-500 mt-1">Kutxa → Barclays → Caixabank</div>
-          </div>
-
-          {/* Saldo Actual */}
-          <div className="bg-slate-900/50 rounded-lg p-4 border border-rose-500/30">
-            <div className="text-[10px] uppercase tracking-wider text-rose-400 mb-1">Saldo Pendiente Actual</div>
-            <div className="text-2xl font-bold text-rose-300">{formatCents(resumenHipoteca.saldoActual)}</div>
-            <div className="text-xs text-rose-400/70 mt-1">Grava solo vivienda de Juan</div>
-          </div>
-
-          {/* Impago Vicenta */}
-          <div className="bg-rose-500/10 rounded-lg p-4 border border-rose-500/30">
-            <div className="text-[10px] uppercase tracking-wider text-rose-400 mb-1 flex items-center gap-1">
-              <AlertTriangle size={12} /> Impagado por Vicenta
-            </div>
-            <div className="text-2xl font-bold text-rose-300">{formatCents(resumenHipoteca.totalImpagadoVicenta)}</div>
-            <div className="text-xs text-rose-400/70 mt-1">{resumenHipoteca.mesesImpagadosVicenta} meses desde Oct 2023</div>
-          </div>
-        </div>
-
-        {/* Garantía y bienes */}
-        <div className="bg-slate-900/50 rounded-lg p-4 border border-amber-500/30">
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="text-amber-400" size={16} />
-            <span className="text-sm font-bold text-amber-300">Punto Clave: Garantía vs. Bienes Adquiridos</span>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <div className="text-xs text-slate-400 mb-2">Garantía Hipotecaria (de Juan):</div>
-              <div className="text-sm text-white font-medium">
-                Vivienda privativa C/ Lope de Vega 7
-              </div>
-              <div className="text-xs text-rose-400 mt-1">
-                ⚠️ Carga actual: {formatCents(resumenHipoteca.saldoActual)}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400 mb-2">Bienes Adquiridos (comunes, LIBRES de cargas):</div>
-              {resumenHipoteca.inmuebles.map((inm, i) => (
-                <div key={i} className="flex justify-between items-center text-sm mb-1">
-                  <span className="text-emerald-300">{inm.nombre}</span>
-                  <span className="text-emerald-400 font-mono">{formatCents(inm.valor)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="mt-3 p-2 bg-amber-500/10 rounded text-xs text-amber-300 border border-amber-500/20">
-            <strong>Estrategia:</strong> Vicenta quiere el 50% de los inmuebles pero pretende que Juan pague solo la hipoteca que los financió.
-          </div>
-        </div>
-      </div>
-
-      {/* HECHOS RECLAMADOS RESUMEN */}
-      <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-          <FileText size={16} className="text-amber-400" />
-          10 Hechos Reclamados por Vicenta
-        </h3>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {hechosReclamados.map((hecho) => (
-            <div
-              key={hecho.id}
-              className={`p-3 rounded-lg border ${
-                hecho.estado === 'prescrito' ? 'bg-slate-500/10 border-slate-500/30' :
-                hecho.estado === 'compensable' ? 'bg-emerald-500/10 border-emerald-500/30' :
-                'bg-rose-500/10 border-rose-500/30'
-              }`}
-            >
-              <div className="flex justify-between items-start gap-2 mb-1">
-                <span className="text-xs font-bold text-slate-500">#{hecho.id}</span>
-                <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${
-                  hecho.estado === 'prescrito' ? 'bg-slate-500/30 text-slate-300' :
-                  hecho.estado === 'compensable' ? 'bg-emerald-500/30 text-emerald-300' :
-                  'bg-rose-500/30 text-rose-300'
-                }`}>
-                  {hecho.estado}
-                </span>
-              </div>
-              <h4 className="text-sm font-medium text-white mb-1 line-clamp-1">{hecho.titulo}</h4>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-500">{hecho.año}</span>
-                <span className="font-mono text-sm text-slate-300">{formatCents(hecho.cuantia * 100)}</span>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 
