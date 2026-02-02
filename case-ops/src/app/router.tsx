@@ -2,11 +2,10 @@
 // CASE OPS - Router Configuration
 // ============================================
 
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { AppShell } from './AppShell';
 
 // Features
-import { DashboardPage } from '../features/dashboard/DashboardPage';
 import { SearchPage } from '../features/search/SearchPage';
 import { DocumentsPage } from '../features/documents/DocumentsPage';
 import { DocumentDetailPage } from '../features/documents/DocumentDetailPage';
@@ -49,11 +48,11 @@ export const router = createBrowserRouter(
       children: [
         {
           index: true,
-          element: <Navigate to="/cases" replace />,
+          element: <CasesPage />,
         },
         {
           path: 'dashboard',
-          element: <DashboardPage />,
+          element: <CasesPage />,
         },
         {
           path: 'analytics',
