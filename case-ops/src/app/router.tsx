@@ -34,6 +34,7 @@ import { AnalyticsAdminPage } from '../features/analytics/pages/AnalyticsAdminPa
 import { CourtDashboard } from '../features/analytics/pages/CourtDashboard';
 import { HechosPage } from '../features/analytics/pages/HechosPage';
 import { PrescripcionPage } from '../features/analytics/pages/PrescripcionPage';
+import { ExcepcionAcumulacionPage } from '../features/analytics/pages/ExcepcionAcumulacionPage';
 import { ModoAudienciaPage } from '../features/audiencia/ModoAudienciaPage';
 import { AudienciaPreviaPage } from '../features/audiencia/AudienciaPreviaPage';
 import { ModoTelepronter } from '../features/audiencia/ModoTelepronter';
@@ -117,6 +118,10 @@ export const router = createBrowserRouter(
         {
           path: 'cases/:caseId/prescripcion',
           element: <CasePrescripcionPage />,
+        },
+        {
+          path: 'cases/:caseId/estrategias/excepcion-acumulacion',
+          element: <ExcepcionAcumulacionPage />,
         },
         // Documents
         {

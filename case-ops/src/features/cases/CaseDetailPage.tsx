@@ -910,34 +910,64 @@ function TabEstrategia({ strategies, caseId }: any) {
               <p className="text-xs text-slate-400">Herramientas clave para la audiencia previa.</p>
             </div>
           </div>
-          <Link
-            to={`/analytics/prescripcion?caseId=picassent&returnTo=${encodeURIComponent(returnTo)}`}
-            className="group block w-full rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.99]"
-          >
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 mb-3">
-              <Scale className="w-6 h-6 text-emerald-400" />
-            </div>
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <h4 className="text-lg font-bold text-white">Prescripción</h4>
-              <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
-                4 escenarios
-              </span>
-            </div>
-            <p className="text-sm text-slate-400 mb-3">
-              Mapa de escenarios + guion de sala + checklist probatorio.
-            </p>
-            <div className="flex flex-wrap gap-2 mb-3">
-              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                STS 458/2025
-              </span>
-              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                Audiencia previa
-              </span>
-            </div>
-            <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
-              Abrir prescripción <ChevronRight className="w-4 h-4 ml-1" />
-            </div>
-          </Link>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Link
+              to={`/analytics/prescripcion?caseId=picassent&returnTo=${encodeURIComponent(returnTo)}`}
+              className="group block w-full rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 mb-3">
+                <Scale className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <h4 className="text-lg font-bold text-white">Prescripción</h4>
+                <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                  4 escenarios
+                </span>
+              </div>
+              <p className="text-sm text-slate-400 mb-3">
+                Mapa de escenarios + guion de sala + checklist probatorio.
+              </p>
+              <div className="flex flex-wrap gap-2 mb-3">
+                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  STS 458/2025
+                </span>
+                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  Audiencia previa
+                </span>
+              </div>
+              <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
+                Abrir prescripción <ChevronRight className="w-4 h-4 ml-1" />
+              </div>
+            </Link>
+            <Link
+              to={`/cases/${caseId}/estrategias/excepcion-acumulacion?returnTo=${encodeURIComponent(returnTo)}`}
+              className="group block w-full rounded-2xl border border-sky-500/30 bg-gradient-to-br from-sky-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-sky-500/60 hover:shadow-lg hover:shadow-sky-500/10 active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-500/20 border border-sky-500/30 mb-3">
+                <AlertTriangle className="w-6 h-6 text-sky-300" />
+              </div>
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <h4 className="text-lg font-bold text-white">Excepción procesal</h4>
+                <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                  4 escenarios
+                </span>
+              </div>
+              <p className="text-sm text-slate-400 mb-3">
+                Acumulación indebida y saneamiento del objeto con guion de sala.
+              </p>
+              <div className="flex flex-wrap gap-2 mb-3">
+                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-200 border border-sky-500/30">
+                  Acumulación objetiva
+                </span>
+                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  Audiencia previa
+                </span>
+              </div>
+              <div className="flex items-center text-sm text-sky-300 font-medium group-hover:translate-x-1 transition-transform">
+                Abrir excepción <ChevronRight className="w-4 h-4 ml-1" />
+              </div>
+            </Link>
+          </div>
         </div>
       )}
       {strategies.length > 0 ? (
