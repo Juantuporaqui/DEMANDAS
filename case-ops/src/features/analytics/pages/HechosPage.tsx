@@ -164,11 +164,13 @@ export function HechosPage() {
       >
         <div className={viewMode === 'compact' ? "grid gap-4 sm:grid-cols-1" : "space-y-3"}>
           {filteredHechos.map((hecho) => (
-            viewMode === 'expandible' ? (
-              <HechoExpandible key={hecho.id} hecho={hecho} />
-            ) : (
-              <HechoCard key={hecho.id} hecho={hecho} />
-            )
+            <div key={hecho.id} id={`hecho-${hecho.id}`} className="scroll-mt-24">
+              {viewMode === 'expandible' ? (
+                <HechoExpandible hecho={hecho} />
+              ) : (
+                <HechoCard hecho={hecho} />
+              )}
+            </div>
           ))}
         </div>
       </SectionCard>

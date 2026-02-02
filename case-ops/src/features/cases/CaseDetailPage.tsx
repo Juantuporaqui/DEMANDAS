@@ -64,6 +64,13 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
 
   const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
   const showAnalytic = !isPicassent && !isMislata && !isQuart;
+  const opposingParty = caseData.opposingPartyName || caseData.opposingCounsel?.split('(')[1]?.replace(')', '');
+  const opposingLawyer = caseData.opposingLawyerName || caseData.opposingCounsel?.split('(')[0]?.trim();
+  const opposingSummary = [opposingParty, opposingLawyer].filter(Boolean).join(' y ');
+  const picassentSummary = {
+    objeto: 'Objeto: Reclamación de la propia cuota hipotecaria, IBIS, vehículos y aportaciones por 212.677€ además división de bienes en común.',
+    defensa: 'Defensa: prescripción parcial, calificación hipotecaria de las aportaciones y compensación de saldos.',
+  };
 
   // Calcular días hasta vista/audiencia
   const vistaEvent = events.find((e: Event) =>
@@ -89,16 +96,11 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             {caseLabel}
           </span>
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           {/* Parte contraria */}
           <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Parte contraria</div>
-            <div className="text-sm font-medium text-rose-300">{caseData.opposingPartyName || caseData.opposingCounsel?.split('(')[1]?.replace(')', '') || 'No especificada'}</div>
-          </div>
-          {/* Letrada contraria */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Letrada contraria</div>
-            <div className="text-sm font-medium text-rose-300">{caseData.opposingLawyerName || caseData.opposingCounsel?.split('(')[0]?.trim() || 'No especificada'}</div>
+            <div className="text-sm font-medium text-rose-300">{opposingSummary || 'No especificada'}</div>
           </div>
           {/* Juzgado */}
           <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
@@ -111,7 +113,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             <div className="text-sm font-medium text-slate-200 font-mono">{caseData.autosNumber}</div>
           </div>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
           {/* NIG */}
           {caseData.nig && (
             <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
@@ -141,6 +143,12 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Cuantía procesal (demanda)</div>
             <div className="text-lg font-bold text-rose-400">{formatCurrency(amounts.totalDemand)}</div>
           </div>
+          {/* Nº Hechos */}
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nº hechos</div>
+            <div className="text-lg font-bold text-slate-200">{hechosCount}</div>
+            <div className="text-[10px] text-slate-500">{factsControvertidos} controvertidos</div>
+          </div>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Sumatorio Analítico */}
@@ -157,12 +165,6 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
               <div className="text-lg font-bold text-amber-400">{formatCurrency(Math.abs(amounts.delta))}</div>
             </div>
           )}
-          {/* Nº Hechos */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nº hechos</div>
-            <div className="text-lg font-bold text-slate-200">{hechosCount}</div>
-            <div className="text-[10px] text-slate-500">{factsControvertidos} controvertidos</div>
-          </div>
           {/* Judge si existe */}
           {caseData.judge && caseData.judge !== '[Pendiente]' && (
             <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
@@ -171,8 +173,17 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             </div>
           )}
         </div>
-        {caseData.notes && !isReadMode && (
-          <p className="mt-4 text-sm text-slate-400 leading-relaxed border-t border-slate-700/50 pt-3">{caseData.notes}</p>
+        {(caseData.notes || isPicassent) && !isReadMode && (
+          <div className="mt-4 text-sm text-slate-400 leading-relaxed border-t border-slate-700/50 pt-3 space-y-2">
+            {isPicassent ? (
+              <>
+                <p>{picassentSummary.objeto}</p>
+                <p>{picassentSummary.defensa}</p>
+              </>
+            ) : (
+              <p>{caseData.notes}</p>
+            )}
+          </div>
         )}
       </div>
 

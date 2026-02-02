@@ -12,7 +12,7 @@ import {
 import { hechosReclamados, getResumenContador } from '../../data/hechosReclamados';
 import {
   Calendar, Home, CreditCard, Scale, AlertTriangle, CheckCircle,
-  TrendingDown, FileText, Clock
+  TrendingDown, FileText, Clock, ChevronRight
 } from 'lucide-react';
 
 // Función para formatear céntimos a euros
@@ -109,12 +109,15 @@ export function PicassentHechosReclamados() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {hechosReclamados.map((hecho) => (
-          <div
+          <a
             key={hecho.id}
-            className={`p-3 rounded-lg border ${
-              hecho.estado === 'prescrito' ? 'bg-slate-500/10 border-slate-500/30' :
-              hecho.estado === 'compensable' ? 'bg-emerald-500/10 border-emerald-500/30' :
-              'bg-rose-500/10 border-rose-500/30'
+            href={`https://juantuporaqui.github.io/DEMANDAS/analytics/hechos#hecho-${hecho.id}`}
+            target="_blank"
+            rel="noreferrer"
+            className={`group flex flex-col justify-between gap-3 p-4 rounded-xl border transition-all hover:-translate-y-0.5 hover:shadow-lg ${
+              hecho.estado === 'prescrito' ? 'bg-slate-500/10 border-slate-500/30 hover:border-slate-400/60 hover:shadow-slate-500/10' :
+              hecho.estado === 'compensable' ? 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-400/60 hover:shadow-emerald-500/10' :
+              'bg-rose-500/10 border-rose-500/30 hover:border-rose-400/60 hover:shadow-rose-500/10'
             }`}
           >
             <div className="flex justify-between items-start gap-2 mb-1">
@@ -127,12 +130,18 @@ export function PicassentHechosReclamados() {
                 {hecho.estado}
               </span>
             </div>
-            <h4 className="text-sm font-medium text-white mb-1 line-clamp-1">{hecho.titulo}</h4>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-500">{hecho.año}</span>
-              <span className="font-mono text-sm text-slate-300">{formatCents(hecho.cuantia * 100)}</span>
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-1 line-clamp-1">{hecho.titulo}</h4>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-500">{hecho.año}</span>
+                <span className="font-mono text-sm text-slate-300">{formatCents(hecho.cuantia * 100)}</span>
+              </div>
             </div>
-          </div>
+            <div className="flex items-center justify-between text-xs text-slate-400">
+              <span className="text-[10px] uppercase tracking-wider">Ver detalle</span>
+              <ChevronRight size={14} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </a>
         ))}
       </div>
     </div>
