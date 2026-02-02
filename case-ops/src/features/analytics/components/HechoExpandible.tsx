@@ -75,6 +75,14 @@ const slugify = (text: string) =>
     .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '');
 
+const getDocumentoHref = (doc: string) => {
+  const match = doc.match(/\bdoc\.?\s*(\d+)\b/i);
+  if (match) {
+    return `/documentos/doc-${match[1]}.pdf`;
+  }
+  return `/documentos/${slugify(doc)}.pdf`;
+};
+
 const parseDesarrollo = (markdown?: string) => {
   if (!markdown) {
     return { title: 'Desarrollo', sections: [] as Array<{ title: string; content: string }> };
@@ -345,9 +353,15 @@ export function HechoExpandible({ hecho }: HechoExpandibleProps) {
                   </div>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {hecho.documentosRef.map((doc, i) => (
-                      <span key={i} className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-slate-700/50 text-[10px] sm:text-xs text-slate-300 font-mono border border-slate-600/50">
+                      <a
+                        key={i}
+                        href={getDocumentoHref(doc)}
+                        download
+                        className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-slate-700/50 text-[10px] sm:text-xs text-slate-200 font-mono border border-slate-600/50 hover:text-white hover:border-slate-500/70 transition-colors"
+                        title={`Descargar ${doc}`}
+                      >
                         {doc}
-                      </span>
+                      </a>
                     ))}
                   </div>
                 </div>
