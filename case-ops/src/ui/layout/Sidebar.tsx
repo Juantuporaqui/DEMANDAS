@@ -20,7 +20,7 @@ import type { Case } from '../../types';
 
 // Navegación Principal
 const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} />, section: 'principal' },
+  { to: '/cases', label: 'Panel', icon: <LayoutDashboard size={18} />, section: 'principal' },
   { to: '/events', label: 'Agenda Global', icon: <Calendar size={18} />, section: 'principal' },
   { to: '/tasks', label: 'Tareas', icon: <CheckSquare size={18} />, section: 'principal' },
   { to: '/documents', label: 'Documentos', icon: <FileText size={18} />, section: 'principal' },
@@ -28,7 +28,6 @@ const NAV_ITEMS = [
 
 // Navegación Secundaria
 const NAV_SECONDARY = [
-  { to: '/cases', label: 'Todos los Casos', icon: <Scale size={18} /> },
   { to: '/search', label: 'Buscador', icon: <Search size={18} /> },
   { to: '/warroom', label: 'War Room', icon: <Target size={18} /> },
   { to: '/settings', label: 'Ajustes', icon: <Settings size={18} /> },

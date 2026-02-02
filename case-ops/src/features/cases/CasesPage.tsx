@@ -4,6 +4,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { EmptyState } from '../../components';
 import {
   casesRepo,
@@ -13,9 +14,12 @@ import {
   partidasRepo,
   strategiesRepo,
 } from '../../db/repositories';
+import { chaladitaDb } from '../../db/chaladitaDb';
 import type { Case, Document, Event, Fact, Partida, Strategy } from '../../types';
 import { formatDate } from '../../utils/dates';
-import { formatCurrency } from '../../utils/validators';
+import { resumenAudiencia } from '../../data/audienciaPrevia';
+import { hechosReclamados, getResumenContador } from '../../data/hechosReclamados';
+import { CaseCard } from './components/CaseCard';
 
 const STATUS_LABELS: Record<string, string> = {
   activo: 'Activo',
@@ -74,6 +78,25 @@ function getCaseLabel(caseItem: Case) {
   return 'CASO';
 }
 
+function getRoleLabel(role?: Case['clientRole']) {
+  if (!role) return 'Parte';
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
+function getDaysDelta(targetDate: string) {
+  const now = new Date();
+  const target = new Date(targetDate);
+  const diff = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (Number.isNaN(diff)) return 'D-0';
+  return diff >= 0 ? `D-${diff}` : `D+${Math.abs(diff)}`;
+}
+
+const DEFAULT_SUMMARIES: Record<string, string> = {
+  PICASSENT: 'Reclamación de cuotas hipotecarias y préstamos tras ruptura.',
+  MISLATA: 'Reclamación de cantidad vinculada a deuda hipotecaria pendiente.',
+  QUART: 'Ejecución familiar para asegurar pagos y ayudas escolares.',
+};
+
 export function CasesPage() {
   const [cases, setCases] = useState<Case[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -82,6 +105,16 @@ export function CasesPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [loading, setLoading] = useState(true);
+  const chaladitaData = useLiveQuery(async () => {
+    const [procedimientos, hechos, documentos, partidas] = await Promise.all([
+      chaladitaDb.procedimientos.toArray(),
+      chaladitaDb.hechos.toArray(),
+      chaladitaDb.documentos.toArray(),
+      chaladitaDb.partidas.toArray(),
+    ]);
+
+    return { procedimientos, hechos, documentos, partidas };
+  }, []);
 
   useEffect(() => {
     async function loadCases() {
@@ -122,20 +155,32 @@ export function CasesPage() {
       return 0;
     });
   }, [cases]);
-  const childCases = useMemo(() => cases.filter((caseItem) => caseItem.parentCaseId), [cases]);
-
   if (loading) return <div className="p-8 text-center text-slate-500">Cargando casos...</div>;
+
+  const proximoHitoLabel = `Audiencia Previa - Picassent`;
+  const proximoHitoDays = getDaysDelta(resumenAudiencia.fecha);
+  const resumenContador = getResumenContador();
 
   return (
     <div className="space-y-8">
-      {/* Navegación de retorno */}
-      <div className="flex items-center gap-4">
-        <Link
-          to="/dashboard"
-          className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
-        >
-          ← Dashboard
-        </Link>
+      <div className="rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-500/10 via-slate-900/80 to-slate-950/80 p-6 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-amber-200">
+              Próximo hito
+            </p>
+            <h2 className="mt-1 text-2xl font-semibold text-white">
+              {proximoHitoLabel}
+            </h2>
+            <p className="mt-1 text-sm text-slate-300">
+              {formatDate(resumenAudiencia.fecha)} · {resumenAudiencia.sala}
+            </p>
+          </div>
+          <div className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-5 py-3 text-center">
+            <div className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200">Cuenta atrás</div>
+            <div className="mt-1 text-2xl font-semibold text-amber-100">{proximoHitoDays}</div>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -167,103 +212,63 @@ export function CasesPage() {
             const caseStrategies = strategies.filter((strategy) => strategy.caseId === caseItem.id);
             const casePartidas = partidas.filter((partida) => partida.caseId === caseItem.id);
             const caseEvents = events.filter((event) => event.caseId === caseItem.id);
-            const pendingFacts = caseFacts.filter(
-              (fact) => fact.status === 'controvertido' || fact.status === 'a_probar'
-            );
             const totalAmount = casePartidas.reduce((sum, partida) => sum + partida.amountCents, 0);
             const nextEvent = getNextEvent(caseEvents);
-            const children = childCases.filter((child) => child.parentCaseId === caseItem.id);
             const caseLabel = getCaseLabel(caseItem);
+            const procedimientoMatch = chaladitaData?.procedimientos.find(
+              (proc) =>
+                proc.autos === caseItem.autosNumber ||
+                proc.nombre.toLowerCase().includes(caseLabel.toLowerCase())
+            );
+            const chaladitaHechos = chaladitaData?.hechos.filter(
+              (hecho) => hecho.procedimientoId === procedimientoMatch?.id
+            ) ?? [];
+            const chaladitaDocs = chaladitaData?.documentos.filter(
+              (doc) => doc.procedimientoId === procedimientoMatch?.id
+            ) ?? [];
+            const chaladitaPartidas = chaladitaData?.partidas.filter(
+              (partida) => partida.procedimientoId === procedimientoMatch?.id
+            ) ?? [];
+            const chaladitaTotal = chaladitaPartidas.reduce((sum, partida) => sum + partida.importe, 0);
+            const baseAmount = caseItem.amountTotalCents
+              ?? (chaladitaTotal > 0 ? chaladitaTotal : totalAmount);
+            const impactAmountCents = baseAmount > 0
+              ? baseAmount
+              : caseLabel === 'PICASSENT'
+                ? Math.round(resumenContador.totalReclamado * 100)
+                : 0;
+            const microSummary =
+              procedimientoMatch?.objetivoInmediato?.trim() ||
+              caseItem.notes?.trim() ||
+              DEFAULT_SUMMARIES[caseLabel] ||
+              'Revisión integral de la estrategia procesal y probatoria.';
+            const gapCount = caseLabel === 'PICASSENT'
+              ? hechosReclamados.filter(
+                  (hecho) => hecho.estado === 'disputa' && hecho.documentosRef.length === 0
+                ).length
+              : 0;
+            const nextEventLabel = nextEvent
+              ? `${nextEvent.title} · ${formatDate(nextEvent.date)}`
+              : undefined;
 
             return (
-              <Link
+              <CaseCard
                 key={caseItem.id}
-                to={`/cases/${caseItem.id}`}
-                className="group flex h-full"
-              >
-                <div
-                  className={`flex h-full w-full flex-col gap-6 rounded-2xl border bg-gradient-to-br ${accent.accent} ${accent.border} p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-xl`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-2xl">
-                        {accent.icon}
-                      </div>
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="text-lg font-semibold text-white">{caseItem.title}</h2>
-                          <span
-                            className={`rounded-full border px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] ${
-                              STATUS_BADGES[caseItem.status] || 'border-white/10 bg-white/5 text-slate-300'
-                            }`}
-                          >
-                            {STATUS_LABELS[caseItem.status] || caseItem.status}
-                          </span>
-                          <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-100">
-                            {caseLabel}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-xs uppercase tracking-[0.3em] text-slate-400">
-                          {caseItem.type} · {caseItem.autosNumber || 'Sin autos'}
-                        </p>
-                        <p className="mt-2 text-sm text-slate-300">{caseItem.court}</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-                      {formatCurrency(totalAmount)}
-                    </span>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                      <div className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                        Documentos
-                      </div>
-                      <div className="mt-2 text-lg font-semibold text-white">{docs.length}</div>
-                    </div>
-                    <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                      <div className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                        Hechos clave
-                      </div>
-                      <div className="mt-2 text-lg font-semibold text-white">{pendingFacts.length}</div>
-                    </div>
-                    <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                      <div className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                        Estrategias
-                      </div>
-                      <div className="mt-2 text-lg font-semibold text-white">{caseStrategies.length}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300">
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                      {casePartidas.length} partidas
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                      {caseEvents.length} eventos
-                    </span>
-                    {children.length > 0 && (
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                        {children.length} procedimientos vinculados
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300">
-                    <div>
-                      <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                        Próximo hito
-                      </div>
-                      <div className="text-sm text-slate-200">
-                        {nextEvent ? `${nextEvent.title} · ${formatDate(nextEvent.date)}` : 'Sin eventos próximos'}
-                      </div>
-                    </div>
-                    <span className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
-                      Ver dossier →
-                    </span>
-                  </div>
-                </div>
-              </Link>
+                caseItem={caseItem}
+                accent={accent}
+                statusLabel={STATUS_LABELS[caseItem.status] || caseItem.status}
+                statusBadge={STATUS_BADGES[caseItem.status] || 'border-white/10 bg-white/5 text-slate-300'}
+                roleLabel={getRoleLabel(caseItem.clientRole)}
+                opposingParty={caseItem.opposingPartyName || 'Sin datos'}
+                opposingLawyer={caseItem.opposingLawyerName || caseItem.opposingCounsel || 'Sin datos'}
+                impactAmountCents={impactAmountCents}
+                hechosCount={chaladitaHechos.length > 0 ? chaladitaHechos.length : caseFacts.length}
+                documentosCount={chaladitaDocs.length > 0 ? chaladitaDocs.length : docs.length}
+                estrategiasCount={caseStrategies.length}
+                microSummary={microSummary}
+                gapCount={gapCount}
+                nextEventLabel={nextEventLabel}
+              />
             );
           })}
         </div>
