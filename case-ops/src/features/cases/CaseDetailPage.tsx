@@ -26,7 +26,7 @@ import { getPDFsByCaso, getPDFUrl, tipoDocIcons, tipoDocColors, type PDFDocument
 // Visor PDF embebido (evita que React Router intercepte las URLs)
 import { EmbeddedPDFViewer } from '../../components/EmbeddedPDFViewer';
 // Timeline específico para Picassent
-import { PicassentTimeline } from './PicassentTimeline';
+import { PicassentHechosReclamados, PicassentHipotecaResumen, PicassentTimeline } from './PicassentTimeline';
 
 // ============================================
 // 1. DASHBOARD EJECUTIVO (Tab Resumen) - DINÁMICO
@@ -316,6 +316,8 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           <div className="text-[10px] text-slate-600">líneas de defensa</div>
         </div>
       </div>
+
+      {isPicassent && <PicassentHechosReclamados />}
 
       {/* HECHOS DEL CASO */}
       {facts.length > 0 && (
@@ -790,6 +792,8 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
 
   return (
     <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
+      {isPicassent && <PicassentHipotecaResumen />}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-bold text-white">Hechos y Partidas</h3>
