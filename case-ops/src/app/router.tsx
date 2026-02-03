@@ -36,6 +36,9 @@ import { HechosPage } from '../features/analytics/pages/HechosPage';
 import { PrescripcionPage } from '../features/analytics/pages/PrescripcionPage';
 import { ExcepcionAcumulacionPage } from '../features/analytics/pages/ExcepcionAcumulacionPage';
 import { PasivoPreferentePage } from '../features/analytics/pages/PasivoPreferentePage';
+import { PruebaDigitalPage } from '../features/analytics/pages/PruebaDigitalPage';
+import { InversionMercantilPage } from '../features/analytics/pages/InversionMercantilPage';
+import { AntiSTS458Page } from '../features/analytics/pages/AntiSTS458Page';
 import { ModoAudienciaPage } from '../features/audiencia/ModoAudienciaPage';
 import { AudienciaPreviaPage } from '../features/audiencia/AudienciaPreviaPage';
 import { ModoTelepronter } from '../features/audiencia/ModoTelepronter';
@@ -91,6 +94,21 @@ export const router = createBrowserRouter(
         {
           path: 'analytics/pasivo-preferente',
           element: <PasivoPreferentePage />,
+          handle: { pageMode: 'wide' },
+        },
+        {
+          path: 'analytics/prueba-digital',
+          element: <PruebaDigitalPage />,
+          handle: { pageMode: 'wide' },
+        },
+        {
+          path: 'analytics/inversion-mercantil',
+          element: <InversionMercantilPage />,
+          handle: { pageMode: 'wide' },
+        },
+        {
+          path: 'analytics/anti-sts-458-2025',
+          element: <AntiSTS458Page />,
           handle: { pageMode: 'wide' },
         },
         {
