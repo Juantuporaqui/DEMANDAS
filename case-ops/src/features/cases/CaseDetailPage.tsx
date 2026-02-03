@@ -95,18 +95,18 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           <Eye size={16} /> Resumen ejecutivo
           <Badge tone="muted">{caseLabel}</Badge>
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-4 auto-rows-fr">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 auto-rows-fr">
           {/* Parte contraria */}
           <div className="card-base card-subtle p-3 h-full">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Parte contraria</div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div>
                 <div className="text-[10px] uppercase tracking-wider text-slate-600">Demandante</div>
-                <div className="text-sm font-medium text-rose-300">{opposingParty || '—'}</div>
+                <div className="text-xs font-medium text-rose-300">{opposingParty || '—'}</div>
               </div>
               <div>
                 <div className="text-[10px] uppercase tracking-wider text-slate-600">Abogada</div>
-                <div className="text-sm font-medium text-rose-200">{opposingLawyer || '—'}</div>
+                <div className="text-xs font-medium text-rose-200">{opposingLawyer || '—'}</div>
               </div>
             </div>
           </div>
@@ -120,18 +120,6 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Autos</div>
             <div className="text-sm font-medium text-slate-200 font-mono">{caseData.autosNumber}</div>
           </div>
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4 auto-rows-fr">
-          {/* NIG */}
-          {caseData.nig && (
-            <div className="card-base card-subtle p-3 h-full">
-              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">NIG</div>
-              <div className="text-xs font-medium text-slate-300 font-mono">{caseData.nig}</div>
-            </div>
-          )}
-          {!caseData.nig && (
-            <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
-          )}
           {/* Rol */}
           <div className="card-base card-subtle p-3 h-full">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Rol procesal</div>
@@ -141,13 +129,24 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
                 : 'text-amber-400'
             }`}>{caseData.clientRole || 'No especificado'}</div>
           </div>
+          {/* NIG */}
+          {caseData.nig ? (
+            <div className="card-base card-subtle p-3 h-full">
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">NIG</div>
+              <div className="text-xs font-medium text-slate-300 font-mono">{caseData.nig}</div>
+            </div>
+          ) : (
+            <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
+          )}
           {/* Próximo hito */}
-          {vistaEvent && (
+          {vistaEvent ? (
             <div className="card-base card-subtle border border-amber-500/30 p-3 h-full">
               <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Próximo hito</div>
               <div className="text-sm font-medium text-amber-300">{formatDate(vistaEvent.date)}</div>
               <div className="text-[10px] text-slate-500">{vistaEvent.title}</div>
             </div>
+          ) : (
+            <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
           )}
           {!vistaEvent && (
             <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
