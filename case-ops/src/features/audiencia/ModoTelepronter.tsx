@@ -3,21 +3,48 @@
 // Frases clave en grande para la vista oral
 // ============================================
 
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { frasesClaveVista, argumentosContestacion, nuestrosArgumentos } from '../../data/mislata';
 import { todasLasCitas } from '../../data/jurisprudencia';
+import { estrategiaPicassent } from '../../data/estrategia/informeEstrategico';
 
 interface FraseTeleprompter {
   id: string;
   categoria: string;
+  filterCategoria: 'TODO' | 'DEFENSA' | 'ATAQUE' | 'RÉPLICA' | 'PREGUNTA';
   titulo: string;
   frase: string;
   subtitulo?: string;
 }
 
-// Combinar todas las frases relevantes
-function getAllFrases(): FraseTeleprompter[] {
+const categoriaMap = {
+  defensa: 'DEFENSA',
+  ataque: 'ATAQUE',
+  replica: 'RÉPLICA',
+  pregunta: 'PREGUNTA',
+} as const;
+
+const filterCategorias: FraseTeleprompter['filterCategoria'][] = [
+  'TODO',
+  'DEFENSA',
+  'ATAQUE',
+  'RÉPLICA',
+  'PREGUNTA',
+];
+
+const resumenLinea = (texto: string) => {
+  const primeraLinea = texto.split('\n')[0]?.trim() ?? '';
+  if (!primeraLinea) return '';
+  const punto = primeraLinea.indexOf('.');
+  if (punto > 0) {
+    return primeraLinea.slice(0, punto + 1);
+  }
+  return primeraLinea;
+};
+
+// Combinar todas las frases relevantes de Mislata
+function getFrasesMislata(): FraseTeleprompter[] {
   const frases: FraseTeleprompter[] = [];
 
   // Frases clave de Mislata
@@ -25,6 +52,7 @@ function getAllFrases(): FraseTeleprompter[] {
     frases.push({
       id: `frase-${i}`,
       categoria: 'FRASE CLAVE',
+      filterCategoria: 'ATAQUE',
       titulo: f.contexto,
       frase: f.frase,
     });
@@ -35,6 +63,7 @@ function getAllFrases(): FraseTeleprompter[] {
     frases.push({
       id: `replica-${arg.id}`,
       categoria: 'RÉPLICA',
+      filterCategoria: 'RÉPLICA',
       titulo: `Contra: ${arg.titulo}`,
       frase: arg.nuestraReplica.split('\n')[0], // Primera línea
       subtitulo: arg.articulosInvocados.join(', '),
@@ -46,6 +75,7 @@ function getAllFrases(): FraseTeleprompter[] {
     frases.push({
       id: `arg-${arg.id}`,
       categoria: 'ARGUMENTO',
+      filterCategoria: 'DEFENSA',
       titulo: arg.titulo,
       frase: arg.cita,
       subtitulo: arg.fundamento,
@@ -59,6 +89,7 @@ function getAllFrases(): FraseTeleprompter[] {
       frases.push({
         id: `juris-${c.id}`,
         categoria: 'JURISPRUDENCIA',
+        filterCategoria: 'DEFENSA',
         titulo: `${c.tribunal} ${c.numero}`,
         frase: c.fraseParaJuez!,
         subtitulo: c.tematica.join(', '),
@@ -68,9 +99,56 @@ function getAllFrases(): FraseTeleprompter[] {
   return frases;
 }
 
+// Combinar todas las frases relevantes de Picassent
+function getFrasesPicassent(): FraseTeleprompter[] {
+  const frases: FraseTeleprompter[] = [];
+
+  estrategiaPicassent.forEach((linea) => {
+    const categoria = categoriaMap[linea.tipo];
+    linea.frasesClave.forEach((frase, index) => {
+      frases.push({
+        id: `${linea.id}-frase-${index}`,
+        categoria,
+        filterCategoria: categoria,
+        titulo: linea.titulo,
+        frase,
+        subtitulo: linea.descripcion,
+      });
+    });
+
+    const fundamentoResumen = resumenLinea(linea.fundamento);
+    if (fundamentoResumen) {
+      frases.push({
+        id: `${linea.id}-fundamento`,
+        categoria: 'ARGUMENTO',
+        filterCategoria: categoria,
+        titulo: `${linea.titulo} · Fundamento`,
+        frase: fundamentoResumen,
+        subtitulo: linea.fundamento,
+      });
+    }
+  });
+
+  return frases;
+}
+
 export function ModoTelepronter() {
   const navigate = useNavigate();
-  const [frases] = useState<FraseTeleprompter[]>(getAllFrases);
+  const [searchParams] = useSearchParams();
+  const procParam = searchParams.get('proc');
+  const procedimiento = procParam === 'picassent' ? 'picassent' : 'mislata';
+  const [categoryFilter, setCategoryFilter] = useState<FraseTeleprompter['filterCategoria']>('TODO');
+  const frases = useMemo(
+    () => (procedimiento === 'picassent' ? getFrasesPicassent() : getFrasesMislata()),
+    [procedimiento],
+  );
+  const filteredFrases = useMemo(
+    () =>
+      categoryFilter === 'TODO'
+        ? frases
+        : frases.filter((frase) => frase.filterCategoria === categoryFilter),
+    [categoryFilter, frases],
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [autoPlay, setAutoPlay] = useState(false);
@@ -79,16 +157,20 @@ export function ModoTelepronter() {
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
 
-  const currentFrase = frases[currentIndex];
+  const fraseCount = filteredFrases.length;
+  const hasFrases = fraseCount > 0;
+  const currentFrase = hasFrases ? filteredFrases[currentIndex] : null;
 
   // Navegación
   const goNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % frases.length);
-  }, [frases.length]);
+    if (!fraseCount) return;
+    setCurrentIndex((prev) => (prev + 1) % fraseCount);
+  }, [fraseCount]);
 
   const goPrev = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + frases.length) % frases.length);
-  }, [frases.length]);
+    if (!fraseCount) return;
+    setCurrentIndex((prev) => (prev - 1 + fraseCount) % fraseCount);
+  }, [fraseCount]);
 
   const goToIndex = useCallback((index: number) => {
     setCurrentIndex(index);
@@ -124,6 +206,10 @@ export function ModoTelepronter() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goNext, goPrev, isFullscreen, navigate]);
+
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [procedimiento, categoryFilter]);
 
   // Auto play
   useEffect(() => {
@@ -162,6 +248,7 @@ export function ModoTelepronter() {
   // Copiar al portapapeles
   const copyToClipboard = async () => {
     try {
+      if (!currentFrase) return;
       await navigator.clipboard.writeText(currentFrase.frase);
     } catch (err) {
       console.error('Error al copiar:', err);
@@ -174,6 +261,9 @@ export function ModoTelepronter() {
     RÉPLICA: 'bg-red-500/20 text-red-300 border-red-500/50',
     ARGUMENTO: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50',
     JURISPRUDENCIA: 'bg-blue-500/20 text-blue-300 border-blue-500/50',
+    DEFENSA: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50',
+    ATAQUE: 'bg-amber-500/20 text-amber-300 border-amber-500/50',
+    PREGUNTA: 'bg-purple-500/20 text-purple-300 border-purple-500/50',
   };
 
   return (
@@ -190,7 +280,7 @@ export function ModoTelepronter() {
           <span className="text-slate-500">|</span>
           <span className="text-white font-medium">Modo Teleprónter</span>
           <span className="text-slate-500 text-sm">
-            {currentIndex + 1} / {frases.length}
+            {hasFrases ? currentIndex + 1 : 0} / {fraseCount}
           </span>
         </div>
 
@@ -240,39 +330,69 @@ export function ModoTelepronter() {
         </div>
       </div>
 
+      {/* Chips de categoría */}
+      <div className="bg-slate-900/60 border-b border-slate-800 px-4 py-2">
+        <div className="flex flex-wrap gap-2">
+          {filterCategorias.map((categoria) => (
+            <button
+              key={categoria}
+              type="button"
+              onClick={() => setCategoryFilter(categoria)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                categoryFilter === categoria
+                  ? 'bg-amber-500/20 text-amber-200 border-amber-500/50'
+                  : 'bg-slate-800 text-slate-300 border-slate-700/60 hover:text-white'
+              }`}
+            >
+              {categoria}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col items-center justify-center p-8">
-        {/* Categoría */}
-        <div
-          className={`text-sm font-bold px-4 py-1 rounded-full border mb-4 ${categoryColors[currentFrase.categoria] || 'bg-slate-700 text-slate-300'}`}
-        >
-          {currentFrase.categoria}
-        </div>
+        {currentFrase ? (
+          <>
+            {/* Categoría */}
+            <div
+              className={`text-sm font-bold px-4 py-1 rounded-full border mb-4 ${
+                categoryColors[currentFrase.categoria] || 'bg-slate-700 text-slate-300'
+              }`}
+            >
+              {currentFrase.categoria}
+            </div>
 
-        {/* Título */}
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 text-center">
-          {currentFrase.titulo}
-        </h2>
+            {/* Título */}
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 text-center">
+              {currentFrase.titulo}
+            </h2>
 
-        {/* Frase principal - GRANDE */}
-        <div className="max-w-4xl mx-auto text-center mb-6">
-          <p className="text-3xl md:text-5xl lg:text-6xl font-medium text-amber-400 leading-tight">
-            {currentFrase.frase}
-          </p>
-        </div>
+            {/* Frase principal - GRANDE */}
+            <div className="max-w-4xl mx-auto text-center mb-6">
+              <p className="text-3xl md:text-5xl lg:text-6xl font-medium text-amber-400 leading-tight">
+                {currentFrase.frase}
+              </p>
+            </div>
 
-        {/* Subtítulo */}
-        {currentFrase.subtitulo && (
-          <p className="text-lg text-slate-400 text-center">{currentFrase.subtitulo}</p>
+            {/* Subtítulo */}
+            {currentFrase.subtitulo && (
+              <p className="text-lg text-slate-400 text-center">{currentFrase.subtitulo}</p>
+            )}
+
+            {/* Botón copiar */}
+            <button
+              onClick={copyToClipboard}
+              className="mt-8 text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg transition-colors"
+            >
+              Copiar frase
+            </button>
+          </>
+        ) : (
+          <div className="text-center text-slate-400">
+            No hay frases para esta categoría.
+          </div>
         )}
-
-        {/* Botón copiar */}
-        <button
-          onClick={copyToClipboard}
-          className="mt-8 text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg transition-colors"
-        >
-          Copiar frase
-        </button>
       </div>
 
       {/* Navegación inferior */}
@@ -287,7 +407,7 @@ export function ModoTelepronter() {
 
           {/* Indicadores */}
           <div className="flex gap-1 overflow-x-auto max-w-md">
-            {frases.map((_, index) => (
+            {filteredFrases.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToIndex(index)}

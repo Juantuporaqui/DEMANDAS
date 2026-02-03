@@ -1,0 +1,35 @@
+@media print {
+  body,
+  #root {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  aside,
+  header,
+  footer,
+  nav,
+  .bottom-nav {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print-surface {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .print-surface * {
+    color: inherit !important;
+  }
+
+  .print-card {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+}
