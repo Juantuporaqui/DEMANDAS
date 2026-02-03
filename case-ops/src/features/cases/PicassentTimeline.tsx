@@ -10,6 +10,7 @@ import {
   type EventoPicassent
 } from '../../data/picassent/timeline';
 import { hechosReclamados, getResumenContador } from '../../data/hechosReclamados';
+import { Link } from 'react-router-dom';
 import {
   Calendar, Home, CreditCard, Scale, AlertTriangle, CheckCircle,
   TrendingDown, FileText, Clock, ChevronRight
@@ -109,20 +110,21 @@ export function PicassentHechosReclamados() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {hechosReclamados.map((hecho) => (
-          <a
+          <Link
             key={hecho.id}
-            href={`https://juantuporaqui.github.io/DEMANDAS/analytics/hechos#hecho-${hecho.id}`}
+            to={`/facts/${hecho.id}`}
             target="_blank"
             rel="noreferrer"
-            className={`group flex flex-col justify-between gap-3 p-4 rounded-xl border transition-all hover:-translate-y-0.5 hover:shadow-lg ${
-              hecho.estado === 'prescrito' ? 'bg-slate-500/10 border-slate-500/30 hover:border-slate-400/60 hover:shadow-slate-500/10' :
-              hecho.estado === 'compensable' ? 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-400/60 hover:shadow-emerald-500/10' :
-              'bg-rose-500/10 border-rose-500/30 hover:border-rose-400/60 hover:shadow-rose-500/10'
+            className={`group relative flex flex-col justify-between gap-4 p-4 rounded-2xl border transition-all hover:-translate-y-0.5 hover:shadow-xl overflow-hidden ${
+              hecho.estado === 'prescrito' ? 'bg-gradient-to-br from-slate-500/15 via-slate-900/40 to-slate-900/70 border-slate-500/30 hover:border-slate-400/60 hover:shadow-slate-500/10' :
+              hecho.estado === 'compensable' ? 'bg-gradient-to-br from-emerald-500/15 via-slate-900/40 to-slate-900/70 border-emerald-500/30 hover:border-emerald-400/60 hover:shadow-emerald-500/10' :
+              'bg-gradient-to-br from-rose-500/15 via-slate-900/40 to-slate-900/70 border-rose-500/30 hover:border-rose-400/60 hover:shadow-rose-500/10'
             }`}
           >
-            <div className="flex justify-between items-start gap-2 mb-1">
-              <span className="text-xs font-bold text-slate-500">#{hecho.id}</span>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${
+            <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex justify-between items-start gap-2">
+              <span className="text-xs font-bold text-slate-400">#{hecho.id}</span>
+              <span className={`text-[9px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wide ${
                 hecho.estado === 'prescrito' ? 'bg-slate-500/30 text-slate-300' :
                 hecho.estado === 'compensable' ? 'bg-emerald-500/30 text-emerald-300' :
                 'bg-rose-500/30 text-rose-300'
@@ -131,17 +133,17 @@ export function PicassentHechosReclamados() {
               </span>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-white mb-1 line-clamp-1">{hecho.titulo}</h4>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-500">{hecho.año}</span>
-                <span className="font-mono text-sm text-slate-300">{formatCents(hecho.cuantia * 100)}</span>
+              <h4 className="text-sm font-semibold text-white mb-2 line-clamp-2">{hecho.titulo}</h4>
+              <div className="flex justify-between items-center text-xs text-slate-400">
+                <span>{hecho.año}</span>
+                <span className="font-mono text-sm text-slate-200">{formatCents(hecho.cuantia * 100)}</span>
               </div>
             </div>
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span className="text-[10px] uppercase tracking-wider">Ver detalle</span>
-              <ChevronRight size={14} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
+            <div className="flex items-center justify-between text-xs text-slate-300">
+              <span className="text-[10px] uppercase tracking-wider">Ver resumen</span>
+              <ChevronRight size={14} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </div>
