@@ -74,10 +74,13 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen fixed z-50" style={{ background: 'linear-gradient(180deg, #1a202c 0%, #2d3748 100%)' }}>
+    <aside
+      className="hidden lg:flex flex-col w-64 h-screen fixed z-50 border-r border-[var(--border)]"
+      style={{ background: 'linear-gradient(180deg, var(--bg) 0%, var(--surface) 100%)' }}
+    >
       {/* Header del Sidebar - Logo */}
-      <div className="p-5 flex items-center gap-3 border-b border-slate-700/50">
-        <div className="w-9 h-9 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center font-black text-slate-900 shadow-lg shadow-amber-500/30 text-lg">
+      <div className="p-5 flex items-center gap-3 border-b border-[var(--border)]">
+        <div className="w-9 h-9 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[var(--radius-md)] flex items-center justify-center font-black text-slate-900 shadow-lg shadow-amber-500/30 text-lg">
           C
         </div>
         <div>
@@ -88,7 +91,7 @@ export function Sidebar() {
           onClick={handleClearCache}
           disabled={isClearing}
           title="Limpiar caché"
-          className="ml-auto p-1.5 rounded-lg text-slate-500 hover:text-amber-400 hover:bg-slate-700/50 transition-all disabled:opacity-50"
+          className="ml-auto p-1.5 rounded-[var(--radius-sm)] text-slate-500 hover:text-amber-400 hover:bg-slate-700/50 transition-all disabled:opacity-50"
         >
           <RefreshCw size={14} className={isClearing ? 'animate-spin' : ''} />
         </button>
@@ -108,10 +111,10 @@ export function Sidebar() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) => `
-                  flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                  flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] text-sm font-medium transition-all duration-200
                   ${isActive
-                    ? 'bg-amber-500/15 text-amber-400 border-l-2 border-amber-400'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-700/30 border-l-2 border-transparent'
+                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-700/30 border border-transparent'
                   }
                 `}
               >
@@ -145,7 +148,7 @@ export function Sidebar() {
                     key={caseItem.id}
                     to={`/cases/${caseItem.id}`}
                     className={`
-                      flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200
+                      flex items-center gap-2 px-3 py-2 rounded-[var(--radius-md)] text-sm transition-all duration-200
                       ${isActive
                         ? 'bg-slate-700/50 text-white'
                         : 'text-slate-400 hover:text-white hover:bg-slate-700/30'
@@ -163,7 +166,7 @@ export function Sidebar() {
                     )}
                     <span className="truncate">{caseItem.title}</span>
                     {urgency === 'urgente' && (
-                      <span className="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-amber-500/20 text-amber-400 rounded">
+                      <span className="badge badge-warn ml-auto px-1.5 py-0.5 text-[9px]">
                         !
                       </span>
                     )}
@@ -195,7 +198,7 @@ export function Sidebar() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) => `
-                  flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200
+                  flex items-center gap-3 px-3 py-2 rounded-[var(--radius-md)] text-sm transition-all duration-200
                   ${isActive
                     ? 'bg-slate-700/50 text-white'
                     : 'text-slate-500 hover:text-slate-300 hover:bg-slate-700/30'
@@ -211,7 +214,7 @@ export function Sidebar() {
       </nav>
 
       {/* Footer del sidebar */}
-      <div className="p-4 border-t border-slate-700/30">
+      <div className="p-4 border-t border-[var(--border)]">
         <div className="flex items-center justify-between text-[10px] text-slate-600">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
