@@ -52,185 +52,228 @@ export const router = createBrowserRouter(
         {
           index: true,
           element: <CasesPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'dashboard',
           element: <CasesPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'analytics',
           element: <AnalyticsDashboardPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'analytics/admin',
           element: <AnalyticsAdminPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'analytics/prescripcion',
           element: <PrescripcionPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'analytics/pasivo-preferente',
           element: <PasivoPreferentePage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'analytics/hechos',
           element: <HechosPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'analytics/audiencia',
           element: <ModoAudienciaPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'audiencia-previa',
           element: <AudienciaPreviaPage />,
+          handle: { pageMode: 'prose' },
         },
         // Audiencia mejorada
         {
           path: 'audiencia/telepronter',
           element: <ModoTelepronter />,
+          handle: { pageMode: 'full' },
         },
         {
           path: 'audiencia/checklist',
           element: <ChecklistAudiencia />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'tools',
           element: <ToolsPage />,
+          handle: { pageMode: 'prose' },
         },
         // Jurisprudencia
         {
           path: 'jurisprudencia',
           element: <JurisprudenciaPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'analytics/:court',
           element: <CourtDashboard />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'search',
           element: <SearchPage />,
+          handle: { pageMode: 'wide' },
         },
         // Cases
         {
           path: 'cases',
           element: <CasesPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'cases/:id',
           element: <CaseDetailPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'cases/:caseId/prescripcion',
           element: <CasePrescripcionPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'cases/:caseId/estrategias/excepcion-acumulacion',
           element: <ExcepcionAcumulacionPage />,
+          handle: { pageMode: 'prose' },
         },
         // Documents
         {
           path: 'documents',
           element: <DocumentsPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'documents/new',
           element: <DocumentFormPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'documents/:id',
           element: <DocumentDetailPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'documents/:id/edit',
           element: <DocumentFormPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'documents/:id/view',
           element: <PdfViewerPage />,
+          handle: { pageMode: 'full' },
         },
         // Facts
         {
           path: 'facts',
           element: <FactsPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'facts/new',
           element: <FactFormPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'facts/:id',
           element: <FactDetailPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'facts/:id/edit',
           element: <FactFormPage />,
+          handle: { pageMode: 'prose' },
         },
         // Partidas
         {
           path: 'partidas',
           element: <PartidasPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'partidas/new',
           element: <PartidaFormPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'partidas/:id',
           element: <PartidaDetailPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'partidas/:id/edit',
           element: <PartidaFormPage />,
+          handle: { pageMode: 'prose' },
         },
         // Events/Timeline
         {
           path: 'events',
           element: <EventsPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'events/new',
           element: <EventFormPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'events/:id/edit',
           element: <EventFormPage />,
+          handle: { pageMode: 'prose' },
         },
         // War Room
         {
           path: 'warroom',
           element: <WarRoomPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'warroom/new',
           element: <StrategyFormPage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'warroom/:id/edit',
           element: <StrategyFormPage />,
+          handle: { pageMode: 'prose' },
         },
         // Tasks
         {
           path: 'tasks',
           element: <TasksPage />,
+          handle: { pageMode: 'wide' },
         },
         {
           path: 'tasks/new',
           element: <NewTaskPage />,
+          handle: { pageMode: 'prose' },
         },
         // Backup
         {
           path: 'backup',
           element: <BackupPage />,
+          handle: { pageMode: 'prose' },
         },
         // More & Settings
         {
           path: 'more',
           element: <MorePage />,
+          handle: { pageMode: 'prose' },
         },
         {
           path: 'settings',
           element: <SettingsPage />,
+          handle: { pageMode: 'prose' },
         },
       ],
     },
