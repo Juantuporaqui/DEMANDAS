@@ -851,10 +851,12 @@ function TabEstrategia({ strategies, caseId }: any) {
   const [tipoFilter, setTipoFilter] = useState<'todas' | TipoEstrategia>('todas');
   const [prioridadFilter, setPrioridadFilter] = useState<'todas' | Prioridad>('todas');
   const [estadoFilter, setEstadoFilter] = useState<'todas' | Estado>('todas');
+  const [lineaSearch, setLineaSearch] = useState('');
   const [selectedLinea, setSelectedLinea] = useState<LineaEstrategica | null>(null);
   const [selectedWarroom, setSelectedWarroom] = useState<Strategy | null>(null);
   const [warroomTag, setWarroomTag] = useState('todas');
   const [warroomSearch, setWarroomSearch] = useState('');
+  const teleprompterProc = isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'mislata';
 
   const normalizedStrategies = Array.isArray(strategies) ? strategies : [];
   const warroomTags = Array.from(new Set(normalizedStrategies.flatMap((s: Strategy) => s.tags || []))).filter(Boolean).sort();
@@ -879,10 +881,21 @@ function TabEstrategia({ strategies, caseId }: any) {
   };
 
   const filteredLineas = estrategiaPicassent.filter((linea) => {
+    const query = lineaSearch.trim().toLowerCase();
+    const searchBlob = [
+      linea.titulo,
+      linea.descripcion,
+      linea.fundamento,
+      ...(linea.frasesClave || []),
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
     const tipoOk = tipoFilter === 'todas' || linea.tipo === tipoFilter;
     const prioridadOk = prioridadFilter === 'todas' || linea.prioridad === prioridadFilter;
     const estadoOk = estadoFilter === 'todas' || linea.estado === estadoFilter;
-    return tipoOk && prioridadOk && estadoOk;
+    const searchOk = !query || searchBlob.includes(query);
+    return tipoOk && prioridadOk && estadoOk && searchOk;
   });
 
   const filteredStrategies = normalizedStrategies.filter((strategy: Strategy) => {
@@ -928,6 +941,40 @@ function TabEstrategia({ strategies, caseId }: any) {
     }
   };
 
+  const handleCopyLinea = async (linea: LineaEstrategica) => {
+    const payload = [
+      `Título: ${linea.titulo}`,
+      `Tipo: ${linea.tipo}`,
+      `Prioridad: ${linea.prioridad}`,
+      `Estado: ${linea.estado}`,
+      `Descripción: ${linea.descripcion}`,
+      `Fundamento: ${linea.fundamento}`,
+      linea.articulosRelacionados.length > 0
+        ? `Artículos relacionados: ${linea.articulosRelacionados.join(', ')}`
+        : null,
+      linea.documentosSoporte.length > 0
+        ? `Documentos soporte: ${linea.documentosSoporte.join(', ')}`
+        : null,
+      linea.frasesClave.length > 0 ? `Frases clave:\n${linea.frasesClave.join('\n')}` : null,
+      linea.riesgos ? `Riesgos: ${linea.riesgos}` : null,
+      linea.notasInternas ? `Notas internas: ${linea.notasInternas}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    try {
+      await navigator.clipboard.writeText(payload);
+    } catch {
+      // no-op
+    }
+  };
+
+  const prioridadStyles: Record<Prioridad, string> = {
+    critica: 'bg-rose-500/20 text-rose-200 border-rose-500/30',
+    alta: 'bg-amber-500/20 text-amber-200 border-amber-500/30',
+    media: 'bg-sky-500/20 text-sky-200 border-sky-500/30',
+    baja: 'bg-slate-500/20 text-slate-200 border-slate-500/30',
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -944,18 +991,27 @@ function TabEstrategia({ strategies, caseId }: any) {
 
       {isPicassent && (
         <>
-          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-5">
+          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-5 print-surface">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <div>
                 <h4 className="text-sm font-semibold text-white">Plan de sala</h4>
                 <p className="text-xs text-slate-400">Resumen operativo con foco en AP.</p>
               </div>
-              <Link
-                to="/audiencia/telepronter"
-                className="rounded-full border border-amber-500/40 px-3 py-1 text-[11px] font-semibold text-amber-200 hover:border-amber-400/80"
-              >
-                Modo sala
-              </Link>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  to={`/audiencia/telepronter?proc=${teleprompterProc}`}
+                  className="rounded-full border border-amber-500/40 px-3 py-1 text-[11px] font-semibold text-amber-200 hover:border-amber-400/80"
+                >
+                  Modo sala
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="rounded-full border border-slate-600/60 px-3 py-1 text-[11px] font-semibold text-slate-200 hover:border-slate-500/80"
+                >
+                  Imprimir playbook
+                </button>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <div className="inline-flex rounded-full border border-slate-700/70 bg-slate-900/60 p-1">
@@ -982,12 +1038,12 @@ function TabEstrategia({ strategies, caseId }: any) {
                 <Copy className="h-3.5 w-3.5" /> {planCopied ? 'Copiado' : 'Copiar'}
               </button>
             </div>
-            <div className="mt-4 rounded-xl border border-slate-800/60 bg-slate-950/40 p-4">
+            <div className="mt-4 rounded-xl border border-slate-800/60 bg-slate-950/40 p-4 print-card">
               <p className="text-sm text-slate-200 whitespace-pre-line">{planScripts[planMode]}</p>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
+          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4 print-surface">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h4 className="text-sm font-semibold text-white">Acciones clave</h4>
@@ -1019,6 +1075,9 @@ function TabEstrategia({ strategies, caseId }: any) {
                     Audiencia previa
                   </span>
                 </div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
+                  Retorno listo
+                </div>
                 <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir prescripción <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
@@ -1046,6 +1105,9 @@ function TabEstrategia({ strategies, caseId }: any) {
                   <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                     Audiencia previa
                   </span>
+                </div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
+                  Retorno listo
                 </div>
                 <div className="flex items-center text-sm text-sky-300 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir excepción <ChevronRight className="w-4 h-4 ml-1" />
@@ -1075,6 +1137,9 @@ function TabEstrategia({ strategies, caseId }: any) {
                     Audiencia previa
                   </span>
                 </div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
+                  Retorno listo
+                </div>
                 <div className="flex items-center text-sm text-indigo-300 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir pasivo preferente <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
@@ -1102,6 +1167,9 @@ function TabEstrategia({ strategies, caseId }: any) {
                   <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
                     Evidencia digital
                   </span>
+                </div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
+                  Retorno listo
                 </div>
                 <div className="flex items-center text-sm text-teal-300 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir prueba digital <ChevronRight className="w-4 h-4 ml-1" />
@@ -1131,6 +1199,9 @@ function TabEstrategia({ strategies, caseId }: any) {
                     Contabilidad
                   </span>
                 </div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
+                  Retorno listo
+                </div>
                 <div className="flex items-center text-sm text-amber-300 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir inversión mercantil <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
@@ -1159,6 +1230,9 @@ function TabEstrategia({ strategies, caseId }: any) {
                     AP
                   </span>
                 </div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
+                  Retorno listo
+                </div>
                 <div className="flex items-center text-sm text-rose-300 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir anti-STS <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
@@ -1178,6 +1252,15 @@ function TabEstrategia({ strategies, caseId }: any) {
               </div>
             </div>
             <div className="flex flex-wrap gap-3 mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
+                <input
+                  value={lineaSearch}
+                  onChange={(event) => setLineaSearch(event.target.value)}
+                  placeholder="Buscar título, descripción, fundamento, frases..."
+                  className="w-72 max-w-full rounded-xl border border-slate-700/60 bg-slate-900/80 py-2 pl-9 pr-3 text-xs text-slate-200 placeholder:text-slate-500"
+                />
+              </div>
               <select
                 value={tipoFilter}
                 onChange={(event) => setTipoFilter(event.target.value as 'todas' | TipoEstrategia)}
@@ -1218,7 +1301,7 @@ function TabEstrategia({ strategies, caseId }: any) {
                   key={linea.id}
                   type="button"
                   onClick={() => setSelectedLinea(linea)}
-                  className="w-full rounded-2xl border border-slate-800/60 bg-slate-950/30 p-4 text-left transition hover:border-emerald-500/40 hover:bg-slate-900/60"
+                  className="w-full rounded-2xl border border-slate-800/60 bg-slate-950/30 p-4 text-left transition hover:border-emerald-500/40 hover:bg-slate-900/60 print-card"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <h5 className="text-sm font-semibold text-white">{linea.titulo}</h5>
@@ -1226,7 +1309,7 @@ function TabEstrategia({ strategies, caseId }: any) {
                       <span className="rounded-full border border-slate-600/60 bg-slate-800/60 px-2 py-0.5 text-slate-200">
                         {linea.tipo}
                       </span>
-                      <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-amber-200">
+                      <span className={`rounded-full border px-2 py-0.5 ${prioridadStyles[linea.prioridad]}`}>
                         {linea.prioridad}
                       </span>
                       <span className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-indigo-200">
@@ -1344,6 +1427,17 @@ function TabEstrategia({ strategies, caseId }: any) {
         isOpen={Boolean(selectedLinea)}
         onClose={() => setSelectedLinea(null)}
         title={selectedLinea ? `Detalle estrategia · ${selectedLinea.titulo}` : 'Detalle estrategia'}
+        footer={
+          selectedLinea ? (
+            <button
+              type="button"
+              onClick={() => handleCopyLinea(selectedLinea)}
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 px-3 py-1 text-xs font-semibold text-emerald-200 hover:border-emerald-400/80"
+            >
+              <Copy className="h-3.5 w-3.5" /> Copiar todo
+            </button>
+          ) : null
+        }
       >
         {selectedLinea && (
           <div className="space-y-4 text-sm text-slate-300">
@@ -1434,7 +1528,7 @@ function TabEstrategia({ strategies, caseId }: any) {
               onClick={() => handleCopyWarroom(selectedWarroom)}
               className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 px-3 py-1 text-xs font-semibold text-emerald-200 hover:border-emerald-400/80"
             >
-              <Copy className="h-3.5 w-3.5" /> Copiar resumen
+              <Copy className="h-3.5 w-3.5" /> Copiar todo
             </button>
           ) : null
         }

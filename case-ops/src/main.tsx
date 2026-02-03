@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import * as pdfjsLib from 'pdfjs-dist'
 import './index.css'
+import './styles/print.css'
 import App from './App.tsx'
 
 // Chaladita Case-Ops bootstrap
