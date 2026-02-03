@@ -148,6 +148,9 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           ) : (
             <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
           )}
+          {!vistaEvent && (
+            <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
+          )}
           {/* Cuantía Procesal */}
           <div className="card-base card-subtle border border-rose-500/30 p-3 h-full">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Cuantía procesal (demanda)</div>
