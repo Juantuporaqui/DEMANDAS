@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
-  Scale, FileText, Calendar, Gavel, ChevronRight, Upload, ListChecks, RefreshCw, Eye, AlertTriangle
+  Scale, FileText, Calendar, Gavel, ChevronRight, Upload, ListChecks, RefreshCw, Eye, AlertTriangle, Landmark
 } from 'lucide-react';
 import {
   casesRepo, documentsRepo, eventsRepo, factsRepo, partidasRepo, strategiesRepo
@@ -965,6 +965,34 @@ function TabEstrategia({ strategies, caseId }: any) {
               </div>
               <div className="flex items-center text-sm text-sky-300 font-medium group-hover:translate-x-1 transition-transform">
                 Abrir excepción <ChevronRight className="w-4 h-4 ml-1" />
+              </div>
+            </Link>
+            <Link
+              to={`/analytics/pasivo-preferente?caseId=${caseId}&returnTo=${encodeURIComponent(returnTo)}`}
+              className="group block w-full rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-indigo-500/60 hover:shadow-lg hover:shadow-indigo-500/10 active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-500/30 mb-3">
+                <Landmark className="w-6 h-6 text-indigo-300" />
+              </div>
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <h4 className="text-lg font-bold text-white">Pasivo preferente (Hipoteca)</h4>
+                <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                  AP / bases de liquidación
+                </span>
+              </div>
+              <p className="text-sm text-slate-400 mb-3">
+                Forzar que parte del precio de venta se destine a cancelar total o parcialmente la hipoteca que financió las parcelas/chalet, evitando reparto “limpio” del activo.
+              </p>
+              <div className="flex flex-wrap gap-2 mb-3">
+                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-200 border border-indigo-500/30">
+                  Pasivo preferente
+                </span>
+                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  Audiencia previa
+                </span>
+              </div>
+              <div className="flex items-center text-sm text-indigo-300 font-medium group-hover:translate-x-1 transition-transform">
+                Abrir pasivo preferente <ChevronRight className="w-4 h-4 ml-1" />
               </div>
             </Link>
           </div>
