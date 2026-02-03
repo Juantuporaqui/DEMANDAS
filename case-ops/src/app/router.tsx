@@ -44,6 +44,8 @@ import { ToolsPage } from '../features/tools/ToolsPage';
 import { JurisprudenciaPage } from '../features/jurisprudencia/JurisprudenciaPage';
 import { PrescriptionPage } from '../features/prescription/PrescriptionPage';
 import { EvidenceComparePage } from '../features/evidence/EvidenceComparePage';
+import { FairLiquidationPage } from '../features/finance/FairLiquidationPage';
+import { AeatContradictionPage } from '../features/contradiction/AeatContradictionPage';
 
 export const router = createBrowserRouter(
   [
@@ -74,6 +76,16 @@ export const router = createBrowserRouter(
         {
           path: 'analytics/prescripcion',
           element: <PrescripcionPage />,
+          handle: { pageMode: 'wide' },
+        },
+        {
+          path: 'analytics/liquidacion-justa',
+          element: <FairLiquidationPage />,
+          handle: { pageMode: 'wide' },
+        },
+        {
+          path: 'analytics/contradiccion-aeat',
+          element: <AeatContradictionPage />,
           handle: { pageMode: 'wide' },
         },
         {
