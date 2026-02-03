@@ -18,6 +18,8 @@ import {
   ChevronRight,
   List,
   Wallet,
+  Clock,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { casesRepo } from '../../db/repositories';
 import type { Case } from '../../types';
@@ -35,6 +37,16 @@ const NAV_ITEMS = [
 // Navegación Secundaria
 const NAV_SECONDARY = [
   { to: '/search', label: 'Buscador', icon: <Search size={18} /> },
+  {
+    to: '/tools/prescripcion',
+    label: 'Prescripción (Timeline)',
+    icon: <Clock size={18} />,
+  },
+  {
+    to: '/tools/comparador-evidencia',
+    label: 'Comparador de evidencia',
+    icon: <SlidersHorizontal size={18} />,
+  },
   { to: '/warroom', label: 'War Room', icon: <Target size={18} /> },
   { to: '/settings', label: 'Ajustes', icon: <Settings size={18} /> },
 ];
