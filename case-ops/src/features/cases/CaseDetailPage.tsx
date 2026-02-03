@@ -5,7 +5,23 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
-  Scale, FileText, Calendar, Gavel, ChevronRight, Upload, ListChecks, RefreshCw, Eye, AlertTriangle, Landmark
+  Scale,
+  FileText,
+  Calendar,
+  Gavel,
+  ChevronRight,
+  Upload,
+  ListChecks,
+  RefreshCw,
+  Eye,
+  AlertTriangle,
+  Landmark,
+  Copy,
+  Filter,
+  Search,
+  Fingerprint,
+  Coins,
+  ShieldX,
 } from 'lucide-react';
 import {
   casesRepo, documentsRepo, eventsRepo, factsRepo, partidasRepo, strategiesRepo
@@ -25,9 +41,17 @@ import { QuartFinancialAnalysis } from './QuartFinancialAnalysis';
 import { getPDFsByCaso, getPDFUrl, tipoDocIcons, tipoDocColors, type PDFDocument } from '../../data/pdfRegistry';
 // Visor PDF embebido (evita que React Router intercepte las URLs)
 import { EmbeddedPDFViewer } from '../../components/EmbeddedPDFViewer';
+import { Modal } from '../../components';
 // Timeline específico para Picassent
 import { PicassentHechosReclamados, PicassentHipotecaResumen, PicassentTimeline } from './PicassentTimeline';
 import Badge from '../../ui/components/Badge';
+import {
+  estrategiaPicassent,
+  type LineaEstrategica,
+  type TipoEstrategia,
+  type Prioridad,
+  type Estado,
+} from '../../data/estrategia/informeEstrategico';
 
 // ============================================
 // 1. DASHBOARD EJECUTIVO (Tab Resumen) - DINÁMICO
@@ -822,9 +846,90 @@ function TabEstrategia({ strategies, caseId }: any) {
     ? 'QUART'
     : 'CASO';
   const returnTo = `/cases/${caseId}?tab=estrategia`;
+  const [planMode, setPlanMode] = useState<'60s' | '2m' | '5m'>('60s');
+  const [planCopied, setPlanCopied] = useState(false);
+  const [tipoFilter, setTipoFilter] = useState<'todas' | TipoEstrategia>('todas');
+  const [prioridadFilter, setPrioridadFilter] = useState<'todas' | Prioridad>('todas');
+  const [estadoFilter, setEstadoFilter] = useState<'todas' | Estado>('todas');
+  const [selectedLinea, setSelectedLinea] = useState<LineaEstrategica | null>(null);
+  const [selectedWarroom, setSelectedWarroom] = useState<Strategy | null>(null);
+  const [warroomTag, setWarroomTag] = useState('todas');
+  const [warroomSearch, setWarroomSearch] = useState('');
+
+  const normalizedStrategies = Array.isArray(strategies) ? strategies : [];
+  const warroomTags = Array.from(new Set(normalizedStrategies.flatMap((s: Strategy) => s.tags || []))).filter(Boolean).sort();
+
+  const planScripts = {
+    '60s':
+      '1) Prescripción por bloques + DT 5ª Ley 42/2015 (cierre 2020/21).\\n2) Falta de prueba fiable: capturas recortadas sin integridad.\\n3) Subsidiario: si invocan STS 458/2025, limitar por diferencias (separación de bienes + inversión).\\n4) Bases de liquidación: pasivo preferente (hipoteca antes del reparto).',
+    '2m':
+      '1) Prescripción por bloques + DT 5ª Ley 42/2015 (cierre 2020/21).\\n2) No mezclar bloques: cada partida exige fecha, concepto, documento, dies a quo e interrupción.\\n3) Prueba digital frágil: capturas recortadas no bastan.\\n4) Subsidiario: STS 458/2025 solo con identidad de razón; aquí separación de bienes + inversión.\\n5) Compensación por frutos/beneficios si aparecen ingresos no repartidos.\\n6) Bases de liquidación: pasivo preferente antes del reparto.',
+    '5m':
+      '1) Prescripción por bloques + DT 5ª Ley 42/2015 (cierre 2020/21).\\n2) No mezclar bloques: cada partida exige fecha, concepto, documento, dies a quo e interrupción.\\n3) Prueba digital: impugnación art. 326 LEC por capturas recortadas; exigir aportación íntegra/certificada.\\n4) Subsidiario: si invocan STS 458/2025, limitar por diferencias (separación de bienes + inversión) y exigibilidad por partidas.\\n5) Compensación por frutos/beneficios si aparecen; neteo.\\n6) Control del objeto y cuantías: depurar duplicidades y fijar bases.\\n7) Peticiones concretas en AP: hechos controvertidos, aportación documental y bases de liquidación (pasivo preferente).',
+  };
+
+  const handleCopyPlan = async () => {
+    try {
+      await navigator.clipboard.writeText(planScripts[planMode]);
+      setPlanCopied(true);
+      setTimeout(() => setPlanCopied(false), 2000);
+    } catch {
+      setPlanCopied(false);
+    }
+  };
+
+  const filteredLineas = estrategiaPicassent.filter((linea) => {
+    const tipoOk = tipoFilter === 'todas' || linea.tipo === tipoFilter;
+    const prioridadOk = prioridadFilter === 'todas' || linea.prioridad === prioridadFilter;
+    const estadoOk = estadoFilter === 'todas' || linea.estado === estadoFilter;
+    return tipoOk && prioridadOk && estadoOk;
+  });
+
+  const filteredStrategies = normalizedStrategies.filter((strategy: Strategy) => {
+    const tagOk = warroomTag === 'todas' || strategy.tags?.includes(warroomTag);
+    const query = warroomSearch.trim().toLowerCase();
+    if (!query) return tagOk;
+    const blob = [
+      strategy.attack,
+      strategy.rebuttal,
+      strategy.risk,
+      strategy.evidencePlan,
+      strategy.questions,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return tagOk && blob.includes(query);
+  });
+
+  const handleCopyPhrase = async (phrase: string) => {
+    try {
+      await navigator.clipboard.writeText(phrase);
+    } catch {
+      // no-op
+    }
+  };
+
+  const handleCopyWarroom = async (strategy: Strategy) => {
+    const payload = [
+      `Ataque: ${strategy.attack}`,
+      `Riesgo: ${strategy.risk}`,
+      `Rebuttal: ${strategy.rebuttal}`,
+      `Plan de evidencia: ${strategy.evidencePlan}`,
+      `Preguntas: ${strategy.questions}`,
+      `Tags: ${(strategy.tags || []).join(', ')}`,
+    ]
+      .filter(Boolean)
+      .join('\\n');
+    try {
+      await navigator.clipboard.writeText(payload);
+    } catch {
+      // no-op
+    }
+  };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <h3 className="font-bold text-white">Estrategias Activas</h3>
@@ -832,133 +937,548 @@ function TabEstrategia({ strategies, caseId }: any) {
             {caseLabel}
           </span>
         </div>
-        <Link to={`/warroom/new?caseId=${caseId}`} className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-500">+ Nueva</Link>
+        <Link to={`/warroom/new?caseId=${caseId}`} className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-500">
+          + Nueva
+        </Link>
       </div>
+
       {isPicassent && (
-        <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h4 className="text-sm font-semibold text-white">Acciones de Estrategia</h4>
-              <p className="text-xs text-slate-400">Herramientas clave para la audiencia previa.</p>
+        <>
+          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div>
+                <h4 className="text-sm font-semibold text-white">Plan de sala</h4>
+                <p className="text-xs text-slate-400">Resumen operativo con foco en AP.</p>
+              </div>
+              <Link
+                to="/audiencia/telepronter"
+                className="rounded-full border border-amber-500/40 px-3 py-1 text-[11px] font-semibold text-amber-200 hover:border-amber-400/80"
+              >
+                Modo sala
+              </Link>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="inline-flex rounded-full border border-slate-700/70 bg-slate-900/60 p-1">
+                {(['60s', '2m', '5m'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setPlanMode(mode)}
+                    className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${
+                      planMode === mode
+                        ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/60'
+                        : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyPlan}
+                className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 px-3 py-1 text-[11px] font-semibold text-emerald-200 hover:border-emerald-400/80 hover:text-emerald-100"
+              >
+                <Copy className="h-3.5 w-3.5" /> {planCopied ? 'Copiado' : 'Copiar'}
+              </button>
+            </div>
+            <div className="mt-4 rounded-xl border border-slate-800/60 bg-slate-950/40 p-4">
+              <p className="text-sm text-slate-200 whitespace-pre-line">{planScripts[planMode]}</p>
             </div>
           </div>
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Link
-              to={`/analytics/prescripcion?caseId=picassent&returnTo=${encodeURIComponent(returnTo)}`}
-              className="group block w-full rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.99]"
-            >
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 mb-3">
-                <Scale className="w-6 h-6 text-emerald-400" />
+
+          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h4 className="text-sm font-semibold text-white">Acciones clave</h4>
+                <p className="text-xs text-slate-400">Cards operativas con checklist y guion.</p>
               </div>
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <h4 className="text-lg font-bold text-white">Prescripción</h4>
-                <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
-                  4 escenarios
-                </span>
-              </div>
-              <p className="text-sm text-slate-400 mb-3">
-                Mapa de escenarios + guion de sala + checklist probatorio.
-              </p>
-              <div className="flex flex-wrap gap-2 mb-3">
-                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  STS 458/2025
-                </span>
-                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  Audiencia previa
-                </span>
-              </div>
-              <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
-                Abrir prescripción <ChevronRight className="w-4 h-4 ml-1" />
-              </div>
-            </Link>
-            <Link
-              to={`/cases/${caseId}/estrategias/excepcion-acumulacion?returnTo=${encodeURIComponent(returnTo)}`}
-              className="group block w-full rounded-2xl border border-sky-500/30 bg-gradient-to-br from-sky-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-sky-500/60 hover:shadow-lg hover:shadow-sky-500/10 active:scale-[0.99]"
-            >
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-500/20 border border-sky-500/30 mb-3">
-                <AlertTriangle className="w-6 h-6 text-sky-300" />
-              </div>
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <h4 className="text-lg font-bold text-white">Excepción procesal</h4>
-                <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
-                  4 escenarios
-                </span>
-              </div>
-              <p className="text-sm text-slate-400 mb-3">
-                Acumulación indebida y saneamiento del objeto con guion de sala.
-              </p>
-              <div className="flex flex-wrap gap-2 mb-3">
-                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-200 border border-sky-500/30">
-                  Acumulación objetiva
-                </span>
-                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  Audiencia previa
-                </span>
-              </div>
-              <div className="flex items-center text-sm text-sky-300 font-medium group-hover:translate-x-1 transition-transform">
-                Abrir excepción <ChevronRight className="w-4 h-4 ml-1" />
-              </div>
-            </Link>
-            <Link
-              to={`/analytics/pasivo-preferente?caseId=${caseId}&returnTo=${encodeURIComponent(returnTo)}`}
-              className="group block w-full rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-indigo-500/60 hover:shadow-lg hover:shadow-indigo-500/10 active:scale-[0.99]"
-            >
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-500/30 mb-3">
-                <Landmark className="w-6 h-6 text-indigo-300" />
-              </div>
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <h4 className="text-lg font-bold text-white">Pasivo preferente (Hipoteca)</h4>
-                <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
-                  AP / bases de liquidación
-                </span>
-              </div>
-              <p className="text-sm text-slate-400 mb-3">
-                Forzar que parte del precio de venta se destine a cancelar total o parcialmente la hipoteca que financió las parcelas/chalet, evitando reparto “limpio” del activo.
-              </p>
-              <div className="flex flex-wrap gap-2 mb-3">
-                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-200 border border-indigo-500/30">
-                  Pasivo preferente
-                </span>
-                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  Audiencia previa
-                </span>
-              </div>
-              <div className="flex items-center text-sm text-indigo-300 font-medium group-hover:translate-x-1 transition-transform">
-                Abrir pasivo preferente <ChevronRight className="w-4 h-4 ml-1" />
-              </div>
-            </Link>
-          </div>
-        </div>
-      )}
-      {strategies.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-          {strategies.map((s: Strategy, i: number) => (
-            <div
-              key={s.id}
-              className="w-full aspect-square rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-amber-500/40 hover:bg-slate-900/70"
-            >
-              <div className="flex flex-col justify-between h-full">
-                <div className="flex flex-wrap gap-1">
-                  <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-slate-600/40 bg-slate-700/40 text-slate-200">
-                    Estrategia #{i + 1}
+            </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Link
+                to={`/analytics/prescripcion?caseId=picassent&returnTo=${encodeURIComponent(returnTo)}`}
+                className="group block w-full rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.99]"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 mb-3">
+                  <Scale className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <h4 className="text-lg font-bold text-white">Prescripción</h4>
+                  <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                    4 escenarios
                   </span>
-                  {s.risk && (
-                    <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-300">
-                      {s.risk}
-                    </span>
-                  )}
                 </div>
-                <div className="space-y-2">
-                  <p className="text-xs text-rose-300 line-clamp-2">⚠️ {s.attack}</p>
-                  <p className="text-xs text-emerald-300 line-clamp-2">🛡️ {s.rebuttal}</p>
+                <p className="text-sm text-slate-400 mb-3">
+                  Mapa de escenarios + guion de sala + checklist probatorio.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    STS 458/2025
+                  </span>
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    Audiencia previa
+                  </span>
                 </div>
+                <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
+                  Abrir prescripción <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
+              </Link>
+              <Link
+                to={`/cases/${caseId}/estrategias/excepcion-acumulacion?returnTo=${encodeURIComponent(returnTo)}`}
+                className="group block w-full rounded-2xl border border-sky-500/30 bg-gradient-to-br from-sky-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-sky-500/60 hover:shadow-lg hover:shadow-sky-500/10 active:scale-[0.99]"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-500/20 border border-sky-500/30 mb-3">
+                  <AlertTriangle className="w-6 h-6 text-sky-300" />
+                </div>
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <h4 className="text-lg font-bold text-white">Excepción procesal</h4>
+                  <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                    4 escenarios
+                  </span>
+                </div>
+                <p className="text-sm text-slate-400 mb-3">
+                  Acumulación indebida y saneamiento del objeto con guion de sala.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-200 border border-sky-500/30">
+                    Acumulación objetiva
+                  </span>
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    Audiencia previa
+                  </span>
+                </div>
+                <div className="flex items-center text-sm text-sky-300 font-medium group-hover:translate-x-1 transition-transform">
+                  Abrir excepción <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
+              </Link>
+              <Link
+                to={`/analytics/pasivo-preferente?caseId=${caseId}&returnTo=${encodeURIComponent(returnTo)}`}
+                className="group block w-full rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-indigo-500/60 hover:shadow-lg hover:shadow-indigo-500/10 active:scale-[0.99]"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-500/30 mb-3">
+                  <Landmark className="w-6 h-6 text-indigo-300" />
+                </div>
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <h4 className="text-lg font-bold text-white">Pasivo preferente (Hipoteca)</h4>
+                  <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                    AP / bases de liquidación
+                  </span>
+                </div>
+                <p className="text-sm text-slate-400 mb-3">
+                  Forzar que parte del precio de venta se destine a cancelar total o parcialmente la hipoteca que financió las parcelas/chalet, evitando reparto “limpio” del activo.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-200 border border-indigo-500/30">
+                    Pasivo preferente
+                  </span>
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    Audiencia previa
+                  </span>
+                </div>
+                <div className="flex items-center text-sm text-indigo-300 font-medium group-hover:translate-x-1 transition-transform">
+                  Abrir pasivo preferente <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
+              </Link>
+              <Link
+                to={`/analytics/prueba-digital?caseId=${caseId}&returnTo=${encodeURIComponent(returnTo)}`}
+                className="group block w-full rounded-2xl border border-teal-500/30 bg-gradient-to-br from-teal-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-teal-500/60 hover:shadow-lg hover:shadow-teal-500/10 active:scale-[0.99]"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-500/30 mb-3">
+                  <Fingerprint className="w-6 h-6 text-teal-300" />
+                </div>
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <h4 className="text-lg font-bold text-white">Prueba digital</h4>
+                  <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                    Checklist
+                  </span>
+                </div>
+                <p className="text-sm text-slate-400 mb-3">
+                  Impugnación de integridad, checklist mínimo y guion de sala.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-200 border border-teal-500/30">
+                    Audiencia previa
+                  </span>
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                    Evidencia digital
+                  </span>
+                </div>
+                <div className="flex items-center text-sm text-teal-300 font-medium group-hover:translate-x-1 transition-transform">
+                  Abrir prueba digital <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
+              </Link>
+              <Link
+                to={`/analytics/inversion-mercantil?caseId=${caseId}&returnTo=${encodeURIComponent(returnTo)}`}
+                className="group block w-full rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-amber-500/60 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.99]"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 mb-3">
+                  <Coins className="w-6 h-6 text-amber-300" />
+                </div>
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <h4 className="text-lg font-bold text-white">Inversión mercantil + compensación</h4>
+                  <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                    Neteo
+                  </span>
+                </div>
+                <p className="text-sm text-slate-400 mb-3">
+                  Separar inversión de cargas familiares y activar compensación de frutos.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-200 border border-amber-500/30">
+                    Compensación
+                  </span>
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                    Contabilidad
+                  </span>
+                </div>
+                <div className="flex items-center text-sm text-amber-300 font-medium group-hover:translate-x-1 transition-transform">
+                  Abrir inversión mercantil <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
+              </Link>
+              <Link
+                to={`/analytics/anti-sts-458-2025?caseId=${caseId}&returnTo=${encodeURIComponent(returnTo)}`}
+                className="group block w-full rounded-2xl border border-rose-500/30 bg-gradient-to-br from-rose-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-rose-500/60 hover:shadow-lg hover:shadow-rose-500/10 active:scale-[0.99]"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-rose-500/20 border border-rose-500/30 mb-3">
+                  <ShieldX className="w-6 h-6 text-rose-300" />
+                </div>
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <h4 className="text-lg font-bold text-white">Anti-STS 458/2025</h4>
+                  <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                    Distinguishing
+                  </span>
+                </div>
+                <p className="text-sm text-slate-400 mb-3">
+                  Limitar alcance por diferencias fácticas y exigibilidad por partidas.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-200 border border-rose-500/30">
+                    Guion 60s
+                  </span>
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                    AP
+                  </span>
+                </div>
+                <div className="flex items-center text-sm text-rose-300 font-medium group-hover:translate-x-1 transition-transform">
+                  Abrir anti-STS <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div>
+                <h4 className="text-sm font-semibold text-white">Matriz estratégica (Picassent)</h4>
+                <p className="text-xs text-slate-400">Líneas de defensa, ataques, réplicas y preguntas.</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                <Filter className="h-3.5 w-3.5" />
+                <span>Filtros</span>
               </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center text-slate-500 py-10 border border-dashed border-slate-800 rounded">Sin estrategias definidas.</div>
+            <div className="flex flex-wrap gap-3 mb-4">
+              <select
+                value={tipoFilter}
+                onChange={(event) => setTipoFilter(event.target.value as 'todas' | TipoEstrategia)}
+                className="rounded-xl border border-slate-700/60 bg-slate-900/80 px-3 py-2 text-xs text-slate-200"
+              >
+                <option value="todas">Tipo: todas</option>
+                <option value="defensa">Defensa</option>
+                <option value="ataque">Ataque</option>
+                <option value="replica">Réplica</option>
+                <option value="pregunta">Pregunta</option>
+              </select>
+              <select
+                value={prioridadFilter}
+                onChange={(event) => setPrioridadFilter(event.target.value as 'todas' | Prioridad)}
+                className="rounded-xl border border-slate-700/60 bg-slate-900/80 px-3 py-2 text-xs text-slate-200"
+              >
+                <option value="todas">Prioridad: todas</option>
+                <option value="critica">Crítica</option>
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="baja">Baja</option>
+              </select>
+              <select
+                value={estadoFilter}
+                onChange={(event) => setEstadoFilter(event.target.value as 'todas' | Estado)}
+                className="rounded-xl border border-slate-700/60 bg-slate-900/80 px-3 py-2 text-xs text-slate-200"
+              >
+                <option value="todas">Estado: todas</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="preparado">Preparado</option>
+                <option value="usado">Usado</option>
+                <option value="descartado">Descartado</option>
+              </select>
+            </div>
+            <div className="space-y-3">
+              {filteredLineas.map((linea) => (
+                <button
+                  key={linea.id}
+                  type="button"
+                  onClick={() => setSelectedLinea(linea)}
+                  className="w-full rounded-2xl border border-slate-800/60 bg-slate-950/30 p-4 text-left transition hover:border-emerald-500/40 hover:bg-slate-900/60"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h5 className="text-sm font-semibold text-white">{linea.titulo}</h5>
+                    <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-wide">
+                      <span className="rounded-full border border-slate-600/60 bg-slate-800/60 px-2 py-0.5 text-slate-200">
+                        {linea.tipo}
+                      </span>
+                      <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-amber-200">
+                        {linea.prioridad}
+                      </span>
+                      <span className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-indigo-200">
+                        {linea.estado}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-400 line-clamp-2">{linea.descripcion}</p>
+                  {linea.articulosRelacionados.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {linea.articulosRelacionados.map((art) => (
+                        <span
+                          key={art}
+                          className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-200"
+                        >
+                          {art}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {linea.documentosSoporte.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {linea.documentosSoporte.map((doc) => (
+                        <span
+                          key={doc}
+                          className="rounded-full border border-slate-600/40 bg-slate-800/40 px-2 py-0.5 text-[10px] font-semibold text-slate-200"
+                        >
+                          {doc}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </button>
+              ))}
+              {filteredLineas.length === 0 && (
+                <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 p-6 text-center text-xs text-slate-500">
+                  Sin estrategias con los filtros seleccionados.
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
+
+      <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h4 className="text-sm font-semibold text-white">WarRoom strategies</h4>
+            <p className="text-xs text-slate-400">Ataques y réplicas rápidas para sala.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+            <Search className="h-3.5 w-3.5" />
+            <span>Búsqueda rápida</span>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-3 mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
+            <input
+              value={warroomSearch}
+              onChange={(event) => setWarroomSearch(event.target.value)}
+              placeholder="Buscar ataque, réplica, riesgo..."
+              className="w-64 max-w-full rounded-xl border border-slate-700/60 bg-slate-900/80 py-2 pl-9 pr-3 text-xs text-slate-200 placeholder:text-slate-500"
+            />
+          </div>
+          <select
+            value={warroomTag}
+            onChange={(event) => setWarroomTag(event.target.value)}
+            className="rounded-xl border border-slate-700/60 bg-slate-900/80 px-3 py-2 text-xs text-slate-200"
+          >
+            <option value="todas">Tag: todas</option>
+            {warroomTags.map((tag) => (
+              <option key={tag} value={tag}>
+                {tag}
+              </option>
+            ))}
+          </select>
+        </div>
+        {filteredStrategies.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+            {filteredStrategies.map((s: Strategy, i: number) => (
+              <button
+                type="button"
+                key={s.id}
+                onClick={() => setSelectedWarroom(s)}
+                className="w-full aspect-square rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-amber-500/40 hover:bg-slate-900/70"
+              >
+                <div className="flex flex-col justify-between h-full">
+                  <div className="flex flex-wrap gap-1">
+                    <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-slate-600/40 bg-slate-700/40 text-slate-200">
+                      Estrategia #{i + 1}
+                    </span>
+                    {s.risk && (
+                      <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-300">
+                        {s.risk}
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xs text-rose-300 line-clamp-2">⚠️ {s.attack}</p>
+                    <p className="text-xs text-emerald-300 line-clamp-2">🛡️ {s.rebuttal}</p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-slate-500 py-10 border border-dashed border-slate-800 rounded">
+            Sin estrategias definidas.
+          </div>
+        )}
+      </div>
+
+      <Modal
+        isOpen={Boolean(selectedLinea)}
+        onClose={() => setSelectedLinea(null)}
+        title={selectedLinea ? `Detalle estrategia · ${selectedLinea.titulo}` : 'Detalle estrategia'}
+      >
+        {selectedLinea && (
+          <div className="space-y-4 text-sm text-slate-300">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-emerald-300">Descripción</div>
+              <p className="mt-2">{selectedLinea.descripcion}</p>
+            </div>
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-indigo-300">Fundamento</div>
+              <p className="mt-2">{selectedLinea.fundamento}</p>
+            </div>
+            {selectedLinea.articulosRelacionados.length > 0 && (
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-cyan-300">Artículos relacionados</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {selectedLinea.articulosRelacionados.map((art) => (
+                    <span
+                      key={art}
+                      className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-200"
+                    >
+                      {art}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedLinea.documentosSoporte.length > 0 && (
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-200">Documentos soporte</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {selectedLinea.documentosSoporte.map((doc) => (
+                    <span
+                      key={doc}
+                      className="rounded-full border border-slate-600/40 bg-slate-800/40 px-2 py-0.5 text-[10px] font-semibold text-slate-200"
+                    >
+                      {doc}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedLinea.frasesClave.length > 0 && (
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-amber-300">Frases clave</div>
+                <div className="mt-3 space-y-2">
+                  {selectedLinea.frasesClave.map((frase) => (
+                    <div
+                      key={frase}
+                      className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 flex items-start justify-between gap-3"
+                    >
+                      <span className="text-amber-100 text-sm italic">“{frase}”</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyPhrase(frase)}
+                        className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 px-2 py-1 text-[10px] font-semibold text-amber-200 hover:border-amber-400/70"
+                      >
+                        <Copy className="h-3 w-3" /> Copiar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedLinea.riesgos && (
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-rose-300">Riesgos</div>
+                <p className="mt-2">{selectedLinea.riesgos}</p>
+              </div>
+            )}
+            {selectedLinea.notasInternas && (
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-300">Notas internas</div>
+                <p className="mt-2">{selectedLinea.notasInternas}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={Boolean(selectedWarroom)}
+        onClose={() => setSelectedWarroom(null)}
+        title={selectedWarroom ? `WarRoom · ${selectedWarroom.attack}` : 'WarRoom'}
+        footer={
+          selectedWarroom ? (
+            <button
+              type="button"
+              onClick={() => handleCopyWarroom(selectedWarroom)}
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 px-3 py-1 text-xs font-semibold text-emerald-200 hover:border-emerald-400/80"
+            >
+              <Copy className="h-3.5 w-3.5" /> Copiar resumen
+            </button>
+          ) : null
+        }
+      >
+        {selectedWarroom && (
+          <div className="space-y-4 text-sm text-slate-300">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-rose-300">Ataque</div>
+              <p className="mt-2">{selectedWarroom.attack}</p>
+            </div>
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-amber-300">Riesgo</div>
+              <p className="mt-2">{selectedWarroom.risk}</p>
+            </div>
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-emerald-300">Rebuttal</div>
+              <p className="mt-2">{selectedWarroom.rebuttal}</p>
+            </div>
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-cyan-300">Plan de evidencia</div>
+              <p className="mt-2">{selectedWarroom.evidencePlan}</p>
+            </div>
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-indigo-300">Preguntas</div>
+              <p className="mt-2">{selectedWarroom.questions}</p>
+            </div>
+            {selectedWarroom.tags?.length > 0 && (
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-200">Tags</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {selectedWarroom.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-slate-600/40 bg-slate-800/40 px-2 py-0.5 text-[10px] font-semibold text-slate-200"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
