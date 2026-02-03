@@ -42,6 +42,8 @@ import { ModoTelepronter } from '../features/audiencia/ModoTelepronter';
 import { ChecklistAudiencia } from '../features/audiencia/ChecklistAudiencia';
 import { ToolsPage } from '../features/tools/ToolsPage';
 import { JurisprudenciaPage } from '../features/jurisprudencia/JurisprudenciaPage';
+import { PrescriptionPage } from '../features/prescription/PrescriptionPage';
+import { EvidenceComparePage } from '../features/evidence/EvidenceComparePage';
 
 export const router = createBrowserRouter(
   [
@@ -109,6 +111,16 @@ export const router = createBrowserRouter(
           path: 'tools',
           element: <ToolsPage />,
           handle: { pageMode: 'prose' },
+        },
+        {
+          path: 'tools/prescripcion',
+          element: <PrescriptionPage />,
+          handle: { pageMode: 'wide' },
+        },
+        {
+          path: 'tools/comparador-evidencia',
+          element: <EvidenceComparePage />,
+          handle: { pageMode: 'wide' },
         },
         // Jurisprudencia
         {

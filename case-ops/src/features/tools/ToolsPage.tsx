@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 // CHALADITA CASE-OPS
 import { ProcedimientosChaladita } from '../../components/ProcedimientosChaladita';
 import { HechosQuickNav } from '../../components/HechosQuickNav';
@@ -44,6 +45,35 @@ export function ToolsPage() {
           </select>
         )}
       </header>
+
+      <section className="grid gap-4 md:grid-cols-2">
+        <article className="card-base card-subtle flex flex-col gap-3 p-5">
+          <h2 className="text-lg font-semibold text-slate-100">
+            Línea de tiempo de prescripción
+          </h2>
+          <p className="text-sm text-slate-400">
+            Visualiza el umbral temporal y los hitos clave con una lectura orientativa.
+          </p>
+          <div className="mt-auto">
+            <Link className="btn btn-primary" to="/tools/prescripcion">
+              Abrir
+            </Link>
+          </div>
+        </article>
+        <article className="card-base card-subtle flex flex-col gap-3 p-5">
+          <h2 className="text-lg font-semibold text-slate-100">
+            Comparador de evidencia
+          </h2>
+          <p className="text-sm text-slate-400">
+            Contrasta pruebas con un divisor interactivo y anotaciones guiadas.
+          </p>
+          <div className="mt-auto">
+            <Link className="btn btn-primary" to="/tools/comparador-evidencia">
+              Abrir
+            </Link>
+          </div>
+        </article>
+      </section>
 
       {/* Quick Nav - Botones estilo app móvil */}
       {selectedProcId && (
