@@ -8,7 +8,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/schema';
 import { casesRepo, eventsRepo } from '../../db/repositories';
-import Card from '../../ui/components/Card';
+import Badge from '../../ui/components/Badge';
+import Button from '../../ui/components/Button';
+import SectionHeader from '../../ui/components/SectionHeader';
+import StatPill from '../../ui/components/StatPill';
 import { formatCurrency } from '../../utils/validators';
 import { AlertasPanel } from '../../components/AlertasPanel';
 import { getResumenContador, calcularTotales } from '../../data/hechosReclamados';
@@ -136,70 +139,72 @@ export function DashboardPage() {
   return (
     <div className="space-y-6 pb-20">
       {/* ===== HEADER: MAPA DE FRENTES ===== */}
-      <header className="flex justify-between items-start">
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-slate-500 mb-1 flex items-center gap-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-slate-500 mb-2 flex items-center gap-2">
             <Building2 size={12} />
             Centro de Comando Legal
           </p>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-[28px] font-semibold text-white tracking-tight">
             Mapa de Frentes Judiciales
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-400 mt-2">
             {frentes.length} procedimientos activos · Cuantía total: {formatCurrency(frentes.reduce((sum, f) => sum + (f.cuantia || 0), 0) * 100)}
           </p>
         </div>
-        <button
+        <Button
           onClick={handleClearCache}
           title="Limpiar caché"
-          className="p-2 rounded-lg border border-slate-600 text-slate-400 hover:text-amber-400 hover:border-amber-500/50 transition-all"
+          variant="ghost"
+          iconButton
         >
           <RefreshCw size={18} />
-        </button>
+        </Button>
       </header>
 
       {/* ===== TARJETAS DE FRENTES JUDICIALES ===== */}
       <section className="grid gap-4 lg:grid-cols-3">
-        {frentes.map((frente, idx) => {
+        {frentes.map((frente) => {
           const dias = frente.proximoHito ? getDiasHasta(frente.proximoHito) : null;
           const isUrgente = frente.urgencia === 'urgente';
           const isRiesgo = frente.urgencia === 'riesgo';
           const caseLabel = getCaseLabel(frente);
+          const statusClass = isUrgente ? 'status-urgente' : isRiesgo ? 'status-disputa' : 'status-activo';
 
           return (
             <button
               key={frente.id}
               onClick={() => navigate(`/cases/${frente.id}`)}
-              className={`case-card text-left group relative ${
+              className={`case-card card-base card-elevated text-left group relative border-l-2 ${statusClass} ${
                 isUrgente ? 'urgente' : isRiesgo ? 'en-riesgo' : ''
               }`}
               style={{
                 background: isUrgente
-                  ? 'linear-gradient(135deg, rgba(249,202,36,0.1) 0%, rgba(45,55,72,1) 100%)'
+                  ? 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(15,23,42,0.9) 100%)'
                   : isRiesgo
-                  ? 'linear-gradient(135deg, rgba(229,62,62,0.1) 0%, rgba(45,55,72,1) 100%)'
-                  : 'linear-gradient(135deg, rgba(56,161,105,0.1) 0%, rgba(45,55,72,1) 100%)',
+                  ? 'linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(15,23,42,0.9) 100%)'
+                  : 'linear-gradient(135deg, rgba(34,197,94,0.12) 0%, rgba(15,23,42,0.9) 100%)',
               }}
             >
               {/* Badge Urgente */}
               {isUrgente && (
                 <div className="absolute top-3 right-3">
-                  <span className="badge-estado urgente flex items-center gap-1">
+                  <Badge tone="warn" className="gap-1">
                     <AlertTriangle size={10} /> URGENTE
-                  </span>
+                  </Badge>
                 </div>
               )}
               {isRiesgo && (
                 <div className="absolute top-3 right-3">
-                  <span className="badge-estado riesgo flex items-center gap-1">
+                  <Badge tone="danger" className="gap-1">
                     <AlertTriangle size={10} /> RIESGO
-                  </span>
+                  </Badge>
                 </div>
               )}
 
               {/* Icono y Título */}
               <div className="flex items-start gap-3 mb-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                <div className={`w-12 h-12 rounded-[var(--radius-md)] flex items-center justify-center ${
                   isUrgente ? 'bg-amber-500/20 text-amber-400' :
                   isRiesgo ? 'bg-rose-500/20 text-rose-400' :
                   'bg-emerald-500/20 text-emerald-400'
@@ -208,10 +213,10 @@ export function DashboardPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-base font-bold text-white truncate">{frente.titulo}</h3>
-                    <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-100">
+                    <h3 className="text-base font-semibold text-white truncate">{frente.titulo}</h3>
+                    <Badge tone="muted" className="px-3">
                       {caseLabel}
-                    </span>
+                    </Badge>
                   </div>
                   <p className="text-xs text-slate-400 truncate">{frente.juzgado}</p>
                 </div>
@@ -220,28 +225,28 @@ export function DashboardPage() {
               {/* Info Grid */}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div>
-                  <div className="text-[9px] uppercase text-slate-500 tracking-wider">Tipo</div>
-                  <div className="text-xs text-slate-300 font-medium">{frente.tipo}</div>
+                  <div className="text-[10px] uppercase text-slate-500 tracking-wider">Tipo</div>
+                  <div className="text-[13px] text-slate-300 font-medium">{frente.tipo}</div>
                 </div>
                 <div>
-                  <div className="text-[9px] uppercase text-slate-500 tracking-wider">Rol</div>
-                  <div className={`text-xs font-medium ${
+                  <div className="text-[10px] uppercase text-slate-500 tracking-wider">Rol</div>
+                  <div className={`text-[13px] font-medium ${
                     frente.rol === 'Demandado' || frente.rol === 'Ejecutado' ? 'text-rose-400' : 'text-emerald-400'
                   }`}>{frente.rol}</div>
                 </div>
                 <div>
-                  <div className="text-[9px] uppercase text-slate-500 tracking-wider">Fase</div>
-                  <div className="text-xs text-slate-300 font-medium">{frente.fase}</div>
+                  <div className="text-[10px] uppercase text-slate-500 tracking-wider">Fase</div>
+                  <div className="text-[13px] text-slate-300 font-medium">{frente.fase}</div>
                 </div>
                 <div>
-                  <div className="text-[9px] uppercase text-slate-500 tracking-wider">Cuantía</div>
-                  <div className="text-xs font-bold text-white">{formatCurrency(frente.cuantia * 100)}</div>
+                  <div className="text-[10px] uppercase text-slate-500 tracking-wider">Cuantía</div>
+                  <div className="text-[13px] font-semibold text-white">{formatCurrency(frente.cuantia * 100)}</div>
                 </div>
               </div>
 
               {/* Próximo Hito */}
               {frente.proximoHito && (
-                <div className={`rounded-lg p-2 ${
+                <div className={`card-subtle rounded-[var(--radius-md)] p-2 ${
                   isUrgente ? 'bg-amber-500/10' : isRiesgo ? 'bg-rose-500/10' : 'bg-slate-700/30'
                 }`}>
                   <div className="flex items-center justify-between">
@@ -249,7 +254,7 @@ export function DashboardPage() {
                       <Calendar size={12} className={
                         isUrgente ? 'text-amber-400' : isRiesgo ? 'text-rose-400' : 'text-slate-400'
                       } />
-                      <span className="text-[10px] text-slate-400">{frente.proximoHitoNombre}</span>
+                      <span className="text-[11px] text-slate-400">{frente.proximoHitoNombre}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono text-slate-300">
@@ -279,61 +284,47 @@ export function DashboardPage() {
       </section>
 
       {/* ===== KPIs GLOBALES (Picassent como referencia) ===== */}
-      <section className="rounded-xl border border-slate-700/50 p-4" style={{ background: '#2d3748' }}>
+      <section className="card-base card-default p-5">
         <div className="flex items-center gap-2 mb-4">
           <MapPin size={14} className="text-amber-400" />
           <span className="text-[10px] uppercase tracking-wider text-slate-400">Resumen Económico · Picassent (Caso Principal)</span>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="kpi-card">
-            <div className="label">Reclamado</div>
-            <div className="value danger">{safeNumber(resumen.totalReclamado).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€</div>
-          </div>
-          <div className="kpi-card">
-            <div className="label">Prescrito</div>
-            <div className="value success">{safeNumber(resumen.prescrito).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€</div>
-          </div>
-          <div className="kpi-card">
-            <div className="label">Deuda Real</div>
-            <div className="value gold">{safeNumber(resumen.cifraRiesgoReal).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€</div>
-          </div>
-          <div className="kpi-card">
-            <div className="label">Reducción</div>
-            <div className="value info">{safeNumber(resumen.reduccionObjetivo)}%</div>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatPill label="Reclamado" value={`${safeNumber(resumen.totalReclamado).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€`} tone="danger" />
+          <StatPill label="Prescrito" value={`${safeNumber(resumen.prescrito).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€`} tone="info" />
+          <StatPill label="Deuda Real" value={`${safeNumber(resumen.cifraRiesgoReal).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€`} tone="warn" />
+          <StatPill label="Reducción" value={`${safeNumber(resumen.reduccionObjetivo)}%`} tone="ok" />
         </div>
       </section>
 
       {/* ===== PRÓXIMOS HITOS GLOBALES ===== */}
       <section>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Calendar size={16} className="text-amber-400" />
-            <h2 className="text-sm font-bold text-white">Próximos Hitos</h2>
-          </div>
-          <Link to="/events" className="text-xs text-amber-400 hover:underline">Ver agenda</Link>
-        </div>
+        <SectionHeader
+          title="Próximos Hitos"
+          subtitle="Fechas críticas en la agenda general."
+          action={<Link to="/events" className="text-xs text-amber-400 hover:underline">Ver agenda</Link>}
+        />
 
-        <div className="space-y-2">
+        <div className="space-y-3 mt-3">
           {/* Audiencia Previa Picassent (hardcoded como urgente) */}
-          <div className="flex items-center gap-4 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5">
-            <div className="w-12 h-12 rounded-lg bg-amber-500/20 flex flex-col items-center justify-center">
-              <span className="text-lg font-bold text-amber-400">
+          <div className="card-base card-elevated status-urgente border-l-2 flex items-center gap-4 p-4">
+            <div className="w-12 h-12 rounded-[var(--radius-md)] bg-amber-500/20 flex flex-col items-center justify-center">
+              <span className="text-lg font-semibold text-amber-400">
                 {getDiasHasta(resumenAudiencia.fecha)}
               </span>
               <span className="text-[8px] text-amber-500 uppercase">días</span>
             </div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-white">Audiencia Previa</div>
+              <div className="text-sm font-semibold text-white">Audiencia Previa</div>
               <div className="text-xs text-slate-400">Picassent · {new Date(resumenAudiencia.fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
             </div>
-            <span className="badge-estado urgente">URGENTE</span>
+            <Badge tone="warn">Urgente</Badge>
           </div>
 
           {/* Otros eventos */}
           {proximosEventos.slice(0, 2).map(evento => (
-            <div key={evento.id} className="flex items-center gap-4 p-3 rounded-lg border border-slate-700/50 bg-slate-800/30">
-              <div className="w-12 h-12 rounded-lg bg-slate-700/50 flex flex-col items-center justify-center">
+            <div key={evento.id} className="card-base card-subtle flex items-center gap-4 p-4">
+              <div className="w-12 h-12 rounded-[var(--radius-md)] bg-slate-700/50 flex flex-col items-center justify-center">
                 <span className="text-sm font-bold text-slate-300">
                   {new Date(evento.date).getDate()}
                 </span>
@@ -351,31 +342,31 @@ export function DashboardPage() {
       </section>
 
       {/* ===== ACCESOS RÁPIDOS ===== */}
-      <section className="grid grid-cols-4 gap-2">
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <button
           onClick={() => navigate('/analytics/hechos')}
-          className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all"
+          className="card-base card-subtle flex flex-col items-center gap-2 p-3 hover:border-emerald-500/30 hover:bg-emerald-500/10 transition-all"
         >
           <Scale size={22} className="text-emerald-400" />
           <span className="text-[10px] text-slate-300">Hechos</span>
         </button>
         <button
           onClick={() => navigate('/analytics/audiencia')}
-          className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-amber-500/10 hover:border-amber-500/30 transition-all"
+          className="card-base card-subtle flex flex-col items-center gap-2 p-3 hover:bg-amber-500/10 hover:border-amber-500/30 transition-all"
         >
           <Gavel size={22} className="text-amber-400" />
           <span className="text-[10px] text-slate-300">Audiencia</span>
         </button>
         <button
           onClick={() => navigate('/documents')}
-          className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all"
+          className="card-base card-subtle flex flex-col items-center gap-2 p-3 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all"
         >
           <FileText size={22} className="text-blue-400" />
           <span className="text-[10px] text-slate-300">Documentos</span>
         </button>
         <button
           onClick={() => navigate('/warroom')}
-          className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-700/50 bg-slate-800/30 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all"
+          className="card-base card-subtle flex flex-col items-center gap-2 p-3 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all"
         >
           <AlertTriangle size={22} className="text-rose-400" />
           <span className="text-[10px] text-slate-300">War Room</span>
@@ -386,8 +377,8 @@ export function DashboardPage() {
       <AlertasPanel />
 
       {/* ===== FUNDAMENTOS JURÍDICOS ===== */}
-      <section className="rounded-xl border border-slate-700/50 p-4" style={{ background: '#2d3748' }}>
-        <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+      <section className="card-base card-default p-5">
+        <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
           <Gavel size={14} className="text-amber-400" />
           Fundamentos Jurídicos Clave
         </h3>

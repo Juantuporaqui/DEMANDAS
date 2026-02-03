@@ -9,7 +9,7 @@ type CardProps = {
 export default function Card({ children, className }: CardProps) {
   return (
     <div
-      className={`${card} ${border} ${shadowCard} ${className ?? ''}`}
+      className={`card-base card-default ${card} ${border} ${shadowCard} ${className ?? ''}`}
       style={{ borderRadius: radius }}
     >
       {children}
