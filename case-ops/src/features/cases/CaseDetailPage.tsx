@@ -157,26 +157,19 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             }`}>{caseData.clientRole || 'No especificado'}</div>
           </div>
           {/* NIG */}
-          {caseData.nig ? (
+          {caseData.nig && (
             <div className="card-base card-subtle p-3 h-full">
               <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">NIG</div>
               <div className="text-xs font-medium text-slate-300 font-mono">{caseData.nig}</div>
             </div>
-          ) : (
-            <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
           )}
           {/* Próximo hito */}
-          {vistaEvent ? (
+          {vistaEvent && (
             <div className="card-base card-subtle border border-amber-500/30 p-3 h-full">
               <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Próximo hito</div>
               <div className="text-sm font-medium text-amber-300">{formatDate(vistaEvent.date)}</div>
               <div className="text-[10px] text-slate-500">{vistaEvent.title}</div>
             </div>
-          ) : (
-            <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
-          )}
-          {!vistaEvent && (
-            <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
           )}
           {/* Cuantía Procesal */}
           <div className="card-base card-subtle border border-rose-500/30 p-3 h-full">
@@ -734,107 +727,129 @@ function TabDocs({ documents, caseId, caseData }: any) {
 // ============================================
 function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact[], caseData?: Case }) {
   const navigate = useNavigate();
+  const [caseFacts, setCaseFacts] = useState<Record<'picassent' | 'mislata' | 'quart', Fact[]>>({
+    picassent: [],
+    mislata: [],
+    quart: [],
+  });
 
-  // Detectar tipo de caso para mostrar análisis específico
+  useEffect(() => {
+    let isActive = true;
+    const loadFacts = async () => {
+      const [allCases, allFacts] = await Promise.all([casesRepo.getAll(), factsRepo.getAll()]);
+      const findCaseId = (matcher: (c: Case) => boolean) => allCases.find(matcher)?.id;
+      const picassentId = findCaseId(
+        (c) => c.id?.includes('picassent') || c.title?.toLowerCase().includes('picassent') || c.autosNumber?.includes('715'),
+      );
+      const mislataId = findCaseId(
+        (c) => c.id?.includes('mislata') || c.title?.toLowerCase().includes('mislata') || c.autosNumber?.includes('1185'),
+      );
+      const quartId = findCaseId(
+        (c) => c.id?.includes('quart') || c.title?.toLowerCase().includes('quart') || c.autosNumber?.includes('1428'),
+      );
+
+      if (isActive) {
+        setCaseFacts({
+          picassent: picassentId ? allFacts.filter((fact) => fact.caseId === picassentId) : [],
+          mislata: mislataId ? allFacts.filter((fact) => fact.caseId === mislataId) : [],
+          quart: quartId ? allFacts.filter((fact) => fact.caseId === quartId) : [],
+        });
+      }
+    };
+
+    loadFacts().catch(() => {
+      if (isActive) {
+        setCaseFacts({
+          picassent: [],
+          mislata: [],
+          quart: [],
+        });
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [caseId]);
+
   const isQuart = caseId?.includes('quart') ||
                   caseData?.title?.toLowerCase().includes('quart') ||
                   caseData?.autosNumber?.includes('1428');
 
-  const isPicassent = caseId?.includes('picassent') ||
-                      caseData?.title?.toLowerCase().includes('picassent') ||
-                      caseData?.autosNumber?.includes('715');
-
-  const isMislata = caseId?.includes('mislata') ||
-                    caseData?.title?.toLowerCase().includes('mislata') ||
-                    caseData?.autosNumber?.includes('1185');
-
-  const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
-
-  // Para Quart, mostrar análisis financiero dedicado
   if (isQuart) {
     return <QuartFinancialAnalysis />;
   }
 
-  // Helper para sacar un importe estimado del texto si existe
   const extractAmount = (text: string) => {
     const match = text.match(/(\d{1,3}(?:\.\d{3})*(?:,\d+)?)\s?€/);
     return match ? match[0] : null;
   };
 
-  return (
-    <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
-      {isPicassent && <PicassentHipotecaResumen />}
+  const columns: Array<{ key: 'picassent' | 'mislata' | 'quart'; title: string; items: Fact[] }> = [
+    { key: 'picassent', title: 'Picassent', items: caseFacts.picassent },
+    { key: 'mislata', title: 'Mislata', items: caseFacts.mislata },
+    { key: 'quart', title: 'Quart', items: caseFacts.quart },
+  ];
 
+  const fallbackEmpty =
+    caseFacts.picassent.length === 0 &&
+    caseFacts.mislata.length === 0 &&
+    caseFacts.quart.length === 0 &&
+    facts.length === 0;
+
+  return (
+    <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-bold text-white">Hechos y Partidas</h3>
+          <h3 className="text-sm font-bold text-white">Reclamaciones económicas por caso</h3>
           <span className="text-[10px] font-bold tracking-widest bg-slate-800/60 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
-            {caseLabel}
+            CENTRO
           </span>
         </div>
         <Link to={`/facts/new?caseId=${caseId}`} className="text-xs bg-emerald-600/80 text-emerald-100 px-3 py-1.5 rounded hover:bg-emerald-500 transition-colors flex items-center gap-2">
-          <span>+</span> Nuevo Hecho / Partida
+          <span>+</span> Nueva reclamación
         </Link>
       </div>
 
-      {facts.length === 0 && (
-          <div className="text-center py-8 border border-dashed border-slate-800 rounded text-slate-500">
-              No hay hechos registrados para este caso.
-          </div>
-      )}
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-        {facts.map((fact) => {
-          const amountDisplay = extractAmount(fact.title || '') || extractAmount(fact.narrative || '');
-          const riskBadge = fact.risk
-            ? {
-                label: `Riesgo ${fact.risk.toUpperCase()}`,
-                className:
-                  fact.risk === 'alto'
-                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                    : fact.risk === 'bajo'
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                    : 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-              }
-            : null;
-          const statusBadge = fact.status
-            ? {
-                label: fact.status.replace('_', ' ').toUpperCase(),
-                className:
-                  fact.status === 'controvertido'
-                    ? 'bg-rose-500/10 text-rose-300 border-rose-500/30'
-                    : fact.status === 'a_probar'
-                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-                    : 'bg-slate-700/40 text-slate-300 border-slate-600/40',
-              }
-            : null;
-
-          return (
-            <button
-              key={fact.id}
-              onClick={() => navigate(`/facts/${fact.id}`)}
-              aria-label={amountDisplay ? `${fact.title} (${amountDisplay})` : fact.title}
-              className="group w-full aspect-square rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-blue-500/50 hover:bg-slate-900/70"
-            >
-              <div className="flex flex-col justify-between h-full">
-                <div className="flex flex-wrap gap-1">
-                  {riskBadge && (
-                    <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded border ${riskBadge.className}`}>
-                      {riskBadge.label}
-                    </span>
-                  )}
-                  {statusBadge && (
-                    <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded border ${statusBadge.className}`}>
-                      {statusBadge.label}
-                    </span>
-                  )}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {columns.map((column) => (
+          <div key={column.key} className="card-base card-subtle p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-300">{column.title}</h4>
+              <span className="text-[10px] text-slate-500">{column.items.length} partidas</span>
+            </div>
+            <div className="space-y-2">
+              {column.items.map((fact) => {
+                const amountDisplay = extractAmount(fact.title || '') || extractAmount(fact.narrative || '');
+                return (
+                  <button
+                    key={fact.id}
+                    onClick={() => navigate(`/facts/${fact.id}`)}
+                    aria-label={amountDisplay ? `${fact.title} (${amountDisplay})` : fact.title}
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-900/40 px-3 py-2 text-left text-xs font-medium text-slate-200 transition hover:border-blue-500/40 hover:bg-slate-900/70"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="line-clamp-2">{fact.title}</span>
+                      {amountDisplay && <span className="text-[10px] text-emerald-300">{amountDisplay}</span>}
+                    </div>
+                  </button>
+                );
+              })}
+              {column.items.length === 0 && (
+                <div className="rounded-lg border border-dashed border-slate-700/60 p-3 text-[11px] text-slate-500">
+                  Sin reclamaciones económicas aún.
                 </div>
-                <div className="text-sm font-semibold text-white leading-snug line-clamp-3">{fact.title}</div>
-              </div>
-            </button>
-          );
-        })}
+              )}
+            </div>
+          </div>
+        ))}
       </div>
+
+      {fallbackEmpty && (
+        <div className="text-center py-8 border border-dashed border-slate-800 rounded text-slate-500">
+          No hay reclamaciones económicas registradas.
+        </div>
+      )}
     </div>
   );
 }
