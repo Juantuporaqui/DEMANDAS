@@ -20,6 +20,8 @@ import {
   Wallet,
   Clock,
   SlidersHorizontal,
+  BarChart3,
+  SplitSquareVertical,
 } from 'lucide-react';
 import { casesRepo } from '../../db/repositories';
 import type { Case } from '../../types';
@@ -46,6 +48,16 @@ const NAV_SECONDARY = [
     to: '/tools/comparador-evidencia',
     label: 'Comparador de evidencia',
     icon: <SlidersHorizontal size={18} />,
+  },
+  {
+    to: '/analytics/liquidacion-justa',
+    label: 'Liquidación Justa',
+    icon: <BarChart3 size={18} />,
+  },
+  {
+    to: '/analytics/contradiccion-aeat',
+    label: 'Contradicción AEAT',
+    icon: <SplitSquareVertical size={18} />,
   },
   { to: '/warroom', label: 'War Room', icon: <Target size={18} /> },
   { to: '/settings', label: 'Ajustes', icon: <Settings size={18} /> },
