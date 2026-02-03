@@ -35,6 +35,7 @@ import { CourtDashboard } from '../features/analytics/pages/CourtDashboard';
 import { HechosPage } from '../features/analytics/pages/HechosPage';
 import { PrescripcionPage } from '../features/analytics/pages/PrescripcionPage';
 import { ExcepcionAcumulacionPage } from '../features/analytics/pages/ExcepcionAcumulacionPage';
+import { PasivoPreferentePage } from '../features/analytics/pages/PasivoPreferentePage';
 import { ModoAudienciaPage } from '../features/audiencia/ModoAudienciaPage';
 import { AudienciaPreviaPage } from '../features/audiencia/AudienciaPreviaPage';
 import { ModoTelepronter } from '../features/audiencia/ModoTelepronter';
@@ -67,6 +68,10 @@ export const router = createBrowserRouter(
         {
           path: 'analytics/prescripcion',
           element: <PrescripcionPage />,
+        },
+        {
+          path: 'analytics/pasivo-preferente',
+          element: <PasivoPreferentePage />,
         },
         {
           path: 'analytics/hechos',
