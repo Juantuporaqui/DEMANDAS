@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { strategiesRepo } from '../../db/repositories';
 import type { Strategy } from '../../types';
-import Card from '../../ui/components/Card';
+import Button from '../../ui/components/Button';
 import {
   getAllEstrategias,
   getEstrategiaPorProcedimiento,
@@ -72,19 +72,15 @@ function TypeBadge({ tipo, size = 'md' }: TypeBadgeProps) {
   const Icon = c.icon;
 
   const sizeClasses = {
-    sm: 'px-2 py-1 text-[10px] gap-1',
-    md: 'px-3 py-1.5 text-xs gap-1.5',
-    lg: 'px-4 py-2 text-sm gap-2',
+    sm: 'badge gap-1',
+    md: 'badge gap-1.5',
+    lg: 'badge gap-2',
   };
 
   const iconSizes = { sm: 12, md: 14, lg: 18 };
 
   return (
-    <span className={`
-      inline-flex items-center font-bold uppercase tracking-wider rounded-full border
-      ${c.bg} ${c.border} ${c.text} ${sizeClasses[size]}
-      shadow-lg ${c.glow}
-    `}>
+    <span className={`${sizeClasses[size]} ${c.bg} ${c.border} ${c.text} shadow-lg ${c.glow}`}>
       <Icon size={iconSizes[size]} />
       {c.label}
     </span>
@@ -106,7 +102,7 @@ function PriorityBadge({ prioridad }: PriorityBadgeProps) {
   const c = config[prioridad] || config.media;
 
   return (
-    <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded ${c.bg} ${c.text}`}>
+    <span className={`badge ${c.bg} ${c.text}`}>
       {c.label}
     </span>
   );
@@ -120,13 +116,13 @@ function ProcBadge({ procedimiento }: ProcBadgeProps) {
   const isPicassent = procedimiento === 'picassent';
 
   return (
-    <span className={`
-      px-2 py-0.5 text-[10px] font-bold uppercase rounded
-      ${isPicassent
-        ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
-        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-      }
-    `}>
+    <span
+      className={`badge ${
+        isPicassent
+          ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
+          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+      }`}
+    >
       {isPicassent ? 'PICASSENT' : 'MISLATA'}
     </span>
   );
@@ -160,7 +156,7 @@ function EstrategiaCard({
   return (
     <div
       className={`
-        rounded-2xl border border-slate-800 bg-slate-900/80 overflow-hidden
+        card-base card-elevated overflow-hidden
         transition-all duration-300 border-l-4 ${borderColor}
         ${estrategia.prioridad === 'critica' ? 'ring-2 ring-rose-500/30 shadow-lg shadow-rose-500/10' : ''}
         hover:border-slate-700 hover:shadow-xl
@@ -178,7 +174,7 @@ function EstrategiaCard({
         </div>
 
         {/* Título */}
-        <h3 className="font-bold text-white text-lg leading-tight">{estrategia.titulo}</h3>
+        <h3 className="font-semibold text-white text-lg leading-tight">{estrategia.titulo}</h3>
         <p className="text-slate-400 text-sm mt-2 leading-relaxed">{estrategia.descripcion}</p>
       </div>
 
@@ -202,18 +198,19 @@ function EstrategiaCard({
             {estrategia.frasesClave.map((frase, i) => (
               <div
                 key={i}
-                className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-3"
+                className="card-base card-subtle border border-amber-500/20 rounded-xl p-3 flex items-start gap-3"
               >
                 <div className="flex-1">
                   <p className="text-amber-200 text-sm italic leading-relaxed">"{frase}"</p>
                 </div>
-                <button
+                <Button
                   onClick={() => onCopy(frase)}
-                  className="flex items-center gap-1 text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 px-2 py-1.5 rounded-lg transition-colors flex-shrink-0 border border-amber-500/30"
+                  variant="ghost"
+                  className="text-amber-300 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 py-1.5 text-xs"
                 >
                   <Copy size={12} />
                   Copiar
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -252,7 +249,7 @@ function EstrategiaCard({
                 {estrategia.articulosRelacionados.map((art) => (
                   <span
                     key={art}
-                    className="text-xs bg-cyan-500/10 text-cyan-300 px-2.5 py-1 rounded-lg border border-cyan-500/30"
+                    className="badge bg-cyan-500/10 text-cyan-300 border border-cyan-500/30"
                   >
                     {art}
                   </span>
@@ -272,7 +269,7 @@ function EstrategiaCard({
                 {estrategia.documentosSoporte.map((doc) => (
                   <span
                     key={doc}
-                    className="text-xs bg-blue-500/10 text-blue-300 px-2.5 py-1 rounded-lg border border-blue-500/30 font-mono"
+                    className="badge bg-blue-500/10 text-blue-300 border border-blue-500/30 font-mono"
                   >
                     {doc}
                   </span>
@@ -283,7 +280,7 @@ function EstrategiaCard({
 
           {/* Riesgos */}
           {estrategia.riesgos && (
-            <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-3">
+            <div className="card-base card-subtle border border-rose-500/30 rounded-xl p-3">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="text-rose-400" size={14} />
                 <p className="text-xs text-rose-400 uppercase font-bold tracking-wider">Riesgos</p>
@@ -374,50 +371,50 @@ export function WarRoomPage() {
             Volver al Panel
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/30">
+            <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-rose-600 rounded-[var(--radius-md)] flex items-center justify-center shadow-lg shadow-rose-500/30">
               <Target className="text-white" size={20} />
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-500">
                 Centro de Estrategia
               </p>
-              <h1 className="text-3xl font-bold text-slate-100 tracking-tight">War Room</h1>
+              <h1 className="text-[28px] font-semibold text-slate-100 tracking-tight">War Room</h1>
             </div>
           </div>
         </div>
 
         {/* Stats con badges de Defensa vs Ataque */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-          <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-4 text-center">
-            <p className="text-3xl font-bold text-white">{stats.total}</p>
+          <div className="card-base card-subtle p-4 text-center">
+            <p className="text-3xl font-semibold text-white">{stats.total}</p>
             <p className="text-xs text-slate-500 mt-1">Total</p>
           </div>
-          <div className="bg-emerald-500/10 rounded-xl border border-emerald-500/30 p-4 text-center">
+          <div className="card-base card-subtle border border-emerald-500/30 p-4 text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
               <Shield className="text-emerald-400" size={18} />
-              <p className="text-3xl font-bold text-emerald-300">{stats.defensas}</p>
+              <p className="text-3xl font-semibold text-emerald-300">{stats.defensas}</p>
             </div>
             <p className="text-xs text-emerald-400">Defensas</p>
           </div>
-          <div className="bg-rose-500/10 rounded-xl border border-rose-500/30 p-4 text-center">
+          <div className="card-base card-subtle border border-rose-500/30 p-4 text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
               <Sword className="text-rose-400" size={18} />
-              <p className="text-3xl font-bold text-rose-300">{stats.ataques}</p>
+              <p className="text-3xl font-semibold text-rose-300">{stats.ataques}</p>
             </div>
             <p className="text-xs text-rose-400">Ataques</p>
           </div>
-          <div className="bg-orange-500/10 rounded-xl border border-orange-500/30 p-4 text-center">
-            <p className="text-3xl font-bold text-orange-300">{stats.picassent}</p>
+          <div className="card-base card-subtle border border-orange-500/30 p-4 text-center">
+            <p className="text-3xl font-semibold text-orange-300">{stats.picassent}</p>
             <p className="text-xs text-orange-400">Picassent</p>
           </div>
-          <div className="bg-cyan-500/10 rounded-xl border border-cyan-500/30 p-4 text-center">
-            <p className="text-3xl font-bold text-cyan-300">{stats.mislata}</p>
+          <div className="card-base card-subtle border border-cyan-500/30 p-4 text-center">
+            <p className="text-3xl font-semibold text-cyan-300">{stats.mislata}</p>
             <p className="text-xs text-cyan-400">Mislata</p>
           </div>
-          <div className="bg-amber-500/10 rounded-xl border border-amber-500/30 p-4 text-center">
+          <div className="card-base card-subtle border border-amber-500/30 p-4 text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
               <Zap className="text-amber-400" size={18} />
-              <p className="text-3xl font-bold text-amber-300">{stats.criticas}</p>
+              <p className="text-3xl font-semibold text-amber-300">{stats.criticas}</p>
             </div>
             <p className="text-xs text-amber-400">Críticas</p>
           </div>
@@ -428,9 +425,9 @@ export function WarRoomPage() {
       <div className="flex gap-2 border-b border-slate-800">
         <button
           onClick={() => setActiveTab('estrategia')}
-          className={`px-5 py-3 text-sm font-medium rounded-t-xl transition-colors ${
+          className={`px-5 py-3 text-sm font-medium rounded-t-[var(--radius-md)] transition-colors ${
             activeTab === 'estrategia'
-              ? 'bg-slate-800 text-white border-b-2 border-amber-500'
+              ? 'bg-slate-800 text-white'
               : 'text-slate-500 hover:text-white hover:bg-slate-800/50'
           }`}
         >
@@ -441,9 +438,9 @@ export function WarRoomPage() {
         </button>
         <button
           onClick={() => setActiveTab('custom')}
-          className={`px-5 py-3 text-sm font-medium rounded-t-xl transition-colors ${
+          className={`px-5 py-3 text-sm font-medium rounded-t-[var(--radius-md)] transition-colors ${
             activeTab === 'custom'
-              ? 'bg-slate-800 text-white border-b-2 border-amber-500'
+              ? 'bg-slate-800 text-white'
               : 'text-slate-500 hover:text-white hover:bg-slate-800/50'
           }`}
         >
@@ -458,7 +455,7 @@ export function WarRoomPage() {
       {activeTab === 'estrategia' && (
         <>
           {/* Filtros mejorados */}
-          <div className="flex flex-wrap gap-3 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+          <div className="card-base card-subtle flex flex-wrap gap-3 p-4">
             {/* Filtro rápido Defensa/Ataque */}
             <div className="flex gap-2">
               <button
@@ -535,7 +532,7 @@ export function WarRoomPage() {
           </div>
 
           {estrategiasFiltradas.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/30 p-12 text-center">
+            <div className="card-base card-subtle border-dashed border-slate-700 p-12 text-center">
               <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Target className="text-slate-500" size={32} />
               </div>
@@ -551,7 +548,7 @@ export function WarRoomPage() {
         <>
           <Link
             to="/warroom/new"
-            className="inline-flex items-center gap-2 justify-center rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-rose-900/30 hover:shadow-rose-900/50 transition-shadow"
+            className="inline-flex items-center gap-2 justify-center rounded-[var(--radius-md)] bg-gradient-to-r from-rose-600 to-rose-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-rose-900/30 hover:shadow-rose-900/50 transition-shadow"
           >
             <Plus size={18} />
             Nueva Estrategia
@@ -560,7 +557,7 @@ export function WarRoomPage() {
           {loading ? (
             <div className="p-12 text-center text-slate-500">Cargando...</div>
           ) : strategies.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/30 p-12 text-center">
+            <div className="card-base card-subtle border-dashed border-slate-700 p-12 text-center">
               <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="text-slate-500" size={32} />
               </div>
@@ -574,8 +571,7 @@ export function WarRoomPage() {
                   key={strategy.id}
                   to={`/warroom/${strategy.id}/edit`}
                   className={`
-                    relative flex flex-col justify-between overflow-hidden rounded-2xl
-                    border border-slate-800 bg-slate-900/80 p-5
+                    card-base card-elevated relative flex flex-col justify-between overflow-hidden p-5
                     transition-all hover:border-slate-700 hover:shadow-xl active:scale-[0.98]
                     border-l-4 ${getRiskColor(strategy.risk)}
                   `}

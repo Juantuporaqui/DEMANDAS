@@ -27,6 +27,7 @@ import { getPDFsByCaso, getPDFUrl, tipoDocIcons, tipoDocColors, type PDFDocument
 import { EmbeddedPDFViewer } from '../../components/EmbeddedPDFViewer';
 // Timeline específico para Picassent
 import { PicassentHechosReclamados, PicassentHipotecaResumen, PicassentTimeline } from './PicassentTimeline';
+import Badge from '../../ui/components/Badge';
 
 // ============================================
 // 1. DASHBOARD EJECUTIVO (Tab Resumen) - DINÁMICO
@@ -90,26 +91,24 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* RESUMEN EJECUTIVO */}
-      <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-slate-900/60 p-4 sm:p-5">
-        <h2 className="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+      <div className="card-base card-elevated border-l-2 status-activo p-5">
+        <h2 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-4 flex items-center gap-2">
           <Eye size={16} /> Resumen ejecutivo
-          <span className="text-[10px] font-bold tracking-widest bg-slate-800/60 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
-            {caseLabel}
-          </span>
+          <Badge tone="muted">{caseLabel}</Badge>
         </h2>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           {/* Parte contraria */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+          <div className="card-base card-subtle p-3">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Parte contraria</div>
             <div className="text-sm font-medium text-rose-300">{opposingSummary || 'No especificada'}</div>
           </div>
           {/* Juzgado */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+          <div className="card-base card-subtle p-3">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Juzgado</div>
             <div className="text-sm font-medium text-slate-200">{caseData.court}</div>
           </div>
           {/* Autos */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+          <div className="card-base card-subtle p-3">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Autos</div>
             <div className="text-sm font-medium text-slate-200 font-mono">{caseData.autosNumber}</div>
           </div>
@@ -117,13 +116,13 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
           {/* NIG */}
           {caseData.nig && (
-            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="card-base card-subtle p-3">
               <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">NIG</div>
               <div className="text-xs font-medium text-slate-300 font-mono">{caseData.nig}</div>
             </div>
           )}
           {/* Rol */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+          <div className="card-base card-subtle p-3">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Rol procesal</div>
             <div className={`text-sm font-bold uppercase ${
               caseData.clientRole === 'demandante' || caseData.clientRole === 'ejecutante'
@@ -133,19 +132,19 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           </div>
           {/* Próximo hito */}
           {vistaEvent && (
-            <div className="bg-slate-800/50 rounded-lg p-3 border border-amber-500/30">
+            <div className="card-base card-subtle border border-amber-500/30 p-3">
               <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Próximo hito</div>
               <div className="text-sm font-medium text-amber-300">{formatDate(vistaEvent.date)}</div>
               <div className="text-[10px] text-slate-500">{vistaEvent.title}</div>
             </div>
           )}
           {/* Cuantía Procesal */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-rose-500/30">
+          <div className="card-base card-subtle border border-rose-500/30 p-3">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Cuantía procesal (demanda)</div>
             <div className="text-lg font-bold text-rose-400">{formatCurrency(amounts.totalDemand)}</div>
           </div>
           {/* Nº Hechos */}
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+          <div className="card-base card-subtle p-3">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nº hechos</div>
             <div className="text-lg font-bold text-slate-200">{hechosCount}</div>
             <div className="text-[10px] text-slate-500">{factsControvertidos} controvertidos</div>
@@ -154,21 +153,21 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Sumatorio Analítico */}
           {showAnalytic && (
-            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="card-base card-subtle p-3">
               <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Sumatorio analítico (partidas)</div>
               <div className="text-lg font-bold text-emerald-400">{formatCurrency(amounts.analytic)}</div>
             </div>
           )}
           {/* Delta */}
           {showAnalytic && amounts.delta !== 0 && (
-            <div className="bg-amber-900/30 rounded-lg p-3 border border-amber-500/50">
+            <div className="card-base card-subtle border border-amber-500/50 p-3">
               <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Delta pendiente de justificar</div>
               <div className="text-lg font-bold text-amber-400">{formatCurrency(Math.abs(amounts.delta))}</div>
             </div>
           )}
           {/* Judge si existe */}
           {caseData.judge && caseData.judge !== '[Pendiente]' && (
-            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+            <div className="card-base card-subtle p-3">
               <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Juez</div>
               <div className="text-sm font-medium text-slate-200">{caseData.judge}</div>
             </div>
@@ -194,22 +193,18 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
         <button
           type="button"
           onClick={() => isPicassent ? navigate('/analytics/hechos') : setActiveTab('economico')}
-          className="group rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left transition-all hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/5 active:scale-[0.98]"
+          className="group card-base card-elevated p-5 text-left hover:border-emerald-500/30 hover:shadow-emerald-500/5 active:scale-[0.98]"
         >
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 mb-3">
+          <div className="flex items-center justify-center w-12 h-12 rounded-[var(--radius-md)] bg-emerald-500/20 border border-emerald-500/30 mb-3">
             <ListChecks className="w-6 h-6 text-emerald-400" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-1">Desglose de Hechos</h3>
+          <h3 className="text-lg font-semibold text-white mb-1">Desglose de Hechos</h3>
           <p className="text-sm text-slate-400 mb-3">
             {facts.length} partidas con análisis detallado
           </p>
           <div className="flex flex-wrap gap-2 mb-3">
-            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-              {factsControvertidos} controvertidos
-            </span>
-            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-              {factsAProbar} a probar
-            </span>
+            <Badge tone="danger">{factsControvertidos} controvertidos</Badge>
+            <Badge tone="warn">{factsAProbar} a probar</Badge>
           </div>
           <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
             Ver desglose completo <ChevronRight className="w-4 h-4 ml-1" />
@@ -221,27 +216,23 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           <button
             type="button"
             onClick={() => navigate('/analytics/audiencia')}
-            className="group relative rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left transition-all hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/5 active:scale-[0.98]"
+            className="group relative card-base card-elevated p-5 text-left hover:border-amber-500/30 hover:shadow-amber-500/5 active:scale-[0.98]"
           >
             <div className="absolute top-4 right-4">
-              <span className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              <Badge tone="warn" className="gap-1">
                 <AlertTriangle className="w-3 h-3" /> Urgente
-              </span>
+              </Badge>
             </div>
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 mb-3">
+            <div className="flex items-center justify-center w-12 h-12 rounded-[var(--radius-md)] bg-amber-500/20 border border-amber-500/30 mb-3">
               <Gavel className="w-6 h-6 text-amber-400" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">Audiencia Previa</h3>
+            <h3 className="text-lg font-semibold text-white mb-1">Audiencia Previa</h3>
             <p className="text-sm text-slate-400 mb-3">
               Alegaciones y hechos controvertidos
             </p>
             <div className="flex flex-wrap gap-2 mb-3">
-              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/50 text-slate-300">
-                12 Alegaciones
-              </span>
-              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/50 text-slate-300">
-                18 Hechos
-              </span>
+              <Badge tone="muted">12 Alegaciones</Badge>
+              <Badge tone="muted">18 Hechos</Badge>
             </div>
             <div className="flex items-center text-sm text-amber-400 font-medium group-hover:translate-x-1 transition-transform">
               Preparar audiencia <ChevronRight className="w-4 h-4 ml-1" />
@@ -254,19 +245,17 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           <button
             type="button"
             onClick={() => isMislata || isQuart ? navigate('/audiencia/checklist') : navigate('/audiencia-previa')}
-            className="group relative rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5 text-left transition-all hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/5 active:scale-[0.98]"
+            className="group relative card-base card-elevated p-5 text-left hover:border-violet-500/30 hover:shadow-violet-500/5 active:scale-[0.98]"
           >
             <div className="absolute top-4 right-4">
               {diasHastaVista !== null && diasHastaVista <= 30 && diasHastaVista > 0 && (
-                <span className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                  {diasHastaVista}d
-                </span>
+                <Badge tone="info">{diasHastaVista}d</Badge>
               )}
             </div>
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-violet-500/20 border border-violet-500/30 mb-3">
+            <div className="flex items-center justify-center w-12 h-12 rounded-[var(--radius-md)] bg-violet-500/20 border border-violet-500/30 mb-3">
               <Scale className="w-6 h-6 text-violet-400" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">Vista / Juicio</h3>
+            <h3 className="text-lg font-semibold text-white mb-1">Vista / Juicio</h3>
             <p className="text-sm text-slate-400 mb-3">
               {vistaEvent.title}
             </p>
@@ -284,7 +273,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           <button
             type="button"
             onClick={() => navigate(`/events/new?caseId=${caseData.id}`)}
-            className="group rounded-2xl border border-dashed border-slate-600 bg-slate-900/30 p-5 text-left transition-all hover:border-violet-500/50 hover:bg-violet-500/5 active:scale-[0.98]"
+            className="group card-base card-subtle border-dashed border-slate-600 p-5 text-left hover:border-violet-500/50 hover:bg-violet-500/5 active:scale-[0.98]"
           >
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-800/50 border border-slate-700 mb-3">
               <Calendar className="w-6 h-6 text-slate-500" />
@@ -302,9 +291,9 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
 
       {/* KPIs DINÁMICOS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+        <div className="card-base card-subtle p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Cuantía procesal (demanda)</div>
-          <div className="text-2xl font-bold text-rose-400 mt-1">
+          <div className="text-2xl font-semibold text-rose-400 mt-1">
             {formatCurrency(amounts.totalDemand)}
           </div>
           <div className="text-[10px] text-slate-600">{partidas.length} partidas</div>
@@ -312,19 +301,19 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             <div className="text-[10px] text-amber-400 mt-1">Delta pendiente de justificar</div>
           )}
         </div>
-        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+        <div className="card-base card-subtle p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Hechos</div>
-          <div className="text-2xl font-bold text-emerald-400 mt-1">{facts.length}</div>
+          <div className="text-2xl font-semibold text-emerald-400 mt-1">{facts.length}</div>
           <div className="text-[10px] text-slate-600">{factsControvertidos} controvertidos</div>
         </div>
-        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+        <div className="card-base card-subtle p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Eventos</div>
-          <div className="text-2xl font-bold text-amber-400 mt-1">{events.length}</div>
+          <div className="text-2xl font-semibold text-amber-400 mt-1">{events.length}</div>
           <div className="text-[10px] text-slate-600">{events.filter((e: Event) => new Date(e.date) > new Date()).length} próximos</div>
         </div>
-        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+        <div className="card-base card-subtle p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Estrategias</div>
-          <div className="text-2xl font-bold text-blue-400 mt-1">{strategies.length}</div>
+          <div className="text-2xl font-semibold text-blue-400 mt-1">{strategies.length}</div>
           <div className="text-[10px] text-slate-600">líneas de defensa</div>
         </div>
       </div>
@@ -333,7 +322,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
 
       {/* HECHOS DEL CASO */}
       {facts.length > 0 && (
-        <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-4 sm:p-5">
+        <div className="card-base card-elevated p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400"><ListChecks size={20} /></div>
@@ -342,9 +331,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
                 <p className="text-[10px] text-slate-500">{facts.length} puntos registrados</p>
               </div>
             </div>
-            <span className="text-[10px] font-bold tracking-widest bg-slate-800/60 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
-              {caseLabel}
-            </span>
+            <Badge tone="muted">{caseLabel}</Badge>
           </div>
 
           <div className="space-y-2 mb-4">
@@ -372,16 +359,10 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
                   </div>
                   <div className="flex gap-1 items-center shrink-0">
                     {/* FASE 6: Indicador probatorio - Sin evidencia */}
-                    <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-rose-600/30 text-rose-300 border border-rose-500/50">
-                      Sin evidencia
-                    </span>
-                    <span className={`text-[10px] uppercase px-2 py-0.5 rounded ${
-                      fact.status === 'controvertido' ? 'bg-rose-500/20 text-rose-300' :
-                      fact.status === 'a_probar' ? 'bg-amber-500/20 text-amber-300' :
-                      'bg-emerald-500/20 text-emerald-300'
-                    }`}>
+                    <Badge tone="danger">Sin evidencia</Badge>
+                    <Badge tone={fact.status === 'controvertido' ? 'danger' : fact.status === 'a_probar' ? 'warn' : 'ok'}>
                       {fact.status}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
               </button>
@@ -391,7 +372,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           {facts.length > 4 && (
             <button
               onClick={() => setActiveTab('economico')}
-              className="w-full text-xs text-emerald-400 font-medium py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors"
+              className="w-full text-xs text-emerald-300 font-medium py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors"
             >
               Ver todos los {facts.length} hechos →
             </button>
@@ -401,7 +382,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
 
       {/* ESTRATEGIAS DEL CASO */}
       {strategies.length > 0 && (
-        <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-4 sm:p-5">
+        <div className="card-base card-elevated p-4 sm:p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400"><Gavel size={20} /></div>
             <div>
@@ -419,11 +400,9 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
               }`}>
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm text-white line-clamp-2">{s.attack}</p>
-                  <span className={`text-[10px] px-2 py-0.5 rounded shrink-0 ${
-                    s.risk === 'Alto' ? 'bg-rose-500/30 text-rose-300' :
-                    s.risk === 'Medio' ? 'bg-amber-500/30 text-amber-300' :
-                    'bg-emerald-500/30 text-emerald-300'
-                  }`}>{s.risk}</span>
+                  <Badge tone={s.risk === 'Alto' ? 'danger' : s.risk === 'Medio' ? 'warn' : 'ok'}>
+                    {s.risk}
+                  </Badge>
                 </div>
               </div>
             ))}
@@ -432,7 +411,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           {strategies.length > 3 && (
             <button
               onClick={() => setActiveTab('estrategia')}
-              className="w-full mt-3 text-xs text-amber-400 font-medium py-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
+              className="w-full mt-3 text-xs text-amber-300 font-medium py-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
             >
               Ver todas las estrategias →
             </button>
@@ -441,7 +420,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
       )}
 
       {/* ACCESO RÁPIDO A DOCUMENTOS */}
-      <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+      <div className="card-base card-subtle p-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400"><Eye size={18} /></div>
           <h3 className="font-bold text-white text-sm">Documentos ({documents.length})</h3>
@@ -473,7 +452,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
 
       {/* PRÓXIMO EVENTO */}
       {nextEvent && (
-        <div className="rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-transparent p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div className="card-base card-elevated status-activo border-l-2 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div className="flex items-center gap-3">
             <div className="bg-emerald-500/20 p-2 rounded-lg text-emerald-400"><Calendar size={20} /></div>
             <div>
