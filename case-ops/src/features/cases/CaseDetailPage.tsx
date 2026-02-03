@@ -44,6 +44,9 @@ import { EmbeddedPDFViewer } from '../../components/EmbeddedPDFViewer';
 import { Modal } from '../../components';
 // Timeline específico para Picassent
 import { PicassentHechosReclamados, PicassentHipotecaResumen, PicassentTimeline } from './PicassentTimeline';
+import CaseTimelineBase from './CaseTimelineBase';
+import { MislataTimeline } from './MislataTimeline';
+import { QuartTimeline } from './QuartTimeline';
 import Badge from '../../ui/components/Badge';
 import {
   estrategiaPicassent,
@@ -1662,6 +1665,22 @@ export function CaseDetailPage() {
   const isPicassent = currentCase.id?.includes('picassent') ||
                       currentCase.title?.toLowerCase().includes('picassent') ||
                       currentCase.autosNumber?.includes('715');
+  const isMislata = currentCase.id?.includes('mislata') ||
+                    currentCase.title?.toLowerCase().includes('mislata') ||
+                    currentCase.autosNumber?.includes('1185');
+  const isQuart = currentCase.id?.includes('quart') ||
+                  currentCase.title?.toLowerCase().includes('quart') ||
+                  currentCase.autosNumber?.includes('1428');
+
+  const fallbackTimelineItems = events.map((event) => ({
+    id: event.id,
+    fecha: event.date,
+    tipo: event.type === 'procesal' ? 'judicial' : 'party_action',
+    titulo: event.title,
+    descripcion: event.description,
+    actores: [],
+    tags: event.tags,
+  }));
 
   return (
     <div className="min-h-screen bg-slate-950 pb-20 font-sans">
@@ -1740,11 +1759,16 @@ export function CaseDetailPage() {
             <div className="animate-in fade-in duration-500">
               <PicassentTimeline />
             </div>
+          ) : isQuart ? (
+            <QuartTimeline />
+          ) : isMislata ? (
+            <MislataTimeline />
           ) : (
-            <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/40 p-8 text-center text-slate-500 animate-in fade-in duration-500">
-              <Calendar size={40} className="mx-auto text-slate-600 mb-4" />
-              <p className="text-sm">Cronología procesal en fase de carga para este procedimiento</p>
-            </div>
+            <CaseTimelineBase
+              title={`Línea Temporal - ${currentCase.title}`}
+              subtitle={`${currentCase.autosNumber} · ${currentCase.court}`}
+              items={fallbackTimelineItems}
+            />
           )
         )}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
