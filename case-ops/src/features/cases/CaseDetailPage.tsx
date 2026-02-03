@@ -67,7 +67,6 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
   const showAnalytic = !isPicassent && !isMislata && !isQuart;
   const opposingParty = caseData.opposingPartyName || caseData.opposingCounsel?.split('(')[1]?.replace(')', '');
   const opposingLawyer = caseData.opposingLawyerName || caseData.opposingCounsel?.split('(')[0]?.trim();
-  const opposingSummary = [opposingParty, opposingLawyer].filter(Boolean).join(' y ');
   const picassentSummary = {
     objeto: 'Pretensión: reclamación económica global (212.677,00 €) construida con partidas históricas.',
     defensa:
@@ -96,33 +95,33 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           <Eye size={16} /> Resumen ejecutivo
           <Badge tone="muted">{caseLabel}</Badge>
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 auto-rows-fr">
           {/* Parte contraria */}
-          <div className="card-base card-subtle p-3">
+          <div className="card-base card-subtle p-3 h-full">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Parte contraria</div>
-            <div className="text-sm font-medium text-rose-300">{opposingSummary || 'No especificada'}</div>
+            <div className="space-y-1.5">
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-slate-600">Demandante</div>
+                <div className="text-xs font-medium text-rose-300">{opposingParty || '—'}</div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-slate-600">Abogada</div>
+                <div className="text-xs font-medium text-rose-200">{opposingLawyer || '—'}</div>
+              </div>
+            </div>
           </div>
           {/* Juzgado */}
-          <div className="card-base card-subtle p-3">
+          <div className="card-base card-subtle p-3 h-full">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Juzgado</div>
             <div className="text-sm font-medium text-slate-200">{caseData.court}</div>
           </div>
           {/* Autos */}
-          <div className="card-base card-subtle p-3">
+          <div className="card-base card-subtle p-3 h-full">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Autos</div>
             <div className="text-sm font-medium text-slate-200 font-mono">{caseData.autosNumber}</div>
           </div>
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
-          {/* NIG */}
-          {caseData.nig && (
-            <div className="card-base card-subtle p-3">
-              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">NIG</div>
-              <div className="text-xs font-medium text-slate-300 font-mono">{caseData.nig}</div>
-            </div>
-          )}
           {/* Rol */}
-          <div className="card-base card-subtle p-3">
+          <div className="card-base card-subtle p-3 h-full">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Rol procesal</div>
             <div className={`text-sm font-bold uppercase ${
               caseData.clientRole === 'demandante' || caseData.clientRole === 'ejecutante'
@@ -130,44 +129,55 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
                 : 'text-amber-400'
             }`}>{caseData.clientRole || 'No especificado'}</div>
           </div>
+          {/* NIG */}
+          {caseData.nig ? (
+            <div className="card-base card-subtle p-3 h-full">
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">NIG</div>
+              <div className="text-xs font-medium text-slate-300 font-mono">{caseData.nig}</div>
+            </div>
+          ) : (
+            <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
+          )}
           {/* Próximo hito */}
-          {vistaEvent && (
-            <div className="card-base card-subtle border border-amber-500/30 p-3">
+          {vistaEvent ? (
+            <div className="card-base card-subtle border border-amber-500/30 p-3 h-full">
               <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Próximo hito</div>
               <div className="text-sm font-medium text-amber-300">{formatDate(vistaEvent.date)}</div>
               <div className="text-[10px] text-slate-500">{vistaEvent.title}</div>
             </div>
+          ) : (
+            <div className="card-base card-subtle p-3 h-full opacity-0" aria-hidden="true" />
           )}
           {/* Cuantía Procesal */}
-          <div className="card-base card-subtle border border-rose-500/30 p-3">
+          <div className="card-base card-subtle border border-rose-500/30 p-3 h-full">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Cuantía procesal (demanda)</div>
             <div className="text-lg font-bold text-rose-400">{formatCurrency(amounts.totalDemand)}</div>
           </div>
           {/* Nº Hechos */}
-          <div className="card-base card-subtle p-3">
+          <div className="card-base card-subtle p-3 h-full">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nº hechos</div>
             <div className="text-lg font-bold text-slate-200">{hechosCount}</div>
             <div className="text-[10px] text-slate-500">{factsControvertidos} controvertidos</div>
           </div>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 auto-rows-fr">
           {/* Sumatorio Analítico */}
           {showAnalytic && (
-            <div className="card-base card-subtle p-3">
+            <div className="card-base card-subtle p-3 h-full">
               <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Sumatorio analítico (partidas)</div>
               <div className="text-lg font-bold text-emerald-400">{formatCurrency(amounts.analytic)}</div>
             </div>
           )}
           {/* Delta */}
           {showAnalytic && amounts.delta !== 0 && (
-            <div className="card-base card-subtle border border-amber-500/50 p-3">
+            <div className="card-base card-subtle border border-amber-500/50 p-3 h-full">
               <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Delta pendiente de justificar</div>
               <div className="text-lg font-bold text-amber-400">{formatCurrency(Math.abs(amounts.delta))}</div>
             </div>
           )}
           {/* Judge si existe */}
           {caseData.judge && caseData.judge !== '[Pendiente]' && (
-            <div className="card-base card-subtle p-3">
+            <div className="card-base card-subtle p-3 h-full">
               <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Juez</div>
               <div className="text-sm font-medium text-slate-200">{caseData.judge}</div>
             </div>
@@ -319,66 +329,6 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
       </div>
 
       {isPicassent && <PicassentHechosReclamados />}
-
-      {/* HECHOS DEL CASO */}
-      {facts.length > 0 && (
-        <div className="card-base card-elevated p-4 sm:p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400"><ListChecks size={20} /></div>
-              <div>
-                <h3 className="font-bold text-white text-sm">Hechos del Caso</h3>
-                <p className="text-[10px] text-slate-500">{facts.length} puntos registrados</p>
-              </div>
-            </div>
-            <Badge tone="muted">{caseLabel}</Badge>
-          </div>
-
-          <div className="space-y-2 mb-4">
-            {topFacts.map((fact: Fact, i: number) => (
-              <button
-                key={fact.id}
-                onClick={() => navigate(`/facts/${fact.id}`)}
-                className={`w-full text-left p-3 rounded-xl border transition-all hover:scale-[1.01] ${
-                  fact.risk === 'alto' || fact.status === 'controvertido'
-                    ? 'bg-rose-500/10 border-rose-500/30 hover:border-rose-500/60'
-                    : fact.status === 'a_probar'
-                    ? 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60'
-                    : 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-500/60'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <span className={`text-xs font-bold ${
-                      fact.risk === 'alto' ? 'text-rose-400' :
-                      fact.risk === 'medio' ? 'text-amber-400' : 'text-emerald-400'
-                    }`}>
-                      #{i + 1}
-                    </span>
-                    <span className="text-white text-sm ml-2 line-clamp-1">{fact.title || fact.titulo}</span>
-                  </div>
-                  <div className="flex gap-1 items-center shrink-0">
-                    {/* FASE 6: Indicador probatorio - Sin evidencia */}
-                    <Badge tone="danger">Sin evidencia</Badge>
-                    <Badge tone={fact.status === 'controvertido' ? 'danger' : fact.status === 'a_probar' ? 'warn' : 'ok'}>
-                      {fact.status}
-                    </Badge>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {facts.length > 4 && (
-            <button
-              onClick={() => setActiveTab('economico')}
-              className="w-full text-xs text-emerald-300 font-medium py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors"
-            >
-              Ver todos los {facts.length} hechos →
-            </button>
-          )}
-        </div>
-      )}
 
       {/* ESTRATEGIAS DEL CASO */}
       {strategies.length > 0 && (
