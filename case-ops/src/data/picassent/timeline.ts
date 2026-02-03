@@ -160,10 +160,10 @@ export const timelinePicassent: EventoPicassent[] = [
     fecha: '2013-08-09',
     tipo: 'personal',
     titulo: 'Matrimonio civil',
-    descripcion: 'Juan y Vicenta contraen matrimonio civil. Régimen económico: separación de bienes.',
+    descripcion: 'Juan y Vicenta contraen matrimonio civil. Régimen económico: gananciales.',
     actores: ['Juan', 'Vicenta'],
     relevancia: 'alta',
-    tags: ['matrimonio', 'separacion-bienes'],
+    tags: ['matrimonio', 'gananciales'],
   },
 
   // ======== 2014 ========
@@ -256,7 +256,7 @@ export const timelinePicassent: EventoPicassent[] = [
   // ======== 2024 ========
   {
     id: 'evt-p-019',
-    fecha: '2024-06-20',
+    fecha: '2024-06-24',
     tipo: 'judicial',
     titulo: 'Demanda P.O. 715/2024',
     descripcion: 'Vicenta presenta demanda de división de cosa común y reclamación de cantidad por 212.677,08€. Incluye 10 hechos reclamados.',
@@ -267,16 +267,6 @@ export const timelinePicassent: EventoPicassent[] = [
   },
 
   // ======== 2025 ========
-  {
-    id: 'evt-p-020',
-    fecha: '2025-01-24',
-    tipo: 'judicial',
-    titulo: 'Audiencia Previa señalada',
-    descripcion: 'Fecha señalada para la celebración de la Audiencia Previa. Preparación de alegaciones y hechos controvertidos.',
-    actores: ['Juzgado Picassent'],
-    relevancia: 'critica',
-    tags: ['audiencia', 'vista', 'proximo'],
-  },
   {
     id: 'evt-p-021',
     fecha: '2025-01-27',
@@ -298,6 +288,68 @@ export const timelinePicassent: EventoPicassent[] = [
     relevancia: 'critica',
     documentoRef: 'Doc. 7',
     tags: ['hipoteca', 'saldo', 'actual'],
+  },
+  {
+    id: 'evt-p-023',
+    fecha: '2025-02-20',
+    tipo: 'judicial',
+    titulo: 'Contestación a la demanda',
+    descripcion: 'Presentación de la contestación a la demanda dentro del plazo conferido.',
+    actores: ['Juan'],
+    relevancia: 'alta',
+    tags: ['contestacion', 'escrito'],
+  },
+  {
+    id: 'evt-p-020',
+    fecha: '2025-10-24',
+    tipo: 'judicial',
+    titulo: 'Audiencia Previa señalada (1º señalamiento)',
+    descripcion: 'Primer señalamiento de Audiencia Previa para preparación de alegaciones y hechos controvertidos.',
+    actores: ['Juzgado Picassent'],
+    relevancia: 'critica',
+    tags: ['audiencia', 'vista', 'proximo'],
+  },
+
+  // ======== 2026 ========
+  {
+    id: 'evt-p-024',
+    fecha: '2026-01-08',
+    tipo: 'judicial',
+    titulo: 'Providencia requiriendo documentación',
+    descripcion: 'Providencia que requiere documentación con 5 días de antelación; se cumple pese a recurso.',
+    actores: ['Juzgado Picassent'],
+    relevancia: 'alta',
+    tags: ['providencia', 'documentacion'],
+  },
+  {
+    id: 'evt-p-025',
+    fecha: '2026-01-16',
+    tipo: 'judicial',
+    titulo: 'Recurso de reposición de la actora',
+    descripcion: 'La parte actora interpone recurso de reposición contra la providencia.',
+    actores: ['Vicenta'],
+    relevancia: 'alta',
+    tags: ['recurso', 'reposicion'],
+  },
+  {
+    id: 'evt-p-026',
+    fecha: '2026-01-19',
+    tipo: 'judicial',
+    titulo: 'Suspensión/cancelación del señalamiento',
+    descripcion: 'Se suspende o cancela el señalamiento fijado.',
+    actores: ['Juzgado Picassent'],
+    relevancia: 'critica',
+    tags: ['suspension', 'señalamiento'],
+  },
+  {
+    id: 'evt-p-027',
+    fecha: '2026-01-20',
+    tipo: 'judicial',
+    titulo: 'Audiencia previa (no celebrada)',
+    descripcion: 'Audiencia previa prevista que no llega a celebrarse por suspensión.',
+    actores: ['Juzgado Picassent'],
+    relevancia: 'critica',
+    tags: ['audiencia', 'suspension'],
   },
 ];
 
