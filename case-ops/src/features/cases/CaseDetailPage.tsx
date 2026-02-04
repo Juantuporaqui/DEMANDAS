@@ -1742,6 +1742,31 @@ export function CaseDetailPage() {
             )}
           </div>
 
+          <div className="flex flex-wrap gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <button
+              type="button"
+              onClick={() => handleTabChange('cronologia')}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
+                activeTab === 'cronologia'
+                  ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-200'
+                  : 'border-white/10 text-slate-200 hover:bg-white/5'
+              }`}
+            >
+              Cronología
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTabChange('actuaciones')}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
+                activeTab === 'actuaciones'
+                  ? 'border-amber-400/60 bg-amber-500/10 text-amber-200'
+                  : 'border-white/10 text-slate-200 hover:bg-white/5'
+              }`}
+            >
+              Hitos
+            </button>
+          </div>
+
           {/* TABS - Scroll horizontal en móvil */}
           <div className="flex gap-3 sm:gap-6 overflow-x-auto no-scrollbar pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
             {[
@@ -1750,7 +1775,7 @@ export function CaseDetailPage() {
               { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
               { id: 'estrategia', label: '♟️ Estrategia', shortLabel: '♟️' },
               { id: 'docs', label: '📂 Documentos', shortLabel: '📂' },
-              { id: 'actuaciones', label: '📅 Actuaciones', shortLabel: '📅' },
+              { id: 'actuaciones', label: '📅 Hitos (Actuaciones)', shortLabel: '📅' },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -1759,7 +1784,7 @@ export function CaseDetailPage() {
                 className={`pb-2 sm:pb-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
               >
                 <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.shortLabel} {tab.id === 'resumen' ? 'Resumen' : tab.id === 'cronologia' ? 'Crono.' : tab.id === 'economico' ? 'Eco.' : tab.id === 'estrategia' ? 'Estr.' : tab.id === 'docs' ? 'Docs' : 'Actu.'}</span>
+                <span className="sm:hidden">{tab.shortLabel} {tab.id === 'resumen' ? 'Resumen' : tab.id === 'cronologia' ? 'Crono.' : tab.id === 'economico' ? 'Eco.' : tab.id === 'estrategia' ? 'Estr.' : tab.id === 'docs' ? 'Docs' : 'Hitos'}</span>
               </button>
             ))}
           </div>
@@ -1791,6 +1816,9 @@ export function CaseDetailPage() {
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
         {activeTab === 'actuaciones' && (
           <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-semibold text-white">Hitos (Actuaciones)</h2>
+            </div>
             {/* Botón añadir nuevo evento */}
             <div className="flex flex-wrap justify-end gap-2">
               <Link
