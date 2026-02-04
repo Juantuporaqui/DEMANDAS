@@ -248,8 +248,8 @@ export const hechosControvertidos: HechoControvertido[] = [
  * Resumen para el panel de control de audiencia
  */
 export const resumenAudiencia = {
-  fecha: '2026-01-24',
-  hora: '10:00',
+  fecha: '2026-03-10',
+  hora: '09:45',
   sala: 'Sala de Vistas 2',
   juzgado: 'Juzgado de Primera Instancia e Instruccion n 1 de Picassent',
   totalAlegaciones: alegacionesComplementarias.length,

@@ -91,6 +91,14 @@ function getDaysDelta(targetDate: string) {
   return diff >= 0 ? `D-${diff}` : `D+${Math.abs(diff)}`;
 }
 
+function getNextAudienciaEvent(events: Event[]) {
+  const audienciaEvents = events.filter((event) => {
+    const title = event.title.toLowerCase();
+    return title.includes('audiencia') || event.tags.some((tag) => tag.toLowerCase().includes('audiencia'));
+  });
+  return getNextEvent(audienciaEvents) ?? getNextEvent(events);
+}
+
 const DEFAULT_SUMMARIES: Record<string, string> = {
   PICASSENT: 'Reclamación de cuotas hipotecarias y préstamos tras ruptura.',
   MISLATA: 'Reclamación de cantidad vinculada a deuda hipotecaria pendiente.',
@@ -157,8 +165,20 @@ export function CasesPage() {
   }, [cases]);
   if (loading) return <div className="p-8 text-center text-slate-500">Cargando casos...</div>;
 
-  const proximoHitoLabel = `Audiencia Previa - Picassent`;
-  const proximoHitoDays = getDaysDelta(resumenAudiencia.fecha);
+  const picassentCase = mainCases.find((caseItem) => {
+    const title = caseItem.title?.toLowerCase() || '';
+    const autos = caseItem.autosNumber || '';
+    return title.includes('picassent') || autos.includes('715/2024');
+  });
+  const picassentEvents = picassentCase
+    ? events.filter((event) => event.caseId === picassentCase.id)
+    : [];
+  const audienciaEvent = getNextAudienciaEvent(picassentEvents);
+  const proximoHitoLabel = audienciaEvent
+    ? `${audienciaEvent.title} - Picassent`
+    : 'Audiencia Previa - Picassent';
+  const proximoHitoDate = audienciaEvent?.date ?? resumenAudiencia.fecha;
+  const proximoHitoDays = getDaysDelta(proximoHitoDate);
   const resumenContador = getResumenContador();
 
   return (
@@ -173,7 +193,7 @@ export function CasesPage() {
               {proximoHitoLabel}
             </h2>
             <p className="mt-1 text-sm text-slate-300">
-              {formatDate(resumenAudiencia.fecha)} · {resumenAudiencia.sala}
+              {formatDate(proximoHitoDate)} · {resumenAudiencia.sala}
             </p>
           </div>
           <div className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-5 py-3 text-center">
