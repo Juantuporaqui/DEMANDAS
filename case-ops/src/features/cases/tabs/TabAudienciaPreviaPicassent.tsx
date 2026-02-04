@@ -684,6 +684,11 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
                         <div className={`rounded-full border px-3 py-1 text-[11px] ${riesgo.bg} ${riesgo.border} ${riesgo.text}`}>
                           Riesgo {riesgo.label}
                         </div>
+                        <div className="text-sm font-semibold text-white">{hecho.titulo}</div>
+                        <div className="text-xs text-slate-200">{hecho.descripcion}</div>
+                      </div>
+                      <div className="flex flex-wrap gap-2 print:hidden">
+                        <CopyButton text={`${hecho.titulo}\n${hecho.descripcion}`} label="Copiar" />
                       </div>
                       <div className="text-sm font-semibold text-white">{hecho.titulo}</div>
                       <div className="text-xs text-slate-200">{hecho.descripcion}</div>
@@ -691,17 +696,32 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
                     <div className="flex flex-wrap gap-2 print:hidden">
                       <CopyButton text={`${hecho.titulo}\n${hecho.descripcion}`} label="Copiar" />
                     </div>
+                    <textarea
+                      value={hechoState.notas}
+                      onChange={(event) =>
+                        setHechosState((prev) => ({
+                          ...prev,
+                          [String(hecho.id)]: {
+                            ...prev[String(hecho.id)],
+                            notas: event.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="Notas (uso en sala, enfoque, objeciones)."
+                      className={`mt-3 w-full rounded-xl border border-slate-700/50 bg-slate-900/50 p-3 text-xs text-white placeholder-slate-500 ${isReadMode ? 'hidden' : ''} print:hidden`}
+                      rows={3}
+                    />
                   </div>
                   <div className="mt-3 grid gap-3 md:grid-cols-[auto_1fr] print:hidden">
                     <label className="flex items-center gap-2 text-xs text-slate-200">
                       <input
                         type="checkbox"
-                        checked={hechoState.done}
+                        checked={state.done}
                         onChange={(event) =>
-                          setHechosState((prev) => ({
+                          setAlegacionesState((prev) => ({
                             ...prev,
-                            [String(hecho.id)]: {
-                              ...prev[String(hecho.id)],
+                            [String(alegacion.id)]: {
+                              ...prev[String(alegacion.id)],
                               done: event.target.checked,
                             },
                           }))
@@ -717,18 +737,16 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
                         onChange={(event) =>
                           setHechosState((prev) => ({
                             ...prev,
-                            [String(hecho.id)]: {
-                              ...prev[String(hecho.id)],
-                              prioridad: event.target.value as 'baja' | 'media' | 'alta',
-                            },
+                            [String(alegacion.id)]: !prev[String(alegacion.id)],
                           }))
                         }
                         className="rounded-lg border border-slate-700/50 bg-slate-900/60 px-2 py-1 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
                       >
-                        <option value="baja">Bajo</option>
-                        <option value="media">Medio</option>
-                        <option value="alta">Alto</option>
-                      </select>
+                        {alegacion.titulo}
+                      </button>
+                    </div>
+                    <div className="print:hidden">
+                      <CopyButton text={`${alegacion.titulo}\n${alegacion.contenido}`} label="Copiar" />
                     </div>
                   </div>
                   <textarea
