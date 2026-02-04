@@ -4,9 +4,9 @@
 // Con badges visuales Defensa vs Ataque
 // ============================================
 
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { strategiesRepo } from '../../db/repositories';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { casesRepo, strategiesRepo } from '../../db/repositories';
 import type { Strategy } from '../../types';
 import Button from '../../ui/components/Button';
 import {
@@ -298,7 +298,58 @@ function EstrategiaCard({
 // PÁGINA PRINCIPAL WAR ROOM
 // ============================================
 
+type CaseKey = 'picassent' | 'mislata' | 'quart';
+
+const STORAGE_KEY = 'caseops.warroom.activeCase';
+
+const CASE_OPTIONS: Array<{ id: CaseKey; label: string; tone: string; badge: string }> = [
+  {
+    id: 'picassent',
+    label: 'Picassent',
+    tone: 'border-orange-500/40 text-orange-200',
+    badge: 'bg-orange-500/20 text-orange-200 border border-orange-500/40',
+  },
+  {
+    id: 'mislata',
+    label: 'Mislata',
+    tone: 'border-cyan-500/40 text-cyan-200',
+    badge: 'bg-cyan-500/20 text-cyan-200 border border-cyan-500/40',
+  },
+  {
+    id: 'quart',
+    label: 'Quart',
+    tone: 'border-indigo-500/40 text-indigo-200',
+    badge: 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/40',
+  },
+];
+
+const DEFAULT_CASE: CaseKey = 'picassent';
+
+const FALLBACK_CASE_IDS: Record<CaseKey, string> = {
+  picassent: 'picassent-715-2024',
+  mislata: 'mislata-1185-2025',
+  quart: 'quart-etj-1428-2025',
+};
+
+function isValidCaseKey(value: string | null): value is CaseKey {
+  return value === 'picassent' || value === 'mislata' || value === 'quart';
+}
+
+function getInitialCase(): CaseKey {
+  const params = new URLSearchParams(window.location.search);
+  const queryCase = params.get('caseId');
+  if (isValidCaseKey(queryCase)) {
+    return queryCase;
+  }
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  if (isValidCaseKey(stored)) {
+    return stored;
+  }
+  return DEFAULT_CASE;
+}
+
 export function WarRoomPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterProc, setFilterProc] = useState<Procedimiento | 'todos'>('todos');
@@ -306,6 +357,8 @@ export function WarRoomPage() {
   const [showOnlyCriticas, setShowOnlyCriticas] = useState(false);
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'estrategia' | 'custom'>('estrategia');
+  const [activeCase, setActiveCase] = useState<CaseKey>(getInitialCase);
+  const [caseIds, setCaseIds] = useState<Record<CaseKey, string>>(FALLBACK_CASE_IDS);
 
   useEffect(() => {
     strategiesRepo.getAll().then((data) => {
@@ -314,16 +367,96 @@ export function WarRoomPage() {
     });
   }, []);
 
-  // Filtrar estrategias
-  const estrategiasFiltradas = getAllEstrategias().filter((e) => {
-    if (filterProc !== 'todos' && e.procedimiento !== filterProc) return false;
-    if (filterTipo !== 'todos' && e.tipo !== filterTipo) return false;
-    if (showOnlyCriticas && e.prioridad !== 'critica') return false;
-    return true;
-  });
+  useEffect(() => {
+    const requested = searchParams.get('caseId');
+    if (isValidCaseKey(requested) && requested !== activeCase) {
+      setActiveCase(requested);
+    }
+  }, [activeCase, searchParams]);
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, activeCase);
+    const current = searchParams.get('caseId');
+    if (current !== activeCase) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.set('caseId', activeCase);
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [activeCase, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    let mounted = true;
+    casesRepo
+      .getAll()
+      .then((cases) => {
+        if (!mounted) return;
+        const next = { ...FALLBACK_CASE_IDS };
+        cases.forEach((caseItem) => {
+          const haystack = `${caseItem.id} ${caseItem.title ?? ''} ${caseItem.autosNumber ?? ''} ${caseItem.court ?? ''}`.toLowerCase();
+          if (haystack.includes('picassent')) next.picassent = caseItem.id;
+          if (haystack.includes('mislata')) next.mislata = caseItem.id;
+          if (haystack.includes('quart')) next.quart = caseItem.id;
+        });
+        setCaseIds(next);
+      })
+      .catch((error) => {
+        console.error('Error loading cases for war room:', error);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeTab !== 'estrategia') return;
+    if (activeCase === 'picassent' || activeCase === 'mislata') {
+      setFilterProc(activeCase);
+    } else {
+      setFilterProc('todos');
+    }
+  }, [activeCase, activeTab]);
+
+  const allEstrategias = useMemo(() => getAllEstrategias(), []);
+  const baseEstrategias = useMemo(() => {
+    return allEstrategias.filter((e) => {
+      if (filterProc !== 'todos' && e.procedimiento !== filterProc) return false;
+      if (filterTipo !== 'todos' && e.tipo !== filterTipo) return false;
+      if (showOnlyCriticas && e.prioridad !== 'critica') return false;
+      return true;
+    });
+  }, [allEstrategias, filterProc, filterTipo, showOnlyCriticas]);
+
+  const estrategiasFiltradas = useMemo(() => {
+    return baseEstrategias.filter((e) => {
+      if (activeCase === 'picassent') return e.procedimiento === 'picassent';
+      if (activeCase === 'mislata') return e.procedimiento === 'mislata';
+      return false;
+    });
+  }, [activeCase, baseEstrategias]);
+
+  const customStrategies = useMemo(() => {
+    return strategies.filter((strategy) => strategy.caseId === caseIds[activeCase]);
+  }, [activeCase, caseIds, strategies]);
+
+  const estrategiaCounts = useMemo(() => {
+    return {
+      picassent: baseEstrategias.filter((e) => e.procedimiento === 'picassent').length,
+      mislata: baseEstrategias.filter((e) => e.procedimiento === 'mislata').length,
+      quart: 0,
+    };
+  }, [baseEstrategias]);
+
+  const customCounts = useMemo(() => {
+    return {
+      picassent: strategies.filter((strategy) => strategy.caseId === caseIds.picassent).length,
+      mislata: strategies.filter((strategy) => strategy.caseId === caseIds.mislata).length,
+      quart: strategies.filter((strategy) => strategy.caseId === caseIds.quart).length,
+    };
+  }, [caseIds, strategies]);
+
+  const caseCounts = activeTab === 'estrategia' ? estrategiaCounts : customCounts;
 
   // Estadísticas mejoradas
-  const allEstrategias = getAllEstrategias();
   const stats = {
     total: allEstrategias.length,
     picassent: getEstrategiaPorProcedimiento('picassent').length,
@@ -381,6 +514,26 @@ export function WarRoomPage() {
               <h1 className="text-[28px] font-semibold text-slate-100 tracking-tight">War Room</h1>
             </div>
           </div>
+        </div>
+
+        <div className="card-base card-subtle flex flex-wrap items-center gap-2 p-3">
+          {CASE_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => setActiveCase(option.id)}
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all ${option.tone} ${
+                activeCase === option.id
+                  ? 'bg-slate-900 shadow-[0_0_0_2px_rgba(148,163,184,0.25)]'
+                  : 'bg-slate-900/40 hover:bg-slate-900'
+              }`}
+            >
+              <span>{option.label}</span>
+              <span className={`text-[11px] px-2 py-0.5 rounded-full ${option.badge}`}>
+                {caseCounts[option.id]}
+              </span>
+            </button>
+          ))}
         </div>
 
         {/* Stats con badges de Defensa vs Ataque */}
@@ -536,8 +689,17 @@ export function WarRoomPage() {
               <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Target className="text-slate-500" size={32} />
               </div>
-              <p className="text-slate-400 text-lg">No hay estrategias con esos filtros</p>
-              <p className="text-slate-600 text-sm mt-2">Prueba a cambiar los criterios de búsqueda</p>
+              <p className="text-slate-400 text-lg">No hay tarjetas para este caso</p>
+              <p className="text-slate-600 text-sm mt-2">
+                Ajusta los filtros o crea una estrategia personalizada para continuar.
+              </p>
+              <Link
+                to={`/warroom/new?caseId=${caseIds[activeCase]}`}
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-white"
+              >
+                <Plus size={16} />
+                Crear tarjeta
+              </Link>
             </div>
           )}
         </>
@@ -547,7 +709,7 @@ export function WarRoomPage() {
       {activeTab === 'custom' && (
         <>
           <Link
-            to="/warroom/new"
+            to={`/warroom/new?caseId=${caseIds[activeCase]}`}
             className="inline-flex items-center gap-2 justify-center rounded-[var(--radius-md)] bg-gradient-to-r from-rose-600 to-rose-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-rose-900/30 hover:shadow-rose-900/50 transition-shadow"
           >
             <Plus size={18} />
@@ -556,17 +718,24 @@ export function WarRoomPage() {
 
           {loading ? (
             <div className="p-12 text-center text-slate-500">Cargando...</div>
-          ) : strategies.length === 0 ? (
+          ) : customStrategies.length === 0 ? (
             <div className="card-base card-subtle border-dashed border-slate-700 p-12 text-center">
               <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="text-slate-500" size={32} />
               </div>
-              <h3 className="text-lg font-semibold text-slate-200 mb-2">Sin estrategias personalizadas</h3>
-              <p className="text-slate-500 mb-6">Define tu primera línea de defensa.</p>
+              <h3 className="text-lg font-semibold text-slate-200 mb-2">No hay tarjetas para este caso</h3>
+              <p className="text-slate-500 mb-6">Crea una estrategia personalizada para empezar a trabajar.</p>
+              <Link
+                to={`/warroom/new?caseId=${caseIds[activeCase]}`}
+                className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-white"
+              >
+                <Plus size={16} />
+                Crear tarjeta
+              </Link>
             </div>
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
-              {strategies.map((strategy) => (
+              {customStrategies.map((strategy) => (
                 <Link
                   key={strategy.id}
                   to={`/warroom/${strategy.id}/edit`}
