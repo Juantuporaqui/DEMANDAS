@@ -734,6 +734,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
                       <span>Riesgo:</span>
                       <select
                         value={hechoState.prioridad}
+                        aria-label="Prioridad de riesgo"
                         onChange={(event) =>
                           setHechosState((prev) => ({
                             ...prev,
