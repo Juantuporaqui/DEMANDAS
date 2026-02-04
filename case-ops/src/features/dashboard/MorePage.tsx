@@ -6,8 +6,8 @@ import { Link } from 'react-router-dom';
 import { ListItem } from '../../components';
 
 const menuItems = [
-  { path: '/dashboard', icon: '📊', label: 'Panel de control', subtitle: 'Resumen Picassent' },
-  { path: '/cases', icon: '⚖️', label: 'Casos', subtitle: 'Gestionar procedimientos' },
+  { path: '/dashboard', icon: '📊', label: 'Panel de control', subtitle: 'Resumen Picassent', hideOnMobile: true },
+  { path: '/cases', icon: '⚖️', label: 'Casos', subtitle: 'Gestionar procedimientos', hideOnMobile: true },
   { path: '/events', icon: '📅', label: 'Cronología', subtitle: 'Línea temporal' },
   { path: '/warroom', icon: '🎯', label: 'War Room', subtitle: 'Estrategias y ataques' },
   { path: '/tasks', icon: '✅', label: 'Tareas', subtitle: 'Acciones pendientes' },
@@ -20,7 +20,7 @@ const newFeatures = [
   { path: '/jurisprudencia', icon: '📚', label: 'Jurisprudencia', subtitle: '9 citas con búsqueda y copiar' },
   { path: '/search', icon: '🔍', label: 'Búsqueda Global', subtitle: 'Busca en todo: hechos, docs, citas' },
   { path: '/audiencia/checklist', icon: '✅', label: 'Checklist Audiencia', subtitle: 'Mislata - Control de puntos' },
-  { path: '/audiencia/telepronter', icon: '📺', label: 'Modo Teleprónter', subtitle: 'Frases en grande para vista' },
+  { path: '/audiencia/telepronter', icon: '📺', label: 'Modo Teleprónter', subtitle: 'Frases en grande para vista', hideOnMobile: true },
 ];
 
 export function MorePage() {
@@ -40,6 +40,7 @@ export function MorePage() {
             <Link
               key={item.path}
               to={item.path}
+              className={item.hideOnMobile ? 'hidden lg:block' : undefined}
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
               <ListItem
@@ -59,6 +60,7 @@ export function MorePage() {
           <Link
             key={item.path}
             to={item.path}
+            className={item.hideOnMobile ? 'hidden lg:block' : undefined}
             style={{ textDecoration: 'none', color: 'inherit' }}
           >
             <ListItem

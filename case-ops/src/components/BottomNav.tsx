@@ -5,7 +5,6 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Gavel,
   CheckSquare,
   Menu
 } from 'lucide-react';
@@ -13,7 +12,6 @@ import {
 export function BottomNav() {
   const NAV_ITEMS = [
     { to: '/cases', label: 'Panel', icon: <LayoutDashboard size={20} /> },
-    { to: '/audiencia-previa', label: 'Audiencia', icon: <Gavel size={20} /> },
     { to: '/tasks', label: 'Tareas', icon: <CheckSquare size={20} /> },
     { to: '/more', label: 'Menú', icon: <Menu size={20} /> },
   ];
