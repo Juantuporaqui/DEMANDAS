@@ -93,8 +93,9 @@ function getDaysDelta(targetDate: string) {
 
 function getNextAudienciaEvent(events: Event[]) {
   const audienciaEvents = events.filter((event) => {
-    const title = event.title.toLowerCase();
-    return title.includes('audiencia') || event.tags.some((tag) => tag.toLowerCase().includes('audiencia'));
+    const title = event.title?.toLowerCase() ?? '';
+    const tags = event.tags ?? [];
+    return title.includes('audiencia') || tags.some((tag) => tag.toLowerCase().includes('audiencia'));
   });
   return getNextEvent(audienciaEvents) ?? getNextEvent(events);
 }
