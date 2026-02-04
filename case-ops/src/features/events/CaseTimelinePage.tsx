@@ -2,7 +2,7 @@
 // CASE OPS - Global Case Timeline Page
 // ============================================
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { casesRepo } from '../../db/repositories';
 import { PicassentTimeline } from '../cases/PicassentTimeline';
@@ -54,23 +54,32 @@ export function CaseTimelinePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeCase, setActiveCase] = useState<CaseKey>(getInitialCase);
   const [caseIds, setCaseIds] = useState<Record<CaseKey, string>>(FALLBACK_CASE_IDS);
+  const latestSearchParamsRef = useRef(searchParams);
 
   useEffect(() => {
     const requested = searchParams.get('caseId');
-    if (isValidCaseKey(requested) && requested !== activeCase) {
-      setActiveCase(requested);
-    }
-  }, [activeCase, searchParams]);
+    if (!isValidCaseKey(requested)) return;
+    setActiveCase((prev) => (prev !== requested ? requested : prev));
+  }, [searchParams]);
+
+  useEffect(() => {
+    latestSearchParamsRef.current = searchParams;
+  }, [searchParams]);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, activeCase);
-    const current = searchParams.get('caseId');
-    if (current !== activeCase) {
-      const nextParams = new URLSearchParams(searchParams);
+    const params = latestSearchParamsRef.current;
+    const current = params.get('caseId');
+    if (current === activeCase) return;
+    const nextParams = new URLSearchParams(params);
+    const hasExtraParams = Array.from(nextParams.keys()).some((key) => key !== 'caseId');
+    if (hasExtraParams) {
       nextParams.set('caseId', activeCase);
       setSearchParams(nextParams, { replace: true });
+    } else {
+      setSearchParams({ caseId: activeCase }, { replace: true });
     }
-  }, [activeCase, searchParams, setSearchParams]);
+  }, [activeCase]);
 
   useEffect(() => {
     let mounted = true;
