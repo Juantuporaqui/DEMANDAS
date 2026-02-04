@@ -32,4 +32,8 @@
     background: #ffffff !important;
     border-color: #e5e7eb !important;
   }
+
+  .print-hidden {
+    display: none !important;
+  }
 }
