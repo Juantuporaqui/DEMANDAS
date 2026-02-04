@@ -1926,7 +1926,7 @@ export function CaseDetailPage() {
             )}
           </div>
         )}
-        {activeTab === 'audiencia' && isPicassent && <TabAudienciaPreviaPicassent caseId={id!} />}
+        {activeTab === 'audiencia' && isPicassent && <TabAudienciaPreviaPicassent caseId={id!} isReadMode={isReadMode} />}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
