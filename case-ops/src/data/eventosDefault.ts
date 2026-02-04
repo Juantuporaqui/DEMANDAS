@@ -15,7 +15,7 @@ export const eventosDefault: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>[] = [
     caseId: 'CAS001',
     title: 'Audiencia Previa',
     description: 'Alegaciones complementarias y fijación de hechos controvertidos. Juzgado de Primera Instancia nº 4 de Picassent. Sala de Vistas 2.',
-    date: '2026-01-24',
+    date: '2026-03-10T09:45:00',
     type: 'procesal',
     tags: ['urgente', 'audiencia', 'picassent'],
   },
