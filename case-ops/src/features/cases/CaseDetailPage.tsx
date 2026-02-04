@@ -81,9 +81,11 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
   const factsAProbar = facts.filter((f: Fact) => f.status === 'a_probar').length;
 
   // Detectar tipo de caso
-  const isPicassent = caseData.id?.includes('picassent') ||
+  const isPicassent = caseData.id === 'CAS001' ||
+                      caseData.id?.includes('picassent') ||
                       caseData.title?.toLowerCase().includes('picassent') ||
-                      caseData.autosNumber?.includes('715');
+                      caseData.autosNumber?.includes('715') ||
+                      caseData.court?.toLowerCase().includes('picassent');
   const isMislata = caseData.id?.includes('mislata') ||
                     caseData.title?.toLowerCase().includes('mislata') ||
                     caseData.autosNumber?.includes('1185');
@@ -1701,9 +1703,11 @@ export function CaseDetailPage() {
   };
 
   if (!currentCase) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Cargando War Room...</div>;
-  const isPicassent = currentCase.id?.includes('picassent') ||
+  const isPicassent = currentCase.id === 'CAS001' ||
+                      currentCase.id?.includes('picassent') ||
                       currentCase.title?.toLowerCase().includes('picassent') ||
-                      currentCase.autosNumber?.includes('715');
+                      currentCase.autosNumber?.includes('715') ||
+                      currentCase.court?.toLowerCase().includes('picassent');
   const isMislata = currentCase.id?.includes('mislata') ||
                     currentCase.title?.toLowerCase().includes('mislata') ||
                     currentCase.autosNumber?.includes('1185');
