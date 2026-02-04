@@ -120,7 +120,7 @@ export function CaseTimelinePage() {
 
       <div
         data-testid="timeline-case-selector"
-        className="card-base card-subtle mb-4 p-3 sticky top-0 z-10"
+        className="card-base card-subtle mb-4 p-3 relative z-10"
       >
         <div className="block sm:hidden">
           <label htmlFor="timeline-case-select" className="text-xs uppercase tracking-wider text-slate-400">
@@ -144,7 +144,7 @@ export function CaseTimelinePage() {
             <button
               key={option.id}
               type="button"
-              className={`btn ${activeCase === option.id ? 'btn-primary' : 'btn-secondary'}`}
+              className={`btn btn-sm ${activeCase === option.id ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setActiveCase(option.id)}
             >
               {option.label}
