@@ -57,20 +57,24 @@ export function CaseTimelinePage() {
 
   useEffect(() => {
     const requested = searchParams.get('caseId');
-    if (isValidCaseKey(requested) && requested !== activeCase) {
-      setActiveCase(requested);
-    }
-  }, [activeCase, searchParams]);
+    if (!isValidCaseKey(requested)) return;
+    setActiveCase((prev) => (prev !== requested ? requested : prev));
+  }, [searchParams]);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, activeCase);
-    const current = searchParams.get('caseId');
-    if (current !== activeCase) {
-      const nextParams = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(window.location.search);
+    const current = params.get('caseId');
+    if (current === activeCase) return;
+    const hasExtraParams = Array.from(params.keys()).some((key) => key !== 'caseId');
+    if (hasExtraParams) {
+      const nextParams = new URLSearchParams(params);
       nextParams.set('caseId', activeCase);
       setSearchParams(nextParams, { replace: true });
+    } else {
+      setSearchParams({ caseId: activeCase }, { replace: true });
     }
-  }, [activeCase, searchParams, setSearchParams]);
+  }, [activeCase, setSearchParams]);
 
   useEffect(() => {
     let mounted = true;
