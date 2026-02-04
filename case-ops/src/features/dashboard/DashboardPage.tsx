@@ -302,7 +302,7 @@ export function DashboardPage() {
         <SectionHeader
           title="Próximos Hitos"
           subtitle="Fechas críticas en la agenda general."
-          action={<Link to="/events" className="text-xs text-amber-400 hover:underline">Ver agenda</Link>}
+          action={<Link to="/events/agenda" className="text-xs text-amber-400 hover:underline">Ver agenda</Link>}
         />
 
         <div className="space-y-3 mt-3">

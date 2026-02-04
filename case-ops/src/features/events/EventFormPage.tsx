@@ -3,7 +3,7 @@
 // ============================================
 
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { eventsRepo, casesRepo } from '../../db/repositories';
 import { getCurrentDate } from '../../utils/dates';
 import type { Case, EventType } from '../../types';
@@ -11,7 +11,9 @@ import type { Case, EventType } from '../../types';
 export function EventFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isEditing = !!id;
+  const requestedCaseId = searchParams.get('caseId');
 
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ export function EventFormPage() {
 
   useEffect(() => {
     loadInitialData();
-  }, [id]);
+  }, [id, requestedCaseId]);
 
   async function loadInitialData() {
     setLoading(true);
@@ -35,7 +37,14 @@ export function EventFormPage() {
       const allCases = await casesRepo.getAll();
       setCases(allCases);
 
-      if (allCases.length === 1) {
+      if (!id && requestedCaseId) {
+        const match = allCases.find((caseItem) => caseItem.id === requestedCaseId);
+        if (match) {
+          setFormData((prev) => ({ ...prev, caseId: match.id }));
+        }
+      }
+
+      if (allCases.length === 1 && !requestedCaseId) {
         setFormData((prev) => ({ ...prev, caseId: allCases[0].id }));
       }
 
@@ -93,7 +102,7 @@ export function EventFormPage() {
         await eventsRepo.create(eventData);
       }
 
-      navigate('/events');
+      navigate('/events/agenda');
     } catch (error) {
       console.error('Error saving event:', error);
       alert('Error al guardar el evento');
@@ -107,7 +116,7 @@ export function EventFormPage() {
 
     try {
       await eventsRepo.delete(id!);
-      navigate('/events');
+      navigate('/events/agenda');
     } catch (error) {
       console.error('Error deleting event:', error);
     }

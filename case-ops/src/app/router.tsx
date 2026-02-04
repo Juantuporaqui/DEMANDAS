@@ -18,6 +18,7 @@ import { PartidasPage } from '../features/partidas/PartidasPage';
 import { PartidaDetailPage } from '../features/partidas/PartidaDetailPage';
 import { PartidaFormPage } from '../features/partidas/PartidaFormPage';
 import { EventsPage } from '../features/events/EventsPage';
+import { CaseTimelinePage } from '../features/events/CaseTimelinePage';
 import { EventFormPage } from '../features/events/EventFormPage';
 import { WarRoomPage } from '../features/warroom/WarRoomPage';
 import { StrategyFormPage } from '../features/warroom/StrategyFormPage';
@@ -260,6 +261,11 @@ export const router = createBrowserRouter(
         // Events/Timeline
         {
           path: 'events',
+          element: <CaseTimelinePage />,
+          handle: { pageMode: 'wide' },
+        },
+        {
+          path: 'events/agenda',
           element: <EventsPage />,
           handle: { pageMode: 'wide' },
         },
