@@ -118,17 +118,39 @@ export function CaseTimelinePage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {CASE_OPTIONS.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            className={`btn ${activeCase === option.id ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setActiveCase(option.id)}
+      <div
+        data-testid="timeline-case-selector"
+        className="card-base card-subtle mb-4 p-3 sticky top-0 z-10"
+      >
+        <div className="block sm:hidden">
+          <label htmlFor="timeline-case-select" className="text-xs uppercase tracking-wider text-slate-400">
+            Caso
+          </label>
+          <select
+            id="timeline-case-select"
+            className="form-select mt-2"
+            value={activeCase}
+            onChange={(event) => setActiveCase(event.target.value as CaseKey)}
           >
-            {option.label}
-          </button>
-        ))}
+            {CASE_OPTIONS.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="hidden sm:flex flex-wrap gap-2">
+          {CASE_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={`btn ${activeCase === option.id ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setActiveCase(option.id)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-6">
