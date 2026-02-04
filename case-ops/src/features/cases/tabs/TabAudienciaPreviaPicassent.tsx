@@ -548,7 +548,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
         className={`print:break-inside-avoid ${salaHiddenClass}`}
       >
         <div className="space-y-4">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center print:hidden">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center print:hidden">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                 <input
@@ -593,97 +593,96 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 print:hidden">
-              <button
-                type="button"
-                onClick={() => setFilterPrueba('todos')}
-                className={`rounded-xl px-3 py-2 text-xs font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300 ${
-                  filterPrueba === 'todos'
-                    ? 'bg-blue-500/20 text-blue-200 border border-blue-500/40'
-                    : 'bg-slate-800/50 text-slate-200 border border-slate-700/50 hover:bg-slate-800'
-                }`}
-              >
-                Prueba ({PICASSENT_AP.hechosControvertidos.length})
-              </button>
-              {(['documental', 'pericial', 'testifical', 'interrogatorio'] as TipoPrueba[]).map((tipo) => {
-                const config = pruebaConfig[tipo];
-                const Icon = config.icon;
-                return (
-                  <button
-                    key={tipo}
-                    type="button"
-                    onClick={() => setFilterPrueba(filterPrueba === tipo ? 'todos' : tipo)}
-                    className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300 ${
-                      filterPrueba === tipo
-                        ? `${config.bg} ${config.text} border ${config.border}`
-                        : 'bg-slate-800/50 text-slate-200 border border-slate-700/50 hover:bg-slate-800'
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {config.label} ({countByPrueba[tipo]})
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex flex-wrap gap-2 print:hidden">
+            <button
+              type="button"
+              onClick={() => setFilterPrueba('todos')}
+              className={`rounded-xl px-3 py-2 text-xs font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300 ${
+                filterPrueba === 'todos'
+                  ? 'bg-blue-500/20 text-blue-200 border border-blue-500/40'
+                  : 'bg-slate-800/50 text-slate-200 border border-slate-700/50 hover:bg-slate-800'
+              }`}
+            >
+              Prueba ({PICASSENT_AP.hechosControvertidos.length})
+            </button>
+            {(['documental', 'pericial', 'testifical', 'interrogatorio'] as TipoPrueba[]).map((tipo) => {
+              const config = pruebaConfig[tipo];
+              const Icon = config.icon;
+              return (
+                <button
+                  key={tipo}
+                  type="button"
+                  onClick={() => setFilterPrueba(filterPrueba === tipo ? 'todos' : tipo)}
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300 ${
+                    filterPrueba === tipo
+                      ? `${config.bg} ${config.text} border ${config.border}`
+                      : 'bg-slate-800/50 text-slate-200 border border-slate-700/50 hover:bg-slate-800'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {config.label} ({countByPrueba[tipo]})
+                </button>
+              );
+            })}
+          </div>
 
-            <div className="flex flex-wrap gap-2 print:hidden">
-              <button
-                type="button"
-                onClick={() => setFilterRiesgo('todos')}
-                className={`rounded-xl px-3 py-2 text-xs font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300 ${
-                  filterRiesgo === 'todos'
-                    ? 'bg-rose-500/20 text-rose-200 border border-rose-500/40'
-                    : 'bg-slate-800/50 text-slate-200 border border-slate-700/50 hover:bg-slate-800'
-                }`}
-              >
-                Riesgo ({PICASSENT_AP.hechosControvertidos.length})
-              </button>
-              {(['baja', 'media', 'alta'] as const).map((nivel) => {
-                const config = riesgoConfig[nivel];
-                return (
-                  <button
-                    key={nivel}
-                    type="button"
-                    onClick={() => setFilterRiesgo(filterRiesgo === nivel ? 'todos' : nivel)}
-                    className={`rounded-xl px-3 py-2 text-xs font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300 ${
-                      filterRiesgo === nivel
-                        ? `${config.bg} ${config.text} border ${config.border}`
-                        : 'bg-slate-800/50 text-slate-200 border border-slate-700/50 hover:bg-slate-800'
-                    }`}
-                  >
-                    {config.label} ({countByRiesgo[nivel]})
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex flex-wrap gap-2 print:hidden">
+            <button
+              type="button"
+              onClick={() => setFilterRiesgo('todos')}
+              className={`rounded-xl px-3 py-2 text-xs font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300 ${
+                filterRiesgo === 'todos'
+                  ? 'bg-rose-500/20 text-rose-200 border border-rose-500/40'
+                  : 'bg-slate-800/50 text-slate-200 border border-slate-700/50 hover:bg-slate-800'
+              }`}
+            >
+              Riesgo ({PICASSENT_AP.hechosControvertidos.length})
+            </button>
+            {(['baja', 'media', 'alta'] as const).map((nivel) => {
+              const config = riesgoConfig[nivel];
+              return (
+                <button
+                  key={nivel}
+                  type="button"
+                  onClick={() => setFilterRiesgo(filterRiesgo === nivel ? 'todos' : nivel)}
+                  className={`rounded-xl px-3 py-2 text-xs font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300 ${
+                    filterRiesgo === nivel
+                      ? `${config.bg} ${config.text} border ${config.border}`
+                      : 'bg-slate-800/50 text-slate-200 border border-slate-700/50 hover:bg-slate-800'
+                  }`}
+                >
+                  {config.label} ({countByRiesgo[nivel]})
+                </button>
+              );
+            })}
+          </div>
 
-            <div className="space-y-3">
-              {filteredHechos.map((hecho) => {
-                const hechoState = hechosState[String(hecho.id)] ?? { done: false, notas: '', prioridad: 'media' };
-                const estado = estadoConfig[hecho.estado];
-                const prueba = pruebaConfig[hecho.tipoPrueba];
-                const riesgo = riesgoConfig[hechoState.prioridad];
-                const EstadoIcon = estado.icon;
-                const PruebaIcon = prueba.icon;
-                return (
-                  <div
-                    key={hecho.id}
-                    className={`rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4 ${hechoState.done ? '' : 'print:hidden'}`}
-                  >
-                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                      <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] ${estado.bg} ${estado.border} ${estado.text}`}>
-                            <EstadoIcon className="h-3 w-3" />
-                            {hecho.estado}
-                          </div>
-                          <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] ${prueba.bg} ${prueba.border} ${prueba.text}`}>
-                            <PruebaIcon className="h-3 w-3" />
-                            {prueba.label}
-                          </div>
-                          <div className={`rounded-full border px-3 py-1 text-[11px] ${riesgo.bg} ${riesgo.border} ${riesgo.text}`}>
-                            Riesgo {riesgo.label}
-                          </div>
+          <div className="space-y-3">
+            {filteredHechos.map((hecho) => {
+              const hechoState = hechosState[String(hecho.id)] ?? { done: false, notas: '', prioridad: 'media' };
+              const estado = estadoConfig[hecho.estado];
+              const prueba = pruebaConfig[hecho.tipoPrueba];
+              const riesgo = riesgoConfig[hechoState.prioridad];
+              const EstadoIcon = estado.icon;
+              const PruebaIcon = prueba.icon;
+              return (
+                <div
+                  key={hecho.id}
+                  className={`rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4 ${hechoState.done ? '' : 'print:hidden'}`}
+                >
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] ${estado.bg} ${estado.border} ${estado.text}`}>
+                          <EstadoIcon className="h-3 w-3" />
+                          {hecho.estado}
+                        </div>
+                        <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] ${prueba.bg} ${prueba.border} ${prueba.text}`}>
+                          <PruebaIcon className="h-3 w-3" />
+                          {prueba.label}
+                        </div>
+                        <div className={`rounded-full border px-3 py-1 text-[11px] ${riesgo.bg} ${riesgo.border} ${riesgo.text}`}>
+                          Riesgo {riesgo.label}
                         </div>
                         <div className="text-sm font-semibold text-white">{hecho.titulo}</div>
                         <div className="text-xs text-slate-200">{hecho.descripcion}</div>
@@ -691,45 +690,11 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
                       <div className="flex flex-wrap gap-2 print:hidden">
                         <CopyButton text={`${hecho.titulo}\n${hecho.descripcion}`} label="Copiar" />
                       </div>
+                      <div className="text-sm font-semibold text-white">{hecho.titulo}</div>
+                      <div className="text-xs text-slate-200">{hecho.descripcion}</div>
                     </div>
-                    <div className="mt-3 grid gap-3 md:grid-cols-[auto_1fr] print:hidden">
-                      <label className="flex items-center gap-2 text-xs text-slate-200">
-                        <input
-                          type="checkbox"
-                          checked={hechoState.done}
-                          onChange={(event) =>
-                            setHechosState((prev) => ({
-                              ...prev,
-                              [String(hecho.id)]: {
-                                ...prev[String(hecho.id)],
-                                done: event.target.checked,
-                              },
-                            }))
-                          }
-                          className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
-                        />
-                        Usar en sala
-                      </label>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-200">
-                        <span>Riesgo:</span>
-                        <select
-                          value={hechoState.prioridad}
-                          onChange={(event) =>
-                            setHechosState((prev) => ({
-                              ...prev,
-                              [String(hecho.id)]: {
-                                ...prev[String(hecho.id)],
-                                prioridad: event.target.value as 'baja' | 'media' | 'alta',
-                              },
-                            }))
-                          }
-                          className="rounded-lg border border-slate-700/50 bg-slate-900/60 px-2 py-1 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
-                        >
-                          <option value="baja">Bajo</option>
-                          <option value="media">Medio</option>
-                          <option value="alta">Alto</option>
-                        </select>
-                      </div>
+                    <div className="flex flex-wrap gap-2 print:hidden">
+                      <CopyButton text={`${hecho.titulo}\n${hecho.descripcion}`} label="Copiar" />
                     </div>
                     <textarea
                       value={hechoState.notas}
@@ -747,9 +712,61 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
                       rows={3}
                     />
                   </div>
-                );
-              })}
-            </div>
+                  <div className="mt-3 grid gap-3 md:grid-cols-[auto_1fr] print:hidden">
+                    <label className="flex items-center gap-2 text-xs text-slate-200">
+                      <input
+                        type="checkbox"
+                        checked={state.done}
+                        onChange={(event) =>
+                          setAlegacionesState((prev) => ({
+                            ...prev,
+                            [String(alegacion.id)]: {
+                              ...prev[String(alegacion.id)],
+                              done: event.target.checked,
+                            },
+                          }))
+                        }
+                        className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+                      />
+                      Usar en sala
+                    </label>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-200">
+                      <span>Riesgo:</span>
+                      <select
+                        value={hechoState.prioridad}
+                        onChange={(event) =>
+                          setHechosState((prev) => ({
+                            ...prev,
+                            [String(alegacion.id)]: !prev[String(alegacion.id)],
+                          }))
+                        }
+                        className="rounded-lg border border-slate-700/50 bg-slate-900/60 px-2 py-1 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+                      >
+                        {alegacion.titulo}
+                      </button>
+                    </div>
+                    <div className="print:hidden">
+                      <CopyButton text={`${alegacion.titulo}\n${alegacion.contenido}`} label="Copiar" />
+                    </div>
+                  </div>
+                  <textarea
+                    value={hechoState.notas}
+                    onChange={(event) =>
+                      setHechosState((prev) => ({
+                        ...prev,
+                        [String(hecho.id)]: {
+                          ...prev[String(hecho.id)],
+                          notas: event.target.value,
+                        },
+                      }))
+                    }
+                    placeholder="Notas (uso en sala, enfoque, objeciones)."
+                    className={`mt-3 w-full rounded-xl border border-slate-700/50 bg-slate-900/50 p-3 text-xs text-white placeholder-slate-500 ${isReadMode ? 'hidden' : ''} print:hidden`}
+                    rows={3}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       </SectionCard>
