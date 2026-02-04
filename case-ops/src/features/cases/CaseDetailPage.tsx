@@ -47,6 +47,7 @@ import { PicassentHechosReclamados, PicassentHipotecaResumen, PicassentTimeline 
 import CaseTimelineBase from './CaseTimelineBase';
 import { MislataTimeline } from './MislataTimeline';
 import { QuartTimeline } from './QuartTimeline';
+import { TabAudienciaPreviaPicassent } from './tabs/TabAudienciaPreviaPicassent';
 import Badge from '../../ui/components/Badge';
 import {
   estrategiaPicassent,
@@ -80,9 +81,11 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
   const factsAProbar = facts.filter((f: Fact) => f.status === 'a_probar').length;
 
   // Detectar tipo de caso
-  const isPicassent = caseData.id?.includes('picassent') ||
+  const isPicassent = caseData.id === 'CAS001' ||
+                      caseData.id?.includes('picassent') ||
                       caseData.title?.toLowerCase().includes('picassent') ||
-                      caseData.autosNumber?.includes('715');
+                      caseData.autosNumber?.includes('715') ||
+                      caseData.court?.toLowerCase().includes('picassent');
   const isMislata = caseData.id?.includes('mislata') ||
                     caseData.title?.toLowerCase().includes('mislata') ||
                     caseData.autosNumber?.includes('1185');
@@ -248,7 +251,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
         {isPicassent && (
           <button
             type="button"
-            onClick={() => navigate('/analytics/audiencia')}
+            onClick={() => (isPicassent ? setActiveTab('audiencia') : navigate('/analytics/audiencia'))}
             className="group relative card-base card-elevated p-5 text-left hover:border-amber-500/30 hover:shadow-amber-500/5 active:scale-[0.98]"
           >
             <div className="absolute top-4 right-4">
@@ -1700,9 +1703,11 @@ export function CaseDetailPage() {
   };
 
   if (!currentCase) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Cargando War Room...</div>;
-  const isPicassent = currentCase.id?.includes('picassent') ||
+  const isPicassent = currentCase.id === 'CAS001' ||
+                      currentCase.id?.includes('picassent') ||
                       currentCase.title?.toLowerCase().includes('picassent') ||
-                      currentCase.autosNumber?.includes('715');
+                      currentCase.autosNumber?.includes('715') ||
+                      currentCase.court?.toLowerCase().includes('picassent');
   const isMislata = currentCase.id?.includes('mislata') ||
                     currentCase.title?.toLowerCase().includes('mislata') ||
                     currentCase.autosNumber?.includes('1185');
@@ -1770,8 +1775,9 @@ export function CaseDetailPage() {
             {[
               { id: 'resumen', label: '📊 Resumen', shortLabel: '📊' },
               { id: 'cronologia', label: '🕒 Cronología', shortLabel: '🕒' },
-              { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
               { id: 'estrategia', label: '♟️ Estrategia', shortLabel: '♟️' },
+              ...(isPicassent ? [{ id: 'audiencia', label: '⚖️ Audiencia Previa', shortLabel: '⚖️' }] : []),
+              { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
               { id: 'docs', label: '📂 Documentos', shortLabel: '📂' },
             ].map(tab => (
               <button
@@ -1781,7 +1787,7 @@ export function CaseDetailPage() {
                 className={`pb-2 sm:pb-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
               >
                 <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.shortLabel} {tab.id === 'resumen' ? 'Resumen' : tab.id === 'cronologia' ? 'Crono.' : tab.id === 'economico' ? 'Eco.' : tab.id === 'estrategia' ? 'Estr.' : 'Docs'}</span>
+                <span className="sm:hidden">{tab.shortLabel} {tab.id === 'resumen' ? 'Resumen' : tab.id === 'cronologia' ? 'Crono.' : tab.id === 'economico' ? 'Eco.' : tab.id === 'estrategia' ? 'Estr.' : tab.id === 'audiencia' ? 'Aud.' : 'Docs'}</span>
               </button>
             ))}
           </div>
@@ -1920,6 +1926,7 @@ export function CaseDetailPage() {
             )}
           </div>
         )}
+        {activeTab === 'audiencia' && isPicassent && <TabAudienciaPreviaPicassent caseId={id!} />}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
         {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
