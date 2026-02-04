@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 type SectionCardProps = {
+  id?: string;
   title?: string;
   subtitle?: string;
   action?: ReactNode;
@@ -9,6 +10,7 @@ type SectionCardProps = {
 };
 
 export function SectionCard({
+  id,
   title,
   subtitle,
   action,
@@ -17,6 +19,7 @@ export function SectionCard({
 }: SectionCardProps) {
   return (
     <section
+      id={id}
       className={`rounded-2xl border border-white/10 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(15,23,42,0.35)] backdrop-blur ${className}`}
     >
       {(title || subtitle || action) && (

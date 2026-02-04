@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Gavel, FileText, Users, Search, Filter, ChevronDown,
   CheckCircle, Clock, AlertCircle, FileSearch, Scale
@@ -119,6 +119,18 @@ export function ModoAudienciaPage() {
         </button>
       }
     >
+      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-100">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>⚖️ Este contenido ya está integrado en Picassent → pestaña Audiencia Previa</div>
+          <Link
+            to="/cases/CAS001?tab=audiencia"
+            className="inline-flex items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/20 px-4 py-2 text-xs font-semibold text-emerald-100 transition hover:border-emerald-400/70 hover:bg-emerald-500/30"
+          >
+            Ir al caso Picassent
+          </Link>
+        </div>
+      </div>
+
       {/* Header con info de audiencia */}
       <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-transparent p-5">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
