@@ -1605,8 +1605,11 @@ export function CaseDetailPage() {
   const tabParam = searchParams.get('tab');
   // Modo lector: oculta botones de edición y acciones destructivas
   const isReadMode = searchParams.get('read') === '1';
-  const resolvedTabParam = tabParam === 'documentos' ? 'docs' : tabParam;
+  const resolvedTabParam = tabParam === 'documentos' ? 'docs' : tabParam === 'actuaciones' ? 'cronologia' : tabParam;
   const [activeTab, setActiveTab] = useState(resolvedTabParam || 'resumen');
+  const [cronologiaView, setCronologiaView] = useState<'cronologia' | 'actuaciones'>(
+    tabParam === 'actuaciones' ? 'actuaciones' : 'cronologia'
+  );
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
   const [docs, setDocs] = useState<Document[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -1661,8 +1664,19 @@ export function CaseDetailPage() {
 
   // Si cambia la URL (por ejemplo al volver de ver un documento), actualizar el tab
   useEffect(() => {
-    if (resolvedTabParam) setActiveTab(resolvedTabParam);
-  }, [resolvedTabParam]);
+    if (!tabParam) return;
+    if (tabParam === 'actuaciones') {
+      setActiveTab('cronologia');
+      setCronologiaView('actuaciones');
+      return;
+    }
+    if (resolvedTabParam) {
+      setActiveTab(resolvedTabParam);
+      if (resolvedTabParam === 'cronologia') {
+        setCronologiaView('cronologia');
+      }
+    }
+  }, [tabParam, resolvedTabParam]);
 
   const handleTabChange = (tabId: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -1674,6 +1688,15 @@ export function CaseDetailPage() {
     nextParams.delete('doc');
     setSearchParams(nextParams);
     setActiveTab(tabId);
+  };
+
+  const handleCronologiaViewChange = (view: 'cronologia' | 'actuaciones') => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('tab', view === 'actuaciones' ? 'actuaciones' : 'cronologia');
+    nextParams.delete('doc');
+    setSearchParams(nextParams);
+    setActiveTab('cronologia');
+    setCronologiaView(view);
   };
 
   if (!currentCase) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Cargando War Room...</div>;
@@ -1742,31 +1765,6 @@ export function CaseDetailPage() {
             )}
           </div>
 
-          <div className="flex flex-wrap gap-2 sm:gap-3 mb-3 sm:mb-4">
-            <button
-              type="button"
-              onClick={() => handleTabChange('cronologia')}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
-                activeTab === 'cronologia'
-                  ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-200'
-                  : 'border-white/10 text-slate-200 hover:bg-white/5'
-              }`}
-            >
-              Cronología
-            </button>
-            <button
-              type="button"
-              onClick={() => handleTabChange('actuaciones')}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
-                activeTab === 'actuaciones'
-                  ? 'border-amber-400/60 bg-amber-500/10 text-amber-200'
-                  : 'border-white/10 text-slate-200 hover:bg-white/5'
-              }`}
-            >
-              Hitos
-            </button>
-          </div>
-
           {/* TABS - Scroll horizontal en móvil */}
           <div className="flex gap-3 sm:gap-6 overflow-x-auto no-scrollbar pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
             {[
@@ -1775,7 +1773,6 @@ export function CaseDetailPage() {
               { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
               { id: 'estrategia', label: '♟️ Estrategia', shortLabel: '♟️' },
               { id: 'docs', label: '📂 Documentos', shortLabel: '📂' },
-              { id: 'actuaciones', label: '📅 Hitos (Actuaciones)', shortLabel: '📅' },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -1784,7 +1781,7 @@ export function CaseDetailPage() {
                 className={`pb-2 sm:pb-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
               >
                 <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.shortLabel} {tab.id === 'resumen' ? 'Resumen' : tab.id === 'cronologia' ? 'Crono.' : tab.id === 'economico' ? 'Eco.' : tab.id === 'estrategia' ? 'Estr.' : tab.id === 'docs' ? 'Docs' : 'Hitos'}</span>
+                <span className="sm:hidden">{tab.shortLabel} {tab.id === 'resumen' ? 'Resumen' : tab.id === 'cronologia' ? 'Crono.' : tab.id === 'economico' ? 'Eco.' : tab.id === 'estrategia' ? 'Estr.' : 'Docs'}</span>
               </button>
             ))}
           </div>
@@ -1795,110 +1792,137 @@ export function CaseDetailPage() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} partidas={partidas} documents={docs} navigate={navigate} setActiveTab={setActiveTab} isReadMode={isReadMode} />}
         {activeTab === 'cronologia' && (
-          isPicassent ? (
-            <div className="animate-in fade-in duration-500">
-              <PicassentTimeline />
-            </div>
-          ) : isQuart ? (
-            <QuartTimeline />
-          ) : isMislata ? (
-            <MislataTimeline />
-          ) : (
-            <CaseTimelineBase
-              title={`Línea Temporal - ${currentCase.title}`}
-              subtitle={`${currentCase.autosNumber} · ${currentCase.court}`}
-              items={fallbackTimelineItems}
-            />
-          )
-        )}
-        {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
-        {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
-        {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
-        {activeTab === 'actuaciones' && (
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-lg font-semibold text-white">Hitos (Actuaciones)</h2>
-            </div>
-            {/* Botón añadir nuevo evento */}
-            <div className="flex flex-wrap justify-end gap-2">
-              <Link
-                to={`/events/new?caseId=${id}`}
-                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => handleCronologiaViewChange('cronologia')}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
+                  cronologiaView === 'cronologia'
+                    ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-200'
+                    : 'border-white/10 text-slate-200 hover:bg-white/5'
+                }`}
               >
-                <Calendar size={16} />
-                + Nuevo hito procesal
-              </Link>
-              <Link
-                to={`/events/new?caseId=${id}`}
-                className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                Cronología
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCronologiaViewChange('actuaciones')}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
+                  cronologiaView === 'actuaciones'
+                    ? 'border-amber-400/60 bg-amber-500/10 text-amber-200'
+                    : 'border-white/10 text-slate-200 hover:bg-white/5'
+                }`}
               >
-                <Calendar size={16} />
-                + Nuevo hito fáctico
-              </Link>
+                Hitos
+              </button>
             </div>
+            {cronologiaView === 'cronologia' ? (
+              isPicassent ? (
+                <div className="animate-in fade-in duration-500">
+                  <PicassentTimeline />
+                </div>
+              ) : isQuart ? (
+                <QuartTimeline />
+              ) : isMislata ? (
+                <MislataTimeline />
+              ) : (
+                <CaseTimelineBase
+                  title={`Línea Temporal - ${currentCase.title}`}
+                  subtitle={`${currentCase.autosNumber} · ${currentCase.court}`}
+                  items={fallbackTimelineItems}
+                />
+              )
+            ) : (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-lg font-semibold text-white">Hitos (Actuaciones)</h2>
+                </div>
+                {/* Botón añadir nuevo evento */}
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Link
+                    to={`/events/new?caseId=${id}`}
+                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <Calendar size={16} />
+                    + Nuevo hito procesal
+                  </Link>
+                  <Link
+                    to={`/events/new?caseId=${id}`}
+                    className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <Calendar size={16} />
+                    + Nuevo hito fáctico
+                  </Link>
+                </div>
 
-            {/* Lista de eventos ordenados por fecha */}
-            {[...events].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(e => {
-              const eventDate = new Date(e.date);
-              const isPast = eventDate < new Date();
-              const isSoon = !isPast && (eventDate.getTime() - Date.now()) < 7 * 24 * 60 * 60 * 1000;
+                {/* Lista de eventos ordenados por fecha */}
+                {[...events].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(e => {
+                  const eventDate = new Date(e.date);
+                  const isPast = eventDate < new Date();
+                  const isSoon = !isPast && (eventDate.getTime() - Date.now()) < 7 * 24 * 60 * 60 * 1000;
 
-              return (
-                <Link
-                  key={e.id}
-                  to={`/events/${e.id}/edit`}
-                  className={`flex gap-4 p-4 rounded-lg border transition-all hover:scale-[1.01] cursor-pointer ${
-                    isPast
-                      ? 'bg-slate-900/30 border-slate-800 hover:border-slate-600'
-                      : isSoon
-                      ? 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60'
-                      : 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-500/60'
-                  }`}
-                >
-                  <div className={`text-center min-w-[70px] pt-1 ${isPast ? 'opacity-60' : ''}`}>
-                    <div className="text-xl font-bold text-slate-200">{eventDate.getDate()}</div>
-                    <div className="text-xs text-slate-400 uppercase">
-                      {eventDate.toLocaleString('es-ES', { month: 'short' })}
-                    </div>
-                    <div className="text-xs font-bold text-slate-500 mt-0.5">
-                      {eventDate.getFullYear()}
-                    </div>
+                  return (
+                    <Link
+                      key={e.id}
+                      to={`/events/${e.id}/edit`}
+                      className={`flex gap-4 p-4 rounded-lg border transition-all hover:scale-[1.01] cursor-pointer ${
+                        isPast
+                          ? 'bg-slate-900/30 border-slate-800 hover:border-slate-600'
+                          : isSoon
+                          ? 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60'
+                          : 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-500/60'
+                      }`}
+                    >
+                      <div className={`text-center min-w-[70px] pt-1 ${isPast ? 'opacity-60' : ''}`}>
+                        <div className="text-xl font-bold text-slate-200">{eventDate.getDate()}</div>
+                        <div className="text-xs text-slate-400 uppercase">
+                          {eventDate.toLocaleString('es-ES', { month: 'short' })}
+                        </div>
+                        <div className="text-xs font-bold text-slate-500 mt-0.5">
+                          {eventDate.getFullYear()}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className={`font-medium ${isPast ? 'text-slate-400' : 'text-white'}`}>{e.title}</h4>
+                          {!isPast && isSoon && (
+                            <span className="text-[10px] bg-amber-500/30 text-amber-300 px-2 py-0.5 rounded uppercase">Próximo</span>
+                          )}
+                          {!isPast && !isSoon && (
+                            <span className="text-[10px] bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded uppercase">Programado</span>
+                          )}
+                          {isPast && (
+                            <span className="text-[10px] bg-slate-700 text-slate-400 px-2 py-0.5 rounded uppercase">Pasado</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-400 mt-1 line-clamp-2">{e.description}</p>
+                        <p className="text-xs text-slate-600 mt-2">Pulsa para editar</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+
+                {events.length === 0 && (
+                  <div className="text-center py-12 border border-dashed border-slate-700 rounded-lg">
+                    <Calendar size={40} className="mx-auto text-slate-600 mb-4" />
+                    <p className="text-slate-500 mb-4">No hay actuaciones registradas.</p>
+                    <Link
+                      to={`/events/new?caseId=${id}`}
+                      className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      <Calendar size={16} />
+                      Crear primer evento
+                    </Link>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className={`font-medium ${isPast ? 'text-slate-400' : 'text-white'}`}>{e.title}</h4>
-                      {!isPast && isSoon && (
-                        <span className="text-[10px] bg-amber-500/30 text-amber-300 px-2 py-0.5 rounded uppercase">Próximo</span>
-                      )}
-                      {!isPast && !isSoon && (
-                        <span className="text-[10px] bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded uppercase">Programado</span>
-                      )}
-                      {isPast && (
-                        <span className="text-[10px] bg-slate-700 text-slate-400 px-2 py-0.5 rounded uppercase">Pasado</span>
-                      )}
-                    </div>
-                    <p className="text-sm text-slate-400 mt-1 line-clamp-2">{e.description}</p>
-                    <p className="text-xs text-slate-600 mt-2">Pulsa para editar</p>
-                  </div>
-                </Link>
-              );
-            })}
-
-            {events.length === 0 && (
-              <div className="text-center py-12 border border-dashed border-slate-700 rounded-lg">
-                <Calendar size={40} className="mx-auto text-slate-600 mb-4" />
-                <p className="text-slate-500 mb-4">No hay actuaciones registradas.</p>
-                <Link
-                  to={`/events/new?caseId=${id}`}
-                  className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <Calendar size={16} />
-                  Crear primer evento
-                </Link>
+                )}
               </div>
             )}
           </div>
         )}
+        {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
+        {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
+        {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
       </main>
     </div>
   );
