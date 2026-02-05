@@ -483,7 +483,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
         <p className="text-xs text-slate-400 mb-3">
           Aquí se ejecuta la sala. La matriz vive en Estrategia. Las tarjetas editables viven en War Room.
         </p>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
           <Link
             to={`/cases/${caseId}?tab=estrategia`}
             className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 transition hover:border-emerald-400/60"
@@ -497,6 +497,13 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
           >
             <div className="text-xs font-bold text-rose-300 mb-1">Abrir War Room (tarjetas)</div>
             <p className="text-[11px] text-slate-400">Tácticas rápidas ataque/respuesta.</p>
+          </Link>
+          <Link
+            to={`/warroom/new?caseId=${caseId}&returnTo=${encodeURIComponent(`/cases/${caseId}?tab=audiencia`)}&caseKey=picassent`}
+            className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 transition hover:border-amber-400/60"
+          >
+            <div className="text-xs font-bold text-amber-300 mb-1">Nueva tarjeta (War Room)</div>
+            <p className="text-[11px] text-slate-400">Crear tarjeta táctica y volver aquí.</p>
           </Link>
           <Link
             to={`/analytics/prescripcion?caseId=picassent`}
