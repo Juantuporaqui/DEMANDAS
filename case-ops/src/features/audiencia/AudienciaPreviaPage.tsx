@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 // FASE 2 - Chaladita Case-Ops
 import { useProcedimientos } from '../../db/chaladitaRepos';
 import { UploadDocumento } from '../../components/UploadDocumento';
@@ -21,6 +22,13 @@ export function AudienciaPreviaPage() {
 
   return (
     <div className="space-y-6">
+      <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+        <strong>LEGACY:</strong> Usa{' '}
+        <Link to="/cases/picassent-715-2024?tab=audiencia" className="underline font-semibold hover:text-white">
+          Caso &gt; Sala (AP)
+        </Link>{' '}
+        para la audiencia previa de Picassent.
+      </div>
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-500">

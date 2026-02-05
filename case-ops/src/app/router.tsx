@@ -42,6 +42,7 @@ import { InversionMercantilPage } from '../features/analytics/pages/InversionMer
 import { AntiSTS458Page } from '../features/analytics/pages/AntiSTS458Page';
 import { ModoAudienciaPage } from '../features/audiencia/ModoAudienciaPage';
 import { AudienciaPreviaPage } from '../features/audiencia/AudienciaPreviaPage';
+import { AudienciaPreviaRedirect } from '../features/audiencia/AudienciaPreviaRedirect';
 import { ModoTelepronter } from '../features/audiencia/ModoTelepronter';
 import { ChecklistAudiencia } from '../features/audiencia/ChecklistAudiencia';
 import { ToolsPage } from '../features/tools/ToolsPage';
@@ -124,6 +125,11 @@ export const router = createBrowserRouter(
         },
         {
           path: 'audiencia-previa',
+          element: <AudienciaPreviaRedirect />,
+          handle: { pageMode: 'prose' },
+        },
+        {
+          path: 'audiencia-previa-legacy',
           element: <AudienciaPreviaPage />,
           handle: { pageMode: 'prose' },
         },
