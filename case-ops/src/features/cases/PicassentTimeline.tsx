@@ -13,7 +13,7 @@ import { hechosReclamados, getResumenContador } from '../../data/hechosReclamado
 import { Link } from 'react-router-dom';
 import {
   Calendar, Home, CreditCard, Scale, AlertTriangle, CheckCircle,
-  TrendingDown, FileText, Clock, ChevronRight
+  FileText, Clock, ChevronRight
 } from 'lucide-react';
 
 // Función para formatear céntimos a euros
@@ -115,7 +115,7 @@ export function PicassentHechosReclamados() {
             to={`/facts/${hecho.id}`}
             target="_blank"
             rel="noreferrer"
-            className={`group relative flex flex-col justify-between gap-4 p-4 rounded-2xl border transition-all hover:-translate-y-0.5 hover:shadow-xl overflow-hidden ${
+            className={`group relative flex flex-col justify-between gap-3 p-3 sm:gap-4 sm:p-4 rounded-2xl border transition-all hover:-translate-y-0.5 hover:shadow-xl overflow-hidden ${
               hecho.estado === 'prescrito' ? 'bg-gradient-to-br from-slate-500/15 via-slate-900/40 to-slate-900/70 border-slate-500/30 hover:border-slate-400/60 hover:shadow-slate-500/10' :
               hecho.estado === 'compensable' ? 'bg-gradient-to-br from-emerald-500/15 via-slate-900/40 to-slate-900/70 border-emerald-500/30 hover:border-emerald-400/60 hover:shadow-emerald-500/10' :
               'bg-gradient-to-br from-rose-500/15 via-slate-900/40 to-slate-900/70 border-rose-500/30 hover:border-rose-400/60 hover:shadow-rose-500/10'
@@ -140,7 +140,7 @@ export function PicassentHechosReclamados() {
               </div>
             </div>
             <div className="flex items-center justify-between text-xs text-slate-300">
-              <span className="text-[10px] uppercase tracking-wider">Ver resumen</span>
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider">Ver resumen</span>
               <ChevronRight size={14} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
@@ -185,23 +185,7 @@ export function PicassentTimeline() {
       </div>
 
       {/* KPIs PRINCIPALES */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Reclamado */}
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4">
-          <div className="text-[10px] uppercase tracking-wider text-rose-400 mb-1">Total Reclamado</div>
-          <div className="text-2xl font-bold text-rose-300">{formatCents(resumenFinanciero.totalReclamado * 100)}</div>
-          <div className="text-xs text-rose-400/70 mt-1">10 hechos en demanda</div>
-        </div>
-
-        {/* Prescrito */}
-        <div className="rounded-xl border border-slate-500/30 bg-slate-500/10 p-4">
-          <div className="text-[10px] uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
-            <TrendingDown size={12} /> Prescrito
-          </div>
-          <div className="text-2xl font-bold text-slate-300">{formatCents(resumenFinanciero.prescrito * 100)}</div>
-          <div className="text-xs text-slate-400/70 mt-1">Art. 1964.2 CC</div>
-        </div>
-
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2">
         {/* Riesgo Real */}
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
           <div className="text-[10px] uppercase tracking-wider text-amber-400 mb-1">Riesgo Real</div>

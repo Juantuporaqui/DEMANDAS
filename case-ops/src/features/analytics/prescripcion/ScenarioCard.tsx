@@ -44,7 +44,7 @@ export function ScenarioCard({
         <div className="space-y-3">
           <div>
             <div className="text-xs font-semibold text-emerald-300">Qué sostener</div>
-            <p className="text-xs text-slate-300">{sostener}</p>
+            <p className="text-xs break-words text-slate-300">{sostener}</p>
           </div>
           <div>
             <div className="text-xs font-semibold text-amber-300">Qué pedir (2 peticiones exactas)</div>
@@ -56,11 +56,11 @@ export function ScenarioCard({
           </div>
           <div>
             <div className="text-xs font-semibold text-rose-300">Riesgo</div>
-            <p className="text-xs text-slate-300">{riesgo}</p>
+            <p className="text-xs break-words text-slate-300">{riesgo}</p>
           </div>
           <div>
             <div className="text-xs font-semibold text-slate-300">Contramedida</div>
-            <p className="text-xs text-slate-300">{contramedida}</p>
+            <p className="text-xs break-words text-slate-300">{contramedida}</p>
           </div>
         </div>
       </div>
@@ -69,7 +69,7 @@ export function ScenarioCard({
         <button
           type="button"
           onClick={onScrollToGuion}
-          className="text-xs font-semibold text-emerald-300 hover:text-emerald-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+          className="text-[11px] font-semibold text-emerald-300 hover:text-emerald-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 sm:text-xs"
         >
           Abrir guion →
         </button>
