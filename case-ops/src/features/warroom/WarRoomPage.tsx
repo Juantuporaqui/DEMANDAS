@@ -52,12 +52,23 @@ function isValidCaseKey(value: string | null): value is CaseKey {
   return value === 'picassent' || value === 'mislata' || value === 'quart';
 }
 
+function coerceToCaseKey(
+  param: string | null,
+  caseIds: Record<CaseKey, string>,
+): CaseKey | null {
+  if (!param) return null;
+  if (isValidCaseKey(param)) return param;
+  const match = (Object.keys(caseIds) as CaseKey[]).find(
+    (k) => caseIds[k] === param,
+  );
+  return match ?? null;
+}
+
 function getInitialCase(): CaseKey {
   const params = new URLSearchParams(window.location.search);
-  const queryCase = params.get('caseId');
-  if (isValidCaseKey(queryCase)) {
-    return queryCase;
-  }
+  const paramRaw = params.get('caseId');
+  const key = coerceToCaseKey(paramRaw, FALLBACK_CASE_IDS);
+  if (key) return key;
   const stored = window.localStorage.getItem(STORAGE_KEY);
   if (isValidCaseKey(stored)) {
     return stored;
@@ -100,10 +111,15 @@ export function WarRoomPage() {
   }, []);
 
   useEffect(() => {
-    const requested = searchParams.get('caseId');
-    if (!isValidCaseKey(requested)) return;
+    const requestedRaw = searchParams.get('caseId');
+    const requested = coerceToCaseKey(requestedRaw, caseIds);
+    if (!requested) return;
     setActiveCase((prev) => (prev !== requested ? requested : prev));
-  }, [searchParams]);
+    // Normalize URL if the raw param was a real caseId (not a key)
+    if (requestedRaw && !isValidCaseKey(requestedRaw) && requested) {
+      setSearchParams({ caseId: requested }, { replace: true });
+    }
+  }, [searchParams, caseIds, setSearchParams]);
 
   useEffect(() => {
     latestSearchParamsRef.current = searchParams;
