@@ -38,7 +38,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
   return (
     <div className="relative space-y-6">
       {copiedText && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-lg animate-pulse">
+        <div className="fixed top-4 right-4 z-50 max-w-[calc(100vw-2rem)] rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-lg animate-pulse sm:px-4 sm:text-sm">
           Copiado al portapapeles
         </div>
       )}
@@ -67,14 +67,14 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
           <div className="flex flex-wrap gap-3">
             <a
               href={returnTo}
-              className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+              className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-200 transition hover:border-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.2em]"
             >
               Volver
             </a>
             <button
               type="button"
               onClick={() => window.print()}
-              className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200 transition hover:border-emerald-400/70 hover:bg-emerald-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+              className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-emerald-200 transition hover:border-emerald-400/70 hover:bg-emerald-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.2em]"
             >
               Imprimir / PDF
             </button>
@@ -253,7 +253,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
                 onCopied={handleCopied}
               />
             </div>
-            <p className="mt-3 text-sm text-slate-300">{content.planA.thesis}</p>
+            <p className="mt-3 text-sm break-words text-slate-300">{content.planA.thesis}</p>
             <p className="mt-4 text-sm font-semibold text-slate-200">{content.planA.checklistTitle}</p>
             <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-slate-300">
               {content.planA.checklist.map((item) => (
@@ -281,7 +281,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
                 onCopied={handleCopied}
               />
             </div>
-            <p className="mt-3 text-sm text-slate-300">{content.planB.enfoque}</p>
+            <p className="mt-3 text-sm break-words text-slate-300">{content.planB.enfoque}</p>
             <p className="mt-4 text-sm font-semibold text-slate-200">{content.planB.frasesTitle}</p>
             <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-slate-300">
               {content.planB.frases.map((item) => (
@@ -305,7 +305,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
                 onCopied={handleCopied}
               />
             </div>
-            <p className="mt-3 text-sm text-slate-300">{content.guion.text}</p>
+            <p className="mt-3 text-sm break-words text-slate-300">{content.guion.text}</p>
           </section>
 
           <section id="checklist-24-72" className="scroll-mt-24 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-200 print-card">
