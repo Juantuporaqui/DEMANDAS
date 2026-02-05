@@ -92,6 +92,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
   const isQuart = caseData.id?.includes('quart') ||
                   caseData.title?.toLowerCase().includes('quart') ||
                   caseData.autosNumber?.includes('1428');
+  const caseSlug = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
 
   const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
   const showAnalytic = !isPicassent && !isMislata && !isQuart;
@@ -209,6 +210,36 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             </div>
           )}
         </div>
+        {caseSlug && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href={`/docs/${caseSlug}/escritos/demanda.html`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40"
+            >
+              📄 Ver demanda
+            </a>
+            <a
+              href={`/docs/${caseSlug}/escritos/contestacion.html`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40"
+            >
+              🛡️ Ver contestación
+            </a>
+            {isQuart && (
+              <a
+                href="/docs/quart/escritos/impugnacion.html"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40"
+              >
+                ⚔️ Ver impugnación
+              </a>
+            )}
+          </div>
+        )}
         {(caseData.notes || isPicassent) && !isReadMode && (
           <div className="mt-4 text-sm text-slate-400 leading-relaxed border-t border-slate-700/50 pt-3 space-y-2">
             {isPicassent ? (
