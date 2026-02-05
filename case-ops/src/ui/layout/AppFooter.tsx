@@ -29,13 +29,15 @@ export function AppFooter() {
   }, []);
 
   return (
-    <footer className="w-full border-t border-slate-800/50 bg-slate-950/60 px-4 py-3 text-[11px] text-slate-500 sm:px-6 lg:px-8">
+    <footer className="w-full border-t border-white/[0.04] px-5 py-4 sm:px-6 lg:px-8"
+      style={{ background: 'rgba(10, 15, 26, 0.5)' }}
+    >
       <div className="mx-auto flex w-full flex-col justify-between gap-2 sm:flex-row sm:items-center">
-        <span className="opacity-70">
-          Aviso: Información confidencial. Uso interno exclusivo.
+        <span className="text-xs text-[var(--dim)]">
+          Aviso: Informacion confidencial. Uso interno exclusivo.
         </span>
-        <span className="font-medium text-slate-400">
-          Última actualización: {lastUpdated}
+        <span className="text-xs font-medium text-[var(--muted)]">
+          Ultima actualizacion: {lastUpdated}
         </span>
       </div>
     </footer>

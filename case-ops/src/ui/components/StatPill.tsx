@@ -19,12 +19,12 @@ const toneStyles: Record<StatPillTone, string> = {
 
 export default function StatPill({ label, value, tone = 'muted', icon }: StatPillProps) {
   return (
-    <div className="card-base card-subtle px-4 py-3 flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]">
+    <div className="card-base card-subtle px-4 py-3.5 flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2.5 text-[11px] uppercase tracking-[0.1em] font-medium text-[var(--muted)]">
         {icon ? <span className={toneStyles[tone]}>{icon}</span> : null}
         {label}
       </div>
-      <div className={`text-lg font-semibold ${toneStyles[tone]}`}>{value}</div>
+      <div className={`text-lg font-bold tracking-tight ${toneStyles[tone]}`}>{value}</div>
     </div>
   );
 }

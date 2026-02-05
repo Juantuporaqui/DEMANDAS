@@ -6,85 +6,133 @@
     <title>Demanda Judicial - Picassent 000715/2024</title>
     <style>
         body {
-            font-family: 'Times New Roman', Times, serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #e0e0e0;
+            font-family: 'Georgia', 'Times New Roman', Times, serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background-color: #f5f5f0;
             margin: 0;
-            padding: 20px;
+            padding: 24px;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
         }
-        .container {
-            max-width: 850px;
-            margin: auto;
-            background: white;
-            padding: 50px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-            border-top: 10px solid #2c3e50;
+        .paper {
+            max-width: 860px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 72px 80px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.08);
+            border: 1px solid #e8e8e0;
+            border-radius: 2px;
         }
         header {
             text-align: center;
-            border-bottom: 2px solid #eee;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-        }
-        h1, h2, h3 {
-            color: #2c3e50;
+            font-weight: bold;
             text-transform: uppercase;
+            margin-bottom: 48px;
+            font-size: 1.15em;
+            border-bottom: 2px solid #1a202c;
+            padding-bottom: 16px;
+            letter-spacing: 0.04em;
         }
-        .court-header {
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-bottom: 5px;
-        }
-        .case-info {
-            background: #f9f9f9;
-            padding: 15px;
-            border: 1px solid #ddd;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-        }
-        .section {
-            margin-bottom: 30px;
+        .intro {
             text-align: justify;
+            margin-bottom: 32px;
         }
-        .highlight-box {
-            background-color: #fff9c4;
-            padding: 15px;
-            border-left: 5px solid #fbc02d;
-            margin: 20px 0;
+        h2 {
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 1.1em;
+            letter-spacing: 0.08em;
+            margin-top: 40px;
+            margin-bottom: 24px;
+            color: #1a202c;
+        }
+        h3 {
+            font-size: 1em;
             font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #d1d5db;
+            padding-bottom: 8px;
+            margin-top: 32px;
+            letter-spacing: 0.02em;
+            color: #374151;
+        }
+        h4 {
+            font-size: 1em;
+            font-weight: bold;
+            margin-top: 24px;
+            font-style: italic;
+            color: #374151;
+        }
+        p {
+            text-align: justify;
+            margin-bottom: 16px;
+            hyphens: auto;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 24px;
+        }
+        li {
+            margin-bottom: 12px;
+            line-height: 1.7;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 0.9em;
+            font-size: 0.875em;
+            margin: 24px 0;
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
+            border: 1px solid #9ca3af;
+            padding: 10px 12px;
+            text-align: center;
+            vertical-align: middle;
         }
         th {
-            background-color: #2c3e50;
-            color: white;
+            background-color: #f3f4f6;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.04em;
+            color: #374151;
         }
-        .suplico {
-            background-color: #f2f4f4;
-            padding: 20px;
-            border: 1px dashed #2c3e50;
-            margin-top: 40px;
+        td {
+            color: #4b5563;
         }
-        .signature {
-            margin-top: 50px;
-            text-align: right;
+        .highlight {
+            background-color: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+        strong {
+            color: #111827;
+        }
+        em {
+            color: #4b5563;
+        }
+        blockquote {
+            border-left: 3px solid #d1d5db;
+            margin: 20px 0;
+            padding: 12px 24px;
+            background: #f9fafb;
+            color: #4b5563;
             font-style: italic;
         }
-        .footer {
-            text-align: center;
-            font-size: 0.8em;
-            color: #777;
-            margin-top: 30px;
+        .footer-legal {
+            margin-top: 48px;
+            padding-top: 20px;
+            border-top: 1px solid #d1d5db;
+            font-size: 0.9em;
+            color: #6b7280;
+        }
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .paper { padding: 32px 24px; }
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .paper { box-shadow: none; border: none; padding: 40px; margin: 0; }
         }
     </style>
 </head>

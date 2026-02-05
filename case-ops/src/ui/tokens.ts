@@ -1,30 +1,34 @@
-// Dimensiones
-export const appMaxWidth = '1400px'; // Un poco más ancho para ver mejor los gráficos
-export const sidebarWidth = '280px';
-export const radius = 'var(--radius-lg)'; // Bordes unificados por tokens
+// ==========================================
+// CASE OPS — Design Tokens (Premium Redesign)
+// ==========================================
 
-// COLORES "HARDCODED" (Fuerza Bruta para garantizar el diseño)
-// Fondo: Slate 950 real (#020617)
+// Dimensiones
+export const appMaxWidth = '1440px';
+export const sidebarWidth = '272px';
+export const sidebarCollapsedWidth = '72px';
+export const radius = 'var(--radius-lg)';
+
+// Fondo
 export const bg = 'bg-[var(--bg)]';
 
-// Tarjetas: Slate 900 real (#0f172a) con un poco de transparencia
-export const card = 'bg-[var(--card)] backdrop-blur-md shadow-[var(--shadow-1)]';
+// Tarjetas: Glass morphism
+export const card = 'bg-[var(--card)] backdrop-blur-xl shadow-[var(--shadow-1)]';
 
-// Bordes: Slate 800 (#1e293b)
+// Bordes
 export const border = 'border border-[var(--border)]';
 
 // Sombras
 export const shadowCard = 'shadow-[var(--shadow-2)]';
 
 // Tipografía
-export const textPrimary = 'text-[var(--text)]'; // Slate 50 (Blanco roto)
-export const textSecondary = 'text-[color-mix(in srgb, var(--text) 70%, transparent)]';
+export const textPrimary = 'text-[var(--text)]';
+export const textSecondary = 'text-[var(--text-secondary)]';
 export const textMuted = 'text-[var(--muted)]';
+export const textDim = 'text-[var(--dim)]';
 export const accent = 'text-[var(--warn)]';
 
 // Interacción
-export const hover = 'hover:bg-[color-mix(in srgb, var(--surface) 70%, transparent)] transition-all duration-200 cursor-pointer';
+export const hover = 'hover:bg-[var(--card-hover)] transition-all duration-200 cursor-pointer';
 
-// Estado Activo (El toque War Room)
-// Fondo Amber 500 (#f59e0b) con texto oscuro y sombra resplandeciente
-export const active = 'bg-[var(--warn)] text-[#020617] font-bold shadow-lg shadow-[color-mix(in srgb, var(--warn) 45%, transparent)] translate-x-1';
+// Estado Activo
+export const active = 'bg-[var(--warn)] text-[#0a0f1a] font-bold shadow-lg shadow-[rgba(251,191,36,0.25)]';

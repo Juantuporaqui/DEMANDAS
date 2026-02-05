@@ -26,40 +26,22 @@ import {
 import { casesRepo } from '../../db/repositories';
 import type { Case } from '../../types';
 
-// Navegación Principal
 const NAV_ITEMS = [
   { to: '/cases', label: 'Panel', icon: <LayoutDashboard size={18} />, section: 'principal' },
-  { to: '/events', label: 'Cronología', icon: <Calendar size={18} />, section: 'principal' },
+  { to: '/events', label: 'Cronologia', icon: <Calendar size={18} />, section: 'principal' },
   { to: '/facts', label: 'Evidencias', icon: <Gavel size={18} />, section: 'principal' },
-  { to: '/partidas', label: 'Económica', icon: <Wallet size={18} />, section: 'principal' },
+  { to: '/partidas', label: 'Economica', icon: <Wallet size={18} />, section: 'principal' },
   { to: '/documents', label: 'Documentos', icon: <FileText size={18} />, section: 'principal' },
   { to: '/tasks', label: 'Tareas', icon: <CheckSquare size={18} />, section: 'principal' },
 ];
 
-// Navegación Secundaria
 const NAV_SECONDARY = [
   { to: '/search', label: 'Buscador', icon: <Search size={18} /> },
-  {
-    to: '/tools/prescripcion',
-    label: 'Prescripción (Timeline)',
-    icon: <Clock size={18} />,
-  },
-  {
-    to: '/tools/comparador-evidencia',
-    label: 'Comparador de evidencia',
-    icon: <SlidersHorizontal size={18} />,
-  },
-  {
-    to: '/analytics/liquidacion-justa',
-    label: 'Liquidación Justa',
-    icon: <BarChart3 size={18} />,
-  },
-  {
-    to: '/analytics/contradiccion-aeat',
-    label: 'Contradicción AEAT',
-    icon: <SplitSquareVertical size={18} />,
-  },
-  { to: '/warroom', label: 'War Room (Tarjetas)', icon: <Target size={18} /> },
+  { to: '/tools/prescripcion', label: 'Prescripcion', icon: <Clock size={18} /> },
+  { to: '/tools/comparador-evidencia', label: 'Comparador', icon: <SlidersHorizontal size={18} /> },
+  { to: '/analytics/liquidacion-justa', label: 'Liquidacion', icon: <BarChart3 size={18} /> },
+  { to: '/analytics/contradiccion-aeat', label: 'Contradiccion', icon: <SplitSquareVertical size={18} /> },
+  { to: '/warroom', label: 'War Room', icon: <Target size={18} /> },
   { to: '/settings', label: 'Ajustes', icon: <Settings size={18} /> },
 ];
 
@@ -74,12 +56,10 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
   const [frentesExpanded, setFrentesExpanded] = useState(true);
   const location = useLocation();
 
-  // Cargar casos al montar
   useEffect(() => {
     casesRepo.getAll().then(setCases).catch(console.error);
   }, []);
 
-  // Filtrar casos principales (Mislata, Picassent, Quart)
   const mainCases = cases.filter(c => !c.parentCaseId).slice(0, 5);
 
   const handleClearCache = async () => {
@@ -95,12 +75,11 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
       });
       window.location.reload();
     } catch (error) {
-      console.error('Error limpiando caché:', error);
+      console.error('Error limpiando cache:', error);
       window.location.reload();
     }
   };
 
-  // Helper para determinar urgencia del caso
   const getCaseUrgency = (caseItem: Case) => {
     const title = caseItem.title?.toLowerCase() || '';
     if (title.includes('picassent')) return 'urgente';
@@ -109,58 +88,61 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
   };
 
   const navItemBase =
-    'group relative flex items-center gap-3 rounded-[var(--radius-md)] text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60';
-  const navItemActive = 'bg-amber-500/15 text-amber-300';
+    'group relative flex items-center gap-3 rounded-[var(--radius-md)] text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40';
+  const navItemActive = 'bg-amber-500/12 text-amber-300 shadow-[inset_0_1px_0_rgba(251,191,36,0.08)]';
   const navItemInactive =
-    'text-slate-400 hover:text-white hover:bg-slate-700/30 border border-transparent';
+    'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] border border-transparent';
 
   return (
     <aside
-      className={`hidden lg:flex flex-col h-screen fixed z-50 border-r border-[var(--border)] transition-all duration-300 ${
-        collapsed ? 'w-20' : 'w-64'
+      className={`hidden lg:flex flex-col h-screen fixed z-50 border-r border-white/[0.06] transition-all duration-300 ease-out ${
+        collapsed ? 'w-[72px]' : 'w-[272px]'
       }`}
-      style={{ background: 'linear-gradient(180deg, var(--bg) 0%, var(--surface) 100%)' }}
+      style={{
+        background: 'linear-gradient(180deg, rgba(10, 15, 26, 0.97) 0%, rgba(17, 24, 39, 0.95) 100%)',
+        backdropFilter: 'blur(20px)',
+      }}
     >
-      {/* Header del Sidebar - Logo */}
-      <div className="p-4 flex items-center gap-3 border-b border-[var(--border)]">
-        <div className="w-9 h-9 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[var(--radius-md)] flex items-center justify-center font-black text-slate-900 shadow-lg shadow-amber-500/30 text-lg">
+      {/* Logo */}
+      <div className="px-4 py-5 flex items-center gap-3 border-b border-white/[0.06]">
+        <div className="w-9 h-9 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[10px] flex items-center justify-center font-black text-slate-900 shadow-lg shadow-amber-500/20 text-lg flex-shrink-0">
           C
         </div>
         {!collapsed && (
-          <div>
-            <span className="text-white font-bold tracking-tight text-base block">CASE OPS</span>
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest">Legal Command</span>
+          <div className="min-w-0">
+            <span className="text-white font-bold tracking-tight text-[15px] block leading-tight">CASE OPS</span>
+            <span className="text-[10px] text-[var(--dim)] uppercase tracking-[0.15em]">Legal Command</span>
           </div>
         )}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
           <button
             onClick={handleClearCache}
             disabled={isClearing}
-            title="Limpiar caché"
-            className="p-1.5 rounded-[var(--radius-sm)] text-slate-500 hover:text-amber-400 hover:bg-slate-700/50 transition-all disabled:opacity-50"
+            title="Limpiar cache"
+            className="p-1.5 rounded-lg text-[var(--dim)] hover:text-amber-400 hover:bg-white/[0.06] transition-all disabled:opacity-50"
           >
             <RefreshCw size={14} className={isClearing ? 'animate-spin' : ''} />
           </button>
           <button
             onClick={onToggleCollapse}
             title={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
-            className="p-1.5 rounded-[var(--radius-sm)] text-slate-500 hover:text-amber-400 hover:bg-slate-700/50 transition-all"
+            className="p-1.5 rounded-lg text-[var(--dim)] hover:text-amber-400 hover:bg-white/[0.06] transition-all"
           >
             {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
         </div>
       </div>
 
-      {/* Navegación Principal */}
-      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto custom-scrollbar">
-        {/* Sección: Control */}
+      {/* Navegacion */}
+      <nav className="flex-1 px-3 py-5 space-y-7 overflow-y-auto custom-scrollbar">
+        {/* Centro de Control */}
         <div>
           {!collapsed && (
-            <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+            <div className="px-3 mb-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--dim)]">
               Centro de Control
             </div>
           )}
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {NAV_ITEMS.map(item => (
               <NavLink
                 key={item.to}
@@ -172,10 +154,10 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
                   }`
                 }
               >
-                <span className="flex h-9 w-9 items-center justify-center">{item.icon}</span>
+                <span className="flex h-8 w-8 items-center justify-center flex-shrink-0">{item.icon}</span>
                 {!collapsed && <span className="truncate">{item.label}</span>}
                 {collapsed && (
-                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs text-slate-100 opacity-0 shadow-lg shadow-black/30 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 opacity-0 shadow-xl shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.06]">
                     {item.label}
                   </span>
                 )}
@@ -184,23 +166,23 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
           </div>
         </div>
 
-        {/* Sección: Frentes Judiciales */}
+        {/* Frentes Judiciales */}
         <div>
           {!collapsed && (
             <button
               onClick={() => setFrentesExpanded(!frentesExpanded)}
-              className="w-full px-3 mb-2 flex items-center justify-between text-[10px] font-semibold uppercase tracking-widest text-slate-500 hover:text-slate-300 transition-colors"
+              className="w-full px-3 mb-3 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--dim)] hover:text-slate-300 transition-colors"
             >
               <span className="flex items-center gap-2">
                 <Building2 size={12} />
                 Frentes Judiciales
               </span>
-              <ChevronDown size={12} className={`transition-transform ${frentesExpanded ? 'rotate-180' : ''}`} />
+              <ChevronDown size={12} className={`transition-transform duration-200 ${frentesExpanded ? 'rotate-180' : ''}`} />
             </button>
           )}
 
           {(frentesExpanded || collapsed) && (
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               {mainCases.length > 0 ? mainCases.map(caseItem => {
                 const urgency = getCaseUrgency(caseItem);
                 const isActive = location.pathname.includes(`/cases/${caseItem.id}`);
@@ -213,35 +195,34 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
                       collapsed ? 'justify-center px-2 py-2' : 'px-3 py-2'
                     }`}
                   >
-                    <span className="flex h-9 w-9 items-center justify-center">
+                    <span className="flex h-8 w-8 items-center justify-center flex-shrink-0">
                       {urgency === 'urgente' && (
-                        <AlertTriangle size={16} className="text-amber-400 flex-shrink-0" />
+                        <AlertTriangle size={16} className="text-amber-400" />
                       )}
                       {urgency === 'activo' && (
-                        <Scale size={16} className="text-emerald-400 flex-shrink-0" />
+                        <Scale size={16} className="text-emerald-400" />
                       )}
                       {urgency === 'normal' && (
-                        <Gavel size={16} className="text-slate-500 flex-shrink-0" />
+                        <Gavel size={16} className="text-slate-500" />
                       )}
                     </span>
                     {!collapsed && (
                       <>
-                        <span className="truncate">{caseItem.title}</span>
+                        <span className="truncate text-[13px]">{caseItem.title}</span>
                         {urgency === 'urgente' && (
-                          <span className="badge badge-warn ml-auto px-1.5 py-0.5 text-[9px]">!
-                          </span>
+                          <span className="ml-auto flex-shrink-0 w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                         )}
                       </>
                     )}
                     {collapsed && (
-                      <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs text-slate-100 opacity-0 shadow-lg shadow-black/30 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                      <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 opacity-0 shadow-xl shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.06]">
                         {caseItem.title}
                       </span>
                     )}
                   </NavLink>
                 );
               }) : (
-                <div className={`px-3 py-2 text-xs text-slate-600 italic ${collapsed ? 'hidden' : ''}`}>
+                <div className={`px-3 py-2 text-xs text-[var(--dim)] italic ${collapsed ? 'hidden' : ''}`}>
                   Sin casos cargados
                 </div>
               )}
@@ -250,12 +231,12 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
                 title={collapsed ? 'Ver todos los casos' : undefined}
                 className={`${navItemBase} ${navItemInactive} ${collapsed ? 'justify-center px-2 py-2' : 'px-3 py-2'}`}
               >
-                <span className="flex h-9 w-9 items-center justify-center">
-                  <List size={16} className="text-slate-500" />
+                <span className="flex h-8 w-8 items-center justify-center flex-shrink-0">
+                  <List size={16} className="text-[var(--dim)]" />
                 </span>
-                {!collapsed && <span className="text-xs text-slate-500">+ Ver todos los casos</span>}
+                {!collapsed && <span className="text-xs text-[var(--dim)]">+ Ver todos</span>}
                 {collapsed && (
-                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs text-slate-100 opacity-0 shadow-lg shadow-black/30 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 opacity-0 shadow-xl shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.06]">
                     Ver todos los casos
                   </span>
                 )}
@@ -264,14 +245,14 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
           )}
         </div>
 
-        {/* Sección: Herramientas */}
+        {/* Herramientas */}
         <div>
           {!collapsed && (
-            <div className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+            <div className="px-3 mb-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--dim)]">
               Herramientas
             </div>
           )}
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {NAV_SECONDARY.map(item => (
               <NavLink
                 key={item.to}
@@ -283,10 +264,10 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
                   }`
                 }
               >
-                <span className="flex h-9 w-9 items-center justify-center">{item.icon}</span>
+                <span className="flex h-8 w-8 items-center justify-center flex-shrink-0">{item.icon}</span>
                 {!collapsed && <span className="truncate">{item.label}</span>}
                 {collapsed && (
-                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs text-slate-100 opacity-0 shadow-lg shadow-black/30 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 opacity-0 shadow-xl shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.06]">
                     {item.label}
                   </span>
                 )}
@@ -296,14 +277,14 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
         </div>
       </nav>
 
-      {/* Footer del sidebar */}
-      <div className="p-4 border-t border-[var(--border)]">
-        <div className="flex items-center justify-between text-[10px] text-slate-600">
+      {/* Footer */}
+      <div className="px-4 py-4 border-t border-white/[0.06]">
+        <div className="flex items-center justify-between text-[10px] text-[var(--dim)]">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.4)]" />
             {!collapsed && <span>Sistema Activo</span>}
           </div>
-          {!collapsed && <span className="font-mono">v2.0</span>}
+          {!collapsed && <span className="font-mono text-[var(--dim)]">v2.0</span>}
         </div>
       </div>
     </aside>
