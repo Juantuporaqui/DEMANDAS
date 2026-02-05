@@ -93,6 +93,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
                   caseData.title?.toLowerCase().includes('quart') ||
                   caseData.autosNumber?.includes('1428');
   const caseSlug = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
+  const docsBasePath = caseSlug ? `${import.meta.env.BASE_URL}docs/${caseSlug}/escritos` : null;
 
   const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
   const showAnalytic = !isPicassent && !isMislata && !isQuart;
@@ -213,7 +214,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
         {caseSlug && (
           <div className="mt-3 flex flex-wrap gap-2">
             <a
-              href={`/docs/${caseSlug}/escritos/demanda.html`}
+              href={`${docsBasePath}/demanda.html`}
               target="_blank"
               rel="noreferrer"
               className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40"
@@ -221,7 +222,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
               📄 Ver demanda
             </a>
             <a
-              href={`/docs/${caseSlug}/escritos/contestacion.html`}
+              href={`${docsBasePath}/contestacion.html`}
               target="_blank"
               rel="noreferrer"
               className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40"
@@ -230,7 +231,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             </a>
             {isQuart && (
               <a
-                href="/docs/quart/escritos/impugnacion.html"
+                href={`${docsBasePath}/impugnacion.html`}
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40"
