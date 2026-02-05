@@ -945,13 +945,20 @@ function TabEstrategia({ strategies, caseId }: any) {
             <div className="text-xs font-bold text-emerald-300 mb-1">Estrategia (Matriz)</div>
             <p className="text-xs text-slate-300">Líneas maestras, riesgos, escenarios y analíticas clave. Estás aquí.</p>
           </div>
-          <Link
-            to={`/cases/${caseId}?tab=audiencia`}
-            className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 transition hover:border-amber-400/60"
-          >
-            <div className="text-xs font-bold text-amber-300 mb-1">Sala (AP)</div>
-            <p className="text-xs text-slate-300">Guiones, checklist, hechos controvertidos y prueba.</p>
-          </Link>
+          {isPicassent ? (
+            <Link
+              to={`/cases/${caseId}?tab=audiencia`}
+              className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 transition hover:border-amber-400/60"
+            >
+              <div className="text-xs font-bold text-amber-300 mb-1">Sala (AP)</div>
+              <p className="text-xs text-slate-300">Guiones, checklist, hechos controvertidos y prueba.</p>
+            </Link>
+          ) : (
+            <div className="rounded-xl border border-slate-700/30 bg-slate-800/20 p-3 opacity-50 cursor-not-allowed">
+              <div className="text-xs font-bold text-slate-500 mb-1">Sala (AP)</div>
+              <p className="text-xs text-slate-500">Disponible solo en Picassent.</p>
+            </div>
+          )}
           <Link
             to={`/warroom?caseId=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
             className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-3 transition hover:border-rose-400/60"
@@ -964,14 +971,11 @@ function TabEstrategia({ strategies, caseId }: any) {
 
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <h3 className="font-bold text-white">Estrategias Activas</h3>
+          <h3 className="font-bold text-white">Matriz estratégica</h3>
           <span className="text-[10px] font-bold tracking-widest bg-slate-800/60 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
             {caseLabel}
           </span>
         </div>
-        <Link to={`/warroom/new?caseId=${caseId}`} className="text-xs bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-500">
-          + Nueva
-        </Link>
       </div>
 
       {isPicassent && (
@@ -1231,14 +1235,22 @@ function TabEstrategia({ strategies, caseId }: any) {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h4 className="text-sm font-semibold text-white">Tarjetas de sala (War Room)</h4>
-            <p className="text-xs text-slate-400">{normalizedStrategies.length} tarjetas vinculadas a este caso.</p>
+            <p className="text-xs text-slate-400">Tarjetas tácticas de sala. Se editan en War Room. ({normalizedStrategies.length} vinculadas)</p>
           </div>
-          <Link
-            to={`/warroom?caseId=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
-            className="inline-flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-200 transition hover:border-rose-400/60 hover:bg-rose-500/20"
-          >
-            Abrir War Room
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to={`/warroom?caseId=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
+              className="inline-flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-200 transition hover:border-rose-400/60 hover:bg-rose-500/20"
+            >
+              Abrir War Room
+            </Link>
+            <Link
+              to={`/warroom/new?caseId=${caseId}&returnTo=${encodeURIComponent(`/cases/${caseId}?tab=estrategia`)}&caseKey=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
+              className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-200 transition hover:border-amber-400/60 hover:bg-amber-500/20"
+            >
+              + Nueva tarjeta
+            </Link>
+          </div>
         </div>
         {normalizedStrategies.length > 0 ? (
           <div className="space-y-2">
