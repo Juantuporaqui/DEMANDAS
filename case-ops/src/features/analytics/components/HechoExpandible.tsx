@@ -23,8 +23,10 @@ import {
   Sword,
   Target,
   UserRound,
+  Download,
 } from 'lucide-react';
 import type { HechoReclamado, EstadoHecho } from '../../../data/hechosReclamados';
+import { getPDFsByCaso, getPDFUrl } from '../../../data/pdfRegistry';
 
 interface HechoExpandibleProps {
   hecho: HechoReclamado;
@@ -70,18 +72,22 @@ const getSectionIcon = (title: string) => {
   return FileText;
 };
 
-const slugify = (text: string) =>
-  normalizeTitle(text)
-    .replace(/[^\p{L}\p{N}]+/gu, '-')
-    .replace(/^-+|-+$/g, '');
-
-const getDocumentoHref = (doc: string) => {
-  const match = doc.match(/\bdoc\.?\s*(\d+)\b/i);
-  if (match) {
-    return `/documentos/doc-${match[1]}.pdf`;
-  }
-  return `/documentos/${slugify(doc)}.pdf`;
+const parseDocNumber = (text: string) => {
+  const match = text.match(/\bdoc\.?[-\s_]*(\d+)\b/i);
+  return match ? Number(match[1]) : null;
 };
+
+const picassentDocsByNumber = getPDFsByCaso('picassent').reduce((acc, pdf) => {
+  const docNumber = parseDocNumber(pdf.archivo);
+  if (docNumber !== null) {
+    acc.set(docNumber, {
+      href: getPDFUrl('picassent', pdf.archivo),
+      title: pdf.titulo,
+      type: pdf.tipo,
+    });
+  }
+  return acc;
+}, new Map<number, { href: string; title: string; type: string }>());
 
 const parseDesarrollo = (markdown?: string) => {
   if (!markdown) {
@@ -214,6 +220,27 @@ export function HechoExpandible({ hecho }: HechoExpandibleProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [vistaActiva, setVistaActiva] = useState<'vista' | 'desarrollo'>('vista');
   const [copied, setCopied] = useState(false);
+
+  const linkedDocuments = useMemo(
+    () =>
+      (hecho.documentosRef ?? [])
+        .map((docLabel) => {
+          const docNumber = parseDocNumber(docLabel);
+          if (docNumber === null) return null;
+
+          const registryMatch = picassentDocsByNumber.get(docNumber);
+          if (!registryMatch) return null;
+
+          return {
+            docLabel,
+            href: registryMatch.href,
+            title: registryMatch.title,
+            type: registryMatch.type,
+          };
+        })
+        .filter((doc): doc is { docLabel: string; href: string; title: string; type: string } => Boolean(doc)),
+    [hecho.documentosRef]
+  );
   const config = estadoConfig[hecho.estado];
   const EstadoIcon = config.icon;
   const desarrollo = useMemo(() => parseDesarrollo(hecho.desarrolloMD), [hecho.desarrolloMD]);
@@ -345,22 +372,33 @@ export function HechoExpandible({ hecho }: HechoExpandibleProps) {
               </div>
 
               {/* DOCUMENTOS DE PRUEBA */}
-              {hecho.documentosRef && hecho.documentosRef.length > 0 && (
+              {linkedDocuments.length > 0 && (
                 <div className="rounded-lg sm:rounded-xl bg-slate-800/50 border border-slate-700/50 p-3 sm:p-4">
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     <FileText size={14} className="text-cyan-400 sm:w-4 sm:h-4" />
                     <h4 className="text-xs sm:text-sm font-bold text-cyan-400 uppercase tracking-wider">Documentos</h4>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {hecho.documentosRef.map((doc, i) => (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {linkedDocuments.map((doc, i) => (
                       <a
                         key={i}
-                        href={getDocumentoHref(doc)}
+                        href={doc.href}
+                        target="_blank"
+                        rel="noreferrer"
                         download
-                        className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-slate-700/50 text-[10px] sm:text-xs text-slate-200 font-mono border border-slate-600/50 hover:text-white hover:border-slate-500/70 transition-colors"
-                        title={`Descargar ${doc}`}
+                        className="group rounded-xl border border-cyan-500/25 bg-gradient-to-br from-cyan-500/10 via-slate-900 to-slate-900 p-2.5 sm:p-3 text-left hover:border-cyan-400/50 hover:from-cyan-500/20 transition-all"
+                        title={`Descargar ${doc.docLabel}`}
                       >
-                        {doc}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-mono text-[11px] sm:text-xs text-cyan-300 group-hover:text-cyan-200">{doc.docLabel}</p>
+                            <p className="text-[10px] sm:text-xs text-slate-300 leading-snug mt-1">{doc.title}</p>
+                          </div>
+                          <Download size={14} className="text-cyan-400/80 group-hover:text-cyan-300 shrink-0" />
+                        </div>
+                        <span className="inline-flex mt-2 rounded-full border border-cyan-500/30 px-2 py-0.5 text-[9px] sm:text-[10px] uppercase tracking-wider text-cyan-200/90">
+                          {doc.type}
+                        </span>
                       </a>
                     ))}
                   </div>
