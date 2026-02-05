@@ -6,107 +6,133 @@
     <title>Contestación Demanda Verbal - Mislata</title>
     <style>
         body {
-            font-family: 'Times New Roman', Times, serif;
-            line-height: 1.5;
-            color: #000;
-            background-color: #f0f0f0;
+            font-family: 'Georgia', 'Times New Roman', Times, serif;
+            line-height: 1.8;
+            color: #1a202c;
+            background-color: #f5f5f0;
             margin: 0;
-            padding: 20px;
+            padding: 24px;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
         }
         .paper {
-            max-width: 850px;
-            margin: auto;
-            background: white;
-            padding: 60px 80px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border: 1px solid #d3d3d3;
+            max-width: 860px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 72px 80px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.08);
+            border: 1px solid #e8e8e0;
+            border-radius: 2px;
         }
         header {
-            text-align: right;
+            text-align: center;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 40px;
-            font-size: 0.9em;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-        }
-        .header-left {
-            text-align: left;
-            float: left;
+            margin-bottom: 48px;
+            font-size: 1.15em;
+            border-bottom: 2px solid #1a202c;
+            padding-bottom: 16px;
+            letter-spacing: 0.04em;
         }
         .intro {
             text-align: justify;
-            margin-bottom: 30px;
-            clear: both;
+            margin-bottom: 32px;
         }
         h2 {
             text-align: center;
             text-transform: uppercase;
             font-size: 1.1em;
-            letter-spacing: 2px;
-            margin-top: 30px;
-            margin-bottom: 20px;
-            background-color: #e0e0e0;
-            padding: 5px;
+            letter-spacing: 0.08em;
+            margin-top: 40px;
+            margin-bottom: 24px;
+            color: #1a202c;
         }
         h3 {
             font-size: 1em;
             font-weight: bold;
             text-transform: uppercase;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
-            margin-top: 25px;
+            border-bottom: 1px solid #d1d5db;
+            padding-bottom: 8px;
+            margin-top: 32px;
+            letter-spacing: 0.02em;
+            color: #374151;
+        }
+        h4 {
+            font-size: 1em;
+            font-weight: bold;
+            margin-top: 24px;
+            font-style: italic;
+            color: #374151;
         }
         p {
             text-align: justify;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
+            hyphens: auto;
         }
         ul {
             list-style-type: none;
-            padding-left: 20px;
+            padding-left: 24px;
         }
         li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            line-height: 1.7;
         }
-        .payment-list li {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #f9f9f9;
-            padding: 5px;
-            border-left: 3px solid #333;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875em;
+            margin: 24px 0;
         }
-        .jurisprudence {
-            font-style: italic;
-            background-color: #f4f4f4;
-            padding: 15px;
-            border-left: 4px solid #555;
-            margin: 15px 0;
-            font-size: 0.9em;
+        th, td {
+            border: 1px solid #9ca3af;
+            padding: 10px 12px;
+            text-align: center;
+            vertical-align: middle;
         }
-        .email-box {
-            border: 1px dashed #000;
-            padding: 15px;
+        th {
+            background-color: #f3f4f6;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.04em;
+            color: #374151;
+        }
+        td {
+            color: #4b5563;
+        }
+        .highlight {
+            background-color: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+        strong {
+            color: #111827;
+        }
+        em {
+            color: #4b5563;
+        }
+        blockquote {
+            border-left: 3px solid #d1d5db;
             margin: 20px 0;
+            padding: 12px 24px;
+            background: #f9fafb;
+            color: #4b5563;
+            font-style: italic;
+        }
+        .footer-legal {
+            margin-top: 48px;
+            padding-top: 20px;
+            border-top: 1px solid #d1d5db;
             font-size: 0.9em;
-            background-color: #fffde7;
+            color: #6b7280;
         }
-        .suplico {
-            margin-top: 40px;
-            background-color: #eaeaea;
-            padding: 20px;
-            border-radius: 5px;
-            border: 1px solid #999;
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .paper { padding: 32px 24px; }
         }
-        .date-sign {
-            margin-top: 60px;
-            text-align: right;
-            font-weight: bold;
-        }
-        .source-ref {
-            font-size: 0.6em;
-            color: #999;
-            vertical-align: super;
-            text-decoration: none;
-            margin-left: 3px;
+        @media print {
+            body { background: white; padding: 0; }
+            .paper { box-shadow: none; border: none; padding: 40px; margin: 0; }
         }
     </style>
 </head>

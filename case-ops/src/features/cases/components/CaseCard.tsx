@@ -1,5 +1,5 @@
 // ============================================
-// CASE OPS - Case Card (Operative Overview)
+// CASE OPS — Case Card (Premium Redesign)
 // ============================================
 
 import { Link } from 'react-router-dom';
@@ -48,76 +48,81 @@ export function CaseCard({
   return (
     <Link key={caseItem.id} to={`/cases/${caseItem.id}`} className="group flex h-full">
       <div
-        className={`flex h-full w-full flex-col gap-5 rounded-2xl border bg-gradient-to-br ${accent.accent} ${accent.border} p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-xl`}
+        className={`flex h-full w-full flex-col gap-5 rounded-[var(--radius-xl)] border bg-gradient-to-br ${accent.accent} ${accent.border} p-6 shadow-[var(--shadow-1)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[var(--shadow-3)]`}
+        style={{ backdropFilter: 'blur(12px)' }}
       >
+        {/* Header */}
         <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-2xl">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-xl flex-shrink-0">
               {accent.icon}
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-lg font-semibold text-white">{caseItem.title}</h2>
+                <h2 className="text-lg font-semibold text-white tracking-tight">{caseItem.title}</h2>
                 <span
-                  className={`rounded-full border px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] ${
-                    statusBadge || 'border-white/10 bg-white/5 text-slate-300'
+                  className={`rounded-full border px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] ${
+                    statusBadge || 'border-white/[0.08] bg-white/[0.04] text-slate-300'
                   }`}
                 >
                   {statusLabel}
                 </span>
               </div>
-              <p className="mt-1 text-xs uppercase tracking-[0.3em] text-slate-400">
+              <p className="mt-1.5 text-[13px] uppercase tracking-[0.15em] text-slate-400">
                 {caseItem.court} · {caseItem.autosNumber || 'Sin autos'} · {roleLabel}
               </p>
-              <p className="mt-2 text-sm text-slate-300">
+              <p className="mt-2 text-sm text-slate-300 leading-relaxed">
                 Parte contraria: {opposingParty} · Letrada: {opposingLawyer}
               </p>
             </div>
           </div>
-          <div className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-100">
-              Cuantía procesal
+          <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/8 px-4 py-2.5 text-right flex-shrink-0">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-emerald-300/80">
+              Cuantia procesal
             </div>
-            <div className="mt-1 text-lg font-semibold text-emerald-200">
+            <div className="mt-1 text-lg font-bold text-emerald-300 tracking-tight">
               {formatCurrency(impactAmountCents)}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+        {/* Counters */}
+        <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-300">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3.5 py-1.5">
             Hechos {hechosCount}
           </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3.5 py-1.5">
             Documentos {documentosCount}
           </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3.5 py-1.5">
             Estrategias {estrategiasCount}
           </span>
         </div>
 
-        <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-            Qué está en juego
+        {/* Summary */}
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3.5">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+            Que esta en juego
           </span>
-          <p className="mt-1 text-sm text-slate-200">{microSummary}</p>
+          <p className="mt-1.5 text-sm text-slate-200 leading-relaxed">{microSummary}</p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300">
+        {/* Footer */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Próximo hito</div>
-            <div className="text-sm text-slate-200">
-              {nextEventLabel || 'Sin eventos próximos'}
+            <div className="text-[11px] uppercase tracking-[0.1em] text-[var(--dim)] font-medium">Proximo hito</div>
+            <div className="text-sm text-slate-200 mt-0.5">
+              {nextEventLabel || 'Sin eventos proximos'}
             </div>
           </div>
           <div className="flex items-center gap-2">
             {gapCount > 0 && (
-              <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-amber-200">
+              <span className="rounded-full border border-amber-400/30 bg-amber-400/8 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-amber-300">
                 Huecos {gapCount}
               </span>
             )}
-            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
-              Ver dossier →
+            <span className="text-xs font-semibold uppercase tracking-[0.15em] text-emerald-300 group-hover:text-emerald-200 transition-colors">
+              Ver dossier &rarr;
             </span>
           </div>
         </div>

@@ -1,6 +1,5 @@
 // ============================================
-// CASE OPS - Main Application Shell
-// Estilo Legal Pro - Plan Maestro Fase 2
+// CASE OPS — Main Application Shell (Premium)
 // ============================================
 
 import { Outlet, ScrollRestoration, useMatches } from 'react-router-dom';
@@ -25,19 +24,19 @@ export function AppShell() {
 
   return (
     <div
-      className="min-h-screen text-slate-200 font-sans selection:bg-amber-500/30"
-      style={{ backgroundColor: '#1a202c' }}
+      className="min-h-screen font-sans selection:bg-amber-500/25 gradient-mesh"
+      style={{ backgroundColor: 'var(--bg)', color: 'var(--text)' }}
     >
-      {/* 1. Sidebar para Desktop (Izquierda) */}
+      {/* Sidebar Desktop */}
       <Sidebar
         collapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
       />
 
-      {/* 2. Área de Contenido Principal */}
+      {/* Contenido Principal */}
       <main
-        className={`min-h-screen flex flex-col transition-all duration-300 ${
-          isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'
+        className={`min-h-screen flex flex-col transition-all duration-300 ease-out ${
+          isSidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-[272px]'
         }`}
       >
         <AppHeader />
@@ -51,10 +50,9 @@ export function AppShell() {
         <AppFooter />
       </main>
 
-      {/* 3. Navegación Inferior para Móvil (Solo visible en pantallas pequeñas) */}
+      {/* Navegación Móvil */}
       <BottomNav />
 
-      {/* Utilidades Globales */}
       <ScrollRestoration />
     </div>
   );

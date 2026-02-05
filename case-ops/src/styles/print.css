@@ -2,38 +2,87 @@
   body,
   #root {
     background: #ffffff !important;
-    color: #111827 !important;
+    color: #1a202c !important;
+    font-size: 12pt !important;
+    line-height: 1.6 !important;
   }
 
+  /* Hide UI chrome */
   aside,
   header,
   footer,
   nav,
-  .bottom-nav {
+  .bottom-nav,
+  .print-hidden {
     display: none !important;
   }
 
+  /* Reset layout */
   main {
     padding: 0 !important;
     margin: 0 !important;
+    padding-left: 0 !important;
   }
 
+  /* Print surface */
   .print-surface {
     background: #ffffff !important;
-    color: #111827 !important;
-    border-color: #e5e7eb !important;
+    color: #1a202c !important;
+    border-color: #d1d5db !important;
+    box-shadow: none !important;
   }
 
   .print-surface * {
     color: inherit !important;
   }
 
-  .print-card {
+  /* Cards in print */
+  .print-card,
+  .card-base,
+  .case-card,
+  .kpi-card {
     background: #ffffff !important;
-    border-color: #e5e7eb !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    color: #1a202c !important;
+    break-inside: avoid;
   }
 
-  .print-hidden {
-    display: none !important;
+  /* Badges in print */
+  .badge,
+  .badge-estado {
+    border: 1px solid #9ca3af !important;
+    background: transparent !important;
+    color: #374151 !important;
+  }
+
+  /* Links */
+  a {
+    color: #1a202c !important;
+    text-decoration: underline !important;
+  }
+
+  /* Page breaks */
+  h1, h2, h3 {
+    break-after: avoid;
+    color: #111827 !important;
+  }
+
+  /* Table styling */
+  table {
+    border-collapse: collapse !important;
+  }
+
+  thead th {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+  }
+
+  tbody td {
+    color: #4b5563 !important;
+    border: 1px solid #e5e7eb !important;
   }
 }

@@ -5,12 +5,12 @@ import type { Case } from '../../types';
 
 const ROUTE_LABELS: Array<{ match: RegExp; label: string }> = [
   { match: /^\/(|dashboard|cases)$/i, label: 'Panel' },
-  { match: /^\/events/i, label: 'Cronología' },
+  { match: /^\/events/i, label: 'Cronologia' },
   { match: /^\/documents/i, label: 'Documentos' },
   { match: /^\/facts/i, label: 'Evidencias' },
-  { match: /^\/partidas/i, label: 'Económica' },
+  { match: /^\/partidas/i, label: 'Economica' },
   { match: /^\/tasks/i, label: 'Tareas' },
-  { match: /^\/analytics/i, label: 'Analítica' },
+  { match: /^\/analytics/i, label: 'Analitica' },
   { match: /^\/search/i, label: 'Buscador' },
   { match: /^\/warroom/i, label: 'War Room' },
   { match: /^\/tools/i, label: 'Herramientas' },
@@ -30,7 +30,7 @@ function formatLabel(value?: string | null) {
 function getCaseReference(caseData?: Case, fallbackId?: string) {
   const raw = caseData?.autosNumber || caseData?.nig || fallbackId || '';
   if (!raw) return '—';
-  return raw.length > 20 ? `${raw.slice(0, 17)}…` : raw;
+  return raw.length > 20 ? `${raw.slice(0, 17)}...` : raw;
 }
 
 function getRouteLabel(pathname: string) {
@@ -89,16 +89,25 @@ export function AppHeader() {
 
   return (
     <header
-      className="sticky top-0 z-40 border-b border-slate-800/60 bg-slate-950/70 backdrop-blur-sm"
-      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      className="sticky top-0 z-40 border-b border-white/[0.06]"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        background: 'rgba(10, 15, 26, 0.82)',
+        backdropFilter: 'blur(20px) saturate(1.3)',
+        WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
+      }}
     >
-      <div className="mx-auto flex w-full items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full items-center justify-between px-5 py-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-1">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-500">Contexto</span>
-          <span className="text-sm font-semibold text-slate-100 sm:text-base">{caseTitle}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--dim)]">
+            Contexto
+          </span>
+          <span className="text-[15px] font-semibold tracking-tight text-[var(--text)] sm:text-base">
+            {caseTitle}
+          </span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="rounded-full border border-slate-700/70 bg-slate-900/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-200">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)]">
             Fase: {phaseLabel}
           </span>
         </div>
