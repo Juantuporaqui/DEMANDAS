@@ -1,266 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demanda de Ejecución - Quart de Poblet</title>
-    <style>
-        body {
-            font-family: 'Georgia', 'Times New Roman', Times, serif;
-            line-height: 1.8;
-            color: #1a202c;
-            background-color: #f5f5f0;
-            margin: 0;
-            padding: 24px;
-            font-size: 16px;
-            -webkit-font-smoothing: antialiased;
-        }
-        .paper {
-            max-width: 860px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 72px 80px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.08);
-            border: 1px solid #e8e8e0;
-            border-radius: 2px;
-        }
-        header {
-            text-align: center;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 48px;
-            font-size: 1.15em;
-            border-bottom: 2px solid #1a202c;
-            padding-bottom: 16px;
-            letter-spacing: 0.04em;
-        }
-        .intro {
-            text-align: justify;
-            margin-bottom: 32px;
-        }
-        h2 {
-            text-align: center;
-            text-transform: uppercase;
-            font-size: 1.1em;
-            letter-spacing: 0.08em;
-            margin-top: 40px;
-            margin-bottom: 24px;
-            color: #1a202c;
-        }
-        h3 {
-            font-size: 1em;
-            font-weight: bold;
-            text-transform: uppercase;
-            border-bottom: 1px solid #d1d5db;
-            padding-bottom: 8px;
-            margin-top: 32px;
-            letter-spacing: 0.02em;
-            color: #374151;
-        }
-        h4 {
-            font-size: 1em;
-            font-weight: bold;
-            margin-top: 24px;
-            font-style: italic;
-            color: #374151;
-        }
-        p {
-            text-align: justify;
-            margin-bottom: 16px;
-            hyphens: auto;
-        }
-        ul {
-            list-style-type: none;
-            padding-left: 24px;
-        }
-        li {
-            margin-bottom: 12px;
-            line-height: 1.7;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.875em;
-            margin: 24px 0;
-        }
-        th, td {
-            border: 1px solid #9ca3af;
-            padding: 10px 12px;
-            text-align: center;
-            vertical-align: middle;
-        }
-        th {
-            background-color: #f3f4f6;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.8em;
-            letter-spacing: 0.04em;
-            color: #374151;
-        }
-        td {
-            color: #4b5563;
-        }
-        .highlight {
-            background-color: #fef3c7;
-            padding: 2px 6px;
-            border-radius: 2px;
-        }
-        strong {
-            color: #111827;
-        }
-        em {
-            color: #4b5563;
-        }
-        blockquote {
-            border-left: 3px solid #d1d5db;
-            margin: 20px 0;
-            padding: 12px 24px;
-            background: #f9fafb;
-            color: #4b5563;
-            font-style: italic;
-        }
-        .footer-legal {
-            margin-top: 48px;
-            padding-top: 20px;
-            border-top: 1px solid #d1d5db;
-            font-size: 0.9em;
-            color: #6b7280;
-        }
-        @media (max-width: 768px) {
-            body { padding: 12px; }
-            .paper { padding: 32px 24px; }
-        }
-        @media print {
-            body { background: white; padding: 0; }
-            .paper { box-shadow: none; border: none; padding: 40px; margin: 0; }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demanda de Ejecución — texto (OCR) en HTML</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin:0; background: Canvas; color: CanvasText; font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+    main { max-width: 980px; margin: 0 auto; padding: 28px 18px 60px; }
+    header { margin-bottom: 18px; }
+    h1 { margin:0; font-size: 22px; }
+    .meta { font-size: 12px; opacity: .75; margin-top: 6px; }
+    .warn { font-size: 12px; opacity: .9; margin-top: 10px; padding: 10px 12px; border: 1px solid rgba(127,127,127,.28); border-radius: 10px; }
+    .page { margin: 22px 0; padding-top: 8px; border-top: 1px solid rgba(127,127,127,.25); }
+    .pagemeta { font-size: 12px; opacity: .7; margin: 0 0 10px; }
+    h2 { margin: 18px 0 10px; font-size: 18px; letter-spacing: .2px; }
+    h3 { margin: 14px 0 8px; font-size: 16px; }
+    h4 { margin: 12px 0 6px; font-size: 14px; }
+    p  { margin: 8px 0; line-height: 1.65; white-space: pre-wrap; }
+  </style>
 </head>
 <body>
-
-<div class="paper">
-
-    <div class="filing-section">
-        <div class="stamp-box">
-            SERVICIO COMUN PROCESAL<br>
-            ASUNTOS GENERALES VALENCIA<br>
-            <strong>14 OCT. 2025</strong><br>
-            REGISTRO UNICA ENTRADA<br>
-            [cite_start]Ref: 1428/25 [cite: 2426-2430]
-        </div>
-        <p><strong>A LA SECCIÓN CIVIL Y DE INSTRUCCIÓN DEL TRIBUNAL DE INSTANCIA DE QUART DE POBLET. [cite_start]PLAZA Nº 1</strong> [cite: 2431-2433]</p>
-        <p>
-            <strong>ISABEL LUZZY AGUILAR</strong>, Procuradora, en representación de <strong>Dª. [cite_start]VICENTA JIMÉNEZ VERA</strong>, en autos de EJECUCIÓN DE TÍTULOS JUDICIALES Nº 1428/2025, comparezco y DIGO: [cite: 2434-2435]
-        </p>
-        <p>
-            [cite_start]Que, habiendo sido notificada la Diligencia de Ordenación de fecha 10 (notificada el 13), por la que se requiere aportar copia de la demanda y documentos en soporte papel, vengo a atender dicho requerimiento aportándola como DOCUMENTO ÚNICO. [cite: 2436]
-        </p>
-        <p>
-            <strong>SUPLICO AL JUZGADO</strong> tenga por presentado este escrito. [cite_start]En Quart de Poblet, a la fecha de su registro. [cite: 2438-2439]
-        </p>
-    </div>
-
+  <main>
     <header>
-        <div class="header-left">
-            [cite_start]SECCIÓN CIVIL Y DE INSTRUCCIÓN DEL TRIBUNAL DE INSTANCIA DE QUART DE POBLET PLAZA Nº 1 [cite: 2441]
-        </div>
+      <h1>Demanda de Ejecución — texto (OCR) en HTML</h1>
+      <div class="meta">Generado: 2026-02-05 20:20:44 · Fuente: Doc_02_DemandaEjecucion.pdf · Páginas: 6</div>
+      <div class="warn">Aviso: este documento es OCR sobre PDF escaneado. Puede contener errores puntuales (tildes, comas, números). Si necesitas “ni una coma”, hay que cotejar contra el PDF.</div>
     </header>
-
-    <div class="intro">
-        <p>
-            <strong>ISABEL LUZZY AGUILAR</strong>, Procuradora de los Tribunales en nombre y representación de <strong>Dña. VICENTA JIMENEZ VERA</strong>, bajo la dirección letrada de <strong>DÑA. [cite_start]M. AUXILIADORA GOMEZ MARTIN</strong> (Col. 10175 ICAV), ante el Juzgado comparezco y DIGO: [cite: 2442-2444]
-        </p>
-        <p>
-            [cite_start]Que por medio del presente escrito formulo <strong>DEMANDA DE EJECUCIÓN</strong> de Sentencia N.º 362/2023, de fecha 17 de octubre de 2023 dictada por el Juzgado de Primera Instancia número 1 de Quart de Poblet (Proc. 892/2023), contra: [cite: 2445]
-        </p>
-        <p>
-            <strong>D. [cite_start]JUAN RODRIGUEZ CRESPO</strong>, mayor de edad, DNI 48380305N, con domicilio en C/ Isabel de Villena n 2 pta 5 Mislata. [cite: 2447]
-        </p>
-    </div>
-
-    <h2>HECHOS</h2>
-
-    <h3>PRIMERO.- Título Ejecutivo</h3>
-    <p>
-        [cite_start]En fecha 17 de octubre de 2023 se dictó Sentencia de divorcio (Proc. 892/2023), aclarada por Autos de 02.11.2023 y 06.11.2023, aprobando el Convenio Regulador de fecha 16.10.2023 sobre las medidas de los hijos Guillermo y Raúl. [cite: 2449-2450]
-    </p>
-    <p>
-        [cite_start]Se acompaña como <strong>DOCUMENTO NÚMERO UNO</strong> testimonio de la Sentencia y Autos aclaratorios. [cite: 2451]
-    </p>
-    <p>
-        [cite_start]En la Estipulación Cuarta del Convenio (Alimentos y Gastos), ambos progenitores se obligaron a ingresar mensualmente <strong>200 € cada uno</strong> en una cuenta bancaria común (del 1 al 5 de cada mes) para hacer frente a gastos escolares y extraordinarios. [cite: 2453-2454]
-    </p>
-
-    <h3>SEGUNDO.- Incumplimiento e Impago</h3>
-    <p>
-        [cite_start]El ejecutado ha dejado de ingresar su cuota de 200 € en las siguientes mensualidades: [cite: 2456]
-    </p>
-    <ul class="debt-list">
-        <li>Abril, Mayo, Junio, Julio, Septiembre y Octubre de 2024</li>
-        <li>Abril, Mayo, Junio, Julio, Agosto y Septiembre de 2025</li>
-    </ul>
-    <p>
-        [cite_start]El importe adeudado asciende a un total de <strong>2.400 €</strong> (12 mensualidades x 200 €), cantidad que se reclama en la presente ejecución, más las que se vayan generando. [cite: 2456-2457]
-    </p>
-
-    <h3>TERCERO.- Requerimiento de cumplimiento futuro</h3>
-    <p>
-        [cite_start]Se interesa que se requiera al Sr. Juan Rodriguez Crespo para el correcto y puntual pago de los alimentos y gastos (200 € mensuales), tal y como se acordó por sentencia. [cite: 2458]
-    </p>
-
-    <h3>CUARTO.- Solicitud de Embargo</h3>
-    <p>
-        Se interesa el cumplimiento conforme a los arts. [cite_start]549 y ss LEC, procediéndose al embargo de bienes <strong>sin previo requerimiento de pago</strong> (Art. 580 LEC). [cite: 2460]
-    </p>
-    <p>
-        [cite_start]Se solicita oficio al Punto Neutro de Información Judicial (PNIJ) para recabar información patrimonial (Cuentas, Catastro, DGT, TGSS, AEAT) y el embargo de salario como Policía Nacional. [cite: 2461-2463]
-    </p>
-
-    <h2>FUNDAMENTOS DE DERECHO</h2>
-
-    <ul>
-        <li><strong>I. EJECUTABILIDAD:</strong> Arts. [cite_start]571 y ss LEC. [cite: 2465]</li>
-        <li><strong>II. COMPETENCIA:</strong> Art. [cite_start]545.1 LEC (Juzgado que dictó la resolución). [cite: 2466]</li>
-        <li><strong>III. [cite_start]LEGITIMACIÓN:</strong> Activa de mi representada y pasiva del Sr. Rodriguez Crespo. [cite: 2467]</li>
-        <li><strong>IV. REPRESENTACIÓN:</strong> Arts. [cite_start]539 y 750 LEC. [cite: 2468]</li>
-        <li><strong>V. DESPACHO DE EJECUCIÓN:</strong> Arts. [cite_start]575, 576 y 580 LEC (Intereses y no requerimiento). [cite: 2469]</li>
-        <li><strong>VII. COSTAS:</strong> Art. [cite_start]539.2 LEC, a cargo del ejecutado. [cite: 2470]</li>
-    </ul>
-
-    <div class="suplico">
-        <h3>SUPLICO AL JUZGADO</h3>
-        <p>
-            [cite_start]Que, teniendo por presentada esta demanda con sus copias y documentos, se sirva admitirla y dictar auto despachando ejecución contra <strong>JUAN RODRIGUEZ CRESPO</strong>, instando: [cite: 2473]
-        </p>
-        <ol type="a">
-            <li>
-                [cite_start]Despachar ejecución —sin previo requerimiento— por la cantidad de <strong>2.400 € de principal</strong> más <strong>800 €</strong> presupuestados para intereses y costas. [cite: 2474-2475]
-            </li>
-            <li>
-                [cite_start]Requerir al ejecutado para que cumpla con el abono mensual de 200 € (del 1 al 5 de cada mes). [cite: 2476]
-            </li>
-            <li>
-                [cite_start]Proceder al <strong>EMBARGO</strong> de bienes y localización patrimonial mediante oficio al Punto Neutro de Información Judicial (cuentas, salario como Policía Nacional, AEAT, etc.). [cite: 2477-2479]
-            </li>
-            <li>
-                [cite_start]Imponer <strong>multas coercitivas</strong> (Art. 776.1 LEC) en caso de incumplimiento reiterado. [cite: 2480]
-            </li>
-        </ol>
-
-        <p>
-            <strong>SEGUNDO OTROSÍ DIGO:</strong> Al amparo de los arts. 317 y ss LEC, se tengan por designados los archivos para cotejo. [cite_start]SUPLICO se tenga por hecha. [cite: 2481-2483]
-        </p>
-        <p>
-            <strong>TERCER OTROSÍ DIGO:</strong> Voluntad de subsanación (Art. 231 LEC). [cite_start]SUPLICO permita subsanar posibles defectos. [cite: 2484-2487]
-        </p>
-    </div>
-
-    <div class="signatures">
-        [cite_start]<p>Firmado digitalmente: MARIA AUXILIADORA GOMEZ MARTIN (02/10/2025) [cite: 2488]</p>
-        [cite_start]<p>Firmado digitalmente: ISABEL LUZZY AGUILAR [cite: 2490-2496]</p>
-    </div>
-
-</div>
-
+    <section class='page' id='p01'><div class='pagemeta'>Página 1 / 6</div><p>| e &gt; 5 SERVICIO 0 ASUNTOS GEN Eo VALEN 14 007. 2005</p><p>REGISTRO A LA SECCIÓN CIVIL Y DE INS IÓN COS RADA DEL TRIBUNAL DE INSTANCIA DE QUART DE POBLET. PLAZA NO 1</p><p>ISABEL LUZZY AGUILAR, Procuradora de los Tribunales, colegiada n* 618).C.P.V., en nombre y representación de D?. VICENTA JIMÉNEZ VERA, tal como consta acreditado en los autos, de EJECUCIÓN DE TÍTULOS JUDICIALES N* 1428/2025, ante el Juzgado comparezco y como mejor / proceda en Derecho, DIGO:</p><p>Que, habiendo notificado Diligencia de Ordenación de fecha 10, notificada 13, por la que requiere a esta parte para aportar copia de la demanda y documentos en soporte papel, por medio del presente escrito vengo a atender dicho requerimiento, aportándola como DOCUMENTO ÚNICO.</p><p>Por lo expuesto,</p><h2>SUPLICO AL JUZGADO que tenga por presentado este escrito y, previos los oportunos trámites, acuerde de conformidad con lo solicitado en el cuerpo del mismo.</h2><p>En Quart de Poblet, a la fecha de su registro.</p><p>SES a,</p></section><section class='page' id='p02'><div class='pagemeta'>Página 2 / 6</div><h2>A</h2><h2>SECCIÓN CIVIL Y DE INSTRUCCIÓN DEL TRIBUNAL DE INSTANCIA DE QUART DE POBLET PLAZA N” 1</h2><p>ISABEL LUZZY AGUILAR, Procuradora de los Tribunales en nombre y representación de Dña. VICENTA JIMENEZ VERA, representación que será acreditada mediante apoderamiento apud acta el día y hora que se determine por el Juzgado a tal efecto, y bajo la dirección letrada de DÑA. M.* AUXILIADORA GOMEZ MARTIN, Colegiada ICA V</p><p>N.* 10175, ante el Juzgado comparezco y, como mejor proceda en Derecho, DIGO:</p><p>Que por medio del presente escrito formulo DEMANDA DE EJECUCIÓN de Sentencia N.” 362/2023, de fecha 17 de octubre de 2023 dictada por el Juzgado de Primera</p><p>Instancia número 1 de Quart de Poblet, en el procedimiento civil número 892/2023, que acordó</p><p>el divorcio, contra:</p><p>- D. JUAN RODRIGUEZ CRESPO, mayor de edad, provisto de DNI n.* 48380305N, con domicilio en C/ Isabel de Villena n 2 pta 5 Mislata ( antes C/ Antonio molle N2</p><p>PTA 5 de Mislata) y todo ello en base a los siguientes</p><h2>HECHOS</h2><h3>PRIMERO. - Que en fecha 17 de octubre de 2023 se dictó Sentencia de divorcio en el procedimiento número 892/2023 por el Juzgado de Primera Instancia número 1 de Quart de Poblet, que fue aclarada por Auto de fecha 02.11.2023 y por Auto de fecha 06.11.2023, y por la que se acordaba el divorcio de los cónyuges, Vicenta Jimenez Vera y Juan Rodriguez Crespo, se aprueba el acuerdo alcanzado por las partes, en relación con las medidas que han de regir sobre los hijos, Guillermo y Raúl, en los términos que son de ver en el convenio regulador suscrito por</h3><p>los cónyuges en fecha 16.10.2023.</p><p>Se acompaña como bloque documental DOCUMENTO NUMERO UNO, Testimonio de Sentencia de divorcio fecha 17 de octubre de 2023 dictada por el Juzgado de Primera Instancia número 1 de Quart de Poblet, Auto de aclaración de sentencia de fecha 02.11.2023, Auto de fecha 06.11.2023, y Convenio Regulador suscrito en fecha 16.10.2023.</p></section><section class='page' id='p03'><div class='pagemeta'>Página 3 / 6</div><h2>ON</h2><p>Que</p><p>en el citado Convenio regulador aprobado judicialmente se establecía e la Estipulación Cuarta del mismo, relativo a Alimentos y Gastos de los Hijos, que Ambos progenitores se obliga a ingresar mensualmente la cantidad de 200€ cada uno durante las doce mensualidades del año, para hacer frente a los gastos escolares y extraordinarios de los hijos, o cualquier otro gasto, sin perjuicio de incrementar las aportaciones de ambo:</p><p>s cÓnyuges en caso de ser necesario.</p><p>| n para atender gastos de los hijos se | atenderá por mitad entre ambos progenitores. |</p><h3>SEGUNDO. - Que desde el establecimiento de la citada obligación de ambos</h3><p>progenitores de ingresar mensualmente la cantidad de 200€ cada uno de ellos, el ejecutado ha</p><p>dejado de ingresar en la cuenta común las mensualidades de abril 2024, mayo 2024, junio 2024. julio 2024, septiembre y octubre del 2024, así como las mensualidades de abril 2025, mayo 2025, junio 2025, julio 2025 agosto 2025 y septiembre de 2025, pi lo que hace un total adeudado de 2.400€, importe que se ejecución.</p><p>or importe cada una de ellas de 200€,</p><p>reclama en la presente demanda de</p><p>Por tanto, a día de hoy,</p><p>el ejecutado adeuda la cantidad de DOS MIL CUATROCIENTOS EUROS en conce;</p><p>pto de Alimentos y Gastos de los Hijos, sin perjuicio de</p><p>título judicial.</p><h3>TERCERO. - Que, así mismo, se interesa que se requiera de manera inmediat</h3><p>a al Sr, Juan Rodriguez Crespo, para que roceda al correcto y puntual ago del im, jorte de alimentos</p><p>Y gastos de los hijos, en la cuantía mensual de 200€, tal y como se acordó por sentencia de fecha 17.10.2023</p></section><section class='page' id='p04'><div class='pagemeta'>Página 4 / 6</div><h3>CUARTO. - Que interesa a esta parte su cumplimiento de acuerdo con lo dispuesto en los artículos 549 y siguientes de la Ley de Enjuiciamiento civil, procediéndose al embargo de los bienes del deudor, Juan Rodriguez Crespo sin necesidad de previo requerimiento de pago en</h3><p>virtud de lo establecido en el artículo 580 de la Ley de Enjuiciamiento Civil.</p><p>Que, se oficie al Punto Neutro de Información Judicial, para que, recabe la información patrimonial de D. JUAN RODRIGUEZ CRESPO, con D.N.I. N.* DNI n.? 48380305N, referente</p><p>a las cuentas bancarias, catastro, Dirección General de Tráfico, Tesorería General de la Seguridad Social. Agencia Estatal de Administración Tributaria.</p><p>Se proceda al embargo de salario como policía Nacional.</p><h2>FUNDAMENTOS DE DERECHO</h2><p>1.- EJECUTABILIDAD DE LA RESOLUCIÓN JUDICIAL. - Conforme a lo previsto en el artículo 571 y siguientes de la Ley de Enjuiciamiento Civil.</p><p>IL- COMPETENCIA. - Resulta competente el Juzgado al que me dirijo, a tenor del artículo 545.1 de la Ley de Enjuiciamiento Civil 1/2000, por ser el que conoció del asunto en primera</p><p>instancia y dictó la resolución cuya ejecución ahora se solicita.</p><p>IIL- LEGITIMACIÓN. - Tiene legitimación activa mi representada y pasiva el Sr. Rodriguez</p><p>Crespo como obligado al cumplimiento de la medida cuya ejecución se pretende por esta parte.</p><p>IV.- REPRESENTACIÓN PROCESAL Y DEFENSA LETRADA. - Cumpliendo la exigencia</p><p>de los artículos 539 y 750 de la citada Ley procesal, esta parte actúa representada por Procurador y dirigida por abogado en ejercicio.</p><h4>V. - DESPACHO DE EJECUCIÓN, INTERESES DE LA MORA PROCESAL E INNECESARIEDAD DE REQUERIMIENTO DE PAGO, son de aplicación los artículos 575, 576 y 580 de la Ley de Enjuiciamiento Civil.</h4><p>VIL - COSTAS. - Conforme a lo preceptuado en el artículo 539.2 de la Ley de Enjuiciamiento</p><p>Civil en el cual se establece que las costas de la presente ejecución serán a cargo del ejecutado.</p></section><section class='page' id='p05'><div class='pagemeta'>Página 5 / 6</div><p>En su virtud,</p><h2>SUPLICO AL JUZGADO. - Que, tenga por presentada esta demanda, juntp cy, . ls</h2><p>copias y documentos que le acompañan, se sirva admitirla y tenerme por personado y part 1%</p><p>representación que ostento y por formulada solicitud de ejecución de Sentencia contra</p><p>RODRIGUEZ CRESPO. a cuyo fin se insta del Juzgado:</p><h2>JUAN</h2><p>a) Que se despache ejecución --sin necesidad de previo requerimiento-- contra los bienes dej ejecutado D. JUAN RODRIGUEZ CRESPO, en la cantidad DOs MIL CUATROCIENTOS EUROS (2.400€) para cubrir el principal en concepto de Pensiones adeudadas, más las que se sigan devengando, así como la cantidad de 800€ en CONcepto de intereses y costas, sin perjuicio de posterior liquidación.</p><p>b) Que se requiera al ejecutado para que cumpla la resolución judicial y abone la cantidad mensual de 200€ acordada en Sentencia, del 1 al 5 de cada mes.</p><p>Cc) Que se proceda al embargo de los siguientes bienes del deudor para hacer frente a las anteriores cantidades, procediéndose a su vez a deducir las siguientes medidas de localización:</p><p>- Que, se oficie al Cuerpo Nacional de Policía para que se proceda al embargo del salario del ejecutado</p><p>- Que, se oficie al Punto Neutro de Información Judicial, para que, recabe la información patrimonial de D. JUAN RODRIGUEZ CRESPO, con DNI n.* 48380305N, referente a las cuentas bancarias, catastro, Dirección General de Tráfico, Tesorería General de la Seguridad Social, Agencia Estatal de Administración Tributaria.</p><p>d) Que, en caso de incumplimiento reiterado de las obligaciones de pago de cantidad, se impongan al deudor las multas coercitivas a que se refiere el artículo 776.1 de la LEC, con arreglo a lo dispuesto en el artículo 711 y sin perjuicio de hacer efectivas sobre SU</p><p>patrimonio las cantidades debidas y no satisfechas.</p><h3>SEGUNDO OTROSÍ DIGO. - Que al amparo de los artículos 317 y ss. de la LEC se tengan por designados los registros, archivos, juzgados, etc. en relación a los documentos públicos que se presentan y citan en esta demanda, en cuanto al cotejo o comprobación. SUPLICO AL</h3><p>JUZGADO. - que se tenga por hecha la anterior consideración.</p><p>TERCER OTROSÍ DIGO. - Que a los efectos de lo dispuesto en el artículo 231 4 la</p><p>o o. . e ley de Enjuiciamiento civil, esta parte manifiesta su firme voluntad de cumplir con todos ||</p><p>4</p></section><section class='page' id='p06'><div class='pagemeta'>Página 6 / 6</div><p>preceptos y requisitos exigidos por la Ley, por lo que, SUPLICO AL JUZGADO. - Que tenga por hecha la anterior manifestación, y en su caso, permita subsanar los defectos de los actos</p><p>procesales en que hubiera podido incurrir esta parte.</p><p>Digitally signed by MARIA . AUXILÍADORA GOMEZ ISABEL| Firmado MARTIN - NIF:25415730V digitalment Date: 2025.10.02 14:32:18 LUZZY| ne +02:0 ISAB AGUILA liza R AGUILAR</p></section>
+  </main>
 </body>
 </html>
