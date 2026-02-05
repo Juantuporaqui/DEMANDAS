@@ -867,39 +867,13 @@ function TabEstrategia({ strategies, caseId }: any) {
     ? 'QUART'
     : 'CASO';
   const returnTo = `/cases/${caseId}?tab=estrategia`;
-  const [planMode, setPlanMode] = useState<'60s' | '2m' | '5m'>('60s');
-  const [planCopied, setPlanCopied] = useState(false);
   const [tipoFilter, setTipoFilter] = useState<'todas' | TipoEstrategia>('todas');
   const [prioridadFilter, setPrioridadFilter] = useState<'todas' | Prioridad>('todas');
   const [estadoFilter, setEstadoFilter] = useState<'todas' | Estado>('todas');
   const [lineaSearch, setLineaSearch] = useState('');
   const [selectedLinea, setSelectedLinea] = useState<LineaEstrategica | null>(null);
-  const [selectedWarroom, setSelectedWarroom] = useState<Strategy | null>(null);
-  const [warroomTag, setWarroomTag] = useState('todas');
-  const [warroomSearch, setWarroomSearch] = useState('');
-  const teleprompterProc = isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'mislata';
 
   const normalizedStrategies = Array.isArray(strategies) ? strategies : [];
-  const warroomTags = Array.from(new Set(normalizedStrategies.flatMap((s: Strategy) => s.tags || []))).filter(Boolean).sort();
-
-  const planScripts = {
-    '60s':
-      '1) Prescripción por bloques + DT 5ª Ley 42/2015 (cierre 2020/21).\\n2) Falta de prueba fiable: capturas recortadas sin integridad.\\n3) Subsidiario: si invocan STS 458/2025, limitar por diferencias (separación de bienes + inversión).\\n4) Bases de liquidación: pasivo preferente (hipoteca antes del reparto).',
-    '2m':
-      '1) Prescripción por bloques + DT 5ª Ley 42/2015 (cierre 2020/21).\\n2) No mezclar bloques: cada partida exige fecha, concepto, documento, dies a quo e interrupción.\\n3) Prueba digital frágil: capturas recortadas no bastan.\\n4) Subsidiario: STS 458/2025 solo con identidad de razón; aquí separación de bienes + inversión.\\n5) Compensación por frutos/beneficios si aparecen ingresos no repartidos.\\n6) Bases de liquidación: pasivo preferente antes del reparto.',
-    '5m':
-      '1) Prescripción por bloques + DT 5ª Ley 42/2015 (cierre 2020/21).\\n2) No mezclar bloques: cada partida exige fecha, concepto, documento, dies a quo e interrupción.\\n3) Prueba digital: impugnación art. 326 LEC por capturas recortadas; exigir aportación íntegra/certificada.\\n4) Subsidiario: si invocan STS 458/2025, limitar por diferencias (separación de bienes + inversión) y exigibilidad por partidas.\\n5) Compensación por frutos/beneficios si aparecen; neteo.\\n6) Control del objeto y cuantías: depurar duplicidades y fijar bases.\\n7) Peticiones concretas en AP: hechos controvertidos, aportación documental y bases de liquidación (pasivo preferente).',
-  };
-
-  const handleCopyPlan = async () => {
-    try {
-      await navigator.clipboard.writeText(planScripts[planMode]);
-      setPlanCopied(true);
-      setTimeout(() => setPlanCopied(false), 2000);
-    } catch {
-      setPlanCopied(false);
-    }
-  };
 
   const filteredLineas = estrategiaPicassent.filter((linea) => {
     const query = lineaSearch.trim().toLowerCase();
@@ -919,44 +893,9 @@ function TabEstrategia({ strategies, caseId }: any) {
     return tipoOk && prioridadOk && estadoOk && searchOk;
   });
 
-  const filteredStrategies = normalizedStrategies.filter((strategy: Strategy) => {
-    const tagOk = warroomTag === 'todas' || strategy.tags?.includes(warroomTag);
-    const query = warroomSearch.trim().toLowerCase();
-    if (!query) return tagOk;
-    const blob = [
-      strategy.attack,
-      strategy.rebuttal,
-      strategy.risk,
-      strategy.evidencePlan,
-      strategy.questions,
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
-    return tagOk && blob.includes(query);
-  });
-
   const handleCopyPhrase = async (phrase: string) => {
     try {
       await navigator.clipboard.writeText(phrase);
-    } catch {
-      // no-op
-    }
-  };
-
-  const handleCopyWarroom = async (strategy: Strategy) => {
-    const payload = [
-      `Ataque: ${strategy.attack}`,
-      `Riesgo: ${strategy.risk}`,
-      `Rebuttal: ${strategy.rebuttal}`,
-      `Plan de evidencia: ${strategy.evidencePlan}`,
-      `Preguntas: ${strategy.questions}`,
-      `Tags: ${(strategy.tags || []).join(', ')}`,
-    ]
-      .filter(Boolean)
-      .join('\\n');
-    try {
-      await navigator.clipboard.writeText(payload);
     } catch {
       // no-op
     }
@@ -998,6 +937,31 @@ function TabEstrategia({ strategies, caseId }: any) {
 
   return (
     <div className="space-y-6">
+      {/* Microcopy: Qué va dónde */}
+      <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
+        <h4 className="text-sm font-semibold text-white mb-3">Qué va dónde</h4>
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
+            <div className="text-xs font-bold text-emerald-300 mb-1">Estrategia (Matriz)</div>
+            <p className="text-xs text-slate-300">Líneas maestras, riesgos, escenarios y analíticas clave. Estás aquí.</p>
+          </div>
+          <Link
+            to={`/cases/${caseId}?tab=audiencia`}
+            className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 transition hover:border-amber-400/60"
+          >
+            <div className="text-xs font-bold text-amber-300 mb-1">Sala (AP)</div>
+            <p className="text-xs text-slate-300">Guiones, checklist, hechos controvertidos y prueba.</p>
+          </Link>
+          <Link
+            to={`/warroom?caseId=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
+            className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-3 transition hover:border-rose-400/60"
+          >
+            <div className="text-xs font-bold text-rose-300 mb-1">War Room</div>
+            <p className="text-xs text-slate-300">Tarjetas rápidas editables (ataque/respuesta).</p>
+          </Link>
+        </div>
+      </div>
+
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <h3 className="font-bold text-white">Estrategias Activas</h3>
@@ -1012,63 +976,11 @@ function TabEstrategia({ strategies, caseId }: any) {
 
       {isPicassent && (
         <>
-          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-5 print-surface">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-              <div>
-                <h4 className="text-sm font-semibold text-white">Plan de sala</h4>
-                <p className="text-xs text-slate-400">Resumen operativo con foco en AP.</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  to={`/audiencia/telepronter?proc=${teleprompterProc}`}
-                  className="rounded-full border border-amber-500/40 px-3 py-1 text-[11px] font-semibold text-amber-200 hover:border-amber-400/80"
-                >
-                  Modo sala
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="rounded-full border border-slate-600/60 px-3 py-1 text-[11px] font-semibold text-slate-200 hover:border-slate-500/80"
-                >
-                  Imprimir playbook
-                </button>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="inline-flex rounded-full border border-slate-700/70 bg-slate-900/60 p-1">
-                {(['60s', '2m', '5m'] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setPlanMode(mode)}
-                    className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${
-                      planMode === mode
-                        ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/60'
-                        : 'text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={handleCopyPlan}
-                className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 px-3 py-1 text-[11px] font-semibold text-emerald-200 hover:border-emerald-400/80 hover:text-emerald-100"
-              >
-                <Copy className="h-3.5 w-3.5" /> {planCopied ? 'Copiado' : 'Copiar'}
-              </button>
-            </div>
-            <div className="mt-4 rounded-xl border border-slate-800/60 bg-slate-950/40 p-4 print-card">
-              <p className="text-sm text-slate-200 whitespace-pre-line">{planScripts[planMode]}</p>
-            </div>
-          </div>
-
           <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4 print-surface">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h4 className="text-sm font-semibold text-white">Acciones clave</h4>
-                <p className="text-xs text-slate-400">Cards operativas con checklist y guion.</p>
+                <h4 className="text-sm font-semibold text-white">Analíticas (trabajo previo)</h4>
+                <p className="text-xs text-slate-400">Líneas de defensa estructurales y herramientas de análisis.</p>
               </div>
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
@@ -1086,18 +998,12 @@ function TabEstrategia({ strategies, caseId }: any) {
                   </span>
                 </div>
                 <p className="text-sm text-slate-400 mb-3">
-                  Mapa de escenarios + guion de sala + checklist probatorio.
+                  Mapa de escenarios + checklist probatorio.
                 </p>
                 <div className="flex flex-wrap gap-2 mb-3">
                   <span className="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                     STS 458/2025
                   </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    Audiencia previa
-                  </span>
-                </div>
-                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
-                  Retorno listo
                 </div>
                 <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir prescripción <ChevronRight className="w-4 h-4 ml-1" />
@@ -1113,23 +1019,12 @@ function TabEstrategia({ strategies, caseId }: any) {
                 <div className="flex items-center justify-between gap-3 mb-2">
                   <h4 className="text-lg font-bold text-white">Excepción procesal</h4>
                   <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
-                    4 escenarios
+                    Saneamiento
                   </span>
                 </div>
                 <p className="text-sm text-slate-400 mb-3">
-                  Acumulación indebida y saneamiento del objeto con guion de sala.
+                  Acumulación indebida y saneamiento del objeto.
                 </p>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-200 border border-sky-500/30">
-                    Acumulación objetiva
-                  </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    Audiencia previa
-                  </span>
-                </div>
-                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
-                  Retorno listo
-                </div>
                 <div className="flex items-center text-sm text-sky-300 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir excepción <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
@@ -1144,23 +1039,12 @@ function TabEstrategia({ strategies, caseId }: any) {
                 <div className="flex items-center justify-between gap-3 mb-2">
                   <h4 className="text-lg font-bold text-white">Pasivo preferente (Hipoteca)</h4>
                   <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
-                    AP / bases de liquidación
+                    Bases de liquidación
                   </span>
                 </div>
                 <p className="text-sm text-slate-400 mb-3">
-                  Forzar que parte del precio de venta se destine a cancelar total o parcialmente la hipoteca que financió las parcelas/chalet, evitando reparto “limpio” del activo.
+                  Forzar que parte del precio de venta se destine a cancelar la hipoteca, evitando reparto "limpio" del activo.
                 </p>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-200 border border-indigo-500/30">
-                    Pasivo preferente
-                  </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    Audiencia previa
-                  </span>
-                </div>
-                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
-                  Retorno listo
-                </div>
                 <div className="flex items-center text-sm text-indigo-300 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir pasivo preferente <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
@@ -1179,19 +1063,8 @@ function TabEstrategia({ strategies, caseId }: any) {
                   </span>
                 </div>
                 <p className="text-sm text-slate-400 mb-3">
-                  Impugnación de integridad, checklist mínimo y guion de sala.
+                  Impugnación de integridad y checklist mínimo.
                 </p>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-200 border border-teal-500/30">
-                    Audiencia previa
-                  </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
-                    Evidencia digital
-                  </span>
-                </div>
-                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
-                  Retorno listo
-                </div>
                 <div className="flex items-center text-sm text-teal-300 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir prueba digital <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
@@ -1212,17 +1085,6 @@ function TabEstrategia({ strategies, caseId }: any) {
                 <p className="text-sm text-slate-400 mb-3">
                   Separar inversión de cargas familiares y activar compensación de frutos.
                 </p>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-200 border border-amber-500/30">
-                    Compensación
-                  </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
-                    Contabilidad
-                  </span>
-                </div>
-                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
-                  Retorno listo
-                </div>
                 <div className="flex items-center text-sm text-amber-300 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir inversión mercantil <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
@@ -1243,17 +1105,6 @@ function TabEstrategia({ strategies, caseId }: any) {
                 <p className="text-sm text-slate-400 mb-3">
                   Limitar alcance por diferencias fácticas y exigibilidad por partidas.
                 </p>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-200 border border-rose-500/30">
-                    Guion 60s
-                  </span>
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
-                    AP
-                  </span>
-                </div>
-                <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">
-                  Retorno listo
-                </div>
                 <div className="flex items-center text-sm text-rose-300 font-medium group-hover:translate-x-1 transition-transform">
                   Abrir anti-STS <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
@@ -1375,75 +1226,44 @@ function TabEstrategia({ strategies, caseId }: any) {
         </>
       )}
 
+      {/* Tarjetas de sala (War Room) — bloque minimal */}
       <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
-            <h4 className="text-sm font-semibold text-white">WarRoom strategies</h4>
-            <p className="text-xs text-slate-400">Ataques y réplicas rápidas para sala.</p>
+            <h4 className="text-sm font-semibold text-white">Tarjetas de sala (War Room)</h4>
+            <p className="text-xs text-slate-400">{normalizedStrategies.length} tarjetas vinculadas a este caso.</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-            <Search className="h-3.5 w-3.5" />
-            <span>Búsqueda rápida</span>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-3 mb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
-            <input
-              value={warroomSearch}
-              onChange={(event) => setWarroomSearch(event.target.value)}
-              placeholder="Buscar ataque, réplica, riesgo..."
-              className="w-64 max-w-full rounded-xl border border-slate-700/60 bg-slate-900/80 py-2 pl-9 pr-3 text-xs text-slate-200 placeholder:text-slate-500"
-            />
-          </div>
-          <select
-            value={warroomTag}
-            onChange={(event) => setWarroomTag(event.target.value)}
-            className="rounded-xl border border-slate-700/60 bg-slate-900/80 px-3 py-2 text-xs text-slate-200"
+          <Link
+            to={`/warroom?caseId=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
+            className="inline-flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-200 transition hover:border-rose-400/60 hover:bg-rose-500/20"
           >
-            <option value="todas">Tag: todas</option>
-            {warroomTags.map((tag) => (
-              <option key={tag} value={tag}>
-                {tag}
-              </option>
-            ))}
-          </select>
+            Abrir War Room
+          </Link>
         </div>
-        {filteredStrategies.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-            {filteredStrategies.map((s: Strategy, i: number) => (
-              <button
-                type="button"
+        {normalizedStrategies.length > 0 ? (
+          <div className="space-y-2">
+            {normalizedStrategies.slice(0, 3).map((s: Strategy) => (
+              <div
                 key={s.id}
-                onClick={() => setSelectedWarroom(s)}
-                className="w-full aspect-square rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-amber-500/40 hover:bg-slate-900/70"
+                className="rounded-xl border border-slate-800/60 bg-slate-950/30 px-4 py-3 text-sm text-slate-300"
               >
-                <div className="flex flex-col justify-between h-full">
-                  <div className="flex flex-wrap gap-1">
-                    <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-slate-600/40 bg-slate-700/40 text-slate-200">
-                      Estrategia #{i + 1}
-                    </span>
-                    {s.risk && (
-                      <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-300">
-                        {s.risk}
-                      </span>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-xs text-rose-300 line-clamp-2">⚠️ {s.attack}</p>
-                    <p className="text-xs text-emerald-300 line-clamp-2">🛡️ {s.rebuttal}</p>
-                  </div>
-                </div>
-              </button>
+                {s.attack}
+              </div>
             ))}
+            {normalizedStrategies.length > 3 && (
+              <p className="text-xs text-slate-500 pl-1">
+                + {normalizedStrategies.length - 3} tarjetas más en War Room
+              </p>
+            )}
           </div>
         ) : (
-          <div className="text-center text-slate-500 py-10 border border-dashed border-slate-800 rounded">
-            Sin estrategias definidas.
+          <div className="text-center text-slate-500 py-6 border border-dashed border-slate-800 rounded-xl text-xs">
+            Sin tarjetas de sala para este caso.
           </div>
         )}
       </div>
 
+      {/* Modal detalle línea estratégica */}
       <Modal
         isOpen={Boolean(selectedLinea)}
         onClose={() => setSelectedLinea(null)}
@@ -1509,7 +1329,7 @@ function TabEstrategia({ strategies, caseId }: any) {
                       key={frase}
                       className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 flex items-start justify-between gap-3"
                     >
-                      <span className="text-amber-100 text-sm italic">“{frase}”</span>
+                      <span className="text-amber-100 text-sm italic">"{frase}"</span>
                       <button
                         type="button"
                         onClick={() => handleCopyPhrase(frase)}
@@ -1532,63 +1352,6 @@ function TabEstrategia({ strategies, caseId }: any) {
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-300">Notas internas</div>
                 <p className="mt-2">{selectedLinea.notasInternas}</p>
-              </div>
-            )}
-          </div>
-        )}
-      </Modal>
-
-      <Modal
-        isOpen={Boolean(selectedWarroom)}
-        onClose={() => setSelectedWarroom(null)}
-        title={selectedWarroom ? `WarRoom · ${selectedWarroom.attack}` : 'WarRoom'}
-        footer={
-          selectedWarroom ? (
-            <button
-              type="button"
-              onClick={() => handleCopyWarroom(selectedWarroom)}
-              className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 px-3 py-1 text-xs font-semibold text-emerald-200 hover:border-emerald-400/80"
-            >
-              <Copy className="h-3.5 w-3.5" /> Copiar todo
-            </button>
-          ) : null
-        }
-      >
-        {selectedWarroom && (
-          <div className="space-y-4 text-sm text-slate-300">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wide text-rose-300">Ataque</div>
-              <p className="mt-2">{selectedWarroom.attack}</p>
-            </div>
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wide text-amber-300">Riesgo</div>
-              <p className="mt-2">{selectedWarroom.risk}</p>
-            </div>
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wide text-emerald-300">Rebuttal</div>
-              <p className="mt-2">{selectedWarroom.rebuttal}</p>
-            </div>
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wide text-cyan-300">Plan de evidencia</div>
-              <p className="mt-2">{selectedWarroom.evidencePlan}</p>
-            </div>
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wide text-indigo-300">Preguntas</div>
-              <p className="mt-2">{selectedWarroom.questions}</p>
-            </div>
-            {selectedWarroom.tags?.length > 0 && (
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wide text-slate-200">Tags</div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedWarroom.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-slate-600/40 bg-slate-800/40 px-2 py-0.5 text-[10px] font-semibold text-slate-200"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
               </div>
             )}
           </div>
@@ -1775,8 +1538,8 @@ export function CaseDetailPage() {
             {[
               { id: 'resumen', label: '📊 Resumen', shortLabel: '📊' },
               { id: 'cronologia', label: '🕒 Cronología', shortLabel: '🕒' },
-              { id: 'estrategia', label: '♟️ Estrategia', shortLabel: '♟️' },
-              ...(isPicassent ? [{ id: 'audiencia', label: '⚖️ Audiencia Previa', shortLabel: '⚖️' }] : []),
+              { id: 'estrategia', label: '♟️ Estrategia (Matriz)', shortLabel: '♟️' },
+              ...(isPicassent ? [{ id: 'audiencia', label: '⚖️ Sala (AP)', shortLabel: '⚖️' }] : []),
               { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
               { id: 'docs', label: '📂 Documentos', shortLabel: '📂' },
             ].map(tab => (

@@ -478,6 +478,43 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
         </div>
       </SectionCard>
 
+      {/* Atajos operativos */}
+      <SectionCard id="atajos" title="Atajos operativos">
+        <p className="text-xs text-slate-400 mb-3">
+          Aquí se ejecuta la sala. La matriz vive en Estrategia. Las tarjetas editables viven en War Room.
+        </p>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <Link
+            to={`/cases/${caseId}?tab=estrategia`}
+            className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 transition hover:border-emerald-400/60"
+          >
+            <div className="text-xs font-bold text-emerald-300 mb-1">Abrir Matriz estratégica</div>
+            <p className="text-[11px] text-slate-400">Líneas de defensa, riesgos, escenarios.</p>
+          </Link>
+          <Link
+            to="/warroom?caseId=picassent"
+            className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-3 transition hover:border-rose-400/60"
+          >
+            <div className="text-xs font-bold text-rose-300 mb-1">Abrir War Room (tarjetas)</div>
+            <p className="text-[11px] text-slate-400">Tácticas rápidas ataque/respuesta.</p>
+          </Link>
+          <Link
+            to={`/analytics/prescripcion?caseId=picassent`}
+            className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 transition hover:border-amber-400/60"
+          >
+            <div className="text-xs font-bold text-amber-300 mb-1">Prescripción</div>
+            <p className="text-[11px] text-slate-400">Mapa de escenarios + DT 5ª.</p>
+          </Link>
+          <Link
+            to="/analytics/liquidacion-justa"
+            className="rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-3 transition hover:border-indigo-400/60"
+          >
+            <div className="text-xs font-bold text-indigo-300 mb-1">Liquidación Justa</div>
+            <p className="text-[11px] text-slate-400">Bases de liquidación y pasivo.</p>
+          </Link>
+        </div>
+      </SectionCard>
+
       <div className={`sticky top-4 z-10 rounded-2xl border border-slate-700/40 bg-slate-900/80 p-2 backdrop-blur print:hidden ${salaMode ? 'hidden' : ''}`}>
         <div className="flex flex-wrap gap-2">
           {navItems.map((item) => (
