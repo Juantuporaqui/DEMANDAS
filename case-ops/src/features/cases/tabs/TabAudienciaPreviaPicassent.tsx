@@ -335,6 +335,100 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
     }
   };
 
+  const renderHechoCard = (hecho: (typeof PICASSENT_AP.hechosControvertidos)[number]) => {
+    const hechoState = hechosState[String(hecho.id)] ?? { done: false, notas: '', prioridad: 'media' };
+    const estado = estadoConfig[hecho.estado];
+    const prueba = pruebaConfig[hecho.tipoPrueba];
+    const riesgo = riesgoConfig[hechoState.prioridad];
+    const EstadoIcon = estado.icon;
+    const PruebaIcon = prueba.icon;
+
+    return (
+      <div
+        key={hecho.id}
+        className={`rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4 ${hechoState.done ? '' : 'print:hidden'}`}
+      >
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] ${estado.bg} ${estado.border} ${estado.text}`}>
+                <EstadoIcon className="h-3 w-3" />
+                {hecho.estado}
+              </div>
+              <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] ${prueba.bg} ${prueba.border} ${prueba.text}`}>
+                <PruebaIcon className="h-3 w-3" />
+                {prueba.label}
+              </div>
+              <div className={`rounded-full border px-3 py-1 text-[11px] ${riesgo.bg} ${riesgo.border} ${riesgo.text}`}>
+                Riesgo {riesgo.label}
+              </div>
+            </div>
+            <div className="text-sm font-semibold text-white">{hecho.titulo}</div>
+            <div className="text-xs text-slate-200">{hecho.descripcion}</div>
+          </div>
+          <div className="flex flex-wrap gap-2 print:hidden">
+            <CopyButton text={`${hecho.titulo}\n${hecho.descripcion}`} label="Copiar" />
+          </div>
+        </div>
+        <div className="mt-3 grid gap-3 md:grid-cols-[auto_1fr] print:hidden">
+          <label className="flex items-center gap-2 text-xs text-slate-200">
+            <input
+              type="checkbox"
+              checked={hechoState.done}
+              onChange={(event) =>
+                setHechosState((prev) => ({
+                  ...prev,
+                  [String(hecho.id)]: {
+                    ...prev[String(hecho.id)],
+                    done: event.target.checked,
+                  },
+                }))
+              }
+              className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+            />
+            Usar en sala
+          </label>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-200">
+            <span>Riesgo:</span>
+            <select
+              value={hechoState.prioridad}
+              aria-label="Prioridad de riesgo"
+              onChange={(event) =>
+                setHechosState((prev) => ({
+                  ...prev,
+                  [String(hecho.id)]: {
+                    ...prev[String(hecho.id)],
+                    prioridad: event.target.value as 'baja' | 'media' | 'alta',
+                  },
+                }))
+              }
+              className="rounded-lg border border-slate-700/50 bg-slate-900/60 px-2 py-1 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+            >
+              <option value="baja">Bajo</option>
+              <option value="media">Medio</option>
+              <option value="alta">Alto</option>
+            </select>
+          </div>
+        </div>
+        <textarea
+          value={hechoState.notas}
+          onChange={(event) =>
+            setHechosState((prev) => ({
+              ...prev,
+              [String(hecho.id)]: {
+                ...prev[String(hecho.id)],
+                notas: event.target.value,
+              },
+            }))
+          }
+          placeholder="Notas (uso en sala, enfoque, objeciones)."
+          className={`mt-3 w-full rounded-xl border border-slate-700/50 bg-slate-900/50 p-3 text-xs text-white placeholder-slate-500 ${isReadMode ? 'hidden' : ''} print:hidden`}
+          rows={3}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 print:bg-white print:text-slate-900">
       <SectionCard
@@ -658,116 +752,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
           </div>
 
           <div className="space-y-3">
-            {filteredHechos.map((hecho) => {
-              const hechoState = hechosState[String(hecho.id)] ?? { done: false, notas: '', prioridad: 'media' };
-              const estado = estadoConfig[hecho.estado];
-              const prueba = pruebaConfig[hecho.tipoPrueba];
-              const riesgo = riesgoConfig[hechoState.prioridad];
-              const EstadoIcon = estado.icon;
-              const PruebaIcon = prueba.icon;
-              return (
-                <div
-                  key={hecho.id}
-                  className={`rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4 ${hechoState.done ? '' : 'print:hidden'}`}
-                >
-                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] ${estado.bg} ${estado.border} ${estado.text}`}>
-                          <EstadoIcon className="h-3 w-3" />
-                          {hecho.estado}
-                        </div>
-                        <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] ${prueba.bg} ${prueba.border} ${prueba.text}`}>
-                          <PruebaIcon className="h-3 w-3" />
-                          {prueba.label}
-                        </div>
-                        <div className={`rounded-full border px-3 py-1 text-[11px] ${riesgo.bg} ${riesgo.border} ${riesgo.text}`}>
-                          Riesgo {riesgo.label}
-                        </div>
-                        <div className="text-sm font-semibold text-white">{hecho.titulo}</div>
-                        <div className="text-xs text-slate-200">{hecho.descripcion}</div>
-                      </div>
-                      <div className="flex flex-wrap gap-2 print:hidden">
-                        <CopyButton text={`${hecho.titulo}\n${hecho.descripcion}`} label="Copiar" />
-                      </div>
-                      <div className="text-sm font-semibold text-white">{hecho.titulo}</div>
-                      <div className="text-xs text-slate-200">{hecho.descripcion}</div>
-                    </div>
-                    <div className="flex flex-wrap gap-2 print:hidden">
-                      <CopyButton text={`${hecho.titulo}\n${hecho.descripcion}`} label="Copiar" />
-                    </div>
-                    <textarea
-                      value={hechoState.notas}
-                      onChange={(event) =>
-                        setHechosState((prev) => ({
-                          ...prev,
-                          [String(hecho.id)]: {
-                            ...prev[String(hecho.id)],
-                            notas: event.target.value,
-                          },
-                        }))
-                      }
-                      placeholder="Notas (uso en sala, enfoque, objeciones)."
-                      className={`mt-3 w-full rounded-xl border border-slate-700/50 bg-slate-900/50 p-3 text-xs text-white placeholder-slate-500 ${isReadMode ? 'hidden' : ''} print:hidden`}
-                      rows={3}
-                    />
-                  </div>
-                  <div className="mt-3 grid gap-3 md:grid-cols-[auto_1fr] print:hidden">
-                    <label className="flex items-center gap-2 text-xs text-slate-200">
-                      <input
-                        type="checkbox"
-                        checked={state.done}
-                        onChange={(event) =>
-                          setAlegacionesState((prev) => ({
-                            ...prev,
-                            [String(alegacion.id)]: {
-                              ...prev[String(alegacion.id)],
-                              done: event.target.checked,
-                            },
-                          }))
-                        }
-                        className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
-                      />
-                      Usar en sala
-                    </label>
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-200">
-                      <span>Riesgo:</span>
-                      <select
-                        value={hechoState.prioridad}
-                        aria-label="Prioridad de riesgo"
-                        onChange={(event) =>
-                          setHechosState((prev) => ({
-                            ...prev,
-                            [String(alegacion.id)]: !prev[String(alegacion.id)],
-                          }))
-                        }
-                        className="rounded-lg border border-slate-700/50 bg-slate-900/60 px-2 py-1 text-xs text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
-                      >
-                        {alegacion.titulo}
-                      </button>
-                    </div>
-                    <div className="print:hidden">
-                      <CopyButton text={`${alegacion.titulo}\n${alegacion.contenido}`} label="Copiar" />
-                    </div>
-                  </div>
-                  <textarea
-                    value={hechoState.notas}
-                    onChange={(event) =>
-                      setHechosState((prev) => ({
-                        ...prev,
-                        [String(hecho.id)]: {
-                          ...prev[String(hecho.id)],
-                          notas: event.target.value,
-                        },
-                      }))
-                    }
-                    placeholder="Notas (uso en sala, enfoque, objeciones)."
-                    className={`mt-3 w-full rounded-xl border border-slate-700/50 bg-slate-900/50 p-3 text-xs text-white placeholder-slate-500 ${isReadMode ? 'hidden' : ''} print:hidden`}
-                    rows={3}
-                  />
-                </div>
-              );
-            })}
+            {filteredHechos.map(renderHechoCard)}
           </div>
         </div>
       </SectionCard>
