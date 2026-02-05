@@ -59,7 +59,7 @@ const NAV_SECONDARY = [
     label: 'Contradicción AEAT',
     icon: <SplitSquareVertical size={18} />,
   },
-  { to: '/warroom', label: 'War Room', icon: <Target size={18} /> },
+  { to: '/warroom', label: 'War Room (Tarjetas)', icon: <Target size={18} /> },
   { to: '/settings', label: 'Ajustes', icon: <Settings size={18} /> },
 ];
 
