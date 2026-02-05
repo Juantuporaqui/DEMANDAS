@@ -3,14 +3,30 @@
 // ============================================
 
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { strategiesRepo, casesRepo } from '../../db/repositories';
 import type { Case } from '../../types';
+
+type CaseKey = 'picassent' | 'mislata' | 'quart';
+
+function inferCaseKey(caseId: string, cases: Case[]): CaseKey | null {
+  const c = cases.find((x) => x.id === caseId);
+  const hay = `${caseId} ${c?.title ?? ''} ${c?.autosNumber ?? ''} ${c?.court ?? ''}`.toLowerCase();
+  if (hay.includes('picassent') || hay.includes('715')) return 'picassent';
+  if (hay.includes('mislata') || hay.includes('1185')) return 'mislata';
+  if (hay.includes('quart') || hay.includes('1428')) return 'quart';
+  return null;
+}
 
 export function StrategyFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isEditing = !!id;
+
+  const queryCaseId = searchParams.get('caseId');
+  const queryCaseKey = searchParams.get('caseKey') as CaseKey | null;
+  const returnTo = searchParams.get('returnTo');
 
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,11 +51,8 @@ export function StrategyFormPage() {
       const allCases = await casesRepo.getAll();
       setCases(allCases);
 
-      if (allCases.length === 1) {
-        setFormData((prev) => ({ ...prev, caseId: allCases[0].id }));
-      }
-
       if (id) {
+        // Editing: load strategy data, ignore query params for caseId
         const strategy = await strategiesRepo.getById(id);
         if (strategy) {
           setFormData({
@@ -52,12 +65,33 @@ export function StrategyFormPage() {
             tags: strategy.tags.join(', '),
           });
         }
+      } else {
+        // Creating: preselect from query params
+        if (queryCaseId && allCases.some((c) => c.id === queryCaseId)) {
+          setFormData((prev) => ({ ...prev, caseId: queryCaseId }));
+        } else if (allCases.length === 1) {
+          setFormData((prev) => ({ ...prev, caseId: allCases[0].id }));
+        }
       }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
+  }
+
+  function navigateBack(savedCaseId?: string) {
+    if (returnTo) {
+      navigate(decodeURIComponent(returnTo));
+      return;
+    }
+    const effectiveCaseId = savedCaseId || formData.caseId;
+    if (queryCaseKey && ['picassent', 'mislata', 'quart'].includes(queryCaseKey)) {
+      navigate(`/warroom?caseId=${queryCaseKey}`);
+      return;
+    }
+    const inferred = inferCaseKey(effectiveCaseId, cases);
+    navigate(inferred ? `/warroom?caseId=${inferred}` : '/warroom');
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -100,7 +134,7 @@ export function StrategyFormPage() {
         await strategiesRepo.create(strategyData);
       }
 
-      navigate('/warroom');
+      navigateBack(formData.caseId);
     } catch (error) {
       console.error('Error saving strategy:', error);
       alert('Error al guardar la estrategia');
@@ -114,9 +148,17 @@ export function StrategyFormPage() {
 
     try {
       await strategiesRepo.delete(id!);
-      navigate('/warroom');
+      navigateBack(formData.caseId);
     } catch (error) {
       console.error('Error deleting strategy:', error);
+    }
+  }
+
+  function handleBack() {
+    if (returnTo) {
+      navigate(decodeURIComponent(returnTo));
+    } else {
+      navigate(-1);
     }
   }
 
@@ -133,12 +175,22 @@ export function StrategyFormPage() {
   return (
     <div className="page">
       <div className="page-header">
-        <button className="btn btn-ghost btn-icon" onClick={() => navigate(-1)}>
+        <button className="btn btn-ghost btn-icon" onClick={handleBack}>
           ←
         </button>
         <h1 className="page-title" style={{ flex: 1 }}>
           {isEditing ? 'Editar estrategia' : 'Nueva estrategia'}
         </h1>
+      </div>
+
+      <div className="mb-md">
+        <button
+          type="button"
+          className="text-xs text-slate-400 hover:text-slate-200 transition"
+          onClick={handleBack}
+        >
+          Cancelar y volver
+        </button>
       </div>
 
       <form onSubmit={handleSubmit}>
