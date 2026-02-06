@@ -6,12 +6,16 @@
 export type EntityType =
   | 'case'
   | 'fact'
+  | 'issue'
   | 'partida'
   | 'document'
   | 'span'
+  | 'rule'
   | 'event'
   | 'strategy'
-  | 'task';
+  | 'task'
+  | 'scenario_model'
+  | 'scenario_node';
 
 // Link Role Types
 export type LinkRole = 'evidence' | 'supports' | 'mentions' | 'contradicts' | 'related';
@@ -57,6 +61,9 @@ export type DocType =
   | 'extracto'
   | 'informe'
   | 'otros';
+
+// Scenario Node Type
+export type ScenarioNodeType = 'issue' | 'fact' | 'rule' | 'partida' | 'document' | 'span';
 
 // ============================================
 // Analytics Types
@@ -210,6 +217,47 @@ export interface Fact {
   updatedAt: number;
 }
 
+export interface Issue {
+  id: string; // I001
+  caseId: string;
+  title: string;
+  description: string;
+  tags: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Rule {
+  id: string; // R001
+  caseId: string;
+  title: string;
+  description: string;
+  appliesToTags: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ScenarioModel {
+  id: string; // SM001
+  caseId: string;
+  name: string;
+  assumptionsJson: string;
+  weightsJson: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ScenarioNode {
+  id: string; // SN001
+  scenarioId: string;
+  nodeType: ScenarioNodeType;
+  nodeId: string;
+  value: number;
+  confidence: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface Partida {
   id: string; // P001
   caseId: string;
@@ -306,11 +354,15 @@ export interface ExportManifest {
     docFiles: number;
     spans: number;
     facts: number;
+    issues: number;
     partidas: number;
     events: number;
     strategies: number;
     tasks: number;
     links: number;
+    rules: number;
+    scenarioModels: number;
+    scenarioNodes: number;
     analyticsMeta: number;
   };
   fileHashes: string[];
@@ -323,11 +375,15 @@ export interface ExportData {
   documents: Document[];
   spans: Span[];
   facts: Fact[];
+  issues: Issue[];
   partidas: Partida[];
   events: Event[];
   strategies: Strategy[];
   tasks: Task[];
   links: Link[];
+  rules: Rule[];
+  scenarioModels: ScenarioModel[];
+  scenarioNodes: ScenarioNode[];
   auditLogs: AuditLog[];
   analyticsMeta: AnalyticsMeta[];
 }

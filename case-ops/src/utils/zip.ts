@@ -12,11 +12,15 @@ import {
   docFilesRepo,
   spansRepo,
   factsRepo,
+  issuesRepo,
   partidasRepo,
   eventsRepo,
   strategiesRepo,
   tasksRepo,
   linksRepo,
+  rulesRepo,
+  scenarioModelsRepo,
+  scenarioNodesRepo,
   auditRepo,
 } from '../db/repositories';
 import type { ExportManifest, ExportData, DocFile } from '../types';
@@ -45,11 +49,15 @@ export interface ImportResult {
     filesSkipped: number;
     spansImported: number;
     factsImported: number;
+    issuesImported: number;
     partidasImported: number;
     eventsImported: number;
     strategiesImported: number;
     tasksImported: number;
     linksImported: number;
+    rulesImported: number;
+    scenarioModelsImported: number;
+    scenarioNodesImported: number;
   };
 }
 
@@ -75,11 +83,15 @@ export async function exportToZip(
   const documents = await documentsRepo.getAll();
   const spans = await spansRepo.getAll();
   const facts = await factsRepo.getAll();
+  const issues = await issuesRepo.getAll();
   const partidas = await partidasRepo.getAll();
   const events = await eventsRepo.getAll();
   const strategies = await strategiesRepo.getAll();
   const tasks = await tasksRepo.getAll();
   const links = await linksRepo.getAll();
+  const rules = await rulesRepo.getAll();
+  const scenarioModels = await scenarioModelsRepo.getAll();
+  const scenarioNodes = await scenarioNodesRepo.getAll();
   const auditLogs = await auditRepo.getAll();
   const analyticsMeta = await db.analytics_meta.toArray();
 
@@ -98,11 +110,15 @@ export async function exportToZip(
     documents,
     spans,
     facts,
+    issues,
     partidas,
     events,
     strategies,
     tasks,
     links,
+    rules,
+    scenarioModels,
+    scenarioNodes,
     auditLogs,
     analyticsMeta,
   };
@@ -147,11 +163,15 @@ export async function exportToZip(
       docFiles: docFiles.length,
       spans: spans.length,
       facts: facts.length,
+      issues: issues.length,
       partidas: partidas.length,
       events: events.length,
       strategies: strategies.length,
       tasks: tasks.length,
       links: links.length,
+      rules: rules.length,
+      scenarioModels: scenarioModels.length,
+      scenarioNodes: scenarioNodes.length,
       analyticsMeta: analyticsMeta.length,
     },
     fileHashes,
@@ -201,11 +221,15 @@ export async function importFromZip(
       filesSkipped: 0,
       spansImported: 0,
       factsImported: 0,
+      issuesImported: 0,
       partidasImported: 0,
       eventsImported: 0,
       strategiesImported: 0,
       tasksImported: 0,
       linksImported: 0,
+      rulesImported: 0,
+      scenarioModelsImported: 0,
+      scenarioNodesImported: 0,
     },
   };
 
@@ -296,6 +320,15 @@ export async function importFromZip(
       }
     }
 
+    // Import issues
+    for (const item of importData.issues ?? []) {
+      const existing = await db.issues.get(item.id);
+      if (!existing || item.updatedAt > existing.updatedAt) {
+        await db.issues.put(item);
+        result.stats.issuesImported++;
+      }
+    }
+
     // Import partidas
     for (const item of importData.partidas) {
       const existing = await db.partidas.get(item.id);
@@ -338,6 +371,33 @@ export async function importFromZip(
       if (!existing || item.updatedAt > existing.updatedAt) {
         await db.links.put(item);
         result.stats.linksImported++;
+      }
+    }
+
+    // Import rules
+    for (const item of importData.rules ?? []) {
+      const existing = await db.rules.get(item.id);
+      if (!existing || item.updatedAt > existing.updatedAt) {
+        await db.rules.put(item);
+        result.stats.rulesImported++;
+      }
+    }
+
+    // Import scenario models
+    for (const item of importData.scenarioModels ?? []) {
+      const existing = await db.scenario_models.get(item.id);
+      if (!existing || item.updatedAt > existing.updatedAt) {
+        await db.scenario_models.put(item);
+        result.stats.scenarioModelsImported++;
+      }
+    }
+
+    // Import scenario nodes
+    for (const item of importData.scenarioNodes ?? []) {
+      const existing = await db.scenario_nodes.get(item.id);
+      if (!existing || item.updatedAt > existing.updatedAt) {
+        await db.scenario_nodes.put(item);
+        result.stats.scenarioNodesImported++;
       }
     }
 

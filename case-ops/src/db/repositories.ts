@@ -11,6 +11,7 @@ import type {
   DocFile,
   Span,
   Fact,
+  Issue,
   Partida,
   Event,
   Strategy,
@@ -19,6 +20,9 @@ import type {
   AuditLog,
   EntityType,
   LinkRole,
+  Rule,
+  ScenarioModel,
+  ScenarioNode,
 } from '../types';
 import { generateUUID } from '../utils/id';
 
@@ -66,10 +70,14 @@ const ID_PREFIXES: Record<string, string> = {
   documents: 'D',
   spans: 'S',
   facts: 'H',
+  issues: 'I',
   partidas: 'P',
   events: 'E',
   strategies: 'W',
   tasks: 'T',
+  rules: 'R',
+  scenario_models: 'SM',
+  scenario_nodes: 'SN',
 };
 
 export const counterRepo = {
@@ -158,53 +166,6 @@ export const casesRepo = {
           c.tags.some((t) => t.toLowerCase().includes(lower))
       )
       .toArray();
-  },
-};
-
-// ============================================
-// Claims Repository
-// ============================================
-
-const claimsRepo = {
-  async getAll(): Promise<Claim[]> {
-    return db.claims.orderBy('updatedAt').reverse().toArray();
-  },
-
-  async getByCaseId(caseId: string): Promise<Claim[]> {
-    return db.claims.where('caseId').equals(caseId).toArray();
-  },
-
-  async getById(id: string): Promise<Claim | undefined> {
-    return db.claims.get(id);
-  },
-
-  async create(data: Omit<Claim, 'id' | 'createdAt' | 'updatedAt'>): Promise<Claim> {
-    return db.transaction('rw', db.counters, db.claims, db.auditLogs, async () => {
-      const id = await counterRepo.getNextIdInTransaction('claims');
-      const now = Date.now();
-      const claim: Claim = {
-        ...data,
-        id,
-        createdAt: now,
-        updatedAt: now,
-      };
-      await db.claims.add(claim);
-      await auditRepo.log('create', 'claim', id);
-      return claim;
-    });
-  },
-
-  async update(id: string, updates: Partial<Claim>): Promise<void> {
-    await db.claims.update(id, {
-      ...updates,
-      updatedAt: Date.now(),
-    });
-    await auditRepo.log('update', 'claim', id);
-  },
-
-  async delete(id: string): Promise<void> {
-    await db.claims.delete(id);
-    await auditRepo.log('delete', 'claim', id);
   },
 };
 
@@ -497,6 +458,53 @@ export const factsRepo = {
           f.tags.some((t) => t.toLowerCase().includes(lower))
       )
       .toArray();
+  },
+};
+
+// ============================================
+// Issues Repository
+// ============================================
+
+export const issuesRepo = {
+  async getAll(): Promise<Issue[]> {
+    return db.issues.orderBy('updatedAt').reverse().toArray();
+  },
+
+  async getByCaseId(caseId: string): Promise<Issue[]> {
+    return db.issues.where('caseId').equals(caseId).toArray();
+  },
+
+  async getById(id: string): Promise<Issue | undefined> {
+    return db.issues.get(id);
+  },
+
+  async create(data: Omit<Issue, 'id' | 'createdAt' | 'updatedAt'>): Promise<Issue> {
+    return db.transaction('rw', db.counters, db.issues, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('issues');
+      const now = Date.now();
+      const issue: Issue = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.issues.add(issue);
+      await auditRepo.log('create', 'issue', id);
+      return issue;
+    });
+  },
+
+  async update(id: string, updates: Partial<Issue>): Promise<void> {
+    await db.issues.update(id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+    await auditRepo.log('update', 'issue', id);
+  },
+
+  async delete(id: string): Promise<void> {
+    await db.issues.delete(id);
+    await auditRepo.log('delete', 'issue', id);
   },
 };
 
@@ -841,6 +849,147 @@ export const linksRepo = {
 };
 
 // ============================================
+// Rules Repository
+// ============================================
+
+export const rulesRepo = {
+  async getAll(): Promise<Rule[]> {
+    return db.rules.orderBy('updatedAt').reverse().toArray();
+  },
+
+  async getByCaseId(caseId: string): Promise<Rule[]> {
+    return db.rules.where('caseId').equals(caseId).toArray();
+  },
+
+  async getById(id: string): Promise<Rule | undefined> {
+    return db.rules.get(id);
+  },
+
+  async create(data: Omit<Rule, 'id' | 'createdAt' | 'updatedAt'>): Promise<Rule> {
+    return db.transaction('rw', db.counters, db.rules, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('rules');
+      const now = Date.now();
+      const rule: Rule = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.rules.add(rule);
+      await auditRepo.log('create', 'rule', id);
+      return rule;
+    });
+  },
+
+  async update(id: string, updates: Partial<Rule>): Promise<void> {
+    await db.rules.update(id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+    await auditRepo.log('update', 'rule', id);
+  },
+
+  async delete(id: string): Promise<void> {
+    await db.rules.delete(id);
+    await auditRepo.log('delete', 'rule', id);
+  },
+};
+
+// ============================================
+// Scenario Models Repository
+// ============================================
+
+export const scenarioModelsRepo = {
+  async getAll(): Promise<ScenarioModel[]> {
+    return db.scenario_models.orderBy('updatedAt').reverse().toArray();
+  },
+
+  async getByCaseId(caseId: string): Promise<ScenarioModel[]> {
+    return db.scenario_models.where('caseId').equals(caseId).toArray();
+  },
+
+  async getById(id: string): Promise<ScenarioModel | undefined> {
+    return db.scenario_models.get(id);
+  },
+
+  async create(data: Omit<ScenarioModel, 'id' | 'createdAt' | 'updatedAt'>): Promise<ScenarioModel> {
+    return db.transaction('rw', db.counters, db.scenario_models, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('scenario_models');
+      const now = Date.now();
+      const model: ScenarioModel = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.scenario_models.add(model);
+      await auditRepo.log('create', 'scenario_model', id);
+      return model;
+    });
+  },
+
+  async update(id: string, updates: Partial<ScenarioModel>): Promise<void> {
+    await db.scenario_models.update(id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+    await auditRepo.log('update', 'scenario_model', id);
+  },
+
+  async delete(id: string): Promise<void> {
+    await db.scenario_models.delete(id);
+    await auditRepo.log('delete', 'scenario_model', id);
+  },
+};
+
+// ============================================
+// Scenario Nodes Repository
+// ============================================
+
+export const scenarioNodesRepo = {
+  async getAll(): Promise<ScenarioNode[]> {
+    return db.scenario_nodes.orderBy('updatedAt').reverse().toArray();
+  },
+
+  async getByScenarioId(scenarioId: string): Promise<ScenarioNode[]> {
+    return db.scenario_nodes.where('scenarioId').equals(scenarioId).toArray();
+  },
+
+  async getById(id: string): Promise<ScenarioNode | undefined> {
+    return db.scenario_nodes.get(id);
+  },
+
+  async create(data: Omit<ScenarioNode, 'id' | 'createdAt' | 'updatedAt'>): Promise<ScenarioNode> {
+    return db.transaction('rw', db.counters, db.scenario_nodes, db.auditLogs, async () => {
+      const id = await counterRepo.getNextIdInTransaction('scenario_nodes');
+      const now = Date.now();
+      const node: ScenarioNode = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.scenario_nodes.add(node);
+      await auditRepo.log('create', 'scenario_node', id);
+      return node;
+    });
+  },
+
+  async update(id: string, updates: Partial<ScenarioNode>): Promise<void> {
+    await db.scenario_nodes.update(id, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+    await auditRepo.log('update', 'scenario_node', id);
+  },
+
+  async delete(id: string): Promise<void> {
+    await db.scenario_nodes.delete(id);
+    await auditRepo.log('delete', 'scenario_node', id);
+  },
+};
+
+// ============================================
 // Audit Log Repository
 // ============================================
 
@@ -985,5 +1134,3 @@ export const getAlerts = async () => {
 
   return alerts;
 };
-
-export { claimsRepo };

@@ -18,10 +18,14 @@ import { formatBytes } from '../../utils/validators';
 import {
   casesRepo,
   factsRepo,
+  issuesRepo,
   documentsRepo,
   partidasRepo,
   eventsRepo,
   linksRepo,
+  rulesRepo,
+  scenarioModelsRepo,
+  scenarioNodesRepo,
 } from '../../db/repositories';
 
 export function BackupPage() {
@@ -41,24 +45,33 @@ export function BackupPage() {
   async function handleExportJson() {
     setExportingJson(true);
     try {
-      const [cases, facts, documents, partidas, events, links] = await Promise.all([
-        casesRepo.getAll(),
-        factsRepo.getAll(),
-        documentsRepo.getAll(),
-        partidasRepo.getAll(),
-        eventsRepo.getAll(),
-        linksRepo.getAll(),
-      ]);
+      const [cases, facts, issues, documents, partidas, events, links, rules, scenarioModels, scenarioNodes] =
+        await Promise.all([
+          casesRepo.getAll(),
+          factsRepo.getAll(),
+          issuesRepo.getAll(),
+          documentsRepo.getAll(),
+          partidasRepo.getAll(),
+          eventsRepo.getAll(),
+          linksRepo.getAll(),
+          rulesRepo.getAll(),
+          scenarioModelsRepo.getAll(),
+          scenarioNodesRepo.getAll(),
+        ]);
 
       const data = {
         exportedAt: new Date().toISOString(),
         version: '1.0',
         cases,
         facts,
+        issues,
         documents: documents.map(d => ({ ...d, blob: undefined })), // Sin blobs
         partidas,
         events,
         links,
+        rules,
+        scenarioModels,
+        scenarioNodes,
       };
 
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -97,7 +110,18 @@ export function BackupPage() {
       const text = await file.text();
       const data = JSON.parse(text);
 
-      let imported = { cases: 0, facts: 0, documents: 0, partidas: 0, events: 0, links: 0 };
+      let imported = {
+        cases: 0,
+        facts: 0,
+        issues: 0,
+        documents: 0,
+        partidas: 0,
+        events: 0,
+        links: 0,
+        rules: 0,
+        scenarioModels: 0,
+        scenarioNodes: 0,
+      };
 
       // Importar casos
       if (data.cases) {
@@ -122,6 +146,19 @@ export function BackupPage() {
             await factsRepo.create(f);
           }
           imported.facts++;
+        }
+      }
+
+      // Importar issues
+      if (data.issues) {
+        for (const issue of data.issues) {
+          const existing = await issuesRepo.getById(issue.id);
+          if (existing) {
+            await issuesRepo.update(issue.id, issue);
+          } else {
+            await issuesRepo.create(issue);
+          }
+          imported.issues++;
         }
       }
 
@@ -175,7 +212,48 @@ export function BackupPage() {
         }
       }
 
-      alert(`Importación completada:\n- Casos: ${imported.cases}\n- Hechos: ${imported.facts}\n- Documentos: ${imported.documents}\n- Partidas: ${imported.partidas}\n- Eventos: ${imported.events}\n- Links: ${imported.links}`);
+      // Importar rules
+      if (data.rules) {
+        for (const rule of data.rules) {
+          const existing = await rulesRepo.getById(rule.id);
+          if (existing) {
+            await rulesRepo.update(rule.id, rule);
+          } else {
+            await rulesRepo.create(rule);
+          }
+          imported.rules++;
+        }
+      }
+
+      // Importar scenario models
+      if (data.scenarioModels) {
+        for (const model of data.scenarioModels) {
+          const existing = await scenarioModelsRepo.getById(model.id);
+          if (existing) {
+            await scenarioModelsRepo.update(model.id, model);
+          } else {
+            await scenarioModelsRepo.create(model);
+          }
+          imported.scenarioModels++;
+        }
+      }
+
+      // Importar scenario nodes
+      if (data.scenarioNodes) {
+        for (const node of data.scenarioNodes) {
+          const existing = await scenarioNodesRepo.getById(node.id);
+          if (existing) {
+            await scenarioNodesRepo.update(node.id, node);
+          } else {
+            await scenarioNodesRepo.create(node);
+          }
+          imported.scenarioNodes++;
+        }
+      }
+
+      alert(
+        `Importación completada:\n- Casos: ${imported.cases}\n- Hechos: ${imported.facts}\n- Issues: ${imported.issues}\n- Documentos: ${imported.documents}\n- Partidas: ${imported.partidas}\n- Eventos: ${imported.events}\n- Links: ${imported.links}\n- Reglas: ${imported.rules}\n- Modelos escenario: ${imported.scenarioModels}\n- Nodos escenario: ${imported.scenarioNodes}`
+      );
     } catch (error) {
       console.error('Import JSON error:', error);
       alert('Error al importar JSON: ' + (error instanceof Error ? error.message : 'Error desconocido'));

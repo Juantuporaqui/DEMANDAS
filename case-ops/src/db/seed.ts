@@ -26,7 +26,20 @@ export async function seedDatabase(): Promise<boolean> {
   try {
     // 1. Configuración Inicial
     await settingsRepo.init('Desktop');
-    const counters = ['cases', 'documents', 'spans', 'facts', 'partidas', 'events', 'strategies', 'tasks'];
+    const counters = [
+      'cases',
+      'documents',
+      'spans',
+      'facts',
+      'issues',
+      'partidas',
+      'events',
+      'strategies',
+      'tasks',
+      'rules',
+      'scenario_models',
+      'scenario_nodes',
+    ];
     for (const c of counters) await counterRepo.setCounter(c, 0);
 
     // =====================================================================
