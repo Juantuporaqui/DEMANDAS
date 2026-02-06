@@ -132,10 +132,11 @@ La actora sostiene que los préstamos personales se cancelaron con **dinero priv
 - “¿Por qué el ingreso relevante aparece como efectivo y no como transferencia trazable de venta?”
 
 ## 7) Plan B si el juez compra el marco STS 458/2025
-- STS 458/2025 (si se invoca) se refiere típicamente a **reembolsos entre cónyuges** y al cómputo del plazo en relación con el régimen matrimonial/liquidación.
-- **Hecho 2008 es PRE-matrimonio (matrimonio 08/2013 en gananciales)**:
-  - No encaja como “crédito ganancial por reembolso entre cónyuges”.
-  - Si la actora lo reconduce a convivencia/sociedad de hecho/enriquecimiento, sigue siendo **acción personal** con prescripción vencida y exige prueba reforzada.
+- **ARG 1 — NEGOCIO, NO VIVIENDA (9/10):** El préstamo financió parcelas para construir y vender chalets como negocio inmobiliario. Tras caer el mercado, se alquiló y Airbnb. NUNCA fue domicilio familiar. La STS 458/2025 protege la vivienda habitual (arts. 67-68 CC, socorro mutuo), no inversiones especulativas. Refuerzo: STS 20/03/2013 y STS 246/2018 — ni la hipoteca de la casa familiar es carga del matrimonio.
+- **ARG 2 — SIN DESEQUILIBRIO (8/10):** La STS 458/2025 requiere probar que los fondos procedían «casi exclusivamente» de un cónyuge. Aquí: sueldos comparables, 2 cuentas conjuntas, 0 patrimonio privativo, nóminas en bancos distintos solo por comisiones. Si ella «puso más» en hipoteca, Juan «puso más» en el resto (comida, ropa, hijos, facturas). Economía integrada. Art. 217 LEC: carga de la prueba sobre quien reclama.
+- **ARG 3 — RETRASO DESLEAL (7/10):** Policía con máster en económicas + cotitular de ambas cuentas + 10+ años sin reclamar, sin transferencia compensatoria, sin documentar desequilibrio. Confianza legítima (art. 7 CC). Verwirkung.
+- **ARG 4 — PROCESAL (6/10):** Si estos argumentos no constan en contestación, art. 426.4 LEC permite complemento de alegaciones en AP por hecho jurídico nuevo (STS posterior a contestación).
+Además, este hecho es PRE-matrimonio (matrimonio 08/2013), lo que refuerza la inaplicabilidad de la doctrina matrimonial de la STS 458/2025.
 
 ## 8) Preguntas sugeridas (interrogatorio/pericial)
 - “Identifique fecha exacta de la venta, neto recibido y cuenta de abono.”
@@ -201,8 +202,10 @@ Que el Seat León se pagó desde una cuenta que “solo se nutría de sus nómin
 - “¿Por qué reclama un coche y no se compensa con el otro coche familiar pagado por Juan?”
 
 ## 7) Plan B STS 458/2025
-- Si intenta convertirlo en “reembolso matrimonial”, sigue siendo un pago en 2014 con prueba mixta.
-- Y, en cualquier caso, el relato de “solo mis nóminas” cae por documental.
+- **ARG 1 — NEGOCIO, NO VIVIENDA (9/10):** El préstamo financió parcelas para construir y vender chalets como negocio inmobiliario. Tras caer el mercado, se alquiló y Airbnb. NUNCA fue domicilio familiar. La STS 458/2025 protege la vivienda habitual (arts. 67-68 CC, socorro mutuo), no inversiones especulativas. Refuerzo: STS 20/03/2013 y STS 246/2018 — ni la hipoteca de la casa familiar es carga del matrimonio.
+- **ARG 2 — SIN DESEQUILIBRIO (8/10):** La STS 458/2025 requiere probar que los fondos procedían «casi exclusivamente» de un cónyuge. Aquí: sueldos comparables, 2 cuentas conjuntas, 0 patrimonio privativo, nóminas en bancos distintos solo por comisiones. Si ella «puso más» en hipoteca, Juan «puso más» en el resto (comida, ropa, hijos, facturas). Economía integrada. Art. 217 LEC: carga de la prueba sobre quien reclama.
+- **ARG 3 — RETRASO DESLEAL (7/10):** Policía con máster en económicas + cotitular de ambas cuentas + 10+ años sin reclamar, sin transferencia compensatoria, sin documentar desequilibrio. Confianza legítima (art. 7 CC). Verwirkung.
+- **ARG 4 — PROCESAL (6/10):** Si estos argumentos no constan en contestación, art. 426.4 LEC permite complemento de alegaciones en AP por hecho jurídico nuevo (STS posterior a contestación).
 
 ## 8) Preguntas sugeridas
 - “Aporte extractos anuales completos de la cuenta durante 2013–2015.”
@@ -271,8 +274,10 @@ Si acusa “sin consentimiento”, debe probar:
 - Presentación sesgada del flujo económico.
 
 ## 7) Plan B STS 458/2025
-No es un reembolso típico “cónyuge paga por otro”, sino reparto de resultado de operación común.
-Si se judicializa como “liquidación de saldos”, debe hacerse por netos y con trazabilidad completa.
+- **ARG 1 — NEGOCIO, NO VIVIENDA (9/10):** El préstamo financió parcelas para construir y vender chalets como negocio inmobiliario. Tras caer el mercado, se alquiló y Airbnb. NUNCA fue domicilio familiar. La STS 458/2025 protege la vivienda habitual (arts. 67-68 CC, socorro mutuo), no inversiones especulativas. Refuerzo: STS 20/03/2013 y STS 246/2018 — ni la hipoteca de la casa familiar es carga del matrimonio.
+- **ARG 2 — SIN DESEQUILIBRIO (8/10):** La STS 458/2025 requiere probar que los fondos procedían «casi exclusivamente» de un cónyuge. Aquí: sueldos comparables, 2 cuentas conjuntas, 0 patrimonio privativo, nóminas en bancos distintos solo por comisiones. Si ella «puso más» en hipoteca, Juan «puso más» en el resto (comida, ropa, hijos, facturas). Economía integrada. Art. 217 LEC: carga de la prueba sobre quien reclama.
+- **ARG 3 — RETRASO DESLEAL (7/10):** Policía con máster en económicas + cotitular de ambas cuentas + 10+ años sin reclamar, sin transferencia compensatoria, sin documentar desequilibrio. Confianza legítima (art. 7 CC). Verwirkung.
+- **ARG 4 — PROCESAL (6/10):** Si estos argumentos no constan en contestación, art. 426.4 LEC permite complemento de alegaciones en AP por hecho jurídico nuevo (STS posterior a contestación).
 
 ## 8) Preguntas sugeridas
 - “Reconozca su retirada de 38.500 € y explique por qué no la incluye.”
@@ -338,9 +343,10 @@ Que precise:
 - Pretende “doble cobro”: 50% de bienes + devolución de financiación.
 
 ## 7) Plan B STS 458/2025
-Incluso si el juez aplica un marco de reembolsos entre cónyuges:
-- hay que fijar con precisión qué pagos, qué origen y qué beneficio.
-- y para pagos antiguos, la prescripción sigue siendo un muro.
+- **ARG 1 — NEGOCIO, NO VIVIENDA (9/10):** El préstamo financió parcelas para construir y vender chalets como negocio inmobiliario. Tras caer el mercado, se alquiló y Airbnb. NUNCA fue domicilio familiar. La STS 458/2025 protege la vivienda habitual (arts. 67-68 CC, socorro mutuo), no inversiones especulativas. Refuerzo: STS 20/03/2013 y STS 246/2018 — ni la hipoteca de la casa familiar es carga del matrimonio.
+- **ARG 2 — SIN DESEQUILIBRIO (8/10):** La STS 458/2025 requiere probar que los fondos procedían «casi exclusivamente» de un cónyuge. Aquí: sueldos comparables, 2 cuentas conjuntas, 0 patrimonio privativo, nóminas en bancos distintos solo por comisiones. Si ella «puso más» en hipoteca, Juan «puso más» en el resto (comida, ropa, hijos, facturas). Economía integrada. Art. 217 LEC: carga de la prueba sobre quien reclama.
+- **ARG 3 — RETRASO DESLEAL (7/10):** Policía con máster en económicas + cotitular de ambas cuentas + 10+ años sin reclamar, sin transferencia compensatoria, sin documentar desequilibrio. Confianza legítima (art. 7 CC). Verwirkung.
+- **ARG 4 — PROCESAL (6/10):** Si estos argumentos no constan en contestación, art. 426.4 LEC permite complemento de alegaciones en AP por hecho jurídico nuevo (STS posterior a contestación).
 
 ## 8) Preguntas sugeridas
 - “Reconozca que el destino del préstamo fue compra/obra del patrimonio común.”
@@ -391,9 +397,10 @@ Que ella abonó el IBI desde cuenta común y debe reintegrarse.
 - Si la cuenta era de uso común y nutrida por Juan, no hay hecho constitutivo del crédito.
 
 ## 6) Plan B STS 458/2025
-Año 2013: justo inicio de matrimonio/gananciales; aun así:
-- exige prueba exacta del pago y origen,
-- y el importe es marginal frente a compensaciones cruzadas.
+- **ARG 1 — NEGOCIO, NO VIVIENDA (9/10):** El préstamo financió parcelas para construir y vender chalets como negocio inmobiliario. Tras caer el mercado, se alquiló y Airbnb. NUNCA fue domicilio familiar. La STS 458/2025 protege la vivienda habitual (arts. 67-68 CC, socorro mutuo), no inversiones especulativas. Refuerzo: STS 20/03/2013 y STS 246/2018 — ni la hipoteca de la casa familiar es carga del matrimonio.
+- **ARG 2 — SIN DESEQUILIBRIO (8/10):** La STS 458/2025 requiere probar que los fondos procedían «casi exclusivamente» de un cónyuge. Aquí: sueldos comparables, 2 cuentas conjuntas, 0 patrimonio privativo, nóminas en bancos distintos solo por comisiones. Si ella «puso más» en hipoteca, Juan «puso más» en el resto (comida, ropa, hijos, facturas). Economía integrada. Art. 217 LEC: carga de la prueba sobre quien reclama.
+- **ARG 3 — RETRASO DESLEAL (7/10):** Policía con máster en económicas + cotitular de ambas cuentas + 10+ años sin reclamar, sin transferencia compensatoria, sin documentar desequilibrio. Confianza legítima (art. 7 CC). Verwirkung.
+- **ARG 4 — PROCESAL (6/10):** Si estos argumentos no constan en contestación, art. 426.4 LEC permite complemento de alegaciones en AP por hecho jurídico nuevo (STS posterior a contestación).
 
 ## 7) Mensaje 15s
 “IBI antiguo, prescrito, y además pagado desde cuenta sustentada por la nómina de Juan; no hay base probatoria para reembolso.”`,
@@ -536,7 +543,10 @@ Que se usó dinero común para cancelar hipoteca previa de Juan.
 - Aun si hubiera pago, fue presupuesto para conseguir préstamo orientado a patrimonio común: aceptación consciente en 2006.
 
 ## 5) Plan B STS 458/2025
-Hecho PRE-matrimonio (2006): inaplicable como reembolso conyugal; si lo reconduce a convivencia/enriquecimiento, igualmente prescrito y exige prueba completa.
+- **ARG 1 — NEGOCIO, NO VIVIENDA (9/10):** El préstamo financió parcelas para construir y vender chalets como negocio inmobiliario. Tras caer el mercado, se alquiló y Airbnb. NUNCA fue domicilio familiar. La STS 458/2025 protege la vivienda habitual (arts. 67-68 CC, socorro mutuo), no inversiones especulativas. Refuerzo: STS 20/03/2013 y STS 246/2018 — ni la hipoteca de la casa familiar es carga del matrimonio.
+- **ARG 2 — SIN DESEQUILIBRIO (8/10):** La STS 458/2025 requiere probar que los fondos procedían «casi exclusivamente» de un cónyuge. Aquí: sueldos comparables, 2 cuentas conjuntas, 0 patrimonio privativo, nóminas en bancos distintos solo por comisiones. Si ella «puso más» en hipoteca, Juan «puso más» en el resto (comida, ropa, hijos, facturas). Economía integrada. Art. 217 LEC: carga de la prueba sobre quien reclama.
+- **ARG 3 — RETRASO DESLEAL (7/10):** Policía con máster en económicas + cotitular de ambas cuentas + 10+ años sin reclamar, sin transferencia compensatoria, sin documentar desequilibrio. Confianza legítima (art. 7 CC). Verwirkung.
+- **ARG 4 — PROCESAL (6/10):** Si estos argumentos no constan en contestación, art. 426.4 LEC permite complemento de alegaciones en AP por hecho jurídico nuevo (STS posterior a contestación).
 
 ## 6) Mensaje 15s
 “Hecho de 2006: prescrito y, además, fue condición bancaria para financiar bienes comunes que ella ahora pretende al 50%.”`,
