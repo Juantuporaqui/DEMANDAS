@@ -31,7 +31,7 @@ export function SplitContradictionView() {
       </div>
 
       <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 text-center text-xs uppercase tracking-[0.2em] text-slate-400 md:hidden">
-        Línea argumental: actos propios
+        Doctrina de los actos propios — No puede contradecir sus propias declaraciones fiscales
       </div>
 
       <div className="grid gap-6 md:grid-cols-[1fr_auto_1fr]">
@@ -41,21 +41,23 @@ export function SplitContradictionView() {
           }`}
         >
           <div className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-200">
-            Demanda (placeholder)
+            Demanda P.O. 715/2024 — Hecho 1
           </div>
           <h3 className="text-lg font-semibold text-white">Texto citado</h3>
           <p className="text-sm text-rose-100/90">
-            “destino a vivienda privativa”
+            &ldquo;La actora afirma que los préstamos personales BBVA se cancelaron con dinero
+            privativo procedente de la venta de su casa en Mislata, por lo que existiría un
+            crédito de 20.085&thinsp;€ a su favor.&rdquo;
           </p>
           <p className="text-xs text-rose-200/70">
-            Bloque pendiente de sustituir por el fragmento real de la demanda.
+            Demanda, Hecho Primero, pág. 3-4
           </p>
         </section>
 
         <div className="hidden md:flex flex-col items-center justify-center gap-2 text-center">
           <div className="h-16 w-px bg-slate-700/70" />
           <span className="rounded-full border border-slate-700/60 bg-slate-950/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200">
-            Línea argumental: actos propios
+            Doctrina de los actos propios — No puede contradecir sus propias declaraciones fiscales
           </span>
           <div className="h-16 w-px bg-slate-700/70" />
         </div>
@@ -66,21 +68,24 @@ export function SplitContradictionView() {
           }`}
         >
           <div className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
-            AEAT (placeholder)
+            Declaración ante la AEAT — Doc. 4
           </div>
           <h3 className="text-lg font-semibold text-white">Texto citado</h3>
           <p className="text-sm text-emerald-100/90">
-            “(pendiente) La AEAT confirma el destino a vivienda privativa...”
+            &ldquo;Ante Hacienda, la propia actora reconoció que los préstamos estaban vinculados
+            a la construcción del chalet común en Montroy, no a una &lsquo;venta
+            privativa&rsquo;. El destino real de los fondos era el proyecto inmobiliario
+            conjunto.&rdquo;
           </p>
           <p className="text-xs text-emerald-200/70">
-            Bloque pendiente de sustituir por el párrafo de la AEAT.
+            Doc. 4 — Respuesta requerimiento Hacienda
           </p>
         </section>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-800/80 bg-slate-950/70 px-4 py-3 text-xs text-slate-500">
-        <span>Fuente: Doc X / pág Y (pendiente)</span>
-        <span>Fuente: Doc X / pág Y (pendiente)</span>
+        <span>Fuente: Demanda P.O. 715/2024, Hecho 1º</span>
+        <span>Fuente: Doc. 4 — Declaración AEAT</span>
       </div>
     </div>
   );

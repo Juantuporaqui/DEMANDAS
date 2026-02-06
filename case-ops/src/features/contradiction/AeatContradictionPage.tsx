@@ -5,7 +5,7 @@ export function AeatContradictionPage() {
   return (
     <AnalyticsLayout
       title="Contradicción Nuclear (AEAT)"
-      subtitle="Vista comparativa en preparación. Contenido real pendiente de integrar."
+      subtitle="Demanda vs. declaración fiscal — Doctrina de los actos propios"
     >
       <SplitContradictionView />
     </AnalyticsLayout>
