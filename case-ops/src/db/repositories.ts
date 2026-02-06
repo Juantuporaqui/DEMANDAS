@@ -987,6 +987,45 @@ export const scenarioNodesRepo = {
     await db.scenario_nodes.delete(id);
     await auditRepo.log('delete', 'scenario_node', id);
   },
+
+  async upsertByKey(
+    scenarioId: string,
+    nodeType: ScenarioNode['nodeType'],
+    nodeId: string,
+    updates: Pick<ScenarioNode, 'value' | 'confidence'>
+  ): Promise<ScenarioNode> {
+    return db.transaction('rw', db.counters, db.scenario_nodes, db.auditLogs, async () => {
+      const existing = await db.scenario_nodes
+        .where('[scenarioId+nodeType+nodeId]')
+        .equals([scenarioId, nodeType, nodeId])
+        .first();
+      if (existing) {
+        const updated: ScenarioNode = {
+          ...existing,
+          ...updates,
+          updatedAt: Date.now(),
+        };
+        await db.scenario_nodes.update(existing.id, updated);
+        await auditRepo.log('update', 'scenario_node', existing.id);
+        return updated;
+      }
+      const id = await counterRepo.getNextIdInTransaction('scenario_nodes');
+      const now = Date.now();
+      const node: ScenarioNode = {
+        id,
+        scenarioId,
+        nodeType,
+        nodeId,
+        value: updates.value,
+        confidence: updates.confidence,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.scenario_nodes.add(node);
+      await auditRepo.log('create', 'scenario_node', id);
+      return node;
+    });
+  },
 };
 
 // ============================================
