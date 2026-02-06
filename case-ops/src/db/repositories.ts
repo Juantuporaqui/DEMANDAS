@@ -992,7 +992,7 @@ export const scenarioNodesRepo = {
     scenarioId: string,
     nodeType: ScenarioNode['nodeType'],
     nodeId: string,
-    updates: Pick<ScenarioNode, 'value' | 'confidence'>
+    updates: Pick<ScenarioNode, 'value' | 'confidence' | 'metaJson'>
   ): Promise<ScenarioNode> {
     return db.transaction('rw', db.counters, db.scenario_nodes, db.auditLogs, async () => {
       const existing = await db.scenario_nodes
@@ -1018,6 +1018,7 @@ export const scenarioNodesRepo = {
         nodeId,
         value: updates.value,
         confidence: updates.confidence,
+        metaJson: updates.metaJson,
         createdAt: now,
         updatedAt: now,
       };

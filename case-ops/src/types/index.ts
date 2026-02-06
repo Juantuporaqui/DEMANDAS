@@ -254,6 +254,7 @@ export interface ScenarioNode {
   nodeId: string;
   value: number;
   confidence: number;
+  metaJson?: string;
   createdAt: number;
   updatedAt: number;
 }
