@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 // FASE 2 - Chaladita Case-Ops
-import { useProcedimientos } from '../../db/chaladitaRepos';
+import { casesRepo } from '../../db/repositories';
 import { UploadDocumento } from '../../components/UploadDocumento';
 // Quick Nav - Botones estilo app móvil
 import { HechosQuickNav } from '../../components/HechosQuickNav';
@@ -9,7 +10,7 @@ import { AudienciaQuickNav } from '../../components/AudienciaQuickNav';
 
 export function AudienciaPreviaPage() {
   // Chaladita
-  const procedimientos = useProcedimientos();
+  const procedimientos = useLiveQuery(() => casesRepo.getAll(), []) ?? [];
   const [selectedProcId, setSelectedProcId] = useState<string>('');
   const [showUpload, setShowUpload] = useState(false);
 
@@ -49,7 +50,7 @@ export function AudienciaPreviaPage() {
           >
             {procedimientos.map((proc) => (
               <option key={proc.id} value={proc.id}>
-                {proc.nombre}
+                {proc.title}
               </option>
             ))}
           </select>

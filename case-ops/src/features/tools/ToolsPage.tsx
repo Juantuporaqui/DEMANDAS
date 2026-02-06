@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 // CHALADITA CASE-OPS
 import { ProcedimientosChaladita } from '../../components/ProcedimientosChaladita';
 import { HechosQuickNav } from '../../components/HechosQuickNav';
 import { AudienciaQuickNav } from '../../components/AudienciaQuickNav';
-import { useProcedimientos } from '../../db/chaladitaRepos';
+import { casesRepo } from '../../db/repositories';
 
 export function ToolsPage() {
-  const procedimientos = useProcedimientos();
+  const procedimientos = useLiveQuery(() => casesRepo.getAll(), []) ?? [];
   const [selectedProcId, setSelectedProcId] = useState<string>('');
 
   // Seleccionar primer procedimiento Chaladita
@@ -39,7 +40,7 @@ export function ToolsPage() {
           >
             {procedimientos.map((proc) => (
               <option key={proc.id} value={proc.id}>
-                {proc.nombre}
+                {proc.title}
               </option>
             ))}
           </select>

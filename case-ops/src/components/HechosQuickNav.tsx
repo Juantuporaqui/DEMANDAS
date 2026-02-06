@@ -5,14 +5,21 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { chaladitaDb } from '../db/chaladitaDb';
-import type { HechoCase, Riesgo } from '../types/caseops';
+import { factsRepo, documentsRepo } from '../db/repositories';
+import type { Fact, RiskLevel } from '../types';
 
 interface HechosQuickNavProps {
   procedimientoId: string;
 }
 
-const riesgoConfig: Record<Riesgo, { bg: string; border: string; text: string; icon: string }> = {
+type QuickFact = Fact & {
+  antitesisEsperada: string;
+  pruebasEsperadas: string[];
+  resumenCorto: string;
+  fecha: string;
+};
+
+const riesgoConfig: Record<RiskLevel, { bg: string; border: string; text: string; icon: string }> = {
   bajo: { bg: '#065f46', border: '#10b981', text: '#6ee7b7', icon: '✓' },
   medio: { bg: '#78350f', border: '#f59e0b', text: '#fcd34d', icon: '!' },
   alto: { bg: '#7f1d1d', border: '#ef4444', text: '#fca5a5', icon: '⚠' },
@@ -21,21 +28,42 @@ const riesgoConfig: Record<Riesgo, { bg: string; border: string; text: string; i
 const fuerzaStars = (fuerza: number) => '★'.repeat(fuerza) + '☆'.repeat(5 - fuerza);
 
 export function HechosQuickNav({ procedimientoId }: HechosQuickNavProps) {
-  const [selectedHecho, setSelectedHecho] = useState<HechoCase | null>(null);
+  const [selectedHecho, setSelectedHecho] = useState<QuickFact | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
 
   const hechos = useLiveQuery(
-    () => chaladitaDb.hechos.where('procedimientoId').equals(procedimientoId).toArray(),
+    async () => {
+      const [facts, docs] = await Promise.all([
+        factsRepo.getByCaseId(procedimientoId),
+        documentsRepo.getByCaseId(procedimientoId),
+      ]);
+      const docsByTag = new Map<string, number>();
+      docs.forEach((doc) => {
+        doc.tags.forEach((tag) => {
+          docsByTag.set(tag, (docsByTag.get(tag) ?? 0) + 1);
+        });
+      });
+
+      return facts.map((fact) => ({
+        ...fact,
+        fecha: new Date(fact.updatedAt).toISOString().slice(0, 10),
+        resumenCorto: fact.narrative,
+        // TODO: CaseOpsDB no tiene antítesis explícita por hecho; mantener placeholder hasta extender schema.
+        antitesisEsperada: 'No disponible en el esquema actual.',
+        // TODO: migrar vínculos hecho-documento a links para evitar inferencia por tags.
+        pruebasEsperadas: fact.tags.filter((tag) => (docsByTag.get(tag) ?? 0) > 0),
+      }));
+    },
     [procedimientoId]
   );
 
   // Ordenar por riesgo (alto primero) y luego por fuerza
   const hechosSorted = hechos?.slice().sort((a, b) => {
     const riesgoOrder = { alto: 0, medio: 1, bajo: 2 };
-    if (riesgoOrder[a.riesgo] !== riesgoOrder[b.riesgo]) {
-      return riesgoOrder[a.riesgo] - riesgoOrder[b.riesgo];
+    if (riesgoOrder[a.risk] !== riesgoOrder[b.risk]) {
+      return riesgoOrder[a.risk] - riesgoOrder[b.risk];
     }
-    return b.fuerza - a.fuerza;
+    return b.strength - a.strength;
   });
 
   // Scroll al detalle cuando se selecciona
@@ -55,7 +83,7 @@ export function HechosQuickNav({ procedimientoId }: HechosQuickNavProps) {
 
   // Solo mostrar los más importantes (riesgo alto/medio o fuerza >= 3)
   const hechosDestacados = hechosSorted.filter(
-    (h) => h.riesgo === 'alto' || h.riesgo === 'medio' || h.fuerza >= 3
+    (h) => h.risk === 'alto' || h.risk === 'medio' || h.strength >= 3
   );
 
   return (
@@ -68,7 +96,7 @@ export function HechosQuickNav({ procedimientoId }: HechosQuickNavProps) {
       {/* Grid de botones estilo app móvil */}
       <div style={styles.buttonGrid}>
         {hechosDestacados.map((hecho) => {
-          const config = riesgoConfig[hecho.riesgo];
+          const config = riesgoConfig[hecho.risk];
           const isSelected = selectedHecho?.id === hecho.id;
           return (
             <button
@@ -84,8 +112,8 @@ export function HechosQuickNav({ procedimientoId }: HechosQuickNavProps) {
             >
               <span style={styles.buttonIcon}>{config.icon}</span>
               <span style={styles.buttonRef}>{hecho.id}</span>
-              <span style={styles.buttonTitle}>{hecho.titulo.slice(0, 25)}{hecho.titulo.length > 25 ? '...' : ''}</span>
-              <span style={styles.buttonFuerza}>{fuerzaStars(hecho.fuerza)}</span>
+              <span style={styles.buttonTitle}>{hecho.title.slice(0, 25)}{hecho.title.length > 25 ? '...' : ''}</span>
+              <span style={styles.buttonFuerza}>{fuerzaStars(hecho.strength)}</span>
             </button>
           );
         })}
@@ -107,11 +135,11 @@ export function HechosQuickNav({ procedimientoId }: HechosQuickNavProps) {
             <div style={styles.detailBadges}>
               <span style={{
                 ...styles.riesgoBadge,
-                backgroundColor: riesgoConfig[selectedHecho.riesgo].bg,
-                borderColor: riesgoConfig[selectedHecho.riesgo].border,
-                color: riesgoConfig[selectedHecho.riesgo].text,
+                backgroundColor: riesgoConfig[selectedHecho.risk].bg,
+                borderColor: riesgoConfig[selectedHecho.risk].border,
+                color: riesgoConfig[selectedHecho.risk].text,
               }}>
-                {selectedHecho.riesgo.toUpperCase()}
+                {selectedHecho.risk.toUpperCase()}
               </span>
               <span style={styles.fechaBadge}>{selectedHecho.fecha}</span>
               <span style={styles.idBadge}>{selectedHecho.id}</span>
@@ -119,12 +147,12 @@ export function HechosQuickNav({ procedimientoId }: HechosQuickNavProps) {
             <button onClick={() => setSelectedHecho(null)} style={styles.closeBtn}>✕</button>
           </div>
 
-          <h4 style={styles.detailTitle}>{selectedHecho.titulo}</h4>
+          <h4 style={styles.detailTitle}>{selectedHecho.title}</h4>
           <p style={styles.detailResumen}>{selectedHecho.resumenCorto}</p>
 
           <div style={styles.detailSection}>
             <h5 style={styles.sectionLabel}>Nuestra Tesis</h5>
-            <p style={styles.sectionText}>{selectedHecho.tesis}</p>
+            <p style={styles.sectionText}>{selectedHecho.narrative}</p>
           </div>
 
           <div style={styles.detailSection}>
@@ -145,7 +173,7 @@ export function HechosQuickNav({ procedimientoId }: HechosQuickNavProps) {
 
           <div style={styles.detailFooter}>
             <span style={styles.fuerzaLabel}>Fuerza: </span>
-            <span style={styles.fuerzaStars}>{fuerzaStars(selectedHecho.fuerza)}</span>
+            <span style={styles.fuerzaStars}>{fuerzaStars(selectedHecho.strength)}</span>
           </div>
         </div>
       )}

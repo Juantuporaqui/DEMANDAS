@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Chips, Modal } from '../../components';
 import { factsRepo, linksRepo, spansRepo, documentsRepo } from '../../db/repositories';
-import { chaladitaDb } from '../../db/chaladitaDb';
 import { formatDateTime } from '../../utils/dates';
 import { hechosReclamados, type HechoReclamado } from '../../data/hechosReclamados';
 import { argumentosContestacion, nuestrosArgumentos, frasesClaveVista, procedimientoMislata, desgloseMislata } from '../../data/mislata';
@@ -165,32 +164,7 @@ export function FactDetailPage() {
       }
 
       // PASO 1: Buscar en repositorios
-      let factData = await factsRepo.getById(factId);
-      let isFromNewDb = false;
-
-      if (!factData) {
-        const newFact = await chaladitaDb.hechos.get(factId);
-        if (newFact) {
-          isFromNewDb = true;
-          factData = {
-            id: newFact.id,
-            title: newFact.titulo,
-            narrative: newFact.resumenCorto,
-            status: 'controvertido',
-            burden: 'mixta',
-            risk: newFact.riesgo,
-            strength: newFact.fuerza,
-            tags: newFact.tags || [],
-            caseId: newFact.procedimientoId,
-            createdAt: new Date(newFact.createdAt).getTime(),
-            updatedAt: new Date(newFact.updatedAt).getTime(),
-            tesis: newFact.tesis,
-            antitesis: newFact.antitesisEsperada,
-            pruebasText: newFact.pruebasEsperadas || [],
-            customAmount: newFact.titulo.includes('€') ? newFact.titulo.match(/\d+(?:[.,]\d+)?€/)?.[0] : null
-          };
-        }
-      }
+      const factData = await factsRepo.getById(factId);
 
       if (!factData) {
         setFact(null);
@@ -201,34 +175,12 @@ export function FactDetailPage() {
 
       // Cargar Evidencias
       const evidenceData = [];
-      if (!isFromNewDb) {
-        const evidenceLinks = await linksRepo.getEvidenceForFact(factId);
-        for (const link of evidenceLinks) {
-          const span = await spansRepo.getById(link.fromId);
-          if (span) {
-            const doc = await documentsRepo.getById(span.documentId);
-            if (doc) evidenceData.push({ link, span, document: doc });
-          }
-        }
-      } else {
-        if (factData.caseId) {
-          const docs = await chaladitaDb.documentos
-            .where('procedimientoId').equals(factData.caseId)
-            .limit(10)
-            .toArray();
-
-          const relevantDocs = docs.filter(d =>
-            d.hechosIds?.includes(factData.id) || d.tipo === 'demanda' || d.tipo === 'contestacion'
-          );
-          const docsToShow = relevantDocs.length > 0 ? relevantDocs : docs.slice(0, 3);
-
-          for (const doc of docsToShow) {
-            evidenceData.push({
-              link: { id: `lnk-virt-${doc.id}` },
-              span: { label: 'Documento relacionado', pageStart: 1, pageEnd: 1 },
-              document: { id: doc.id, title: doc.descripcion || doc.tipo }
-            });
-          }
+      const evidenceLinks = await linksRepo.getEvidenceForFact(factId);
+      for (const link of evidenceLinks) {
+        const span = await spansRepo.getById(link.fromId);
+        if (span) {
+          const doc = await documentsRepo.getById(span.documentId);
+          if (doc) evidenceData.push({ link, span, document: doc });
         }
       }
       setEvidence(evidenceData);
@@ -245,7 +197,6 @@ export function FactDetailPage() {
     try {
       await linksRepo.deleteByEntity('fact', fact.id);
       await factsRepo.delete(fact.id);
-      if (fact.id) await chaladitaDb.hechos.delete(fact.id);
       navigate('/facts');
     } catch (error) { console.error(error); }
   }
