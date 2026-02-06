@@ -8,7 +8,7 @@ export default function AppLayout() {
       <Sidebar />
       
       {/* Contenido principal (Outlet es donde se pintan las páginas) */}
-      <main className="flex-1 px-4 py-6 lg:ml-64 lg:px-8 lg:py-8 max-w-[100vw] overflow-x-hidden">
+      <main className="flex-1 px-3 sm:px-4 py-4 sm:py-6 pb-24 lg:pb-8 lg:ml-64 lg:px-8 lg:py-8 max-w-[100vw] overflow-x-hidden">
         <Outlet />
       </main>
     </div>

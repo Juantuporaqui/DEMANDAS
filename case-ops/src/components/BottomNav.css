@@ -22,7 +22,8 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 0.5rem;
+  padding: 0.625rem 0.25rem;
+  min-height: 48px;
   color: var(--dim);
   text-decoration: none;
   transition: color 0.2s ease;

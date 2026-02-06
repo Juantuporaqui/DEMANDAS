@@ -106,7 +106,7 @@ export function EventsPage() {
 
       {/* PRÓXIMOS EVENTOS - Destacados */}
       {eventosProximos.length > 0 && (
-        <div className="mb-6 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
           <div className="flex items-center gap-2 mb-3">
             <Clock size={16} className="text-amber-400" />
             <span className="text-sm font-bold text-amber-300 uppercase tracking-wider">

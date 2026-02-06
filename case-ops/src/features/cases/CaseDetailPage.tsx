@@ -128,7 +128,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           <Eye size={16} /> Resumen ejecutivo
           <Badge tone="muted">{caseLabel}</Badge>
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 auto-rows-fr">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 auto-rows-fr">
           {/* Parte contraria */}
           <div className="card-base card-subtle p-3 h-full">
             <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Parte contraria</div>
@@ -189,7 +189,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             <div className="text-[10px] text-slate-500">{factsControvertidos} controvertidos</div>
           </div>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 auto-rows-fr">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 auto-rows-fr">
           {/* Sumatorio Analítico */}
           {showAnalytic && (
             <div className="card-base card-subtle p-3 h-full">
@@ -359,8 +359,8 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
       </div>
 
       {/* KPIs DINÁMICOS */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="card-base card-subtle p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+        <div className="card-base card-subtle p-3 sm:p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Cuantía procesal (demanda)</div>
           <div className="text-2xl font-semibold text-rose-400 mt-1">
             {formatCurrency(amounts.totalDemand)}

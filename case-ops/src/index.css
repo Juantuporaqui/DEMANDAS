@@ -755,3 +755,47 @@ tbody tr:last-child td {
 .page-enter {
   animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+
+/* ==========================================
+ * MOBILE OPTIMIZATIONS
+ * ========================================== */
+@media (max-width: 640px) {
+  h1 { font-size: 1.375rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1.1rem; }
+
+  body {
+    font-size: 14px;
+  }
+
+  /* Cards: reducir padding en móvil */
+  .case-card {
+    padding: 1.25rem;
+  }
+
+  .kpi-card {
+    padding: 1rem;
+  }
+
+  .kpi-card .value {
+    font-size: 1.375rem;
+  }
+
+  /* Card hover: desactivar translateY en móvil (impide doble-tap) */
+  .card-base:hover {
+    transform: none;
+  }
+
+  /* Tabs: scroll horizontal */
+  .tabs-expediente {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Touch targets mínimos para dispositivos táctiles */
+@media (pointer: coarse) {
+  .card-interactive {
+    min-height: 44px;
+  }
+}

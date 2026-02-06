@@ -224,7 +224,7 @@ export function FactFormPage() {
             </div>
 
             {/* Risk & Strength */}
-            <div className="grid grid-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="form-group">
                 <label className="form-label">Riesgo</label>
                 <select

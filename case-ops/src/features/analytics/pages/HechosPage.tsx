@@ -104,28 +104,28 @@ export function HechosPage() {
       }
     >
       {/* 1. Panel de Control de Riesgos (KPIs) */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+        <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-3 sm:p-4">
           <div className="text-[10px] text-rose-300/70 uppercase font-bold tracking-widest mb-1">Total Demandado</div>
-          <div className="text-2xl font-black text-rose-400">
+          <div className="text-xl sm:text-2xl font-black text-rose-400">
             {resumenContador.totalReclamado.toLocaleString('es-ES')} €
           </div>
         </div>
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3 sm:p-4">
           <div className="text-[10px] text-emerald-300/70 uppercase font-bold tracking-widest mb-1">Potencial Prescrito</div>
-          <div className="text-2xl font-black text-emerald-400">
+          <div className="text-xl sm:text-2xl font-black text-emerald-400">
             {totales.prescrito.toLocaleString('es-ES')} €
           </div>
         </div>
-        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-3 sm:p-4">
           <div className="text-[10px] text-amber-300/70 uppercase font-bold tracking-widest mb-1">Exposición Real</div>
-          <div className="text-2xl font-black text-amber-400">
+          <div className="text-xl sm:text-2xl font-black text-amber-400">
             {resumenContador.cifraRiesgoReal.toLocaleString('es-ES')} €
           </div>
         </div>
-        <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+        <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-3 sm:p-4">
           <div className="text-[10px] text-cyan-300/70 uppercase font-bold tracking-widest mb-1">% Éxito Objetivo</div>
-          <div className="text-2xl font-black text-cyan-400">
+          <div className="text-xl sm:text-2xl font-black text-cyan-400">
             {resumenContador.reduccionObjetivo}%
           </div>
         </div>
@@ -176,7 +176,7 @@ export function HechosPage() {
       </SectionCard>
 
       {/* 4. Accesos Rápidos Estratégicos */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mt-4 sm:mt-6">
         {[
           { label: 'Prescripción', icon: Clock, path: '/analytics/prescripcion', color: 'text-emerald-400' },
           { label: 'Audiencia', icon: Scale, path: '/analytics/audiencia', color: 'text-amber-400' },

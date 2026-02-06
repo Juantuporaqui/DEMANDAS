@@ -153,17 +153,17 @@ export function ModoAudienciaPage() {
           </div>
 
           {/* KPIs rápidos */}
-          <div className="flex gap-3">
-            <div className="text-center px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
-              <div className="text-2xl font-bold text-white">{resumenAudiencia.totalAlegaciones}</div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="text-center px-2 sm:px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
+              <div className="text-xl sm:text-2xl font-bold text-white">{resumenAudiencia.totalAlegaciones}</div>
               <div className="text-[10px] text-slate-400 uppercase">Alegaciones</div>
             </div>
-            <div className="text-center px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
-              <div className="text-2xl font-bold text-white">{resumenAudiencia.totalHechosControvertidos}</div>
+            <div className="text-center px-2 sm:px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
+              <div className="text-xl sm:text-2xl font-bold text-white">{resumenAudiencia.totalHechosControvertidos}</div>
               <div className="text-[10px] text-slate-400 uppercase">Hechos</div>
             </div>
-            <div className="text-center px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/30">
-              <div className="text-2xl font-bold text-amber-400">{resumenAudiencia.hechosPendientes}</div>
+            <div className="text-center px-2 sm:px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/30">
+              <div className="text-xl sm:text-2xl font-bold text-amber-400">{resumenAudiencia.hechosPendientes}</div>
               <div className="text-[10px] text-amber-300 uppercase">Pendientes</div>
             </div>
           </div>

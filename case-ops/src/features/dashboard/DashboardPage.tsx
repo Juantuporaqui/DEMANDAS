@@ -145,7 +145,7 @@ export function DashboardPage() {
             <Building2 size={12} />
             Centro de Comando Legal
           </p>
-          <h1 className="text-[28px] font-semibold text-white tracking-tight">
+          <h1 className="text-xl sm:text-[28px] font-semibold text-white tracking-tight">
             Mapa de Frentes Judiciales
           </h1>
           <p className="text-sm text-slate-400 mt-2">
@@ -163,7 +163,7 @@ export function DashboardPage() {
       </header>
 
       {/* ===== TARJETAS DE FRENTES JUDICIALES ===== */}
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
         {frentes.map((frente) => {
           const dias = frente.proximoHito ? getDiasHasta(frente.proximoHito) : null;
           const isUrgente = frente.urgencia === 'urgente';
@@ -342,10 +342,10 @@ export function DashboardPage() {
       </section>
 
       {/* ===== ACCESOS RÁPIDOS ===== */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
         <button
           onClick={() => navigate('/analytics/hechos')}
-          className="card-base card-subtle flex flex-col items-center gap-2 p-3 hover:border-emerald-500/30 hover:bg-emerald-500/10 transition-all"
+          className="card-base card-subtle flex flex-col items-center gap-2 p-3 hover:border-emerald-500/30 hover:bg-emerald-500/10 transition-all min-h-[60px]"
         >
           <Scale size={22} className="text-emerald-400" />
           <span className="text-[10px] text-slate-300">Hechos</span>
@@ -377,12 +377,12 @@ export function DashboardPage() {
       <AlertasPanel />
 
       {/* ===== FUNDAMENTOS JURÍDICOS ===== */}
-      <section className="card-base card-default p-5">
+      <section className="card-base card-default p-4 sm:p-5">
         <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
           <Gavel size={14} className="text-amber-400" />
           Fundamentos Jurídicos Clave
         </h3>
-        <div className="grid grid-cols-2 gap-3 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs">
           <div className="flex gap-2 items-start">
             <span className="text-emerald-400 font-bold shrink-0">Art. 1964.2 CC:</span>
             <span className="text-slate-400">Prescripción 5 años</span>

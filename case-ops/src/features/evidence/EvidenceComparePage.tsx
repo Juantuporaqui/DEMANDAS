@@ -2,7 +2,7 @@ import { ImageCompareSlider } from './ImageCompareSlider';
 
 export function EvidenceComparePage() {
   return (
-    <div className="page flex flex-col gap-6 p-6">
+    <div className="page flex flex-col gap-4 sm:gap-6 p-3 sm:p-6">
       <ImageCompareSlider
         beforeSrc="/evidence/prueba-actora-incompleta.svg"
         afterSrc="/evidence/prueba-real-certificada.svg"

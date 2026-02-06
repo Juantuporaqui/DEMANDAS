@@ -31,7 +31,7 @@ export function TasksPage() {
     <div className="space-y-6 pb-20">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-100 tracking-tight">Operaciones</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 tracking-tight">Operaciones</h1>
           <p className="text-sm text-slate-400">Listado de tareas y vencimientos</p>
         </div>
         <Link to="/tasks/new" className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 hover:bg-emerald-500">
@@ -47,10 +47,10 @@ export function TasksPage() {
         )}
         
         {tasks.map((task) => (
-          <Card key={task.id} className={`p-4 flex items-center gap-4 transition-all ${task.status === 'completada' ? 'opacity-50' : 'hover:border-emerald-500/50'}`}>
+          <Card key={task.id} className={`p-3 sm:p-4 flex items-center gap-3 sm:gap-4 transition-all ${task.status === 'completada' ? 'opacity-50' : 'hover:border-emerald-500/50'}`}>
             <button
               onClick={() => toggleTask(task)}
-              className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+              className={`h-8 w-8 sm:h-6 sm:w-6 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${
                 task.status === 'completada' ? 'bg-emerald-500 border-emerald-500 text-black' : 'border-slate-600 hover:border-emerald-500'
               }`}
             >

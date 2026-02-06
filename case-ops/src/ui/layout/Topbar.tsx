@@ -18,11 +18,11 @@ export default function Topbar({ title = 'Case Ops', subtitle = 'Legal-tech work
       }}
     >
       <div
-        className="mx-auto flex w-full items-center justify-between gap-4 px-5 py-4 md:px-8"
+        className="mx-auto flex w-full items-center justify-between gap-3 px-3 py-3 sm:px-5 sm:py-4 md:px-8"
         style={{ maxWidth: appMaxWidth }}
       >
         <div>
-          <div className={`text-lg font-semibold tracking-tight ${accent}`}>{title}</div>
+          <div className={`text-base sm:text-lg font-semibold tracking-tight ${accent}`}>{title}</div>
           <div className={`text-[11px] uppercase tracking-[0.15em] ${textMuted}`}>
             {subtitle}
           </div>

@@ -66,8 +66,8 @@ export function FairLiquidationPage() {
       title="Calculadora de Liquidación Justa"
       subtitle="Resultado orientativo según estos parámetros (puede variar por interrupción/dies a quo)."
     >
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-        <section className="space-y-6 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-6 shadow-lg shadow-black/30">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.1fr_1fr]">
+        <section className="space-y-4 sm:space-y-6 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 sm:p-6 shadow-lg shadow-black/30">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-white">Parámetros de cálculo</h2>
@@ -146,7 +146,7 @@ export function FairLiquidationPage() {
           </p>
         </section>
 
-        <section className="space-y-6 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-6 shadow-lg shadow-black/30">
+        <section className="space-y-4 sm:space-y-6 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4 sm:p-6 shadow-lg shadow-black/30">
           <div>
             <h2 className="text-lg font-semibold text-white">Waterfall de liquidación</h2>
             <p className="text-xs text-slate-400">Desglose visual del ajuste sobre la petición actora.</p>
@@ -154,7 +154,7 @@ export function FairLiquidationPage() {
 
           <WaterfallChart steps={steps} total={reclamacionTotal} />
 
-          <div className="overflow-hidden rounded-xl border border-slate-800/80">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 rounded-xl border border-slate-800/80">
             <table className="min-w-full text-left text-sm">
               <thead className="bg-slate-900/80 text-xs uppercase tracking-[0.2em] text-slate-400">
                 <tr>

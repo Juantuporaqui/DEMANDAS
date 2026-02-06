@@ -44,20 +44,26 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 className="modal-title">{title}</h2>
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full sm:max-w-lg max-h-[90dvh] flex flex-col rounded-t-2xl sm:rounded-2xl border border-slate-700/60 bg-slate-900 shadow-xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-slate-700/50 px-4 sm:px-5 py-3 sm:py-4 flex-shrink-0">
+          <h2 className="text-base sm:text-lg font-semibold text-white truncate">{title}</h2>
           <button
-            className="btn btn-ghost btn-icon-sm"
+            className="flex items-center justify-center h-9 w-9 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors flex-shrink-0"
             onClick={onClose}
             aria-label="Cerrar"
           >
             ✕
           </button>
         </div>
-        <div className="modal-body">{children}</div>
-        {footer && <div className="modal-footer">{footer}</div>}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 sm:py-5">{children}</div>
+        {footer && <div className="border-t border-slate-700/50 px-4 sm:px-5 py-3 sm:py-4 flex-shrink-0">{footer}</div>}
       </div>
     </div>
   );

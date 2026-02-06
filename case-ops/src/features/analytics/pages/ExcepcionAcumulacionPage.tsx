@@ -107,8 +107,8 @@ export function ExcepcionAcumulacionPage() {
             ))}
           </nav>
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="space-y-6">
+          <div className="grid gap-4 sm:gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="space-y-4 sm:space-y-6">
               <div id="resumen" className="scroll-mt-24">
                 <SectionCard title="Resumen operativo" subtitle="Qué se pide exactamente">
                   <div className="space-y-4 text-sm text-slate-200">

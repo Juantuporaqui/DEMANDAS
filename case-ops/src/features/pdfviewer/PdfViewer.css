@@ -268,5 +268,46 @@
 
 @media (max-width: 600px) {
   .zoom-indicator { display: none; }
-  .pdf-title-container { max-width: 160px; }
+  .pdf-title-container { max-width: 140px; }
+
+  .pdf-header {
+    padding: 0.625rem 0.75rem;
+    gap: 0.625rem;
+  }
+
+  .pdf-doc-title {
+    font-size: 0.8rem;
+  }
+
+  .pdf-toolbar {
+    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
+
+  .pdf-viewport {
+    padding: 8px;
+  }
+
+  .btn-icon {
+    padding: 0.625rem;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .span-chip {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    min-height: 40px;
+  }
+
+  .page-indicator {
+    font-size: 0.75rem;
+    min-width: 2.5rem;
+  }
+
+  .floating-exit-btn {
+    top: max(12px, env(safe-area-inset-top));
+    right: 12px;
+  }
 }
