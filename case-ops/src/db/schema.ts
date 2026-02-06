@@ -11,6 +11,7 @@ import type {
   DocFile,
   Span,
   Fact,
+  Issue,
   Partida,
   Event,
   Strategy,
@@ -18,10 +19,13 @@ import type {
   Link,
   AuditLog,
   AnalyticsMeta,
+  Rule,
+  ScenarioModel,
+  ScenarioNode,
 } from '../types';
 
 // Database Schema Version
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 // Database class extending Dexie
 class CaseOpsDB extends Dexie {
@@ -32,11 +36,15 @@ class CaseOpsDB extends Dexie {
   docFiles!: EntityTable<DocFile, 'id'>;
   spans!: EntityTable<Span, 'id'>;
   facts!: EntityTable<Fact, 'id'>;
+  issues!: EntityTable<Issue, 'id'>;
   partidas!: EntityTable<Partida, 'id'>;
   events!: EntityTable<Event, 'id'>;
   strategies!: EntityTable<Strategy, 'id'>;
   tasks!: EntityTable<Task, 'id'>;
   links!: EntityTable<Link, 'id'>;
+  rules!: EntityTable<Rule, 'id'>;
+  scenario_models!: EntityTable<ScenarioModel, 'id'>;
+  scenario_nodes!: EntityTable<ScenarioNode, 'id'>;
   auditLogs!: EntityTable<AuditLog, 'id'>;
   analytics_meta!: EntityTable<AnalyticsMeta, 'id'>;
 
@@ -65,6 +73,9 @@ class CaseOpsDB extends Dexie {
       // Facts - legal facts to prove/defend
       facts: 'id, caseId, title, status, burden, risk, strength, updatedAt, *tags',
 
+      // Issues - debated items for scenarios
+      issues: 'id, caseId, title, updatedAt, *tags',
+
       // Partidas - economic items
       partidas: 'id, caseId, date, amountCents, state, updatedAt, *tags',
 
@@ -79,6 +90,15 @@ class CaseOpsDB extends Dexie {
 
       // Links - generic entity relationships
       links: 'id, fromType, fromId, toType, toId, [fromType+fromId], [toType+toId], updatedAt',
+
+      // Rules - legal modifiers for scenarios
+      rules: 'id, caseId, title, updatedAt, *appliesToTags',
+
+      // Scenario models - alternative assumptions
+      scenario_models: 'id, caseId, name, updatedAt',
+
+      // Scenario nodes - overrides per scenario
+      scenario_nodes: 'id, scenarioId, nodeType, nodeId, updatedAt, [scenarioId+nodeType+nodeId]',
 
       // Audit log - optional tracking
       auditLogs: 'id, at, action, entityType, entityId',
