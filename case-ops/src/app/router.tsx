@@ -2,7 +2,7 @@
 // CASE OPS - Router Configuration
 // ============================================
 
-import { createBrowserRouter } from 'react-router-dom';
+import { Navigate, createBrowserRouter } from 'react-router-dom';
 import { AppShell } from './AppShell';
 
 // Features
@@ -47,7 +47,6 @@ import { ModoTelepronter } from '../features/audiencia/ModoTelepronter';
 import { ChecklistAudiencia } from '../features/audiencia/ChecklistAudiencia';
 import { ToolsPage } from '../features/tools/ToolsPage';
 import { JurisprudenciaPage } from '../features/jurisprudencia/JurisprudenciaPage';
-import { PrescriptionPage } from '../features/prescription/PrescriptionPage';
 import { EvidenceComparePage } from '../features/evidence/EvidenceComparePage';
 import { FairLiquidationPage } from '../features/finance/FairLiquidationPage';
 import { AeatContradictionPage } from '../features/contradiction/AeatContradictionPage';
@@ -151,7 +150,7 @@ export const router = createBrowserRouter(
         },
         {
           path: 'tools/prescripcion',
-          element: <PrescriptionPage />,
+          element: <Navigate to="/analytics/prescripcion" replace />,
           handle: { pageMode: 'wide' },
         },
         {
