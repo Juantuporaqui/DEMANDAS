@@ -45,6 +45,11 @@ type ActionCandidate = {
   deltaExpected: number;
   roi: number;
   rationale: string;
+  targetFactId?: string;
+  targetPartidaId?: string;
+  targetDocumentId?: string;
+  targetSpanId?: string;
+  targetPage?: number;
 };
 
 const DEFAULT_SCENARIOS: Array<Pick<ScenarioModel, 'name' | 'assumptionsJson' | 'weightsJson'>> = [
@@ -148,14 +153,14 @@ const computeFactBase = (
   fact: Fact,
   evidenceCount: number,
   contradictions: number,
-  applicableRules: Rule[],
+  applicableRulesCount: number,
   weights: ScenarioWeights,
   scenarioNode?: ScenarioNode
 ) => {
   const base = fact.strength / 5;
   const evidenceBoost = evidenceCount * (weights.evidenceBoost ?? 0.05);
   const contradictionPenalty = contradictions * (weights.contradictionsPenalty ?? 0.08);
-  const rulePenalty = applicableRules.length * (weights.rulePenalty ?? 0.06);
+  const rulePenalty = applicableRulesCount * (weights.rulePenalty ?? 0.06);
   const nodeAdjust = scenarioNode?.value ?? 0;
   return clamp(base + evidenceBoost + nodeAdjust - contradictionPenalty - rulePenalty, 0.05, 0.98);
 };
@@ -274,6 +279,8 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     () => new Map(scenarioNodes.map((node) => [`${node.nodeType}:${node.nodeId}`, node])),
     [scenarioNodes]
   );
+  const documentsById = useMemo(() => new Map(documents.map((doc) => [doc.id, doc])), [documents]);
+  const spansById = useMemo(() => new Map(spans.map((span) => [span.id, span])), [spans]);
 
   const linksForCase = useMemo(
     () =>
@@ -377,14 +384,21 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
   };
 
   const computeScenario = useCallback(
-    (overrides?: {
-      extraEvidence?: Record<string, number>;
-      reduceContradictions?: Record<string, number>;
-      forcedPartidaProb?: Record<string, number>;
-    }): ScenarioComputation => {
+    ({
+      samples = DEFAULT_SAMPLES,
+      overrides,
+    }: {
+      samples?: number;
+      overrides?: {
+        extraEvidence?: Record<string, number>;
+        reduceContradictions?: Record<string, number>;
+        forcedPartidaProb?: Record<string, number>;
+      };
+    } = {}): ScenarioComputation => {
       const results: ScenarioResult[] = [];
-      const totalSamples = Array.from({ length: DEFAULT_SAMPLES }, () => 0);
-      const totalExpectedCents = partidas.reduce((acc, partida) => {
+      const totalSamples = Array.from({ length: samples }, () => 0);
+
+      partidas.forEach((partida) => {
         const factIds = unique(getLinkedIds(linksForCase, 'partida', partida.id, 'fact'));
         const relevantFacts = facts.filter((fact) => factIds.includes(fact.id));
         const aggregation =
@@ -393,9 +407,8 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         const sampleValues: number[] = [];
         const drivers: Array<{ fact: Fact; base: number; evidenceCount: number }> = [];
         const scenarioKeyBase = `${selectedScenarioId ?? 'default'}:${partida.id}`;
-        const rngByFact = new Map<string, () => number>();
 
-        relevantFacts.forEach((fact) => {
+        const precalcFacts = relevantFacts.map((fact) => {
           const evidence = evidenceByFact.get(fact.id);
           const evidenceCount = Math.max(
             0,
@@ -408,46 +421,36 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
           const applicableRules = rules.filter((rule) =>
             rule.appliesToTags?.some((tag) => fact.tags.includes(tag) || partida.tags.includes(tag))
           );
+          const applicableRulesCount = applicableRules.length;
           const scenarioNode = scenarioMap.get(`fact:${fact.id}`);
           const base = computeFactBase(
             fact,
             evidenceCount,
             contradictions,
-            applicableRules,
+            applicableRulesCount,
             scenarioWeights,
             scenarioNode
           );
+          const confidence = clamp(scenarioNode?.confidence ?? 0.7);
+          const sigma = 0.12 * (1 - confidence);
+          const rng = mulberry32(hashString(`${scenarioKeyBase}:${fact.id}`));
           drivers.push({ fact, base, evidenceCount });
-          rngByFact.set(fact.id, mulberry32(hashString(`${scenarioKeyBase}:${fact.id}`)));
+          return {
+            fact,
+            evidenceCount,
+            contradictions,
+            applicableRulesCount,
+            scenarioNode,
+            base,
+            sigma,
+            rng,
+          };
         });
 
-        for (let i = 0; i < DEFAULT_SAMPLES; i += 1) {
-          const pFacts = relevantFacts.map((fact) => {
-            const evidence = evidenceByFact.get(fact.id);
-            const evidenceCount = Math.max(
-              0,
-              (evidence?.evidenceCount ?? 0) + (overrides?.extraEvidence?.[fact.id] ?? 0)
-            );
-            const contradictions = Math.max(
-              0,
-              (evidence?.contradictions ?? 0) - (overrides?.reduceContradictions?.[fact.id] ?? 0)
-            );
-            const applicableRules = rules.filter((rule) =>
-              rule.appliesToTags?.some((tag) => fact.tags.includes(tag) || partida.tags.includes(tag))
-            );
-            const scenarioNode = scenarioMap.get(`fact:${fact.id}`);
-            const base = computeFactBase(
-              fact,
-              evidenceCount,
-              contradictions,
-              applicableRules,
-              scenarioWeights,
-              scenarioNode
-            );
-            const confidence = clamp(scenarioNode?.confidence ?? 0.7);
-            const rng = rngByFact.get(fact.id) ?? mulberry32(hashString(`${scenarioKeyBase}:${fact.id}`));
-            const noise = randn(rng) * 0.12 * (1 - confidence);
-            return clamp(base + noise, 0.02, 0.99);
+        for (let i = 0; i < samples; i += 1) {
+          const pFacts = precalcFacts.map((factData) => {
+            const noise = randn(factData.rng) * factData.sigma;
+            return clamp(factData.base + noise, 0.02, 0.99);
           });
 
           const aggregated = computeAggregated(pFacts, aggregation);
@@ -468,10 +471,11 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
           expectedCents,
           drivers: drivers.sort((a, b) => b.base - a.base).slice(0, 3),
         });
+      });
 
-        return acc + expectedCents;
-      }, 0);
-
+      const totalExpectedCents = Math.round(
+        totalSamples.reduce((accSum, value) => accSum + value, 0) / Math.max(totalSamples.length, 1)
+      );
       const perPartidaExpected = results.map((result) => ({
         partidaId: result.partidaId,
         expectedCents: result.expectedCents,
@@ -496,16 +500,73 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     };
   }, [facts, evidenceByFact]);
 
+  const dataQuality = useMemo(() => {
+    const partidasWithoutFacts = partidas.filter(
+      (partida) => getLinkedIds(linksForCase, 'partida', partida.id, 'fact').length === 0
+    );
+    const factsWithoutEvidence = facts.filter(
+      (fact) => (evidenceByFact.get(fact.id)?.evidenceCount ?? 0) === 0
+    );
+    const spansWithoutLinks = spans.filter(
+      (span) => !linksForCase.some((link) => linkInvolves(link, 'span', span.id))
+    );
+    return {
+      partidasWithoutFacts,
+      factsWithoutEvidence,
+      spansWithoutLinks,
+    };
+  }, [evidenceByFact, facts, linksForCase, partidas, spans]);
+
   const actionCandidates = useMemo(() => {
     const actions: ActionCandidate[] = [];
     const baseTotal = scenarioResult.totalExpectedCents;
-    const factsByStrength = [...facts].sort((a, b) => b.strength - a.strength);
-    const strongestFact = factsByStrength[0];
+    const docsWithoutSpans = documents
+      .filter((doc) => !spans.some((span) => span.documentId === doc.id))
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .slice(0, 5);
+    const spansWithoutLinks = spans.filter(
+      (span) => !linksForCase.some((link) => linkInvolves(link, 'span', span.id))
+    );
+    const factsWithoutEvidence = facts.filter(
+      (fact) => (evidenceByFact.get(fact.id)?.evidenceCount ?? 0) === 0
+    );
+    const topPartidas = [...scenarioResult.results]
+      .sort((a, b) => b.expectedCents - a.expectedCents)
+      .slice(0, 3);
+    const topPartidaIds = new Set(topPartidas.map((item) => item.partidaId));
 
-    const docsWithoutSpans = documents.filter((doc) => !spans.some((span) => span.documentId === doc.id));
+    const bottlenecks = topPartidas
+      .map((result) => {
+        const partida = partidas.find((item) => item.id === result.partidaId);
+        if (!partida) return null;
+        const factIds = unique(getLinkedIds(linksForCase, 'partida', partida.id, 'fact'));
+        const relevantFacts = facts.filter((fact) => factIds.includes(fact.id));
+        const ranked = relevantFacts
+          .map((fact) => {
+            const evidence = evidenceByFact.get(fact.id);
+            const evidenceCount = evidence?.evidenceCount ?? 0;
+            const contradictions = evidence?.contradictions ?? 0;
+            const coverage = computeCoverage(fact, evidenceCount, contradictions);
+            return { fact, coverage, contradictions };
+          })
+          .sort((a, b) => a.coverage - b.coverage || b.contradictions - a.contradictions);
+        const selected = ranked[0];
+        if (!selected) return null;
+        return { partidaId: partida.id, ...selected };
+      })
+      .filter(Boolean) as Array<{ partidaId: string; fact: Fact; coverage: number; contradictions: number }>;
+
+    const globalBottleneck = bottlenecks.sort(
+      (a, b) => a.coverage - b.coverage || b.contradictions - a.contradictions
+    )[0];
+    const targetForNewSpan = globalBottleneck?.fact ?? factsWithoutEvidence[0];
+    const targetForLink = [...coverageData.items].sort((a, b) => a.score - b.score)[0]?.fact;
     docsWithoutSpans.forEach((doc) => {
-      if (!strongestFact) return;
-      const result = computeScenario({ extraEvidence: { [strongestFact.id]: 1 } });
+      if (!targetForNewSpan) return;
+      const result = computeScenario({
+        samples: 250,
+        overrides: { extraEvidence: { [targetForNewSpan.id]: 1 } },
+      });
       const delta = result.totalExpectedCents - baseTotal;
       actions.push({
         id: `span-${doc.id}`,
@@ -514,24 +575,30 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         deltaExpected: delta,
         roi: delta / 0.4,
         rationale: 'Genera evidencia básica para conectar con hechos clave.',
+        targetFactId: targetForNewSpan.id,
+        targetPartidaId: globalBottleneck?.partidaId,
+        targetDocumentId: doc.id,
       });
     });
 
-    const spansWithoutLinks = spans.filter(
-      (span) => !linksForCase.some((link) => linkInvolves(link, 'span', span.id))
-    );
-    spansWithoutLinks.slice(0, 5).forEach((span) => {
-      const targetFact = coverageData.items.find((item) => item.score < 0.5)?.fact ?? strongestFact;
-      if (!targetFact) return;
-      const result = computeScenario({ extraEvidence: { [targetFact.id]: 1 } });
+    spansWithoutLinks.slice(0, 8).forEach((span) => {
+      if (!targetForLink) return;
+      const result = computeScenario({
+        samples: 250,
+        overrides: { extraEvidence: { [targetForLink.id]: 1 } },
+      });
       const delta = result.totalExpectedCents - baseTotal;
       actions.push({
         id: `link-span-${span.id}`,
-        label: `Vincular span “${span.label}” a ${targetFact.title}`,
+        label: `Vincular span “${span.label}” a ${targetForLink.title}`,
         etaHours: 0.25,
         deltaExpected: delta,
         roi: delta / 0.25,
         rationale: 'Aumenta cobertura probatoria del hecho más débil.',
+        targetFactId: targetForLink.id,
+        targetSpanId: span.id,
+        targetDocumentId: span.documentId,
+        targetPage: span.pageStart,
       });
     });
 
@@ -539,7 +606,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
       (partida) => getLinkedIds(linksForCase, 'partida', partida.id, 'fact').length === 0
     );
     partidasSinHechos.forEach((partida) => {
-      const result = computeScenario({ forcedPartidaProb: { [partida.id]: 0.3 } });
+      const result = computeScenario({ samples: 250, overrides: { forcedPartidaProb: { [partida.id]: 0.3 } } });
       const delta = result.totalExpectedCents - baseTotal;
       actions.push({
         id: `fact-${partida.id}`,
@@ -548,23 +615,32 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         deltaExpected: delta,
         roi: delta,
         rationale: 'Introduce base fáctica mínima donde no existe soporte.',
+        targetPartidaId: partida.id,
       });
     });
 
-    coverageData.items
-      .filter((item) => (evidenceByFact.get(item.fact.id)?.contradictions ?? 0) > 0)
-      .forEach((item) => {
-        const result = computeScenario({ reduceContradictions: { [item.fact.id]: 1 } });
-        const delta = result.totalExpectedCents - baseTotal;
-        actions.push({
-          id: `contradiction-${item.fact.id}`,
-          label: `Marcar contradicción en ${item.fact.title}`,
-          etaHours: 0.5,
-          deltaExpected: delta,
-          roi: delta / 0.5,
-          rationale: 'Reduce penalización por evidencia contradictoria.',
-        });
+    const contradictionFacts = coverageData.items.filter(
+      (item) => (evidenceByFact.get(item.fact.id)?.contradictions ?? 0) > 0
+    );
+    const contradictionCandidates = contradictionFacts.filter((item) => {
+      const linkedPartidas = getLinkedIds(linksForCase, 'fact', item.fact.id, 'partida');
+      return linkedPartidas.some((id) => topPartidaIds.has(id));
+    });
+    const contradictionsToUse = contradictionCandidates.length > 0 ? contradictionCandidates : contradictionFacts;
+
+    contradictionsToUse.forEach((item) => {
+      const result = computeScenario({ samples: 250, overrides: { reduceContradictions: { [item.fact.id]: 1 } } });
+      const delta = result.totalExpectedCents - baseTotal;
+      actions.push({
+        id: `contradiction-${item.fact.id}`,
+        label: `Marcar contradicción en ${item.fact.title}`,
+        etaHours: 0.5,
+        deltaExpected: delta,
+        roi: delta / 0.5,
+        rationale: 'Reduce penalización por evidencia contradictoria.',
+        targetFactId: item.fact.id,
       });
+    });
 
     return actions
       .filter((action) => Number.isFinite(action.roi))
@@ -578,6 +654,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     facts,
     linksForCase,
     partidas,
+    scenarioResult.results,
     scenarioResult.totalExpectedCents,
     spans,
   ]);
@@ -677,12 +754,13 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         const applicableRules = rules.filter((rule) =>
           rule.appliesToTags?.some((tag) => fact.tags.includes(tag) || selectedPartida.tags.includes(tag))
         );
+        const applicableRulesCount = applicableRules.length;
         const scenarioNode = scenarioMap.get(`fact:${fact.id}`);
         const base = computeFactBase(
           fact,
           evidenceCount,
           contradictions,
-          applicableRules,
+          applicableRulesCount,
           scenarioWeights,
           scenarioNode
         );
@@ -692,8 +770,8 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
       .slice(0, 6);
 
     return factBases.map(({ fact }) => {
-      const plus = computeScenario({ extraEvidence: { [fact.id]: 1 } });
-      const minus = computeScenario({ extraEvidence: { [fact.id]: -1 } });
+      const plus = computeScenario({ samples: 300, overrides: { extraEvidence: { [fact.id]: 1 } } });
+      const minus = computeScenario({ samples: 300, overrides: { extraEvidence: { [fact.id]: -1 } } });
       const plusExpected =
         plus.perPartidaExpected.find((item) => item.partidaId === selectedPartida.id)?.expectedCents ?? baseExpected;
       const minusExpected =
@@ -777,6 +855,30 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         {selectedAssumptions.narrative && (
           <p className="mt-3 text-xs text-slate-400">{selectedAssumptions.narrative}</p>
         )}
+      </div>
+
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-300">
+        <div className="text-sm font-semibold text-white">Calidad de datos</div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3">
+            <div className="text-[11px] uppercase text-slate-500">Partidas sin hechos</div>
+            <div className="mt-1 text-lg font-semibold text-rose-200">
+              {dataQuality.partidasWithoutFacts.length}
+            </div>
+          </div>
+          <div className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3">
+            <div className="text-[11px] uppercase text-slate-500">Facts sin evidencia</div>
+            <div className="mt-1 text-lg font-semibold text-rose-200">
+              {dataQuality.factsWithoutEvidence.length}
+            </div>
+          </div>
+          <div className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3">
+            <div className="text-[11px] uppercase text-slate-500">Spans sin links</div>
+            <div className="mt-1 text-lg font-semibold text-rose-200">
+              {dataQuality.spansWithoutLinks.length}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
@@ -956,6 +1058,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
                 const partida = partidas.find((item) => item.id === result.partidaId);
                 if (!partida) return null;
                 const isSelected = selectedPartidaId === partida.id;
+                const hasNoFacts = getLinkedIds(linksForCase, 'partida', partida.id, 'fact').length === 0;
                 return (
                   <tr
                     key={result.partidaId}
@@ -976,9 +1079,16 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
                       {formatCurrency(result.expectedCents)}
                     </td>
                     <td className="py-2">
-                      <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300">
-                        {partida.state}
-                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300">
+                          {partida.state}
+                        </span>
+                        {hasNoFacts && (
+                          <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-semibold text-rose-200">
+                            SIN HECHOS
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -1002,9 +1112,17 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
       <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-sm font-semibold text-white">2.1) Drawer por partida</h3>
-          <span className="text-xs text-slate-500">
-            {selectedPartida ? selectedPartida.concept : 'Selecciona una partida'}
-          </span>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            <span>{selectedPartida ? selectedPartida.concept : 'Selecciona una partida'}</span>
+            {selectedPartida && (
+              <a
+                href={`/partidas/${selectedPartida.id}`}
+                className="rounded-full border border-slate-700 px-2 py-1 text-[10px] text-slate-200 hover:border-slate-500"
+              >
+                Abrir Partida
+              </a>
+            )}
+          </div>
         </div>
         {!selectedPartida ? (
           <p className="mt-3 text-xs text-slate-500">Haz click en una fila para ajustar el escenario.</p>
@@ -1028,18 +1146,119 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
                   <ul className="mt-2 space-y-2">
                     {selectedPartidaFacts.map((fact) => {
                       const evidence = evidenceByFact.get(fact.id);
+                      const evidenceCount = evidence?.evidenceCount ?? 0;
+                      const contradictions = evidence?.contradictions ?? 0;
                       const coverage = computeCoverage(
                         fact,
-                        evidence?.evidenceCount ?? 0,
-                        evidence?.contradictions ?? 0
+                        evidenceCount,
+                        contradictions
                       );
+                      const evidenceLinks = linksForCase.filter(
+                        (link) =>
+                          linkInvolves(link, 'fact', fact.id) &&
+                          ['span', 'document'].includes(link.fromType === 'fact' ? link.toType : link.fromType) &&
+                          getLinkRole(link) === 'evidence'
+                      );
+                      const contradictionLinks = linksForCase.filter(
+                        (link) =>
+                          linkInvolves(link, 'fact', fact.id) &&
+                          ['span', 'document'].includes(link.fromType === 'fact' ? link.toType : link.fromType) &&
+                          getLinkRole(link) === 'contradicts'
+                      );
+                      const evidenceSpans = evidenceLinks
+                        .filter((link) => (link.fromType === 'fact' ? link.toType : link.fromType) === 'span')
+                        .map((link) => spansById.get(link.fromType === 'span' ? link.fromId : link.toId))
+                        .filter(Boolean) as Span[];
+                      const evidenceDocs = evidenceLinks
+                        .filter((link) => (link.fromType === 'fact' ? link.toType : link.fromType) === 'document')
+                        .map((link) => documentsById.get(link.fromType === 'document' ? link.fromId : link.toId))
+                        .filter(Boolean) as Document[];
+                      const contradictionSpans = contradictionLinks
+                        .filter((link) => (link.fromType === 'fact' ? link.toType : link.fromType) === 'span')
+                        .map((link) => spansById.get(link.fromType === 'span' ? link.fromId : link.toId))
+                        .filter(Boolean) as Span[];
+                      const contradictionDocs = contradictionLinks
+                        .filter((link) => (link.fromType === 'fact' ? link.toType : link.fromType) === 'document')
+                        .map((link) => documentsById.get(link.fromType === 'document' ? link.fromId : link.toId))
+                        .filter(Boolean) as Document[];
                       return (
                         <li key={fact.id} className="rounded-lg border border-slate-800/70 p-2">
-                          <div className="text-sm font-semibold text-white">{fact.title}</div>
-                          <div className="mt-1 text-[11px] text-slate-400">
-                            Evidencias: {evidence?.evidenceCount ?? 0} · Contradicciones:{' '}
-                            {evidence?.contradictions ?? 0} · Cobertura: {Math.round(coverage * 100)}%
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="text-sm font-semibold text-white">{fact.title}</div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <a
+                                href={`/facts/${fact.id}`}
+                                className="rounded-full border border-slate-700 px-2 py-0.5 text-[10px] text-slate-200 hover:border-slate-500"
+                              >
+                                Abrir Fact
+                              </a>
+                              {evidenceCount === 0 && (
+                                <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-semibold text-rose-200">
+                                  SIN PRUEBA
+                                </span>
+                              )}
+                            </div>
                           </div>
+                          <div className="mt-1 text-[11px] text-slate-400">
+                            Evidencias: {evidenceCount} · Contradicciones: {contradictions} · Cobertura:{' '}
+                            {Math.round(coverage * 100)}%
+                          </div>
+                          <div className="mt-2 space-y-1 text-[11px] text-slate-400">
+                            <div className="uppercase text-slate-500">Evidencias reales</div>
+                            {evidenceSpans.length === 0 && evidenceDocs.length === 0 ? (
+                              <p className="text-[11px] text-slate-500">Sin evidencias vinculadas.</p>
+                            ) : (
+                              <ul className="space-y-1">
+                                {evidenceSpans.map((span) => (
+                                  <li key={span.id}>
+                                    <a
+                                      href={`/documents/${span.documentId}/view?page=${span.pageStart}`}
+                                      className="text-sky-200 hover:text-sky-100"
+                                    >
+                                      Span: {span.label} (p. {span.pageStart})
+                                    </a>
+                                  </li>
+                                ))}
+                                {evidenceDocs.map((doc) => (
+                                  <li key={doc.id}>
+                                    <a
+                                      href={`/documents/${doc.id}/view`}
+                                      className="text-sky-200 hover:text-sky-100"
+                                    >
+                                      Documento: {doc.title}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                          {(contradictionSpans.length > 0 || contradictionDocs.length > 0) && (
+                            <div className="mt-2 space-y-1 text-[11px] text-rose-200/80">
+                              <div className="uppercase text-rose-300">Contradicciones</div>
+                              <ul className="space-y-1">
+                                {contradictionSpans.map((span) => (
+                                  <li key={span.id}>
+                                    <a
+                                      href={`/documents/${span.documentId}/view?page=${span.pageStart}`}
+                                      className="text-rose-200 hover:text-rose-100"
+                                    >
+                                      Span: {span.label} (p. {span.pageStart})
+                                    </a>
+                                  </li>
+                                ))}
+                                {contradictionDocs.map((doc) => (
+                                  <li key={doc.id}>
+                                    <a
+                                      href={`/documents/${doc.id}/view`}
+                                      className="text-rose-200 hover:text-rose-100"
+                                    >
+                                      Documento: {doc.title}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                         </li>
                       );
                     })}
@@ -1271,6 +1490,38 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
                     {action.etaHours}h
                   </span>
                 </div>
+                {(action.targetDocumentId || action.targetFactId || action.targetPartidaId) && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {action.targetDocumentId && (
+                      <a
+                        href={
+                          action.targetPage
+                            ? `/documents/${action.targetDocumentId}/view?page=${action.targetPage}`
+                            : `/documents/${action.targetDocumentId}/view`
+                        }
+                        className="rounded-full border border-slate-700 px-2 py-1 text-[10px] text-slate-200 hover:border-slate-500"
+                      >
+                        Abrir PDF
+                      </a>
+                    )}
+                    {action.targetFactId && (
+                      <a
+                        href={`/facts/${action.targetFactId}`}
+                        className="rounded-full border border-slate-700 px-2 py-1 text-[10px] text-slate-200 hover:border-slate-500"
+                      >
+                        Abrir Fact
+                      </a>
+                    )}
+                    {action.targetPartidaId && (
+                      <a
+                        href={`/partidas/${action.targetPartidaId}`}
+                        className="rounded-full border border-slate-700 px-2 py-1 text-[10px] text-slate-200 hover:border-slate-500"
+                      >
+                        Abrir Partida
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             ))
           )}
