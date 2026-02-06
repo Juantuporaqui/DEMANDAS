@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from "react";
-import HardRefreshButton from "../../components/HardRefreshButton";
 
 export default function ToolsPage() {
   const [advanced, setAdvanced] = useState(false);

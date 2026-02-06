@@ -18,7 +18,8 @@ export function TasksPage() {
 
   const toggleTask = async (task: Task) => {
     // Actualización optimista en la UI
-    const updatedTask = { ...task, done: !task.done };
+    const newStatus = task.status === 'completada' ? 'pendiente' : 'completada';
+    const updatedTask = { ...task, status: newStatus as Task['status'], updatedAt: Date.now() };
     setTasks(tasks.map(t => t.id === task.id ? updatedTask : t));
     // Guardar en DB
     await tasksRepo.update(updatedTask);
@@ -46,18 +47,18 @@ export function TasksPage() {
         )}
         
         {tasks.map((task) => (
-          <Card key={task.id} className={`p-4 flex items-center gap-4 transition-all ${task.done ? 'opacity-50' : 'hover:border-emerald-500/50'}`}>
+          <Card key={task.id} className={`p-4 flex items-center gap-4 transition-all ${task.status === 'completada' ? 'opacity-50' : 'hover:border-emerald-500/50'}`}>
             <button
               onClick={() => toggleTask(task)}
               className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                task.done ? 'bg-emerald-500 border-emerald-500 text-black' : 'border-slate-600 hover:border-emerald-500'
+                task.status === 'completada' ? 'bg-emerald-500 border-emerald-500 text-black' : 'border-slate-600 hover:border-emerald-500'
               }`}
             >
-              {task.done && '✓'}
+              {task.status === 'completada' && '✓'}
             </button>
-            
+
             <div className="flex-1">
-              <h3 className={`font-bold ${task.done ? 'text-slate-500 line-through' : 'text-slate-200'}`}>
+              <h3 className={`font-bold ${task.status === 'completada' ? 'text-slate-500 line-through' : 'text-slate-200'}`}>
                 {task.title}
               </h3>
               <div className="flex gap-2 mt-1">
