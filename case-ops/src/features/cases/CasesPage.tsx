@@ -4,7 +4,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { EmptyState } from '../../components';
 import {
   casesRepo,
@@ -14,7 +13,6 @@ import {
   partidasRepo,
   strategiesRepo,
 } from '../../db/repositories';
-import { chaladitaDb } from '../../db/chaladitaDb';
 import type { Case, Document, Event, Fact, Partida, Strategy } from '../../types';
 import { formatDate } from '../../utils/dates';
 import { resumenAudiencia } from '../../data/audienciaPrevia';
@@ -114,16 +112,7 @@ export function CasesPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [loading, setLoading] = useState(true);
-  const chaladitaData = useLiveQuery(async () => {
-    const [procedimientos, hechos, documentos, partidas] = await Promise.all([
-      chaladitaDb.procedimientos.toArray(),
-      chaladitaDb.hechos.toArray(),
-      chaladitaDb.documentos.toArray(),
-      chaladitaDb.partidas.toArray(),
-    ]);
 
-    return { procedimientos, hechos, documentos, partidas };
-  }, []);
 
   useEffect(() => {
     async function loadCases() {
@@ -236,30 +225,13 @@ export function CasesPage() {
             const totalAmount = casePartidas.reduce((sum, partida) => sum + partida.amountCents, 0);
             const nextEvent = getNextEvent(caseEvents);
             const caseLabel = getCaseLabel(caseItem);
-            const procedimientoMatch = chaladitaData?.procedimientos.find(
-              (proc) =>
-                proc.autos === caseItem.autosNumber ||
-                proc.nombre.toLowerCase().includes(caseLabel.toLowerCase())
-            );
-            const chaladitaHechos = chaladitaData?.hechos.filter(
-              (hecho) => hecho.procedimientoId === procedimientoMatch?.id
-            ) ?? [];
-            const chaladitaDocs = chaladitaData?.documentos.filter(
-              (doc) => doc.procedimientoId === procedimientoMatch?.id
-            ) ?? [];
-            const chaladitaPartidas = chaladitaData?.partidas.filter(
-              (partida) => partida.procedimientoId === procedimientoMatch?.id
-            ) ?? [];
-            const chaladitaTotal = chaladitaPartidas.reduce((sum, partida) => sum + partida.importe, 0);
-            const baseAmount = caseItem.amountTotalCents
-              ?? (chaladitaTotal > 0 ? chaladitaTotal : totalAmount);
+            const baseAmount = caseItem.amountTotalCents ?? totalAmount;
             const impactAmountCents = baseAmount > 0
               ? baseAmount
               : caseLabel === 'PICASSENT'
                 ? Math.round(resumenContador.totalReclamado * 100)
                 : 0;
             const microSummary =
-              procedimientoMatch?.objetivoInmediato?.trim() ||
               caseItem.notes?.trim() ||
               DEFAULT_SUMMARIES[caseLabel] ||
               'Revisión integral de la estrategia procesal y probatoria.';
@@ -283,8 +255,8 @@ export function CasesPage() {
                 opposingParty={caseItem.opposingPartyName || 'Sin datos'}
                 opposingLawyer={caseItem.opposingLawyerName || caseItem.opposingCounsel || 'Sin datos'}
                 impactAmountCents={impactAmountCents}
-                hechosCount={chaladitaHechos.length > 0 ? chaladitaHechos.length : caseFacts.length}
-                documentosCount={chaladitaDocs.length > 0 ? chaladitaDocs.length : docs.length}
+                hechosCount={caseFacts.length}
+                documentosCount={docs.length}
                 estrategiasCount={caseStrategies.length}
                 microSummary={microSummary}
                 gapCount={gapCount}
