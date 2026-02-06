@@ -52,6 +52,12 @@ type ActionCandidate = {
   targetPage?: number;
 };
 
+type IssueNodeMeta = {
+  active?: boolean;
+  type?: 'knockout' | 'partial';
+  impact?: number;
+};
+
 const DEFAULT_SCENARIOS: Array<Pick<ScenarioModel, 'name' | 'assumptionsJson' | 'weightsJson'>> = [
   {
     name: 'Defensa fuerte',
@@ -76,6 +82,39 @@ const DEFAULT_SCENARIOS: Array<Pick<ScenarioModel, 'name' | 'assumptionsJson' | 
   },
 ];
 
+const DEFAULT_ISSUES: Array<Pick<Issue, 'title' | 'description' | 'tags'>> = [
+  {
+    title: 'Prescripción',
+    description: 'Defensa de prescripción extintiva para excluir la pretensión principal.',
+    tags: ['defensa', 'knockout'],
+  },
+  {
+    title: 'Prueba actora insuficiente/impugnable',
+    description: 'La actora no acredita el hecho base o su prueba es impugnable.',
+    tags: ['defensa', 'knockout'],
+  },
+  {
+    title: 'Pago acreditado por demandado',
+    description: 'Pago previo acreditado que neutraliza la reclamación.',
+    tags: ['defensa', 'knockout'],
+  },
+  {
+    title: 'Pluspetición / cuantía inflada',
+    description: 'Revisión parcial de la cuantía solicitada por la actora.',
+    tags: ['defensa', 'parcial', 'impact-0.5'],
+  },
+  {
+    title: 'Falta de nexo/causalidad',
+    description: 'Ausencia de relación causal entre hechos y pretensión.',
+    tags: ['defensa', 'knockout'],
+  },
+  {
+    title: 'Compensación/crédito a favor',
+    description: 'Compensación parcial con crédito a favor del demandado.',
+    tags: ['defensa', 'parcial'],
+  },
+];
+
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
 const formatCurrency = (amountCents: number) =>
@@ -92,6 +131,35 @@ const parseJson = <T,>(value: string, fallback: T): T => {
     return fallback;
   }
 };
+
+const getIssueDefaultType = (issue: Issue): IssueNodeMeta['type'] => {
+  if (issue.tags.some((tag) => tag.toLowerCase() === 'parcial' || tag.toLowerCase() === 'partial')) {
+    return 'partial';
+  }
+  if (issue.tags.some((tag) => tag.toLowerCase() === 'knockout')) {
+    return 'knockout';
+  }
+  return 'knockout';
+};
+
+const getIssueDefaultImpact = (issue: Issue, type: IssueNodeMeta['type']) => {
+  if (type === 'knockout') return 1;
+  const impactTag = issue.tags.find((tag) => tag.startsWith('impact-'));
+  const parsed = impactTag ? Number(impactTag.replace('impact-', '')) : NaN;
+  return Number.isFinite(parsed) ? clamp(parsed, 0, 1) : 0.5;
+};
+
+const parseIssueMeta = (issue: Issue, node?: ScenarioNode): IssueNodeMeta => {
+  const stored = node?.metaJson ? parseJson<IssueNodeMeta>(node.metaJson, {}) : {};
+  const type = stored.type ?? getIssueDefaultType(issue);
+  return {
+    active: stored.active ?? (node ? true : false),
+    type,
+    impact: stored.impact ?? getIssueDefaultImpact(issue, type),
+  };
+};
+
+const issueNodeKey = (issueId: string, partidaId: string) => `${issueId}@@${partidaId}`;
 
 const hashString = (value: string) => {
   let hash = 2166136261;
@@ -136,6 +204,17 @@ const getLinkedIds = (links: Link[], type: string, id: string, targetType: strin
     .map((link) => (link.fromType === targetType ? link.fromId : link.toId));
 
 const unique = <T,>(items: T[]) => Array.from(new Set(items));
+
+const getFactIdsForPartida = (linksForCase: Link[], partidaId: string) => {
+  const direct = getLinkedIds(linksForCase, 'partida', partidaId, 'fact');
+  const documentIds = getLinkedIds(linksForCase, 'partida', partidaId, 'document');
+  const spanIds = unique([
+    ...getLinkedIds(linksForCase, 'partida', partidaId, 'span'),
+    ...documentIds.flatMap((docId) => getLinkedIds(linksForCase, 'document', docId, 'span')),
+  ]);
+  const factFromSpans = spanIds.flatMap((spanId) => getLinkedIds(linksForCase, 'span', spanId, 'fact'));
+  return unique([...direct, ...factFromSpans]);
+};
 
 const burdenTargets: Record<Fact['burden'], number> = {
   actora: 3,
@@ -216,19 +295,34 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
   const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
   const [scenarioNodes, setScenarioNodes] = useState<ScenarioNode[]>([]);
   const [selectedPartidaId, setSelectedPartidaId] = useState<string | null>(null);
+  const [scenarioMode, setScenarioMode] = useState<'simple' | 'technical'>('simple');
   const scenarioNodeTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const scenarioModelTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     let isActive = true;
     (async () => {
-      const [spansData, linksData, issuesData, rulesData, modelsData] = await Promise.all([
+      const [spansData, linksData, issuesDataRaw, rulesData, modelsData] = await Promise.all([
         spansRepo.getByCaseId(caseId),
         linksRepo.getAll(),
         issuesRepo.getByCaseId(caseId),
         rulesRepo.getByCaseId(caseId),
         scenarioModelsRepo.getByCaseId(caseId),
       ]);
+      let issuesData = issuesDataRaw;
+      if (issuesData.length === 0) {
+        const created = await Promise.all(
+          DEFAULT_ISSUES.map((issue) =>
+            issuesRepo.create({
+              caseId,
+              title: issue.title,
+              description: issue.description,
+              tags: issue.tags,
+            })
+          )
+        );
+        issuesData = created;
+      }
 
       if (!isActive) return;
       setSpans(spansData);
@@ -277,6 +371,10 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
 
   const scenarioMap = useMemo(
     () => new Map(scenarioNodes.map((node) => [`${node.nodeType}:${node.nodeId}`, node])),
+    [scenarioNodes]
+  );
+  const issueNodeMap = useMemo(
+    () => new Map(scenarioNodes.filter((node) => node.nodeType === 'issue').map((node) => [node.nodeId, node])),
     [scenarioNodes]
   );
   const documentsById = useMemo(() => new Map(documents.map((doc) => [doc.id, doc])), [documents]);
@@ -342,7 +440,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     scenarioId: string,
     nodeType: ScenarioNode['nodeType'],
     nodeId: string,
-    updates: Pick<ScenarioNode, 'value' | 'confidence'>
+    updates: Pick<ScenarioNode, 'value' | 'confidence' | 'metaJson'>
   ) => {
     const key = `${scenarioId}:${nodeType}:${nodeId}`;
     setScenarioNodes((prev) => {
@@ -358,6 +456,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         nodeId,
         value: updates.value,
         confidence: updates.confidence,
+        metaJson: updates.metaJson,
         createdAt: now,
         updatedAt: now,
       };
@@ -399,7 +498,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
       const totalSamples = Array.from({ length: samples }, () => 0);
 
       partidas.forEach((partida) => {
-        const factIds = unique(getLinkedIds(linksForCase, 'partida', partida.id, 'fact'));
+        const factIds = getFactIdsForPartida(linksForCase, partida.id);
         const relevantFacts = facts.filter((fact) => factIds.includes(fact.id));
         const aggregation =
           scenarioWeights.issueAggregationByPartida?.[partida.id] ?? scenarioWeights.issueAggregation ?? 'and';
@@ -488,6 +587,48 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
 
   const scenarioResult = useMemo(() => computeScenario(), [computeScenario]);
 
+  const simpleScenario = useMemo(() => {
+    const results = partidas.map((partida) => {
+      const issueStates = issues.map((issue) => {
+        const nodeId = issueNodeKey(issue.id, partida.id);
+        const node = issueNodeMap.get(nodeId);
+        const meta = parseIssueMeta(issue, node);
+        const pDefensa = clamp(node?.value ?? 0.3);
+        const confidence = clamp(node?.confidence ?? 0.7);
+        const impact = clamp(meta.impact ?? (meta.type === 'knockout' ? 1 : 0.5));
+        return {
+          issue,
+          nodeId,
+          active: meta.active ?? false,
+          type: meta.type ?? 'knockout',
+          impact,
+          pDefensa,
+          confidence,
+        };
+      });
+      const pActora = clamp(
+        issueStates
+          .filter((item) => item.active)
+          .reduce((acc, item) => acc * (1 - item.pDefensa * item.impact), 1)
+      );
+      const expectedCents = Math.round(partida.amountCents * pActora);
+      return {
+        partida,
+        pActora,
+        expectedCents,
+        issueStates,
+        activeIssues: issueStates.filter((item) => item.active),
+      };
+    });
+    const totalExpectedCents = results.reduce((acc, item) => acc + item.expectedCents, 0);
+    return { results, totalExpectedCents };
+  }, [issueNodeMap, issues, partidas]);
+
+  const simpleTopPartidas = useMemo(
+    () => [...simpleScenario.results].sort((a, b) => b.expectedCents - a.expectedCents).slice(0, 10),
+    [simpleScenario.results]
+  );
+
   const coverageData = useMemo(() => {
     const items = facts.map((fact) => {
       const evidence = evidenceByFact.get(fact.id);
@@ -502,7 +643,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
 
   const dataQuality = useMemo(() => {
     const partidasWithoutFacts = partidas.filter(
-      (partida) => getLinkedIds(linksForCase, 'partida', partida.id, 'fact').length === 0
+      (partida) => getFactIdsForPartida(linksForCase, partida.id).length === 0
     );
     const factsWithoutEvidence = facts.filter(
       (fact) => (evidenceByFact.get(fact.id)?.evidenceCount ?? 0) === 0
@@ -539,7 +680,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
       .map((result) => {
         const partida = partidas.find((item) => item.id === result.partidaId);
         if (!partida) return null;
-        const factIds = unique(getLinkedIds(linksForCase, 'partida', partida.id, 'fact'));
+        const factIds = getFactIdsForPartida(linksForCase, partida.id);
         const relevantFacts = facts.filter((fact) => factIds.includes(fact.id));
         const ranked = relevantFacts
           .map((fact) => {
@@ -603,7 +744,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     });
 
     const partidasSinHechos = partidas.filter(
-      (partida) => getLinkedIds(linksForCase, 'partida', partida.id, 'fact').length === 0
+      (partida) => getFactIdsForPartida(linksForCase, partida.id).length === 0
     );
     partidasSinHechos.forEach((partida) => {
       const result = computeScenario({ samples: 250, overrides: { forcedPartidaProb: { [partida.id]: 0.3 } } });
@@ -661,7 +802,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
 
   const paths = useMemo(() => {
     return partidas.map((partida) => {
-      const factIds = unique(getLinkedIds(linksForCase, 'partida', partida.id, 'fact'));
+      const factIds = getFactIdsForPartida(linksForCase, partida.id);
       const factItems = factIds
         .map((id) => facts.find((fact) => fact.id === id))
         .filter(Boolean) as Fact[];
@@ -694,10 +835,14 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     () => partidas.find((partida) => partida.id === selectedPartidaId) ?? null,
     [partidas, selectedPartidaId]
   );
+  const selectedSimple = useMemo(
+    () => simpleScenario.results.find((result) => result.partida.id === selectedPartidaId) ?? null,
+    [selectedPartidaId, simpleScenario.results]
+  );
 
   const selectedPartidaFacts = useMemo(() => {
     if (!selectedPartida) return [];
-    const factIds = unique(getLinkedIds(linksForCase, 'partida', selectedPartida.id, 'fact'));
+    const factIds = getFactIdsForPartida(linksForCase, selectedPartida.id);
     return facts.filter((fact) => factIds.includes(fact.id));
   }, [facts, linksForCase, selectedPartida]);
 
@@ -838,47 +983,78 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     });
   };
 
+  const updateIssueNode = useCallback(
+    (
+      partidaId: string,
+      issue: Issue,
+      changes: Partial<{ active: boolean; type: IssueNodeMeta['type']; impact: number; pDefensa: number; confidence: number }>
+    ) => {
+      if (!selectedScenarioId) return;
+      const nodeId = issueNodeKey(issue.id, partidaId);
+      const existing = issueNodeMap.get(nodeId);
+      const meta = parseIssueMeta(issue, existing);
+      const nextType = changes.type ?? meta.type ?? 'knockout';
+      const nextMeta: IssueNodeMeta = {
+        active: changes.active ?? meta.active ?? false,
+        type: nextType,
+        impact: clamp(
+          changes.impact ?? meta.impact ?? (nextType === 'knockout' ? 1 : getIssueDefaultImpact(issue, nextType))
+        ),
+      };
+      const value = clamp(changes.pDefensa ?? existing?.value ?? 0.3);
+      const confidence = clamp(changes.confidence ?? existing?.confidence ?? 0.7);
+      scheduleScenarioNodeUpsert(selectedScenarioId, 'issue', nodeId, {
+        value,
+        confidence,
+        metaJson: JSON.stringify(nextMeta),
+      });
+    },
+    [issueNodeMap, scheduleScenarioNodeUpsert, selectedScenarioId]
+  );
+
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-300">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-white">🧠 Escenarios (Grafo)</h3>
+            <h3 className="text-base font-semibold text-white">🧠 Escenarios</h3>
             <p className="text-xs text-slate-400">
               Estimación orientativa (no predicción judicial). Depende de enlaces y supuestos.
             </p>
           </div>
-          <span className="rounded-full border border-emerald-500/50 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-            Monte Carlo {DEFAULT_SAMPLES} muestras
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center rounded-full border border-slate-700 bg-slate-950/60 p-1 text-[11px] text-slate-300">
+              <button
+                type="button"
+                onClick={() => setScenarioMode('simple')}
+                className={`rounded-full px-3 py-1 transition ${
+                  scenarioMode === 'simple'
+                    ? 'bg-sky-500/20 text-sky-200'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Modo simple (Matriz por partida)
+              </button>
+              <button
+                type="button"
+                onClick={() => setScenarioMode('technical')}
+                className={`rounded-full px-3 py-1 transition ${
+                  scenarioMode === 'technical'
+                    ? 'bg-sky-500/20 text-sky-200'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Modo técnico (Grafo)
+              </button>
+            </div>
+            <span className="rounded-full border border-emerald-500/50 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+              Monte Carlo {DEFAULT_SAMPLES} muestras
+            </span>
+          </div>
         </div>
         {selectedAssumptions.narrative && (
           <p className="mt-3 text-xs text-slate-400">{selectedAssumptions.narrative}</p>
         )}
-      </div>
-
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-300">
-        <div className="text-sm font-semibold text-white">Calidad de datos</div>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3">
-            <div className="text-[11px] uppercase text-slate-500">Partidas sin hechos</div>
-            <div className="mt-1 text-lg font-semibold text-rose-200">
-              {dataQuality.partidasWithoutFacts.length}
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3">
-            <div className="text-[11px] uppercase text-slate-500">Facts sin evidencia</div>
-            <div className="mt-1 text-lg font-semibold text-rose-200">
-              {dataQuality.factsWithoutEvidence.length}
-            </div>
-          </div>
-          <div className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3">
-            <div className="text-[11px] uppercase text-slate-500">Spans sin links</div>
-            <div className="mt-1 text-lg font-semibold text-rose-200">
-              {dataQuality.spansWithoutLinks.length}
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
@@ -1040,8 +1216,269 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         )}
       </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-        <h3 className="text-sm font-semibold text-white">2) Tabla de partidas</h3>
+      {scenarioMode === 'simple' && (
+        <>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-300">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-white">Resumen global (modo simple)</h3>
+                <p className="text-[11px] text-slate-400">Total en juego y principales partidas por exposición.</p>
+              </div>
+              <div className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                Total € en juego: {formatCurrency(simpleScenario.totalExpectedCents)}
+              </div>
+            </div>
+            <div className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+              <div className="rounded-xl border border-slate-800/70 bg-slate-950/40 p-3">
+                <div className="text-[11px] uppercase text-slate-500">Top 10 partidas por € en juego</div>
+                <ul className="mt-2 space-y-1">
+                  {simpleTopPartidas.map((item, index) => (
+                    <li key={item.partida.id} className="flex items-center justify-between text-[11px] text-slate-300">
+                      <span className="truncate">
+                        {index + 1}. {item.partida.concept}
+                      </span>
+                      <span className="font-semibold text-emerald-200">
+                        {formatCurrency(item.expectedCents)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-slate-800/70 bg-slate-950/40 p-3">
+                  <div className="text-[11px] uppercase text-slate-500">Partidas sin hechos (técnico)</div>
+                  <div className="mt-1 text-lg font-semibold text-rose-200">
+                    {dataQuality.partidasWithoutFacts.length}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-800/70 bg-slate-950/40 p-3">
+                  <div className="text-[11px] uppercase text-slate-500">Facts sin prueba</div>
+                  <div className="mt-1 text-lg font-semibold text-rose-200">
+                    {dataQuality.factsWithoutEvidence.length}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <h3 className="text-sm font-semibold text-white">2) Matriz por partida</h3>
+            <div className="mt-3 overflow-x-auto">
+              <table className="min-w-full text-left text-xs text-slate-300">
+                <thead className="text-[11px] uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th className="py-2 pr-4">Concepto</th>
+                    <th className="py-2 pr-4">Importe</th>
+                    <th className="py-2 pr-4">P. actora</th>
+                    <th className="py-2 pr-4">€ en juego</th>
+                    <th className="py-2">Defensas activas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {simpleScenario.results.map((result) => {
+                    const isSelected = selectedPartidaId === result.partida.id;
+                    return (
+                      <tr
+                        key={result.partida.id}
+                        className={`cursor-pointer border-t border-slate-800 transition ${
+                          isSelected ? 'bg-sky-500/10' : 'hover:bg-slate-800/40'
+                        }`}
+                        onClick={() => setSelectedPartidaId(result.partida.id)}
+                      >
+                        <td className="py-2 pr-4">
+                          <div className="font-semibold text-white">{result.partida.concept}</div>
+                          <div className="text-[11px] text-slate-500">{result.partida.id}</div>
+                        </td>
+                        <td className="py-2 pr-4">{formatCurrency(result.partida.amountCents)}</td>
+                        <td className="py-2 pr-4">{(result.pActora * 100).toFixed(1)}%</td>
+                        <td className="py-2 pr-4 font-semibold text-emerald-200">
+                          {formatCurrency(result.expectedCents)}
+                        </td>
+                        <td className="py-2">
+                          <div className="flex flex-wrap gap-2">
+                            {result.activeIssues.length === 0 ? (
+                              <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400">
+                                Sin defensas
+                              </span>
+                            ) : (
+                              result.activeIssues.slice(0, 3).map((item) => (
+                                <span
+                                  key={item.issue.id}
+                                  className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-200"
+                                >
+                                  {item.issue.title}
+                                </span>
+                              ))
+                            )}
+                            {result.activeIssues.length > 3 && (
+                              <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400">
+                                +{result.activeIssues.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t border-slate-700 text-sm font-semibold text-white">
+                    <td className="py-2 pr-4">Total</td>
+                    <td />
+                    <td />
+                    <td className="py-2 pr-4 text-emerald-200">
+                      {formatCurrency(simpleScenario.totalExpectedCents)}
+                    </td>
+                    <td />
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-white">2.1) Drawer por partida</h3>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                <span>{selectedPartida ? selectedPartida.concept : 'Selecciona una partida'}</span>
+                {selectedPartida && (
+                  <a
+                    href={`/partidas/${selectedPartida.id}`}
+                    className="rounded-full border border-slate-700 px-2 py-1 text-[10px] text-slate-200 hover:border-slate-500"
+                  >
+                    Abrir Partida
+                  </a>
+                )}
+              </div>
+            </div>
+            {!selectedSimple ? (
+              <p className="mt-3 text-xs text-slate-500">Haz click en una fila para ajustar defensas.</p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {selectedSimple.issueStates.map((item) => (
+                  <div key={item.issue.id} className="rounded-xl border border-slate-800/70 bg-slate-950/30 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-white">
+                        <input
+                          type="checkbox"
+                          checked={item.active}
+                          onChange={(event) =>
+                            updateIssueNode(selectedSimple.partida.id, item.issue, { active: event.target.checked })
+                          }
+                          className="h-4 w-4 rounded border-slate-600 bg-slate-950"
+                        />
+                        {item.issue.title}
+                      </label>
+                      <span className="text-[11px] text-slate-500">{item.issue.description}</span>
+                    </div>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <label className="flex flex-col gap-1 text-[11px] text-slate-400">
+                        P. defensa: {item.pDefensa.toFixed(2)}
+                        <input
+                          type="range"
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          value={item.pDefensa}
+                          onChange={(event) =>
+                            updateIssueNode(selectedSimple.partida.id, item.issue, {
+                              pDefensa: Number(event.target.value),
+                            })
+                          }
+                          className="w-full"
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1 text-[11px] text-slate-400">
+                        Confianza: {item.confidence.toFixed(2)}
+                        <input
+                          type="range"
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          value={item.confidence}
+                          onChange={(event) =>
+                            updateIssueNode(selectedSimple.partida.id, item.issue, {
+                              confidence: Number(event.target.value),
+                            })
+                          }
+                          className="w-full"
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1 text-[11px] text-slate-400">
+                        Tipo de defensa
+                        <select
+                          value={item.type}
+                          onChange={(event) => {
+                            const type = event.target.value as IssueNodeMeta['type'];
+                            updateIssueNode(selectedSimple.partida.id, item.issue, {
+                              type,
+                              impact: type === 'knockout' ? 1 : item.impact,
+                            });
+                          }}
+                          className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100"
+                        >
+                          <option value="knockout">Knockout</option>
+                          <option value="partial">Parcial</option>
+                        </select>
+                      </label>
+                      {item.type === 'partial' ? (
+                        <label className="flex flex-col gap-1 text-[11px] text-slate-400">
+                          Impacto: {item.impact.toFixed(2)}
+                          <input
+                            type="range"
+                            min={0}
+                            max={1}
+                            step={0.01}
+                            value={item.impact}
+                            onChange={(event) =>
+                              updateIssueNode(selectedSimple.partida.id, item.issue, {
+                                impact: Number(event.target.value),
+                              })
+                            }
+                            className="w-full"
+                          />
+                        </label>
+                      ) : (
+                        <div className="flex items-center text-[11px] text-slate-500">
+                          Impacto fijo 1.0 (knockout)
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {scenarioMode === 'technical' && (
+        <>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-300">
+            <div className="text-sm font-semibold text-white">Calidad de datos</div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3">
+                <div className="text-[11px] uppercase text-slate-500">Partidas sin hechos</div>
+                <div className="mt-1 text-lg font-semibold text-rose-200">
+                  {dataQuality.partidasWithoutFacts.length}
+                </div>
+              </div>
+              <div className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3">
+                <div className="text-[11px] uppercase text-slate-500">Facts sin evidencia</div>
+                <div className="mt-1 text-lg font-semibold text-rose-200">
+                  {dataQuality.factsWithoutEvidence.length}
+                </div>
+              </div>
+              <div className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-3">
+                <div className="text-[11px] uppercase text-slate-500">Spans sin links</div>
+                <div className="mt-1 text-lg font-semibold text-rose-200">
+                  {dataQuality.spansWithoutLinks.length}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <h3 className="text-sm font-semibold text-white">2) Tabla de partidas</h3>
         <div className="mt-3 overflow-x-auto">
           <table className="min-w-full text-left text-xs text-slate-300">
             <thead className="text-[11px] uppercase tracking-wide text-slate-500">
@@ -1058,7 +1495,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
                 const partida = partidas.find((item) => item.id === result.partidaId);
                 if (!partida) return null;
                 const isSelected = selectedPartidaId === partida.id;
-                const hasNoFacts = getLinkedIds(linksForCase, 'partida', partida.id, 'fact').length === 0;
+                const hasNoFacts = getFactIdsForPartida(linksForCase, partida.id).length === 0;
                 return (
                   <tr
                     key={result.partidaId}
@@ -1527,6 +1964,8 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
           )}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }
