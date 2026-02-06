@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FAB, EmptyState, ListItem } from '../../components';
+import { FAB, EmptyState } from '../../components';
 import { partidasRepo, linksRepo } from '../../db/repositories';
 import type { Partida, PartidaState } from '../../types';
 import { formatDate } from '../../utils/dates';
@@ -85,34 +85,48 @@ export function PartidasPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Partidas</h1>
-          <p className="page-subtitle">
-            Total: {formatCurrency(totalAmount)}
-          </p>
+          <p className="page-subtitle">Total: {formatCurrency(totalAmount)}</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="tabs mb-md">
+      <div className="mb-md flex flex-wrap gap-2 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-2">
         <button
-          className={`tab ${filter === 'all' ? 'active' : ''}`}
+          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+            filter === 'all'
+              ? 'border-emerald-500/40 bg-emerald-500/20 text-emerald-300'
+              : 'border-slate-700 bg-slate-900/50 text-slate-300 hover:border-slate-500'
+          }`}
           onClick={() => setFilter('all')}
         >
           Todas ({counts.all})
         </button>
         <button
-          className={`tab ${filter === 'reclamable' ? 'active' : ''}`}
+          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+            filter === 'reclamable'
+              ? 'border-emerald-500/40 bg-emerald-500/20 text-emerald-300'
+              : 'border-slate-700 bg-slate-900/50 text-slate-300 hover:border-slate-500'
+          }`}
           onClick={() => setFilter('reclamable')}
         >
           Reclamables ({counts.reclamable})
         </button>
         <button
-          className={`tab ${filter === 'discutida' ? 'active' : ''}`}
+          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+            filter === 'discutida'
+              ? 'border-rose-500/40 bg-rose-500/20 text-rose-300'
+              : 'border-slate-700 bg-slate-900/50 text-slate-300 hover:border-slate-500'
+          }`}
           onClick={() => setFilter('discutida')}
         >
           Discutidas ({counts.discutida})
         </button>
         <button
-          className={`tab ${filter === 'neutral' ? 'active' : ''}`}
+          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+            filter === 'neutral'
+              ? 'border-sky-500/40 bg-sky-500/20 text-sky-300'
+              : 'border-slate-700 bg-slate-900/50 text-slate-300 hover:border-slate-500'
+          }`}
           onClick={() => setFilter('neutral')}
         >
           Neutras ({counts.neutral})
@@ -138,7 +152,7 @@ export function PartidasPage() {
           }
         />
       ) : (
-        <div className="card">
+        <div className="space-y-3 rounded-2xl border border-slate-700/60 bg-gradient-to-b from-slate-900/70 to-slate-950/60 p-3">
           {filteredPartidas.map((partida) => {
             const hasEvidence = evidenceCounts[partida.id] > 0;
             const needsEvidence = partida.state === 'discutida';
@@ -147,56 +161,53 @@ export function PartidasPage() {
               <Link
                 key={partida.id}
                 to={`/partidas/${partida.id}`}
-                style={{ textDecoration: 'none', color: 'inherit' }}
+                className="block rounded-xl border border-slate-700/70 bg-slate-900/50 p-3 text-inherit no-underline transition hover:-translate-y-0.5 hover:border-emerald-500/40 hover:bg-slate-900/80"
               >
-                <ListItem
-                  icon={
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
                     <div
                       style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 8,
+                        width: 38,
+                        height: 38,
+                        borderRadius: 10,
                         backgroundColor: `${STATE_COLORS[partida.state]}20`,
+                        border: `1px solid ${STATE_COLORS[partida.state]}55`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '1.25rem',
+                        fontSize: '1.1rem',
                       }}
                     >
                       💰
                     </div>
-                  }
-                  title={
-                    <span>
-                      <span style={{ fontWeight: 700 }}>
-                        {formatCurrency(partida.amountCents)}
-                      </span>
-                      <span className="text-muted" style={{ marginLeft: 8 }}>
-                        {partida.concept}
-                      </span>
-                    </span>
-                  }
-                  subtitle={
-                    <span>
-                      {partida.id} · {formatDate(partida.date)} ·{' '}
-                      {STATE_LABELS[partida.state]} · {evidenceCounts[partida.id] || 0}{' '}
-                      evidencias
-                    </span>
-                  }
-                  action={
-                    <div className="flex items-center gap-sm">
-                      {needsEvidence && !hasEvidence && (
-                        <span
-                          className="chip chip-danger"
-                          style={{ fontSize: '0.625rem' }}
-                        >
-                          Sin evidencia
-                        </span>
-                      )}
-                      <span>›</span>
+                    <div>
+                      <p className="m-0 text-base font-bold text-white">{formatCurrency(partida.amountCents)}</p>
+                      <p className="m-0 text-sm text-slate-200">{partida.concept}</p>
+                      <p className="m-0 mt-1 text-xs text-slate-400">
+                        {partida.id} · {formatDate(partida.date)} · {evidenceCounts[partida.id] || 0} evidencias
+                      </p>
                     </div>
-                  }
-                />
+                  </div>
+
+                  <div className="flex flex-col items-end gap-2">
+                    <span
+                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold"
+                      style={{
+                        color: STATE_COLORS[partida.state],
+                        borderColor: `${STATE_COLORS[partida.state]}66`,
+                        backgroundColor: `${STATE_COLORS[partida.state]}1A`,
+                      }}
+                    >
+                      {STATE_LABELS[partida.state]}
+                    </span>
+                    {needsEvidence && !hasEvidence && (
+                      <span className="rounded-full border border-rose-500/40 bg-rose-500/15 px-2 py-0.5 text-[10px] font-semibold text-rose-300">
+                        Sin evidencia
+                      </span>
+                    )}
+                    <span className="text-sm text-slate-500">›</span>
+                  </div>
+                </div>
               </Link>
             );
           })}
@@ -204,11 +215,10 @@ export function PartidasPage() {
       )}
 
       {/* Summary */}
-      <div className="card mt-lg">
-        <div className="card-body">
-          <h3 className="section-title mb-md">Resumen económico</h3>
-          <div className="grid grid-2">
-            <div>
+      <div className="mt-lg rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4">
+        <h3 className="mb-md text-sm font-semibold uppercase tracking-wider text-slate-300">Resumen económico</h3>
+        <div className="grid grid-2 gap-3">
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
               <p className="text-muted" style={{ fontSize: '0.875rem' }}>
                 Reclamables
               </p>
@@ -220,7 +230,7 @@ export function PartidasPage() {
                 )}
               </p>
             </div>
-            <div>
+            <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3">
               <p className="text-muted" style={{ fontSize: '0.875rem' }}>
                 Discutidas
               </p>
@@ -232,7 +242,6 @@ export function PartidasPage() {
                 )}
               </p>
             </div>
-          </div>
         </div>
       </div>
 

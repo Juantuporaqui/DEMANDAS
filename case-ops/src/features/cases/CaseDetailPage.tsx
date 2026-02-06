@@ -848,10 +848,14 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {columns.map((column) => (
-          <div key={column.key} className="card-base card-subtle p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-300">{column.title}</h4>
-              <span className="text-[10px] text-slate-500">{column.items.length} partidas</span>
+          <div
+            key={column.key}
+            className="relative overflow-hidden rounded-2xl border border-slate-700/70 bg-gradient-to-b from-slate-900/90 to-slate-950/80 p-4 shadow-lg shadow-slate-950/40"
+          >
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400/70 via-cyan-400/70 to-blue-400/70" />
+            <div className="mb-3 flex items-center justify-between">
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-200">{column.title}</h4>
+              <span className="rounded-full border border-slate-600/70 bg-slate-800/70 px-2 py-0.5 text-[10px] text-slate-300">{column.items.length} partidas</span>
             </div>
             <div className="space-y-2">
               {column.items.map((fact) => {
@@ -861,17 +865,17 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
                     key={fact.id}
                     onClick={() => navigate(`/facts/${fact.id}`)}
                     aria-label={amountDisplay ? `${fact.title} (${amountDisplay})` : fact.title}
-                    className="w-full rounded-xl border border-slate-700/60 bg-slate-900/40 px-3 py-2 text-left text-xs font-medium text-slate-200 transition hover:border-blue-500/40 hover:bg-slate-900/70"
+                    className="group w-full rounded-xl border border-slate-700/70 bg-slate-800/45 px-3 py-2.5 text-left text-xs font-medium text-slate-100 transition hover:-translate-y-0.5 hover:border-emerald-400/40 hover:bg-slate-800/80"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="line-clamp-2">{fact.title}</span>
-                      {amountDisplay && <span className="text-[10px] text-emerald-300">{amountDisplay}</span>}
+                      <span className="line-clamp-2 text-slate-100 group-hover:text-white">{fact.title}</span>
+                      {amountDisplay && <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] text-emerald-300">{amountDisplay}</span>}
                     </div>
                   </button>
                 );
               })}
               {column.items.length === 0 && (
-                <div className="rounded-lg border border-dashed border-slate-700/60 p-3 text-[11px] text-slate-500">
+                <div className="rounded-lg border border-dashed border-slate-600/70 bg-slate-800/30 p-3 text-[11px] text-slate-400">
                   Sin reclamaciones económicas aún.
                 </div>
               )}
