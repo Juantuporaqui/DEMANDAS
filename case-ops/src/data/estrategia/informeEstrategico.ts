@@ -96,6 +96,41 @@ export const estrategiaPicassent: LineaEstrategica[] = [
       '"No puede contradecir sus propias declaraciones fiscales cuando le conviene."',
     ],
   },
+  {
+    id: 'pic-def-5',
+    procedimiento: 'picassent',
+    tipo: 'defensa',
+    titulo: 'DOBLE COBRO / ENRIQUECIMIENTO INJUSTO',
+    descripcion:
+      'La actora reclama reembolso del préstamo Y el 50% de los terrenos/chalet que se compraron con ese préstamo. Es doble cobro.',
+    fundamento: 'Art. 1901 CC (cobro de lo indebido) + Doctrina enriquecimiento sin causa',
+    prioridad: 'alta',
+    estado: 'pendiente',
+    articulosRelacionados: ['art. 1901 CC', 'art. 10 CC', 'Doctrina enriquecimiento sin causa'],
+    documentosSoporte: ['Doc. 6'],
+    frasesClave: [
+      '"No se puede cobrar dos veces: el reembolso del préstamo Y la mitad del patrimonio que financió."',
+      '"Si pretende el 50% de los terrenos, no puede además reclamar el 100% de las cuotas que financiaron esos terrenos."',
+    ],
+    riesgos: 'El juez puede considerar que son pretensiones independientes si la actora lo argumenta bien',
+  },
+  {
+    id: 'pic-def-6',
+    procedimiento: 'picassent',
+    tipo: 'defensa',
+    titulo: 'CONSECUENCIAS ADVERSAS DE DOCS INCOMPLETOS (Art. 329 LEC)',
+    descripcion:
+      'Los Docs 39, 41, 43, 45 están recortados. El Art. 329 LEC permite al tribunal tener por ciertos los hechos que la otra parte alegue si se aportan documentos incompletos.',
+    fundamento: 'Art. 329 LEC - Deber de exhibición documental',
+    prioridad: 'critica',
+    estado: 'pendiente',
+    articulosRelacionados: ['art. 329 LEC', 'art. 328 LEC'],
+    documentosSoporte: ['Doc. 39', 'Doc. 41', 'Doc. 43', 'Doc. 45'],
+    frasesClave: [
+      '"Señoría, solicitamos que aplique el Art. 329 LEC: si la actora oculta información relevante en documentos recortados, el tribunal puede tener por ciertos los hechos que alegamos."',
+      '"Pedimos diligencia final para que el banco aporte los extractos COMPLETOS (Art. 435 LEC)."',
+    ],
+  },
 
   // ATAQUES
   {
@@ -111,6 +146,22 @@ export const estrategiaPicassent: LineaEstrategica[] = [
     documentosSoporte: [],
     frasesClave: [
       '"¿Dónde están los extractos de su cuenta personal acreditando esos pagos?"',
+    ],
+  },
+  {
+    id: 'pic-atk-2',
+    procedimiento: 'picassent',
+    tipo: 'ataque',
+    titulo: 'DILIGENCIA FINAL — EXTRACTOS COMPLETOS DEL BANCO',
+    descripcion:
+      'Solicitar al banco los extractos completos de las transferencias donde se recortó el ordenante. Art. 435 LEC.',
+    fundamento: 'Art. 435 LEC - Diligencias finales',
+    prioridad: 'alta',
+    estado: 'pendiente',
+    articulosRelacionados: ['art. 435 LEC'],
+    documentosSoporte: [],
+    frasesClave: [
+      '"Solicitamos como diligencia final que se oficie al banco para que aporte los extractos completos de las operaciones correspondientes a los Docs 39, 41, 43 y 45."',
     ],
   },
 
