@@ -649,3 +649,5 @@ export function buscarEnQuart(termino: string): string[] {
 
   return resultados;
 }
+
+export { escenariosQuart } from './escenarios';
