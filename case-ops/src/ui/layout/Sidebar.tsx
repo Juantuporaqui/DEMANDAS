@@ -143,7 +143,7 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
             </div>
           )}
           <div className="space-y-0.5">
-            {NAV_ITEMS.map(item => (
+            {NAV_ITEMS.slice(0, 1).map(item => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -243,6 +243,31 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
               </NavLink>
             </div>
           )}
+        </div>
+
+        <div>
+          <div className="space-y-0.5">
+            {NAV_ITEMS.slice(1).map(item => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                title={collapsed ? item.label : undefined}
+                className={({ isActive }) =>
+                  `${navItemBase} ${isActive ? navItemActive : navItemInactive} ${
+                    collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'
+                  }`
+                }
+              >
+                <span className="flex h-8 w-8 items-center justify-center flex-shrink-0">{item.icon}</span>
+                {!collapsed && <span className="truncate">{item.label}</span>}
+                {collapsed && (
+                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 opacity-0 shadow-xl shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.06]">
+                    {item.label}
+                  </span>
+                )}
+              </NavLink>
+            ))}
+          </div>
         </div>
 
         {/* Herramientas */}
