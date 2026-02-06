@@ -1,4 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import type {
   Document,
   Fact,
@@ -77,11 +88,31 @@ const parseJson = <T,>(value: string, fallback: T): T => {
   }
 };
 
-const randn = () => {
+const hashString = (value: string) => {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+};
+
+const mulberry32 = (seed: number) => {
+  let t = seed >>> 0;
+  return () => {
+    t += 0x6d2b79f5;
+    let result = t;
+    result = Math.imul(result ^ (result >>> 15), result | 1);
+    result ^= result + Math.imul(result ^ (result >>> 7), result | 61);
+    return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const randn = (rng: () => number) => {
   let u = 0;
   let v = 0;
-  while (u === 0) u = Math.random();
-  while (v === 0) v = Math.random();
+  while (u === 0) u = rng();
+  while (v === 0) v = rng();
   return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 };
 
@@ -158,6 +189,8 @@ type ScenarioResult = {
 type ScenarioComputation = {
   results: ScenarioResult[];
   totalExpectedCents: number;
+  totalSamples: number[];
+  perPartidaExpected: Array<{ partidaId: string; expectedCents: number }>;
 };
 
 const DEFAULT_SAMPLES = 2000;
@@ -177,6 +210,9 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
   const [scenarioModels, setScenarioModels] = useState<ScenarioModel[]>([]);
   const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
   const [scenarioNodes, setScenarioNodes] = useState<ScenarioNode[]>([]);
+  const [selectedPartidaId, setSelectedPartidaId] = useState<string | null>(null);
+  const scenarioNodeTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const scenarioModelTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     let isActive = true;
@@ -280,47 +316,91 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     return parseJson<ScenarioWeights>(scenario.weightsJson, {});
   }, [scenarioModels, selectedScenarioId]);
 
-  const computeScenario = (overrides?: {
-    extraEvidence?: Record<string, number>;
-    reduceContradictions?: Record<string, number>;
-    forcedPartidaProb?: Record<string, number>;
-  }): ScenarioComputation => {
-    const results: ScenarioResult[] = [];
-    const totalExpectedCents = partidas.reduce((acc, partida) => {
-      const factIds = unique(getLinkedIds(linksForCase, 'partida', partida.id, 'fact'));
-      const relevantFacts = facts.filter((fact) => factIds.includes(fact.id));
-      const aggregation =
-        scenarioWeights.issueAggregationByPartida?.[partida.id] ?? scenarioWeights.issueAggregation ?? 'and';
+  const updateScenarioModel = (id: string, updates: Partial<ScenarioModel>) => {
+    setScenarioModels((prev) =>
+      prev.map((model) => (model.id === id ? { ...model, ...updates, updatedAt: Date.now() } : model))
+    );
+    const existingTimeout = scenarioModelTimeouts.current.get(id);
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+    }
+    const timeout = setTimeout(() => {
+      scenarioModelsRepo.update(id, updates);
+      scenarioModelTimeouts.current.delete(id);
+    }, 300);
+    scenarioModelTimeouts.current.set(id, timeout);
+  };
 
-      const sampleValues: number[] = [];
-      const drivers: Array<{ fact: Fact; base: number; evidenceCount: number }> = [];
+  const scheduleScenarioNodeUpsert = (
+    scenarioId: string,
+    nodeType: ScenarioNode['nodeType'],
+    nodeId: string,
+    updates: Pick<ScenarioNode, 'value' | 'confidence'>
+  ) => {
+    const key = `${scenarioId}:${nodeType}:${nodeId}`;
+    setScenarioNodes((prev) => {
+      const existing = prev.find((node) => node.scenarioId === scenarioId && node.nodeType === nodeType && node.nodeId === nodeId);
+      if (existing) {
+        return prev.map((node) => (node.id === existing.id ? { ...node, ...updates } : node));
+      }
+      const now = Date.now();
+      const tempNode: ScenarioNode = {
+        id: `temp-${key}`,
+        scenarioId,
+        nodeType,
+        nodeId,
+        value: updates.value,
+        confidence: updates.confidence,
+        createdAt: now,
+        updatedAt: now,
+      };
+      return [...prev, tempNode];
+    });
 
-      relevantFacts.forEach((fact) => {
-        const evidence = evidenceByFact.get(fact.id);
-        const evidenceCount = (evidence?.evidenceCount ?? 0) + (overrides?.extraEvidence?.[fact.id] ?? 0);
-        const contradictions = Math.max(
-          0,
-          (evidence?.contradictions ?? 0) - (overrides?.reduceContradictions?.[fact.id] ?? 0)
-        );
-        const applicableRules = rules.filter((rule) =>
-          rule.appliesToTags?.some((tag) => fact.tags.includes(tag) || partida.tags.includes(tag))
-        );
-        const scenarioNode = scenarioMap.get(`fact:${fact.id}`);
-        const base = computeFactBase(
-          fact,
-          evidenceCount,
-          contradictions,
-          applicableRules,
-          scenarioWeights,
-          scenarioNode
-        );
-        drivers.push({ fact, base, evidenceCount });
+    const existingTimeout = scenarioNodeTimeouts.current.get(key);
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+    }
+    const timeout = setTimeout(async () => {
+      const saved = await scenarioNodesRepo.upsertByKey(scenarioId, nodeType, nodeId, updates);
+      setScenarioNodes((prev) => {
+        const withoutTemp = prev.filter((node) => !(node.id.startsWith('temp-') && node.nodeId === nodeId && node.nodeType === nodeType));
+        const exists = withoutTemp.find((node) => node.id === saved.id);
+        if (exists) {
+          return withoutTemp.map((node) => (node.id === saved.id ? saved : node));
+        }
+        return [...withoutTemp, saved];
       });
+      scenarioNodeTimeouts.current.delete(key);
+    }, 300);
+    scenarioNodeTimeouts.current.set(key, timeout);
+  };
 
-      for (let i = 0; i < DEFAULT_SAMPLES; i += 1) {
-        const pFacts = relevantFacts.map((fact) => {
+  const computeScenario = useCallback(
+    (overrides?: {
+      extraEvidence?: Record<string, number>;
+      reduceContradictions?: Record<string, number>;
+      forcedPartidaProb?: Record<string, number>;
+    }): ScenarioComputation => {
+      const results: ScenarioResult[] = [];
+      const totalSamples = Array.from({ length: DEFAULT_SAMPLES }, () => 0);
+      const totalExpectedCents = partidas.reduce((acc, partida) => {
+        const factIds = unique(getLinkedIds(linksForCase, 'partida', partida.id, 'fact'));
+        const relevantFacts = facts.filter((fact) => factIds.includes(fact.id));
+        const aggregation =
+          scenarioWeights.issueAggregationByPartida?.[partida.id] ?? scenarioWeights.issueAggregation ?? 'and';
+
+        const sampleValues: number[] = [];
+        const drivers: Array<{ fact: Fact; base: number; evidenceCount: number }> = [];
+        const scenarioKeyBase = `${selectedScenarioId ?? 'default'}:${partida.id}`;
+        const rngByFact = new Map<string, () => number>();
+
+        relevantFacts.forEach((fact) => {
           const evidence = evidenceByFact.get(fact.id);
-          const evidenceCount = (evidence?.evidenceCount ?? 0) + (overrides?.extraEvidence?.[fact.id] ?? 0);
+          const evidenceCount = Math.max(
+            0,
+            (evidence?.evidenceCount ?? 0) + (overrides?.extraEvidence?.[fact.id] ?? 0)
+          );
           const contradictions = Math.max(
             0,
             (evidence?.contradictions ?? 0) - (overrides?.reduceContradictions?.[fact.id] ?? 0)
@@ -337,45 +417,72 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
             scenarioWeights,
             scenarioNode
           );
-          const confidence = clamp(scenarioNode?.confidence ?? 0.7);
-          const noise = randn() * 0.12 * (1 - confidence);
-          return clamp(base + noise, 0.02, 0.99);
+          drivers.push({ fact, base, evidenceCount });
+          rngByFact.set(fact.id, mulberry32(hashString(`${scenarioKeyBase}:${fact.id}`)));
         });
 
-        const aggregated = computeAggregated(pFacts, aggregation);
-        sampleValues.push(aggregated);
-      }
+        for (let i = 0; i < DEFAULT_SAMPLES; i += 1) {
+          const pFacts = relevantFacts.map((fact) => {
+            const evidence = evidenceByFact.get(fact.id);
+            const evidenceCount = Math.max(
+              0,
+              (evidence?.evidenceCount ?? 0) + (overrides?.extraEvidence?.[fact.id] ?? 0)
+            );
+            const contradictions = Math.max(
+              0,
+              (evidence?.contradictions ?? 0) - (overrides?.reduceContradictions?.[fact.id] ?? 0)
+            );
+            const applicableRules = rules.filter((rule) =>
+              rule.appliesToTags?.some((tag) => fact.tags.includes(tag) || partida.tags.includes(tag))
+            );
+            const scenarioNode = scenarioMap.get(`fact:${fact.id}`);
+            const base = computeFactBase(
+              fact,
+              evidenceCount,
+              contradictions,
+              applicableRules,
+              scenarioWeights,
+              scenarioNode
+            );
+            const confidence = clamp(scenarioNode?.confidence ?? 0.7);
+            const rng = rngByFact.get(fact.id) ?? mulberry32(hashString(`${scenarioKeyBase}:${fact.id}`));
+            const noise = randn(rng) * 0.12 * (1 - confidence);
+            return clamp(base + noise, 0.02, 0.99);
+          });
 
-      const forcedProb = overrides?.forcedPartidaProb?.[partida.id];
-      const pMean = forcedProb ?? sampleValues.reduce((accSum, value) => accSum + value, 0) / sampleValues.length;
-      const p10 = forcedProb ?? quantile(sampleValues, 0.1);
-      const p90 = forcedProb ?? quantile(sampleValues, 0.9);
-      const expectedCents = Math.round(pMean * partida.amountCents);
-      results.push({
-        partidaId: partida.id,
-        pMean,
-        p10,
-        p90,
-        expectedCents,
-        drivers: drivers.sort((a, b) => b.base - a.base).slice(0, 3),
-      });
+          const aggregated = computeAggregated(pFacts, aggregation);
+          sampleValues.push(aggregated);
+          totalSamples[i] += aggregated * partida.amountCents;
+        }
 
-      return acc + expectedCents;
-    }, 0);
+        const forcedProb = overrides?.forcedPartidaProb?.[partida.id];
+        const pMean = forcedProb ?? sampleValues.reduce((accSum, value) => accSum + value, 0) / sampleValues.length;
+        const p10 = forcedProb ?? quantile(sampleValues, 0.1);
+        const p90 = forcedProb ?? quantile(sampleValues, 0.9);
+        const expectedCents = Math.round(pMean * partida.amountCents);
+        results.push({
+          partidaId: partida.id,
+          pMean,
+          p10,
+          p90,
+          expectedCents,
+          drivers: drivers.sort((a, b) => b.base - a.base).slice(0, 3),
+        });
 
-    return { results, totalExpectedCents };
-  };
+        return acc + expectedCents;
+      }, 0);
 
-  const scenarioResult = useMemo(() => computeScenario(), [
-    caseId,
-    facts,
-    partidas,
-    linksForCase,
-    scenarioWeights,
-    rules,
-    evidenceByFact,
-    scenarioMap,
-  ]);
+      const perPartidaExpected = results.map((result) => ({
+        partidaId: result.partidaId,
+        expectedCents: result.expectedCents,
+      }));
+
+      return { results, totalExpectedCents, totalSamples, perPartidaExpected };
+    },
+    [evidenceByFact, facts, linksForCase, partidas, rules, scenarioMap, scenarioWeights, selectedScenarioId]
+  );
+
+  const scenarioResult = useMemo(() => computeScenario(), [computeScenario]);
 
   const coverageData = useMemo(() => {
     const items = facts.map((fact) => {
@@ -465,6 +572,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
       .slice(0, 10);
   }, [
     coverageData,
+    computeScenario,
     documents,
     evidenceByFact,
     facts,
@@ -494,10 +602,163 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     });
   }, [partidas, linksForCase, facts, evidenceByFact]);
 
+  useEffect(() => {
+    if (scenarioResult.results.length === 0) {
+      setSelectedPartidaId(null);
+      return;
+    }
+    const exists = scenarioResult.results.some((result) => result.partidaId === selectedPartidaId);
+    if (!exists) {
+      setSelectedPartidaId(scenarioResult.results[0]?.partidaId ?? null);
+    }
+  }, [scenarioResult.results, selectedPartidaId]);
+
+  const selectedPartida = useMemo(
+    () => partidas.find((partida) => partida.id === selectedPartidaId) ?? null,
+    [partidas, selectedPartidaId]
+  );
+
+  const selectedPartidaFacts = useMemo(() => {
+    if (!selectedPartida) return [];
+    const factIds = unique(getLinkedIds(linksForCase, 'partida', selectedPartida.id, 'fact'));
+    return facts.filter((fact) => factIds.includes(fact.id));
+  }, [facts, linksForCase, selectedPartida]);
+
+  const topPartidasChart = useMemo(() => {
+    const sorted = [...scenarioResult.results].sort((a, b) => b.expectedCents - a.expectedCents);
+    const top = sorted.slice(0, 12);
+    const restTotal = sorted.slice(12).reduce((acc, item) => acc + item.expectedCents, 0);
+    const data = top.map((item) => {
+      const partida = partidas.find((p) => p.id === item.partidaId);
+      return {
+        label: partida?.concept ?? item.partidaId,
+        expectedCents: item.expectedCents,
+      };
+    });
+    if (restTotal > 0) {
+      data.push({ label: 'Resto', expectedCents: restTotal });
+    }
+    return data;
+  }, [partidas, scenarioResult.results]);
+
+  const histogramData = useMemo(() => {
+    if (scenarioResult.totalSamples.length === 0) return [];
+    const min = Math.min(...scenarioResult.totalSamples);
+    const max = Math.max(...scenarioResult.totalSamples);
+    if (min === max) {
+      return [{ label: formatCurrency(min), count: scenarioResult.totalSamples.length }];
+    }
+    const bins = 20;
+    const step = (max - min) / bins;
+    const counts = Array.from({ length: bins }, () => 0);
+    scenarioResult.totalSamples.forEach((value) => {
+      const index = Math.min(bins - 1, Math.floor((value - min) / step));
+      counts[index] += 1;
+    });
+    return counts.map((count, index) => {
+      const start = min + index * step;
+      const end = start + step;
+      return {
+        label: `${formatCurrency(start)} - ${formatCurrency(end)}`,
+        count,
+      };
+    });
+  }, [scenarioResult.totalSamples]);
+
+  const tornadoData = useMemo(() => {
+    if (!selectedPartida) return [];
+    const baseExpected =
+      scenarioResult.perPartidaExpected.find((item) => item.partidaId === selectedPartida.id)?.expectedCents ?? 0;
+    const factBases = selectedPartidaFacts
+      .map((fact) => {
+        const evidence = evidenceByFact.get(fact.id);
+        const evidenceCount = evidence?.evidenceCount ?? 0;
+        const contradictions = evidence?.contradictions ?? 0;
+        const applicableRules = rules.filter((rule) =>
+          rule.appliesToTags?.some((tag) => fact.tags.includes(tag) || selectedPartida.tags.includes(tag))
+        );
+        const scenarioNode = scenarioMap.get(`fact:${fact.id}`);
+        const base = computeFactBase(
+          fact,
+          evidenceCount,
+          contradictions,
+          applicableRules,
+          scenarioWeights,
+          scenarioNode
+        );
+        return { fact, base };
+      })
+      .sort((a, b) => b.base - a.base)
+      .slice(0, 6);
+
+    return factBases.map(({ fact }) => {
+      const plus = computeScenario({ extraEvidence: { [fact.id]: 1 } });
+      const minus = computeScenario({ extraEvidence: { [fact.id]: -1 } });
+      const plusExpected =
+        plus.perPartidaExpected.find((item) => item.partidaId === selectedPartida.id)?.expectedCents ?? baseExpected;
+      const minusExpected =
+        minus.perPartidaExpected.find((item) => item.partidaId === selectedPartida.id)?.expectedCents ?? baseExpected;
+      return {
+        label: fact.title,
+        plus: plusExpected - baseExpected,
+        minus: minusExpected - baseExpected,
+      };
+    });
+  }, [
+    evidenceByFact,
+    computeScenario,
+    rules,
+    scenarioMap,
+    scenarioResult.perPartidaExpected,
+    scenarioWeights,
+    selectedPartida,
+    selectedPartidaFacts,
+  ]);
+
   const selectedScenario = scenarioModels.find((model) => model.id === selectedScenarioId);
   const selectedAssumptions = selectedScenario
     ? parseJson<{ narrative?: string }>(selectedScenario.assumptionsJson, {})
     : {};
+  const selectedWeights = selectedScenario ? parseJson<ScenarioWeights>(selectedScenario.weightsJson, {}) : {};
+
+  const handleCreateScenario = async () => {
+    const created = await scenarioModelsRepo.create({
+      caseId,
+      name: 'Nuevo escenario',
+      assumptionsJson: JSON.stringify({ narrative: '' }),
+      weightsJson: JSON.stringify({
+        issueAggregation: 'and',
+        evidenceBoost: 0.05,
+        rulePenalty: 0.06,
+        contradictionsPenalty: 0.08,
+      }),
+    });
+    setScenarioModels((prev) => [created, ...prev]);
+    setSelectedScenarioId(created.id);
+  };
+
+  const handleCloneScenario = async () => {
+    if (!selectedScenario) return;
+    const created = await scenarioModelsRepo.create({
+      caseId,
+      name: `Copia de ${selectedScenario.name}`,
+      assumptionsJson: selectedScenario.assumptionsJson,
+      weightsJson: selectedScenario.weightsJson,
+    });
+    setScenarioModels((prev) => [created, ...prev]);
+    setSelectedScenarioId(created.id);
+  };
+
+  const handleDeleteScenario = async () => {
+    if (!selectedScenario || scenarioModels.length <= 1) return;
+    await scenarioModelsRepo.delete(selectedScenario.id);
+    setScenarioModels((prev) => prev.filter((model) => model.id !== selectedScenario.id));
+    setSelectedScenarioId((prev) => {
+      if (prev !== selectedScenario.id) return prev;
+      const remaining = scenarioModels.filter((model) => model.id !== selectedScenario.id);
+      return remaining[0]?.id ?? null;
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -506,7 +767,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
           <div>
             <h3 className="text-base font-semibold text-white">🧠 Escenarios (Grafo)</h3>
             <p className="text-xs text-slate-400">
-              Estimación orientativa y auditable con propagación por hechos, prueba y reglas.
+              Estimación orientativa (no predicción judicial). Depende de enlaces y supuestos.
             </p>
           </div>
           <span className="rounded-full border border-emerald-500/50 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
@@ -521,7 +782,32 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
       <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-sm font-semibold text-white">1) Selector de escenario</h3>
-          <span className="text-xs text-slate-500">{issues.length} issues registradas</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-slate-500">{issues.length} issues registradas</span>
+            <button
+              type="button"
+              onClick={handleCreateScenario}
+              className="rounded-full border border-slate-700 px-3 py-1 text-[11px] text-slate-200 hover:border-slate-500"
+            >
+              + Nuevo
+            </button>
+            <button
+              type="button"
+              onClick={handleCloneScenario}
+              disabled={!selectedScenario}
+              className="rounded-full border border-slate-700 px-3 py-1 text-[11px] text-slate-200 hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Clonar
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteScenario}
+              disabled={!selectedScenario || scenarioModels.length <= 1}
+              className="rounded-full border border-rose-500/40 px-3 py-1 text-[11px] text-rose-200 hover:border-rose-400 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Borrar
+            </button>
+          </div>
         </div>
         <div className="mt-3 grid gap-3 md:grid-cols-3">
           {scenarioModels.map((scenario) => (
@@ -537,10 +823,119 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
             >
               <div className="text-xs uppercase tracking-wide text-slate-400">Escenario</div>
               <div className="mt-1 text-sm font-semibold text-white">{scenario.name}</div>
-              <div className="mt-2 text-[11px] text-slate-400 line-clamp-2">{scenario.assumptionsJson}</div>
+              <div className="mt-2 text-[11px] text-slate-400 line-clamp-2">
+                {parseJson<{ narrative?: string }>(scenario.assumptionsJson, {}).narrative ?? 'Sin narrativa'}
+              </div>
             </button>
           ))}
         </div>
+        {selectedScenario && (
+          <div className="mt-4 grid gap-3 rounded-xl border border-slate-800/70 bg-slate-950/40 p-3 text-xs text-slate-200 md:grid-cols-2">
+            <label className="flex flex-col gap-2">
+              <span className="text-[11px] uppercase text-slate-500">Nombre</span>
+              <input
+                value={selectedScenario.name}
+                onChange={(event) => updateScenarioModel(selectedScenario.id, { name: event.target.value })}
+                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-[11px] uppercase text-slate-500">Narrativa</span>
+              <textarea
+                value={selectedAssumptions.narrative ?? ''}
+                onChange={(event) =>
+                  updateScenarioModel(
+                    selectedScenario.id,
+                    { assumptionsJson: JSON.stringify({ ...selectedAssumptions, narrative: event.target.value }) }
+                  )
+                }
+                rows={2}
+                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-[11px] uppercase text-slate-500">Agregación</span>
+              <select
+                value={selectedWeights.issueAggregation ?? 'and'}
+                onChange={(event) =>
+                  updateScenarioModel(
+                    selectedScenario.id,
+                    {
+                      weightsJson: JSON.stringify({
+                        ...selectedWeights,
+                        issueAggregation: event.target.value as 'and' | 'or',
+                      }),
+                    }
+                  )
+                }
+                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+              >
+                <option value="and">AND (más estricto)</option>
+                <option value="or">OR (más flexible)</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-[11px] uppercase text-slate-500">Evidence boost</span>
+              <input
+                type="number"
+                step="0.01"
+                value={selectedWeights.evidenceBoost ?? 0}
+                onChange={(event) =>
+                  updateScenarioModel(
+                    selectedScenario.id,
+                    {
+                      weightsJson: JSON.stringify({
+                        ...selectedWeights,
+                        evidenceBoost: Number(event.target.value),
+                      }),
+                    }
+                  )
+                }
+                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-[11px] uppercase text-slate-500">Rule penalty</span>
+              <input
+                type="number"
+                step="0.01"
+                value={selectedWeights.rulePenalty ?? 0}
+                onChange={(event) =>
+                  updateScenarioModel(
+                    selectedScenario.id,
+                    {
+                      weightsJson: JSON.stringify({
+                        ...selectedWeights,
+                        rulePenalty: Number(event.target.value),
+                      }),
+                    }
+                  )
+                }
+                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-[11px] uppercase text-slate-500">Contradictions penalty</span>
+              <input
+                type="number"
+                step="0.01"
+                value={selectedWeights.contradictionsPenalty ?? 0}
+                onChange={(event) =>
+                  updateScenarioModel(
+                    selectedScenario.id,
+                    {
+                      weightsJson: JSON.stringify({
+                        ...selectedWeights,
+                        contradictionsPenalty: Number(event.target.value),
+                      }),
+                    }
+                  )
+                }
+                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+              />
+            </label>
+          </div>
+        )}
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
@@ -560,8 +955,15 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
               {scenarioResult.results.map((result) => {
                 const partida = partidas.find((item) => item.id === result.partidaId);
                 if (!partida) return null;
+                const isSelected = selectedPartidaId === partida.id;
                 return (
-                  <tr key={result.partidaId} className="border-t border-slate-800">
+                  <tr
+                    key={result.partidaId}
+                    className={`cursor-pointer border-t border-slate-800 transition ${
+                      isSelected ? 'bg-blue-500/10' : 'hover:bg-slate-800/40'
+                    }`}
+                    onClick={() => setSelectedPartidaId(partida.id)}
+                  >
                     <td className="py-2 pr-4">
                       <div className="font-semibold text-white">{partida.concept}</div>
                       <div className="text-[11px] text-slate-500">{partida.id}</div>
@@ -597,9 +999,180 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         </div>
       </div>
 
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold text-white">2.1) Drawer por partida</h3>
+          <span className="text-xs text-slate-500">
+            {selectedPartida ? selectedPartida.concept : 'Selecciona una partida'}
+          </span>
+        </div>
+        {!selectedPartida ? (
+          <p className="mt-3 text-xs text-slate-500">Haz click en una fila para ajustar el escenario.</p>
+        ) : (
+          <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_1fr]">
+            <div className="space-y-3 text-xs text-slate-300">
+              <div className="rounded-xl border border-slate-800/70 bg-slate-950/30 p-3">
+                <div className="text-[11px] uppercase text-slate-500">Drivers principales</div>
+                <div className="mt-2 text-sm text-white">
+                  {scenarioResult.results
+                    .find((result) => result.partidaId === selectedPartida.id)
+                    ?.drivers.map((driver) => driver.fact.title)
+                    .join(' · ') || 'Sin drivers'}
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-800/70 bg-slate-950/30 p-3">
+                <div className="text-[11px] uppercase text-slate-500">Facts vinculados</div>
+                {selectedPartidaFacts.length === 0 ? (
+                  <p className="mt-2 text-[11px] text-slate-500">Sin hechos vinculados.</p>
+                ) : (
+                  <ul className="mt-2 space-y-2">
+                    {selectedPartidaFacts.map((fact) => {
+                      const evidence = evidenceByFact.get(fact.id);
+                      const coverage = computeCoverage(
+                        fact,
+                        evidence?.evidenceCount ?? 0,
+                        evidence?.contradictions ?? 0
+                      );
+                      return (
+                        <li key={fact.id} className="rounded-lg border border-slate-800/70 p-2">
+                          <div className="text-sm font-semibold text-white">{fact.title}</div>
+                          <div className="mt-1 text-[11px] text-slate-400">
+                            Evidencias: {evidence?.evidenceCount ?? 0} · Contradicciones:{' '}
+                            {evidence?.contradictions ?? 0} · Cobertura: {Math.round(coverage * 100)}%
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </div>
+            <div className="space-y-3 text-xs text-slate-300">
+              <div className="text-[11px] uppercase text-slate-500">Ajustes ScenarioNode</div>
+              {selectedPartidaFacts.length === 0 ? (
+                <p className="text-[11px] text-slate-500">Vincula hechos para ajustar el escenario.</p>
+              ) : (
+                <div className="space-y-3">
+                  {selectedPartidaFacts.map((fact) => {
+                    const scenarioNode = scenarioMap.get(`fact:${fact.id}`);
+                    const value = scenarioNode?.value ?? 0;
+                    const confidence = scenarioNode?.confidence ?? 0.7;
+                    return (
+                      <div key={fact.id} className="rounded-lg border border-slate-800/70 p-3">
+                        <div className="text-sm font-semibold text-white">{fact.title}</div>
+                        <div className="mt-2 space-y-2">
+                          <label className="flex flex-col gap-1">
+                            <span className="text-[11px] text-slate-400">
+                              Ajuste valor: {value.toFixed(2)}
+                            </span>
+                            <input
+                              type="range"
+                              min={-0.25}
+                              max={0.25}
+                              step={0.01}
+                              value={value}
+                              onChange={(event) => {
+                                if (!selectedScenarioId) return;
+                                scheduleScenarioNodeUpsert(selectedScenarioId, 'fact', fact.id, {
+                                  value: Number(event.target.value),
+                                  confidence,
+                                });
+                              }}
+                              className="w-full"
+                            />
+                          </label>
+                          <label className="flex flex-col gap-1">
+                            <span className="text-[11px] text-slate-400">
+                              Confianza: {confidence.toFixed(2)}
+                            </span>
+                            <input
+                              type="range"
+                              min={0}
+                              max={1}
+                              step={0.01}
+                              value={confidence}
+                              onChange={(event) => {
+                                if (!selectedScenarioId) return;
+                                scheduleScenarioNodeUpsert(selectedScenarioId, 'fact', fact.id, {
+                                  value,
+                                  confidence: Number(event.target.value),
+                                });
+                              }}
+                              className="w-full"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+        <h3 className="text-sm font-semibold text-white">3) Gráficos de exposición</h3>
+        <div className="mt-4 grid gap-6 lg:grid-cols-3">
+          <div className="rounded-xl border border-slate-800/70 bg-slate-950/30 p-3">
+            <div className="text-[11px] uppercase text-slate-500">Top partidas (expected)</div>
+            <div className="mt-3 h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topPartidasChart}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                  <XAxis dataKey="label" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                  <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                  <Tooltip
+                    contentStyle={{ background: '#0f172a', border: '1px solid #334155' }}
+                    formatter={(value: number) => formatCurrency(value)}
+                  />
+                  <Bar dataKey="expectedCents" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="rounded-xl border border-slate-800/70 bg-slate-950/30 p-3">
+            <div className="text-[11px] uppercase text-slate-500">Histograma (total samples)</div>
+            <div className="mt-3 h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={histogramData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                  <XAxis dataKey="label" tick={{ fill: '#94a3b8', fontSize: 10 }} hide />
+                  <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                  <Tooltip
+                    contentStyle={{ background: '#0f172a', border: '1px solid #334155' }}
+                    formatter={(value: number) => value}
+                  />
+                  <Area type="monotone" dataKey="count" stroke="#a855f7" fill="#a855f7" fillOpacity={0.35} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="rounded-xl border border-slate-800/70 bg-slate-950/30 p-3">
+            <div className="text-[11px] uppercase text-slate-500">Tornado (±1 evidencia)</div>
+            <div className="mt-3 h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={tornadoData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                  <XAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                  <YAxis dataKey="label" type="category" tick={{ fill: '#94a3b8', fontSize: 10 }} width={90} />
+                  <Tooltip
+                    contentStyle={{ background: '#0f172a', border: '1px solid #334155' }}
+                    formatter={(value: number) => formatCurrency(value)}
+                  />
+                  <Bar dataKey="minus" fill="#f87171" />
+                  <Bar dataKey="plus" fill="#34d399" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-          <h3 className="text-sm font-semibold text-white">3) Panel grafo (vista simple)</h3>
+          <h3 className="text-sm font-semibold text-white">4) Panel grafo (vista simple)</h3>
           <div className="mt-3 space-y-4 text-xs text-slate-300">
             {paths.map((entry) => (
               <div key={entry.partida.id} className="rounded-xl border border-slate-800/70 bg-slate-950/30 p-3">
@@ -631,7 +1204,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         </div>
 
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-          <h3 className="text-sm font-semibold text-white">4) Heatmap cobertura hechos</h3>
+          <h3 className="text-sm font-semibold text-white">5) Heatmap cobertura hechos</h3>
           <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
             {coverageData.items.map((item) => (
               <div
@@ -664,7 +1237,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
       </div>
 
       <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-        <h3 className="text-sm font-semibold text-white">5) Next Best Actions</h3>
+        <h3 className="text-sm font-semibold text-white">6) Next Best Actions</h3>
         <div className="mt-3 space-y-3">
           {actionCandidates.length === 0 ? (
             <p className="text-xs text-slate-500">No hay acciones sugeridas.</p>
