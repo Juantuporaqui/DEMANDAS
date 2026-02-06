@@ -3,7 +3,7 @@
 // Líneas de defensa, ataques, réplicas y preguntas
 // ============================================
 
-export type Procedimiento = 'picassent' | 'mislata';
+export type Procedimiento = 'picassent' | 'mislata' | 'quart';
 export type TipoEstrategia = 'defensa' | 'ataque' | 'replica' | 'pregunta';
 export type Prioridad = 'critica' | 'alta' | 'media' | 'baja';
 export type Estado = 'pendiente' | 'preparado' | 'usado' | 'descartado';
@@ -253,6 +253,21 @@ export const estrategiaMislata: LineaEstrategica[] = [
       '"La cantidad es líquida: 7.119,98 €. Las cuotas ya vencieron. Es exigible ahora."',
     ],
   },
+  {
+    id: 'mis-atk-4',
+    procedimiento: 'mislata',
+    tipo: 'ataque',
+    titulo: 'INTERESES MORATORIOS',
+    descripcion: 'Cada cuota impagada genera intereses desde su vencimiento. Art. 1108 CC.',
+    fundamento: 'Art. 1108 CC - Intereses moratorios',
+    prioridad: 'media',
+    estado: 'pendiente',
+    articulosRelacionados: ['art. 1108 CC', 'art. 1100 CC'],
+    documentosSoporte: ['Doc. 3 - Extractos bancarios'],
+    frasesClave: [
+      '"Además del principal, reclamamos intereses moratorios desde el vencimiento de cada cuota impagada, conforme al Art. 1108 CC."',
+    ],
+  },
 
   // RÉPLICAS (contra argumentos de Vicenta)
   {
@@ -317,6 +332,40 @@ export const estrategiaMislata: LineaEstrategica[] = [
     frasesClave: [
       '"El convenio habla de gastos de vivienda: IBI, luz, agua. La hipoteca es una DEUDA que ambos contrajimos. No es lo mismo."',
       '"Si quisieron incluir la hipoteca, debieron pactarlo expresamente."',
+    ],
+  },
+  {
+    id: 'mis-rep-5',
+    procedimiento: 'mislata',
+    tipo: 'replica',
+    titulo: 'SUBSIDIARIO: MEDIDA CAUTELAR SI SUSPENSIÓN',
+    descripcion:
+      'Si el juez suspende por prejudicialidad, pedir medida cautelar: que Vicenta deposite el 50% de las cuotas que vayan venciendo.',
+    fundamento: 'Art. 721 LEC - Medidas cautelares',
+    prioridad: 'alta',
+    estado: 'pendiente',
+    articulosRelacionados: ['art. 721 LEC', 'art. 728 LEC'],
+    documentosSoporte: [],
+    frasesClave: [
+      '"Señoría, si suspende el procedimiento, solicitamos medida cautelar: que la demandada deposite el 50% de las cuotas que vayan venciendo para evitar perjuicio irreparable."',
+      '"El periculum in mora es evidente: cada mes que pasa, Juan paga el 100% y la deuda crece."',
+    ],
+    riesgos: 'El juez puede considerar que no hay periculum in mora suficiente',
+  },
+  {
+    id: 'mis-atk-5',
+    procedimiento: 'mislata',
+    tipo: 'ataque',
+    titulo: 'COSTAS POR TEMERIDAD',
+    descripcion:
+      'Solicitar condena en costas. Los argumentos de Vicenta son débiles (según nuestro análisis) y la deuda es líquida.',
+    fundamento: 'Art. 394 LEC - Costas',
+    prioridad: 'baja',
+    estado: 'pendiente',
+    articulosRelacionados: ['art. 394 LEC'],
+    documentosSoporte: [],
+    frasesClave: [
+      '"Solicitamos condena en costas: la deuda es líquida, vencida y exigible, y la oposición carece de fundamento serio."',
     ],
   },
 ];
