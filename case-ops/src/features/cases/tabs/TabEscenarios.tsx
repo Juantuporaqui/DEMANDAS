@@ -29,6 +29,13 @@ import {
   scenarioNodesRepo,
   spansRepo,
 } from '../../../db/repositories';
+import {
+  SCORECARD_TEMPLATES,
+  scorecardTemplateByTag,
+  type ChecklistItem,
+  type DefenseTemplate,
+  type ScorecardContext,
+} from '../../scenarios/scorecardTemplates';
 
 type ScenarioWeights = {
   issueAggregation?: 'and' | 'or';
@@ -115,6 +122,34 @@ const DEFAULT_ISSUES: Array<Pick<Issue, 'title' | 'description' | 'tags'>> = [
   },
 ];
 
+const DEFENSE_ISSUES: Array<Pick<Issue, 'title' | 'description' | 'tags'>> = [
+  {
+    title: 'Prescripción',
+    description: 'Defensa de prescripción extintiva aplicable a la partida.',
+    tags: ['defense:prescripcion', 'kind:ko'],
+  },
+  {
+    title: 'Prueba actora inválida/insuficiente',
+    description: 'Cuestiona la calidad y suficiencia de la prueba de la actora.',
+    tags: ['defense:prueba', 'kind:ko'],
+  },
+  {
+    title: 'Pago acreditado por Juan',
+    description: 'Se acredita un pago previo que neutraliza la reclamación.',
+    tags: ['defense:pago', 'kind:ko'],
+  },
+  {
+    title: 'Cuantía inflada / pluspetición',
+    description: 'Rebaja parcial de la cuantía reclamada.',
+    tags: ['defense:pluspeticion', 'kind:partial', 'impact:0.50'],
+  },
+  {
+    title: 'Compensación / créditos a favor',
+    description: 'Compensación parcial con créditos a favor.',
+    tags: ['defense:compensacion', 'kind:partial', 'impact:0.35'],
+  },
+];
+
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
 const formatCurrency = (amountCents: number) =>
@@ -160,6 +195,8 @@ const parseIssueMeta = (issue: Issue, node?: ScenarioNode): IssueNodeMeta => {
 };
 
 const issueNodeKey = (issueId: string, partidaId: string) => `${issueId}@@${partidaId}`;
+const scorecardItemNodeKey = (issueId: string, partidaId: string, itemKey: string) =>
+  `${issueId}@@${partidaId}@@${itemKey}`;
 
 const hashString = (value: string) => {
   let hash = 2166136261;
@@ -216,6 +253,17 @@ const getFactIdsForPartida = (linksForCase: Link[], partidaId: string) => {
   return unique([...direct, ...factFromSpans]);
 };
 
+const hasEvidenceForPartida = (linksForCase: Link[], partidaId: string) =>
+  linksForCase.some(
+    (link) =>
+      linkInvolves(link, 'partida', partidaId) &&
+      (link.fromType === 'span' ||
+        link.toType === 'span' ||
+        link.fromType === 'document' ||
+        link.toType === 'document') &&
+      getLinkRole(link) === 'evidence'
+  );
+
 const burdenTargets: Record<Fact['burden'], number> = {
   actora: 3,
   demandado: 2,
@@ -261,6 +309,88 @@ const quantile = (values: number[], q: number) => {
   return sorted[base] + (sorted[base + 1] - sorted[base]) * (rest || 0);
 };
 
+const sigmoid = (value: number) => 1 / (1 + Math.exp(-value));
+
+const average = (values: number[], fallback = 0) =>
+  values.length === 0 ? fallback : values.reduce((acc, value) => acc + value, 0) / values.length;
+
+const gammaSample = (shape: number, rng: () => number): number => {
+  if (shape < 1) {
+    const u = rng();
+    return gammaSample(shape + 1, rng) * Math.pow(u, 1 / shape);
+  }
+  const d = shape - 1 / 3;
+  const c = 1 / Math.sqrt(9 * d);
+  while (true) {
+    const x = randn(rng);
+    const v = Math.pow(1 + c * x, 3);
+    if (v <= 0) continue;
+    const u = rng();
+    if (u < 1 - 0.331 * Math.pow(x, 4)) return d * v;
+    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+  }
+};
+
+const betaSample = (pMean: number, confidence: number, rng: () => number) => {
+  const mean = clamp(pMean, 0.01, 0.99);
+  const conf = clamp(confidence, 0.2, 0.95);
+  const strength = 2 + conf * 18;
+  const alpha = mean * strength;
+  const beta = (1 - mean) * strength;
+  const x = gammaSample(alpha, rng);
+  const y = gammaSample(beta, rng);
+  return x / (x + y);
+};
+
+const getDefenseTag = (issue: Issue) =>
+  issue.tags.find((tag) => tag.toLowerCase().startsWith('defense:'));
+
+const getIssueKind = (issue: Issue, template?: DefenseTemplate): 'ko' | 'partial' => {
+  const kindTag = issue.tags.find((tag) => tag.toLowerCase().startsWith('kind:'));
+  if (kindTag) {
+    const parsed = kindTag.split(':')[1];
+    return parsed === 'partial' ? 'partial' : 'ko';
+  }
+  return template?.kind ?? 'ko';
+};
+
+const getIssueImpact = (issue: Issue, template?: DefenseTemplate) => {
+  const impactTag = issue.tags.find((tag) => tag.toLowerCase().startsWith('impact:'));
+  if (impactTag) {
+    const parsed = Number(impactTag.split(':')[1]);
+    return Number.isFinite(parsed) ? clamp(parsed, 0, 1) : template?.defaultImpact ?? 0.5;
+  }
+  return template?.defaultImpact ?? 0.5;
+};
+
+type ScorecardItemState = {
+  item: ChecklistItem;
+  value: number;
+  confidence: number;
+  evidence?: Array<{ docId: string; page?: number }>;
+  kind: 'auto' | 'manual';
+};
+
+type ScorecardDefenseState = {
+  issue: Issue;
+  template?: DefenseTemplate;
+  kind: 'ko' | 'partial';
+  impact: number;
+  pDef: number;
+  confidence: number;
+  items: ScorecardItemState[];
+  drivers: ScorecardItemState[];
+};
+
+type ScorecardPartidaState = {
+  partida: Partida;
+  defenses: ScorecardDefenseState[];
+  pActora: number;
+  expectedLoss: number;
+  range: { p10: number; p50: number; p90: number };
+  hasEvidence: boolean;
+};
+
 type ScenarioResult = {
   partidaId: string;
   pMean: number;
@@ -296,6 +426,8 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
   const [scenarioNodes, setScenarioNodes] = useState<ScenarioNode[]>([]);
   const [selectedPartidaId, setSelectedPartidaId] = useState<string | null>(null);
   const [scenarioMode, setScenarioMode] = useState<'simple' | 'technical'>('simple');
+  const [viewMode, setViewMode] = useState<'grafo' | 'scorecard'>('scorecard');
+  const [scorecardSort, setScorecardSort] = useState<'desc' | 'asc'>('desc');
   const scenarioNodeTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const scenarioModelTimeouts = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -322,6 +454,22 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
           )
         );
         issuesData = created;
+      }
+      const hasDefenseTags = issuesData.some((issue) =>
+        issue.tags.some((tag) => tag.toLowerCase().startsWith('defense:'))
+      );
+      if (!hasDefenseTags) {
+        const created = await Promise.all(
+          DEFENSE_ISSUES.map((issue) =>
+            issuesRepo.create({
+              caseId,
+              title: issue.title,
+              description: issue.description,
+              tags: issue.tags,
+            })
+          )
+        );
+        issuesData = [...issuesData, ...created];
       }
 
       if (!isActive) return;
@@ -800,6 +948,157 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     spans,
   ]);
 
+  const scorecardContext = useMemo<ScorecardContext>(
+    () => ({
+      links: linksForCase,
+      documents,
+      spans,
+    }),
+    [documents, linksForCase, spans]
+  );
+
+  const defenseIssues = useMemo(
+    () => issues.filter((issue) => Boolean(getDefenseTag(issue))),
+    [issues]
+  );
+
+  const scorecardData = useMemo(() => {
+    if (partidas.length === 0 || defenseIssues.length === 0) {
+      return {
+        partidas: [] as ScorecardPartidaState[],
+        totalRange: { p10: 0, p50: 0, p90: 0 },
+        totalSamples: [] as number[],
+      };
+    }
+
+    const baseStates: ScorecardPartidaState[] = partidas.map((partida) => {
+      const defenses: ScorecardDefenseState[] = defenseIssues.map((issue) => {
+        const defenseTag = getDefenseTag(issue);
+        const template = defenseTag ? scorecardTemplateByTag.get(defenseTag) : undefined;
+        const autoResults = template?.autoEval(scorecardContext, partida) ?? {};
+        const items = (template?.items ?? []).map((item) => {
+          if (item.kind === 'auto') {
+            const auto = autoResults[item.key];
+            return {
+              item,
+              value: auto?.value ?? 0,
+              confidence: clamp(auto?.confidence ?? 0.6),
+              evidence: auto?.evidence,
+              kind: 'auto' as const,
+            };
+          }
+          const nodeId = scorecardItemNodeKey(issue.id, partida.id, item.key);
+          const node = scenarioMap.get(`issue:${nodeId}`);
+          return {
+            item,
+            value: clamp(node?.value ?? 0),
+            confidence: clamp(node?.confidence ?? 0.7),
+            kind: 'manual' as const,
+          };
+        });
+
+        const alpha = template?.alpha ?? -0.6;
+        const score = items.reduce((acc, entry) => acc + entry.item.weight * (entry.value * entry.confidence), 0);
+        const pDef = clamp(sigmoid(alpha + score), 0.01, 0.99);
+        const defenseConfidence = clamp(average(items.map((entry) => entry.confidence), 0.7), 0.2, 0.95);
+        const drivers = items
+          .filter((entry) => entry.value * entry.confidence < 0.5)
+          .sort((a, b) => a.value * a.confidence - b.value * b.confidence)
+          .slice(0, 3);
+        return {
+          issue,
+          template,
+          kind: getIssueKind(issue, template),
+          impact: getIssueImpact(issue, template),
+          pDef,
+          confidence: defenseConfidence,
+          items,
+          drivers,
+        };
+      });
+
+      let pActora = 1;
+      let effectiveAmount = partida.amountCents;
+      defenses.forEach((defense) => {
+        if (defense.kind === 'ko') {
+          pActora *= 1 - defense.pDef;
+        } else {
+          effectiveAmount *= 1 - defense.pDef * defense.impact;
+        }
+      });
+      const expectedLoss = Math.round(pActora * effectiveAmount);
+
+      return {
+        partida,
+        defenses,
+        pActora: clamp(pActora),
+        expectedLoss,
+        range: { p10: expectedLoss, p50: expectedLoss, p90: expectedLoss },
+        hasEvidence: hasEvidenceForPartida(linksForCase, partida.id),
+      };
+    });
+
+    const samples = DEFAULT_SAMPLES;
+    const totalSamples = Array.from({ length: samples }, () => 0);
+    const perPartidaSamples = new Map(
+      baseStates.map((state) => [state.partida.id, Array.from({ length: samples }, () => 0)])
+    );
+    const rng = mulberry32(hashString(`${caseId}:${selectedScenarioId ?? 'scorecard'}:scorecard`));
+
+    for (let i = 0; i < samples; i += 1) {
+      let total = 0;
+      baseStates.forEach((state) => {
+        let pActora = 1;
+        let effectiveAmount = state.partida.amountCents;
+        state.defenses.forEach((defense) => {
+          const sampled = betaSample(defense.pDef, defense.confidence, rng);
+          if (defense.kind === 'ko') {
+            pActora *= 1 - sampled;
+          } else {
+            effectiveAmount *= 1 - sampled * defense.impact;
+          }
+        });
+        const loss = pActora * effectiveAmount;
+        const bucket = perPartidaSamples.get(state.partida.id);
+        if (bucket) {
+          bucket[i] = loss;
+        }
+        total += loss;
+      });
+      totalSamples[i] = total;
+    }
+
+    const partidasWithRanges = baseStates.map((state) => {
+      const samplesForPartida = perPartidaSamples.get(state.partida.id) ?? [];
+      return {
+        ...state,
+        range: {
+          p10: quantile(samplesForPartida, 0.1),
+          p50: quantile(samplesForPartida, 0.5),
+          p90: quantile(samplesForPartida, 0.9),
+        },
+      };
+    });
+
+    return {
+      partidas: partidasWithRanges,
+      totalRange: {
+        p10: quantile(totalSamples, 0.1),
+        p50: quantile(totalSamples, 0.5),
+        p90: quantile(totalSamples, 0.9),
+      },
+      totalSamples,
+    };
+  }, [
+    caseId,
+    defenseIssues,
+    linksForCase,
+    partidas,
+    scenarioMap,
+    scorecardContext,
+    selectedScenarioId,
+  ]);
+
   const paths = useMemo(() => {
     return partidas.map((partida) => {
       const factIds = getFactIdsForPartida(linksForCase, partida.id);
@@ -821,6 +1120,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
   }, [partidas, linksForCase, facts, evidenceByFact]);
 
   useEffect(() => {
+    if (viewMode !== 'grafo') return;
     if (scenarioResult.results.length === 0) {
       setSelectedPartidaId(null);
       return;
@@ -829,12 +1129,40 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     if (!exists) {
       setSelectedPartidaId(scenarioResult.results[0]?.partidaId ?? null);
     }
-  }, [scenarioResult.results, selectedPartidaId]);
+  }, [scenarioResult.results, selectedPartidaId, viewMode]);
+
+  useEffect(() => {
+    if (viewMode !== 'scorecard') return;
+    if (scorecardData.partidas.length === 0) {
+      setSelectedPartidaId(null);
+      return;
+    }
+    const exists = scorecardData.partidas.some((item) => item.partida.id === selectedPartidaId);
+    if (!exists) {
+      setSelectedPartidaId(scorecardData.partidas[0]?.partida.id ?? null);
+    }
+  }, [scorecardData.partidas, selectedPartidaId, viewMode]);
 
   const selectedPartida = useMemo(
     () => partidas.find((partida) => partida.id === selectedPartidaId) ?? null,
     [partidas, selectedPartidaId]
   );
+  const selectedScorecard = useMemo(
+    () => scorecardData.partidas.find((item) => item.partida.id === selectedPartidaId) ?? null,
+    [scorecardData.partidas, selectedPartidaId]
+  );
+  const sortedScorecardPartidas = useMemo(() => {
+    const sorted = [...scorecardData.partidas];
+    sorted.sort((a, b) =>
+      scorecardSort === 'desc' ? b.range.p50 - a.range.p50 : a.range.p50 - b.range.p50
+    );
+    return sorted;
+  }, [scorecardData.partidas, scorecardSort]);
+  const scorecardSummary = useMemo(() => {
+    const totalPartidas = scorecardData.partidas.length;
+    const withoutEvidence = scorecardData.partidas.filter((item) => !item.hasEvidence).length;
+    return { totalPartidas, withoutEvidence };
+  }, [scorecardData.partidas]);
   const selectedSimple = useMemo(
     () => simpleScenario.results.find((result) => result.partida.id === selectedPartidaId) ?? null,
     [selectedPartidaId, simpleScenario.results]
@@ -1012,209 +1340,501 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
     [issueNodeMap, scheduleScenarioNodeUpsert, selectedScenarioId]
   );
 
+  const updateScorecardItem = useCallback(
+    (issueId: string, partidaId: string, itemKey: string, value: number, confidence: number) => {
+      if (!selectedScenarioId) return;
+      const nodeId = scorecardItemNodeKey(issueId, partidaId, itemKey);
+      scheduleScenarioNodeUpsert(selectedScenarioId, 'issue', nodeId, {
+        value,
+        confidence,
+      });
+    },
+    [scheduleScenarioNodeUpsert, selectedScenarioId]
+  );
+
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-300">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="text-base font-semibold text-white">🧠 Escenarios</h3>
-            <p className="text-xs text-slate-400">
-              Estimación orientativa (no predicción judicial). Depende de enlaces y supuestos.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <div>
+              <h3 className="text-base font-semibold text-white">🧠 Escenarios</h3>
+              <p className="text-xs text-slate-400">
+                Estimación orientativa (no predicción judicial). Depende de enlaces y supuestos.
+              </p>
+            </div>
             <div className="flex items-center rounded-full border border-slate-700 bg-slate-950/60 p-1 text-[11px] text-slate-300">
               <button
                 type="button"
-                onClick={() => setScenarioMode('simple')}
+                onClick={() => setViewMode('scorecard')}
                 className={`rounded-full px-3 py-1 transition ${
-                  scenarioMode === 'simple'
-                    ? 'bg-sky-500/20 text-sky-200'
+                  viewMode === 'scorecard'
+                    ? 'bg-emerald-500/20 text-emerald-200'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Modo simple (Matriz por partida)
+                🧾 Scorecard
               </button>
               <button
                 type="button"
-                onClick={() => setScenarioMode('technical')}
+                onClick={() => setViewMode('grafo')}
                 className={`rounded-full px-3 py-1 transition ${
-                  scenarioMode === 'technical'
+                  viewMode === 'grafo'
                     ? 'bg-sky-500/20 text-sky-200'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Modo técnico (Grafo)
+                🧠 Grafo
               </button>
             </div>
-            <span className="rounded-full border border-emerald-500/50 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-              Monte Carlo {DEFAULT_SAMPLES} muestras
-            </span>
           </div>
+          {viewMode === 'grafo' && (
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center rounded-full border border-slate-700 bg-slate-950/60 p-1 text-[11px] text-slate-300">
+                <button
+                  type="button"
+                  onClick={() => setScenarioMode('simple')}
+                  className={`rounded-full px-3 py-1 transition ${
+                    scenarioMode === 'simple'
+                      ? 'bg-sky-500/20 text-sky-200'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Modo simple (Matriz por partida)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScenarioMode('technical')}
+                  className={`rounded-full px-3 py-1 transition ${
+                    scenarioMode === 'technical'
+                      ? 'bg-sky-500/20 text-sky-200'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Modo técnico (Grafo)
+                </button>
+              </div>
+              <span className="rounded-full border border-emerald-500/50 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                Monte Carlo {DEFAULT_SAMPLES} muestras
+              </span>
+            </div>
+          )}
         </div>
-        {selectedAssumptions.narrative && (
+        {selectedAssumptions.narrative && viewMode === 'grafo' && (
           <p className="mt-3 text-xs text-slate-400">{selectedAssumptions.narrative}</p>
         )}
       </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <h3 className="text-sm font-semibold text-white">1) Selector de escenario</h3>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-500">{issues.length} issues registradas</span>
-            <button
-              type="button"
-              onClick={handleCreateScenario}
-              className="rounded-full border border-slate-700 px-3 py-1 text-[11px] text-slate-200 hover:border-slate-500"
-            >
-              + Nuevo
-            </button>
-            <button
-              type="button"
-              onClick={handleCloneScenario}
-              disabled={!selectedScenario}
-              className="rounded-full border border-slate-700 px-3 py-1 text-[11px] text-slate-200 hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Clonar
-            </button>
-            <button
-              type="button"
-              onClick={handleDeleteScenario}
-              disabled={!selectedScenario || scenarioModels.length <= 1}
-              className="rounded-full border border-rose-500/40 px-3 py-1 text-[11px] text-rose-200 hover:border-rose-400 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Borrar
-            </button>
-          </div>
-        </div>
-        <div className="mt-3 grid gap-3 md:grid-cols-3">
-          {scenarioModels.map((scenario) => (
-            <button
-              key={scenario.id}
-              type="button"
-              onClick={() => setSelectedScenarioId(scenario.id)}
-              className={`rounded-xl border px-3 py-3 text-left transition ${
-                selectedScenarioId === scenario.id
-                  ? 'border-blue-500 bg-blue-500/10 text-blue-100'
-                  : 'border-slate-700 bg-slate-900/40 text-slate-300 hover:border-slate-500'
-              }`}
-            >
-              <div className="text-xs uppercase tracking-wide text-slate-400">Escenario</div>
-              <div className="mt-1 text-sm font-semibold text-white">{scenario.name}</div>
-              <div className="mt-2 text-[11px] text-slate-400 line-clamp-2">
-                {parseJson<{ narrative?: string }>(scenario.assumptionsJson, {}).narrative ?? 'Sin narrativa'}
+      {viewMode === 'scorecard' && (
+        <>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-300">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-white">🧾 Scorecard por partida</h3>
+                <p className="text-[11px] text-slate-400">
+                  Probabilidad de defensa y rango de pérdidas por partida.
+                </p>
               </div>
-            </button>
-          ))}
-        </div>
-        {selectedScenario && (
-          <div className="mt-4 grid gap-3 rounded-xl border border-slate-800/70 bg-slate-950/40 p-3 text-xs text-slate-200 md:grid-cols-2">
-            <label className="flex flex-col gap-2">
-              <span className="text-[11px] uppercase text-slate-500">Nombre</span>
-              <input
-                value={selectedScenario.name}
-                onChange={(event) => updateScenarioModel(selectedScenario.id, { name: event.target.value })}
-                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
-              />
-            </label>
-            <label className="flex flex-col gap-2">
-              <span className="text-[11px] uppercase text-slate-500">Narrativa</span>
-              <textarea
-                value={selectedAssumptions.narrative ?? ''}
-                onChange={(event) =>
-                  updateScenarioModel(
-                    selectedScenario.id,
-                    { assumptionsJson: JSON.stringify({ ...selectedAssumptions, narrative: event.target.value }) }
-                  )
-                }
-                rows={2}
-                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
-              />
-            </label>
-            <label className="flex flex-col gap-2">
-              <span className="text-[11px] uppercase text-slate-500">Agregación</span>
-              <select
-                value={selectedWeights.issueAggregation ?? 'and'}
-                onChange={(event) =>
-                  updateScenarioModel(
-                    selectedScenario.id,
-                    {
-                      weightsJson: JSON.stringify({
-                        ...selectedWeights,
-                        issueAggregation: event.target.value as 'and' | 'or',
-                      }),
-                    }
-                  )
-                }
-                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
-              >
-                <option value="and">AND (más estricto)</option>
-                <option value="or">OR (más flexible)</option>
-              </select>
-            </label>
-            <label className="flex flex-col gap-2">
-              <span className="text-[11px] uppercase text-slate-500">Evidence boost</span>
-              <input
-                type="number"
-                step="0.01"
-                value={selectedWeights.evidenceBoost ?? 0}
-                onChange={(event) =>
-                  updateScenarioModel(
-                    selectedScenario.id,
-                    {
-                      weightsJson: JSON.stringify({
-                        ...selectedWeights,
-                        evidenceBoost: Number(event.target.value),
-                      }),
-                    }
-                  )
-                }
-                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
-              />
-            </label>
-            <label className="flex flex-col gap-2">
-              <span className="text-[11px] uppercase text-slate-500">Rule penalty</span>
-              <input
-                type="number"
-                step="0.01"
-                value={selectedWeights.rulePenalty ?? 0}
-                onChange={(event) =>
-                  updateScenarioModel(
-                    selectedScenario.id,
-                    {
-                      weightsJson: JSON.stringify({
-                        ...selectedWeights,
-                        rulePenalty: Number(event.target.value),
-                      }),
-                    }
-                  )
-                }
-                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
-              />
-            </label>
-            <label className="flex flex-col gap-2">
-              <span className="text-[11px] uppercase text-slate-500">Contradictions penalty</span>
-              <input
-                type="number"
-                step="0.01"
-                value={selectedWeights.contradictionsPenalty ?? 0}
-                onChange={(event) =>
-                  updateScenarioModel(
-                    selectedScenario.id,
-                    {
-                      weightsJson: JSON.stringify({
-                        ...selectedWeights,
-                        contradictionsPenalty: Number(event.target.value),
-                      }),
-                    }
-                  )
-                }
-                className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
-              />
-            </label>
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+                <span className="rounded-full border border-slate-700 px-2 py-1">
+                  Total partidas: {scorecardSummary.totalPartidas}
+                </span>
+                <span
+                  className={`rounded-full border px-2 py-1 ${
+                    scorecardSummary.withoutEvidence > 0
+                      ? 'border-rose-500/50 text-rose-200'
+                      : 'border-emerald-500/40 text-emerald-200'
+                  }`}
+                >
+                  Sin evidencias: {scorecardSummary.withoutEvidence}
+                </span>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-slate-800/70 bg-slate-950/40 p-3">
+                <div className="text-[11px] uppercase text-slate-500">Cuantía en juego (p50)</div>
+                <div className="mt-1 text-lg font-semibold text-emerald-200">
+                  {formatCurrency(Math.round(scorecardData.totalRange.p50))}
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-800/70 bg-slate-950/40 p-3">
+                <div className="text-[11px] uppercase text-slate-500">Mejor caso p10</div>
+                <div className="mt-1 text-lg font-semibold text-emerald-200">
+                  {formatCurrency(Math.round(scorecardData.totalRange.p10))}
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-800/70 bg-slate-950/40 p-3">
+                <div className="text-[11px] uppercase text-slate-500">Peor caso razonable p90</div>
+                <div className="mt-1 text-lg font-semibold text-emerald-200">
+                  {formatCurrency(Math.round(scorecardData.totalRange.p90))}
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <h3 className="text-sm font-semibold text-white">1) Tabla partidas</h3>
+            <div className="mt-3 overflow-x-auto">
+              <table className="min-w-full text-left text-xs text-slate-300">
+                <thead className="text-[11px] uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th className="py-2 pr-4">Concepto</th>
+                    <th className="py-2 pr-4">Importe</th>
+                    <th className="py-2 pr-4">P. actora (media)</th>
+                    <th className="py-2 pr-4">Rango [p10–p90]</th>
+                    <th className="py-2 pr-4">
+                      <button
+                        type="button"
+                        onClick={() => setScorecardSort((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
+                        className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-slate-500 hover:text-slate-300"
+                      >
+                        € en juego (p50)
+                        <span>{scorecardSort === 'desc' ? '↓' : '↑'}</span>
+                      </button>
+                    </th>
+                    <th className="py-2">Badges</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedScorecardPartidas.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-4 text-center text-[11px] text-slate-500">
+                        Sin partidas con defensas configuradas.
+                      </td>
+                    </tr>
+                  ) : (
+                    sortedScorecardPartidas.map((item) => {
+                      const isSelected = selectedPartidaId === item.partida.id;
+                      return (
+                        <tr
+                          key={item.partida.id}
+                          className={`cursor-pointer border-t border-slate-800 transition ${
+                            isSelected ? 'bg-emerald-500/10' : 'hover:bg-slate-800/40'
+                          }`}
+                          onClick={() => setSelectedPartidaId(item.partida.id)}
+                        >
+                          <td className="py-2 pr-4">
+                            <div className="font-semibold text-white">{item.partida.concept}</div>
+                            <div className="text-[11px] text-slate-500">{item.partida.id}</div>
+                          </td>
+                          <td className="py-2 pr-4">{formatCurrency(item.partida.amountCents)}</td>
+                          <td className="py-2 pr-4">{(item.pActora * 100).toFixed(1)}%</td>
+                          <td className="py-2 pr-4">
+                            {formatCurrency(Math.round(item.range.p10))} – {formatCurrency(Math.round(item.range.p90))}
+                          </td>
+                          <td className="py-2 pr-4 font-semibold text-emerald-200">
+                            {formatCurrency(Math.round(item.range.p50))}
+                          </td>
+                          <td className="py-2">
+                            <div className="flex flex-wrap gap-2">
+                              {!item.hasEvidence && (
+                                <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-semibold text-rose-200">
+                                  SIN EVIDENCIA
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-white">2) Drawer por partida</h3>
+              <div className="text-xs text-slate-500">
+                {selectedScorecard ? selectedScorecard.partida.concept : 'Selecciona una partida'}
+              </div>
+            </div>
+            {!selectedScorecard ? (
+              <p className="mt-3 text-xs text-slate-500">Haz click en una fila para abrir el detalle.</p>
+            ) : (
+              <div className="mt-4 space-y-4">
+                {selectedScorecard.defenses.map((defense) => (
+                  <div
+                    key={`${defense.issue.id}-${selectedScorecard.partida.id}`}
+                    className="rounded-xl border border-slate-800/70 bg-slate-950/30 p-3 text-xs text-slate-300"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <div className="text-sm font-semibold text-white">{defense.issue.title}</div>
+                        <div className="text-[11px] text-slate-500">{defense.issue.description}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-semibold text-emerald-200">
+                          {(defense.pDef * 100).toFixed(1)}%
+                        </div>
+                        <div className="text-[11px] text-slate-400">
+                          {defense.kind === 'ko'
+                            ? 'KO'
+                            : `Parcial · Impacto ${(defense.impact * 100).toFixed(0)}%`}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 space-y-2">
+                      {defense.items.map((entry) => (
+                        <div
+                          key={`${defense.issue.id}-${entry.item.key}`}
+                          className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-2"
+                        >
+                          {entry.kind === 'auto' ? (
+                            <>
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="text-[11px] text-slate-200">{entry.item.label}</div>
+                                <span
+                                  className={`rounded-full px-2 py-0.5 text-[10px] ${
+                                    entry.value > 0.5
+                                      ? 'bg-emerald-500/20 text-emerald-200'
+                                      : 'bg-slate-800 text-slate-400'
+                                  }`}
+                                >
+                                  {entry.value > 0.5 ? 'Detectado' : 'No detectado'}
+                                </span>
+                              </div>
+                              {entry.evidence && entry.evidence.length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  {entry.evidence.map((evidence, index) => (
+                                    <a
+                                      key={`${evidence.docId}-${index}`}
+                                      href={`/documents/${evidence.docId}/view?page=${evidence.page ?? 1}`}
+                                      className="rounded-full border border-slate-700 px-2 py-0.5 text-[10px] text-slate-200 hover:border-slate-500"
+                                    >
+                                      Abrir PDF
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div className="space-y-2">
+                              <label className="flex items-center gap-2 text-[11px] text-slate-200">
+                                <input
+                                  type="checkbox"
+                                  checked={entry.value > 0.5}
+                                  onChange={(event) =>
+                                    updateScorecardItem(
+                                      defense.issue.id,
+                                      selectedScorecard.partida.id,
+                                      entry.item.key,
+                                      event.target.checked ? 1 : 0,
+                                      entry.confidence
+                                    )
+                                  }
+                                  className="h-4 w-4 rounded border-slate-600 bg-slate-950"
+                                />
+                                {entry.item.label}
+                              </label>
+                              <label className="flex flex-col gap-1 text-[10px] text-slate-400">
+                                Confianza: {entry.confidence.toFixed(2)}
+                                <input
+                                  type="range"
+                                  min={0}
+                                  max={1}
+                                  step={0.05}
+                                  value={entry.confidence}
+                                  onChange={(event) =>
+                                    updateScorecardItem(
+                                      defense.issue.id,
+                                      selectedScorecard.partida.id,
+                                      entry.item.key,
+                                      entry.value,
+                                      Number(event.target.value)
+                                    )
+                                  }
+                                  className="w-full"
+                                />
+                              </label>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 rounded-lg border border-slate-800/70 bg-slate-950/30 p-2">
+                      <div className="text-[11px] uppercase text-slate-500">Drivers pendientes</div>
+                      {defense.drivers.length === 0 ? (
+                        <div className="mt-1 text-[11px] text-slate-400">Sin drivers pendientes.</div>
+                      ) : (
+                        <ul className="mt-1 space-y-1 text-[11px] text-slate-300">
+                          {defense.drivers.map((driver) => (
+                            <li key={driver.item.key}>• {driver.item.label}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {viewMode === 'grafo' && (
+        <>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-white">1) Selector de escenario</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-slate-500">{issues.length} issues registradas</span>
+                <button
+                  type="button"
+                  onClick={handleCreateScenario}
+                  className="rounded-full border border-slate-700 px-3 py-1 text-[11px] text-slate-200 hover:border-slate-500"
+                >
+                  + Nuevo
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCloneScenario}
+                  disabled={!selectedScenario}
+                  className="rounded-full border border-slate-700 px-3 py-1 text-[11px] text-slate-200 hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Clonar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteScenario}
+                  disabled={!selectedScenario || scenarioModels.length <= 1}
+                  className="rounded-full border border-rose-500/40 px-3 py-1 text-[11px] text-rose-200 hover:border-rose-400 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Borrar
+                </button>
+              </div>
+            </div>
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              {scenarioModels.map((scenario) => (
+                <button
+                  key={scenario.id}
+                  type="button"
+                  onClick={() => setSelectedScenarioId(scenario.id)}
+                  className={`rounded-xl border px-3 py-3 text-left transition ${
+                    selectedScenarioId === scenario.id
+                      ? 'border-blue-500 bg-blue-500/10 text-blue-100'
+                      : 'border-slate-700 bg-slate-900/40 text-slate-300 hover:border-slate-500'
+                  }`}
+                >
+                  <div className="text-xs uppercase tracking-wide text-slate-400">Escenario</div>
+                  <div className="mt-1 text-sm font-semibold text-white">{scenario.name}</div>
+                  <div className="mt-2 text-[11px] text-slate-400 line-clamp-2">
+                    {parseJson<{ narrative?: string }>(scenario.assumptionsJson, {}).narrative ?? 'Sin narrativa'}
+                  </div>
+                </button>
+              ))}
+            </div>
+            {selectedScenario && (
+              <div className="mt-4 grid gap-3 rounded-xl border border-slate-800/70 bg-slate-950/40 p-3 text-xs text-slate-200 md:grid-cols-2">
+                <label className="flex flex-col gap-2">
+                  <span className="text-[11px] uppercase text-slate-500">Nombre</span>
+                  <input
+                    value={selectedScenario.name}
+                    onChange={(event) => updateScenarioModel(selectedScenario.id, { name: event.target.value })}
+                    className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+                  />
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-[11px] uppercase text-slate-500">Narrativa</span>
+                  <textarea
+                    value={selectedAssumptions.narrative ?? ''}
+                    onChange={(event) =>
+                      updateScenarioModel(
+                        selectedScenario.id,
+                        { assumptionsJson: JSON.stringify({ ...selectedAssumptions, narrative: event.target.value }) }
+                      )
+                    }
+                    rows={2}
+                    className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+                  />
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-[11px] uppercase text-slate-500">Agregación</span>
+                  <select
+                    value={selectedWeights.issueAggregation ?? 'and'}
+                    onChange={(event) =>
+                      updateScenarioModel(
+                        selectedScenario.id,
+                        {
+                          weightsJson: JSON.stringify({
+                            ...selectedWeights,
+                            issueAggregation: event.target.value as 'and' | 'or',
+                          }),
+                        }
+                      )
+                    }
+                    className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+                  >
+                    <option value="and">AND (más estricto)</option>
+                    <option value="or">OR (más flexible)</option>
+                  </select>
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-[11px] uppercase text-slate-500">Evidence boost</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={selectedWeights.evidenceBoost ?? 0}
+                    onChange={(event) =>
+                      updateScenarioModel(
+                        selectedScenario.id,
+                        {
+                          weightsJson: JSON.stringify({
+                            ...selectedWeights,
+                            evidenceBoost: Number(event.target.value),
+                          }),
+                        }
+                      )
+                    }
+                    className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+                  />
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-[11px] uppercase text-slate-500">Rule penalty</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={selectedWeights.rulePenalty ?? 0}
+                    onChange={(event) =>
+                      updateScenarioModel(
+                        selectedScenario.id,
+                        {
+                          weightsJson: JSON.stringify({
+                            ...selectedWeights,
+                            rulePenalty: Number(event.target.value),
+                          }),
+                        }
+                      )
+                    }
+                    className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+                  />
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-[11px] uppercase text-slate-500">Contradictions penalty</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={selectedWeights.contradictionsPenalty ?? 0}
+                    onChange={(event) =>
+                      updateScenarioModel(
+                        selectedScenario.id,
+                        {
+                          weightsJson: JSON.stringify({
+                            ...selectedWeights,
+                            contradictionsPenalty: Number(event.target.value),
+                          }),
+                        }
+                      )
+                    }
+                    className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-sm text-slate-100"
+                  />
+                </label>
+              </div>
+            )}
+          </div>
 
       {scenarioMode === 'simple' && (
         <>
@@ -1964,6 +2584,8 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
           )}
         </div>
       </div>
+        </>
+      )}
         </>
       )}
     </div>
