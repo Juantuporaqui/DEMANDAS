@@ -464,7 +464,7 @@ export function BackupPage() {
                 {importResult.success ? 'Completado sin errores' : 'Completado con errores'}
               </div>
 
-              <div className="grid grid-2 gap-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <p className="text-muted" style={{ fontSize: '0.75rem' }}>
                     Casos
@@ -543,7 +543,7 @@ export function BackupPage() {
               Exporta o importa los datos en formato JSON para mantenimiento del sistema sin necesidad de agentes externos.
             </p>
 
-            <div className="grid grid-2 gap-md">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 className="btn btn-primary btn-lg"
                 onClick={handleExportJson}

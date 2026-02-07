@@ -180,7 +180,7 @@ export function PartidaFormPage() {
             </div>
 
             {/* Amount & Currency */}
-            <div className="grid grid-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="form-group">
                 <label className="form-label">Importe *</label>
                 <input
@@ -263,7 +263,7 @@ export function PartidaFormPage() {
             </div>
 
             {/* Payer & Beneficiary */}
-            <div className="grid grid-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="form-group">
                 <label className="form-label">Pagador</label>
                 <input
@@ -291,7 +291,7 @@ export function PartidaFormPage() {
             </div>
 
             {/* Accounts */}
-            <div className="grid grid-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="form-group">
                 <label className="form-label">Cuenta origen</label>
                 <input

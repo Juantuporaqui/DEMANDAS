@@ -217,7 +217,7 @@ export function PartidasPage() {
       {/* Summary */}
       <div className="mt-lg rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4">
         <h3 className="mb-md text-sm font-semibold uppercase tracking-wider text-slate-300">Resumen económico</h3>
-        <div className="grid grid-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
               <p className="text-muted" style={{ fontSize: '0.875rem' }}>
                 Reclamables

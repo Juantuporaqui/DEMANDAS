@@ -173,13 +173,13 @@ export function CasesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-500/10 via-slate-900/80 to-slate-950/80 p-6 shadow-lg">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-amber-200">
+      <div className="rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-500/10 via-slate-900/80 to-slate-950/80 p-4 sm:p-6 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.4em] text-amber-200">
               Próximo hito
             </p>
-            <h2 className="mt-1 text-2xl font-semibold text-white">
+            <h2 className="mt-1 text-lg sm:text-2xl font-semibold text-white truncate">
               {proximoHitoLabel}
             </h2>
             <p className="mt-1 text-sm text-slate-300">
@@ -198,7 +198,7 @@ export function CasesPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
             Procedimientos principales
           </p>
-          <h1 className="text-3xl font-semibold text-white">Mapa de frentes judiciales</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white">Mapa de frentes judiciales</h1>
           <p className="mt-1 text-sm text-slate-400">
             {mainCases.length} procedimientos activos con su documentación, hechos y estrategia.
           </p>

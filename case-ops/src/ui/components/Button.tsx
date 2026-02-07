@@ -36,7 +36,7 @@ export default function Button({
         'focus-visible:outline-none focus-visible:shadow-[var(--ring)]',
         'disabled:cursor-not-allowed disabled:opacity-50',
         'active:scale-[0.98]',
-        iconButton ? 'h-9 w-9 p-0' : 'px-4 py-2.5',
+        iconButton ? 'h-10 w-10 sm:h-9 sm:w-9 p-0' : 'px-4 py-3 sm:py-2.5',
         variantStyles[variant],
         className ?? '',
       ].join(' ')}

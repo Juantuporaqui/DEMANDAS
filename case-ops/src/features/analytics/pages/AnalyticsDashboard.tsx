@@ -59,15 +59,15 @@ export function AnalyticsDashboardPage() {
       }
     >
       {/* Header con caso principal */}
-      <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-r from-slate-800/80 to-slate-900/80 p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30">
-              <Scale className="w-6 h-6 text-amber-400" />
+      <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-r from-slate-800/80 to-slate-900/80 p-4 sm:p-5">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+            <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex-shrink-0">
+              <Scale className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">Procedimiento Ordinario 715/2024</h2>
-              <p className="text-sm text-slate-400">Juzgado de Primera Instancia nº 4 de Picassent</p>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-xl font-bold text-white truncate">Procedimiento Ordinario 715/2024</h2>
+              <p className="text-xs sm:text-sm text-slate-400">Juzgado de Primera Instancia nº 4 de Picassent</p>
               <div className="flex flex-wrap gap-2 mt-2">
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                   Caso Maestro
@@ -83,9 +83,9 @@ export function AnalyticsDashboardPage() {
           </div>
 
           {/* Card de Audiencia Previa */}
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 min-w-[180px]">
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 sm:p-4 min-w-0 sm:min-w-[180px]">
             <div className="text-[10px] uppercase tracking-wider text-amber-300/70">Audiencia Previa</div>
-            <div className="text-3xl font-black text-white mt-1">
+            <div className="text-2xl sm:text-3xl font-black text-white mt-1">
               {diasHastaAudiencia > 0 ? `${diasHastaAudiencia}d` : 'HOY'}
             </div>
             <div className="text-xs text-slate-400 mt-1">
@@ -104,29 +104,29 @@ export function AnalyticsDashboardPage() {
       </div>
 
       {/* KPIs principales estilo chaladita */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-3 sm:p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Total Reclamado</div>
-          <div className="text-2xl font-bold text-rose-400 mt-1">
+          <div className="text-xl sm:text-2xl font-bold text-rose-400 mt-1">
             {resumenContador.totalReclamado.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €
           </div>
         </div>
-        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-3 sm:p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Prescrito (~)</div>
-          <div className="text-2xl font-bold text-emerald-400 mt-1">
+          <div className="text-xl sm:text-2xl font-bold text-emerald-400 mt-1">
             {totales.prescrito.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €
           </div>
           <div className="text-[10px] text-slate-600 mt-1">Art. 1964.2 CC</div>
         </div>
-        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-3 sm:p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Riesgo Real</div>
-          <div className="text-2xl font-bold text-amber-400 mt-1">
+          <div className="text-xl sm:text-2xl font-bold text-amber-400 mt-1">
             {resumenContador.cifraRiesgoReal.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €
           </div>
         </div>
-        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4">
+        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-3 sm:p-4">
           <div className="text-[10px] uppercase tracking-wider text-slate-500">Estrategias</div>
-          <div className="text-2xl font-bold text-emerald-400 mt-1">
+          <div className="text-xl sm:text-2xl font-bold text-emerald-400 mt-1">
             {meta?.estrategiasActivas ?? 5} activas
           </div>
         </div>

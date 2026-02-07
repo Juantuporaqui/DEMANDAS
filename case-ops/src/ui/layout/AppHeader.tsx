@@ -97,17 +97,17 @@ export function AppHeader() {
         WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
       }}
     >
-      <div className="mx-auto flex w-full items-center justify-between px-5 py-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-1">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--dim)]">
+      <div className="mx-auto flex w-full items-center justify-between gap-3 px-3 py-3 sm:px-5 sm:py-4 lg:px-8">
+        <div className="flex flex-col gap-0.5 sm:gap-1 min-w-0 flex-1">
+          <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--dim)]">
             Contexto
           </span>
-          <span className="text-[15px] font-semibold tracking-tight text-[var(--text)] sm:text-base">
+          <span className="text-[13px] sm:text-[15px] font-semibold tracking-tight text-[var(--text)] truncate">
             {caseTitle}
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)]">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)] whitespace-nowrap">
             Fase: {phaseLabel}
           </span>
         </div>

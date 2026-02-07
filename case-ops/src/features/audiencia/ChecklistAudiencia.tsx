@@ -149,7 +149,7 @@ export function ChecklistAudiencia() {
       </div>
 
       {/* Progreso */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-slate-400 text-sm">Progreso total</span>

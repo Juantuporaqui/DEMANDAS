@@ -18,7 +18,7 @@ export function PageShell({ mode = 'prose', children, className = '' }: PageShel
   return (
     <section
       className={[
-        'w-full mx-auto px-5 sm:px-6 lg:px-8 py-6 sm:py-8 page-enter',
+        'w-full mx-auto px-3 sm:px-5 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 page-enter',
         MODE_CLASSES[mode],
         className,
       ].join(' ')}
