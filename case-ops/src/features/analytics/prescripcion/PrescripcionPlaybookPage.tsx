@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { prescripcionPicassent } from '../../../content/prescripcion/picassent';
 import { CopyButton } from './CopyButton';
 import { CronologiaMatrix } from './CronologiaMatrix';
@@ -115,12 +115,12 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <a
-              href={returnTo}
+            <Link
+              to={returnTo}
               className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-200 transition hover:border-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.2em]"
             >
               Volver
-            </a>
+            </Link>
             <button
               type="button"
               onClick={() => window.print()}
