@@ -9,6 +9,7 @@ import { HypothesisToggle } from './HypothesisToggle';
 import { MarcoNormativoSection } from './MarcoNormativoSection';
 import { ScenarioCard } from './ScenarioCard';
 import { StickyTOC } from './StickyTOC';
+import { TablaPartidasSection } from './TablaPartidasSection';
 
 interface PrescripcionPlaybookPageProps {
   returnTo: string;
@@ -251,6 +252,13 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
               <p className="mt-4 text-sm font-semibold text-amber-50">{content.peticionPrioritaria.mantra}</p>
             </div>
           </section>
+
+          <TablaPartidasSection
+            id="tabla-partidas"
+            title="Tabla verificable por partidas (A/B/C)"
+            subtitle="Fuente única: seed DB Picassent. Completar con documento/base/exigibilidad cuando se acrediten."
+            onCopied={handleCopied}
+          />
 
           <section id="regla-de-oro" className="scroll-mt-24 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-200 print-card">
             <div className="flex flex-wrap items-center justify-between gap-3">
