@@ -1333,11 +1333,11 @@ function TabEstrategia({ strategies, caseId }: any) {
           <div className="space-y-4 text-sm text-slate-300">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wide text-emerald-300">Descripción</div>
-              <p className="mt-2">{selectedLinea.descripcion}</p>
+              <p className="mt-2 whitespace-pre-line">{selectedLinea.descripcion}</p>
             </div>
             <div>
               <div className="text-xs font-semibold uppercase tracking-wide text-indigo-300">Fundamento</div>
-              <p className="mt-2">{selectedLinea.fundamento}</p>
+              <p className="mt-2 whitespace-pre-line">{selectedLinea.fundamento}</p>
             </div>
             {selectedLinea.articulosRelacionados.length > 0 && (
               <div>
@@ -1394,13 +1394,13 @@ function TabEstrategia({ strategies, caseId }: any) {
             {selectedLinea.riesgos && (
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wide text-rose-300">Riesgos</div>
-                <p className="mt-2">{selectedLinea.riesgos}</p>
+                <p className="mt-2 whitespace-pre-line">{selectedLinea.riesgos}</p>
               </div>
             )}
             {selectedLinea.notasInternas && (
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-300">Notas internas</div>
-                <p className="mt-2">{selectedLinea.notasInternas}</p>
+                <p className="mt-2 whitespace-pre-line">{selectedLinea.notasInternas}</p>
               </div>
             )}
           </div>
