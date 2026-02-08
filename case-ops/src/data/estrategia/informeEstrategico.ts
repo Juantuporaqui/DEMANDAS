@@ -131,6 +131,60 @@ export const estrategiaPicassent: LineaEstrategica[] = [
       '"Pedimos diligencia final para que el banco aporte los extractos COMPLETOS (Art. 435 LEC)."',
     ],
   },
+  {
+    id: 'pic-def-7',
+    procedimiento: 'picassent',
+    tipo: 'defensa',
+    titulo: 'COHERENCIA ECONÓMICA + TRAZABILIDAD (TEST DE CAPACIDAD DE AHORRO)',
+    descripcion:
+      'No es un reproche (“cómo vivió”). Es un argumento PROBATORIO: si la actora estima ingresos totales en convivencia ≈ 359.000 € y, aun así, sostiene una reclamación dineraria ≈ 212.677,08 € + pretende el 50% del patrimonio común, habiendo además existido retirada de líquido (38.500 €) y un pasivo hipotecario común que condiciona el activo (≈ 180.000 €), entonces la consecuencia procesal es OBLIGAR A TRAZABILIDAD: qué pagó, desde qué cuenta, con qué origen (privativo/común), y qué parte eran cargas familiares (no reembolsables). Esto se convierte en HECHOS CONTROVERTIDOS (art. 428 LEC) y en PRUEBA (art. 429 LEC) bajo carga de la actora (art. 217 LEC).',
+    fundamento:
+      'CUANTIFICACIÓN (marco de coherencia; no sustituye la prueba):\n' +
+      '• Ingresos estimados actora durante convivencia: 359.000 € (estimación del demandado; se contrasta con AEAT/TGSS).\n' +
+      '• Cuantía demanda (Picassent): 212.677,08 € (dato del caso /timeline).\n' +
+      '• Retirada de líquido de cuentas: 38.500 € (dato corregido).\n' +
+      '• Activo conjunto BRUTO estimado (referencial): 450.000 €.\n' +
+      '• Pasivo hipotecario común (referencial): 180.000 €.\n' +
+      '• Activo NETO estimado = 450.000 − 180.000 = 270.000 €.\n' +
+      '• Mitad del neto = 135.000 € (si el tribunal opera en términos netos).\n' +
+      '• “Exposición económica mínima” que resulta de sumar: 212.677,08 + 135.000 + 38.500 = 386.177,08 € (sin intereses/costas).\n' +
+      '  (Si se discute sobre bruto: 212.677,08 + 225.000 + 38.500 = 476.177,08 €).\n\n' +
+      'TRADUCCIÓN JURÍDICO-PROCESAL:\n' +
+      '1) CARGA DE LA PRUEBA (art. 217 LEC): quien afirma pagos y origen privativo debe acreditarlo con extractos completos, nóminas/IRPF y trazabilidad.\n' +
+      '2) CARGAS DEL MATRIMONIO (arts. 1318 y 1438 CC, y el régimen primario): lo destinado a sostenimiento familiar durante convivencia NO se presume préstamo. Reembolso exige prueba clara de “anticipo/credito” y no mera convivencia.\n' +
+      '3) AUDIENCIA PREVIA: \n' +
+      '   • art. 426 LEC: alegaciones complementarias SIN alterar pretensión: se introduce como criterio de depuración y necesidad de prueba.\n' +
+      '   • art. 428 LEC: fijación de HECHOS controvertidos (ingresos reales actora; aportaciones reales; origen fondos; retiro 38.500; naturaleza de pagos: carga familiar vs inversión patrimonial).\n' +
+      '   • art. 429 LEC: proposición de prueba: oficios AEAT/TGSS + banco (extractos completos) + pericial contable de reconstrucción de flujos.\n\n' +
+      'PETICIÓN OPERATIVA (en sala): que el tribunal exija trazabilidad mínima y, si falta, valore la insuficiencia probatoria y limite la pretensión a lo efectivamente acreditado.',
+    prioridad: 'critica',
+    estado: 'preparado',
+    articulosRelacionados: [
+      'art. 217 LEC',
+      'art. 426 LEC',
+      'art. 428 LEC',
+      'art. 429 LEC',
+      'art. 1318 CC',
+      'art. 1438 CC',
+    ],
+    documentosSoporte: [
+      'AEAT (IRPF/retenciones actora)',
+      'TGSS (vida laboral/bases)',
+      'Bancos: extractos COMPLETOS (no recortes)',
+      'Pericial contable (reconstrucción de flujos)',
+      'Extracto/soporte retirada 38.500 €',
+    ],
+    frasesClave: [
+      '“Señoría, esto no es un juicio moral: es un problema de CARGA DE LA PRUEBA. Si se afirma pago privativo, hay que traer trazabilidad completa (art. 217 LEC).”',
+      '“Pedimos que se fijen como HECHOS CONTROVERTIDOS: ingresos reales, origen de fondos, retiro de 38.500 € y naturaleza de los pagos: cargas familiares vs inversión (art. 428 LEC).”',
+      '“Y como PRUEBA: oficios a AEAT/TGSS y al banco para extractos completos, más pericial contable de flujos (art. 429 LEC).”',
+      '“Lo que no esté trazado, no puede convertirse en condena: no hay presunción de préstamo en una convivencia/matrimonio; la carga es de quien reclama.”',
+    ],
+    riesgos:
+      'Riesgo: que el juez intente cortar por “irrelevante”. Mitigación: enmarcarlo SIEMPRE como distribución de carga probatoria + delimitación de hechos controvertidos + necesidad de prueba objetiva (no como reproche personal).',
+    notasInternas:
+      'Usar como “palanca de prueba”: no discutir estilos de vida. Objetivo: obligar a AEAT/TGSS/banco + pericial contable y, si no hay trazabilidad, pedir que se limite la reclamación a lo efectivamente acreditado.',
+  },
 
   // ATAQUES
   {
