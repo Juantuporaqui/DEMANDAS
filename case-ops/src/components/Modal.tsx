@@ -3,6 +3,7 @@
 // ============================================
 
 import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ModalProps {
   isOpen: boolean;
@@ -43,7 +44,7 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div
       className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
       onClick={onClose}
@@ -67,4 +68,6 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
