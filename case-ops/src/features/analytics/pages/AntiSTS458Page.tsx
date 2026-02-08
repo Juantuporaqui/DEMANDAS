@@ -81,6 +81,33 @@ export function AntiSTS458Page() {
           </SectionCard>
         ))}
 
+        <SectionCard title="Tabla comparativa">
+          <div className="overflow-x-auto rounded-lg border border-slate-700/60 bg-slate-900/60">
+            <table className="w-full min-w-[640px] text-left text-xs text-slate-300">
+              <thead className="bg-slate-900 text-[11px] uppercase text-slate-400">
+                <tr>
+                  {antiSts458.tablaDistinguishing.headers.map((header) => (
+                    <th key={header} className="border-b border-slate-700/60 px-3 py-2">
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {antiSts458.tablaDistinguishing.rows.map((row, rowIndex) => (
+                  <tr key={`${row[0]}-${rowIndex}`} className="align-top">
+                    {row.map((cell, cellIndex) => (
+                      <td key={`${cell}-${cellIndex}`} className="px-3 py-3 text-slate-200">
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SectionCard>
+
         {/* ORDEN DE INTERVENCIÓN */}
         <SectionCard title={antiSts458.ordenIntervencion.title}>
           <div className="space-y-2 text-sm text-slate-300">

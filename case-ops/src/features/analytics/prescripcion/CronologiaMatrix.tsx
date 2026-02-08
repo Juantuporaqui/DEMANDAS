@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 type HypothesisValue = 'H1' | 'H2';
 
 type CronologiaTramo = {
@@ -15,6 +17,7 @@ interface CronologiaMatrixProps {
   subtitle?: string;
   tramos: CronologiaTramo[];
   activeHypothesis: HypothesisValue;
+  actions?: ReactNode;
 }
 
 const estadoBadgeMap: Record<string, string> = {
@@ -35,7 +38,7 @@ function EstadoBadge({ label, isActive }: { label: string; isActive?: boolean })
   );
 }
 
-export function CronologiaMatrix({ id, title, subtitle, tramos, activeHypothesis }: CronologiaMatrixProps) {
+export function CronologiaMatrix({ id, title, subtitle, tramos, activeHypothesis, actions }: CronologiaMatrixProps) {
   return (
     <section id={id} className="scroll-mt-24 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-200 print-card">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -43,9 +46,12 @@ export function CronologiaMatrix({ id, title, subtitle, tramos, activeHypothesis
           <h2 className="text-base font-semibold text-white">{title}</h2>
           {subtitle ? <p className="mt-1 text-sm text-slate-400">{subtitle}</p> : null}
         </div>
-        <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
-          Carril activo: {activeHypothesis}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          {actions}
+          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+            Carril activo: {activeHypothesis}
+          </span>
+        </div>
       </div>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-xs text-slate-300">
