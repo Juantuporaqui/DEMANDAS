@@ -45,11 +45,11 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="relative w-full sm:max-w-lg max-h-[90dvh] flex flex-col rounded-t-2xl sm:rounded-2xl border border-slate-700/60 bg-slate-900 shadow-xl overflow-hidden"
+        className="relative w-full sm:max-w-lg max-h-[90dvh] flex flex-col rounded-2xl border border-slate-700/60 bg-slate-900 shadow-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between gap-3 border-b border-slate-700/50 px-4 sm:px-5 py-3 sm:py-4 flex-shrink-0">
