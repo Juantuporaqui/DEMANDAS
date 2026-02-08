@@ -21,6 +21,62 @@ export type BloqueDefensa = {
   planB: string[];
 };
 
+export type ExcepcionProcesalItem = {
+  id: string;
+  titulo: string;
+  sala: {
+    mensaje: string;
+    pedir: string[];
+    base: string[];
+  };
+  interno: {
+    checklist: string[];
+    riesgos: string[];
+    contraataques: string[];
+  };
+};
+
+export type ExcepcionSaneamiento = {
+  sala: {
+    titulo: string;
+    contenido: string[];
+    base: string[];
+  };
+  interno: {
+    titulo: string;
+    contenido: string[];
+    notas: string[];
+  };
+};
+
+export type GuionActa = {
+  sala: {
+    principal: string;
+    subsidiario: string;
+  };
+  interno: {
+    principal: string;
+    subsidiario: string;
+    checklist: string[];
+  };
+};
+
+export type MatrizPreclusionItem = {
+  id: string;
+  momento: string;
+  riesgo: 'baja' | 'media' | 'alta';
+  clave: string;
+  base: string[];
+  notaInterna: string;
+};
+
+export type EscenarioDecision = {
+  id: string;
+  decision: string;
+  sala: string;
+  interno: string;
+};
+
 export const PICASSENT_AP = {
   // Sección 0 — Guiones listos para copiar
   guiones: {
@@ -344,6 +400,254 @@ export const PICASSENT_AP = {
       ]
     }
   ] as BloqueDefensa[],
+
+  excepcionesProcesales: {
+    excepciones: [
+      {
+        id: 'competencia',
+        titulo: 'Falta de competencia objetiva/territorial o funcional',
+        sala: {
+          mensaje: 'Señoría, interesa que se depure de oficio y, en su caso, se declare la incompetencia conforme a la LEC.',
+          pedir: [
+            'Que se aprecie y resuelva la competencia con carácter preferente, dejando constancia expresa en acta.',
+            'Subsidiario: si se mantiene la competencia, que se motive el criterio aplicado.'
+          ],
+          base: ['LEC 416–418 (excepciones procesales en AP).', 'LEC 48–60 (competencia).']
+        },
+        interno: {
+          checklist: [
+            'Verificar si la demanda encaja en la competencia objetiva y territorial.',
+            'Si hay dudas, pedir resolución expresa en AP para evitar nulidades futuras.'
+          ],
+          riesgos: [
+            'Si no se plantea en AP, riesgo de convalidación y pérdida de oportunidad.',
+            'Evitar contradicción con actos propios: no pedir luego nulidad si aquí se convalida.'
+          ],
+          contraataques: [
+            '“Se admitió ya la demanda”: respuesta: la competencia se depura en AP por mandato legal.',
+            '“No hay indefensión”: respuesta: la competencia es presupuesto procesal y debe resolverse.'
+          ]
+        }
+      },
+      {
+        id: 'indebida_acumulacion',
+        titulo: 'Indebida acumulación objetiva (división + reclamación heterogénea)',
+        sala: {
+          mensaje: 'Señoría, la demanda acumula pretensiones heterogéneas: pedimos inadmisión parcial o depuración por bloques.',
+          pedir: [
+            'Que se declare la indebida acumulación o, al menos, se acote el objeto por bloques y se excluya lo ajeno.',
+            'Que se exija concreción por partida con soporte íntegro.'
+          ],
+          base: ['LEC 71–73 (acumulación objetiva).', 'LEC 402 (oposición en contestación y resolución en AP).']
+        },
+        interno: {
+          checklist: [
+            'Marcar partidas sin conexión funcional con la división de cosa común.',
+            'Pedir resolución expresa para fijar el perímetro del litigio.'
+          ],
+          riesgos: [
+            'Riesgo de “macro-objeto” sin trazabilidad si no se depura.',
+            'Preclusión: si no se concreta aquí, luego se consolida.'
+          ],
+          contraataques: [
+            '“Todo está conectado”: respuesta: conexión no sustituye trazabilidad ni identidad de causa.',
+            '“Ya lo detallé”: respuesta: detalle no es soporte íntegro.'
+          ]
+        }
+      },
+      {
+        id: 'defecto_demanda',
+        titulo: 'Defectos de demanda (falta de claridad/concreción)',
+        sala: {
+          mensaje: 'Señoría, la demanda carece de concreción suficiente: pedimos aclaración, depuración o inadmisión parcial.',
+          pedir: [
+            'Que se requiera concreción y depuración por partidas, con fechas, cuentas y soportes íntegros.',
+            'Que se tenga por no alegado lo que no se concrete con precisión.'
+          ],
+          base: ['LEC 424 (defectos de la demanda).', 'Art. 24 CE (defensa efectiva).']
+        },
+        interno: {
+          checklist: [
+            'Identificar bloques sin fecha/cuenta/ordenante.',
+            'Pedir que se fijen hechos controvertidos con precisión.'
+          ],
+          riesgos: [
+            'Si se admite la demanda imprecisa, se traslada la indefensión a la prueba.',
+            'Preclusión tácita si se tolera la indeterminación.'
+          ],
+          contraataques: [
+            '“Se aclarará en prueba”: respuesta: la claridad del objeto es presupuesto de la contradicción.'
+          ]
+        }
+      },
+      {
+        id: 'prescripcion',
+        titulo: 'Prescripción de partidas anteriores a 2019',
+        sala: {
+          mensaje: 'Señoría, pedimos que se declare prescrita toda partida anterior a 2019 conforme al CC.',
+          pedir: [
+            'Estimación de la prescripción pre-2019 salvo interrupción fehaciente acreditada.',
+            'En su caso, fijación del dies a quo por cada pago.'
+          ],
+          base: ['CC 1964.2 y 1969.', 'LEC 416–418 (excepciones).']
+        },
+        interno: {
+          checklist: [
+            'Separar por periodos y exigir prueba de interrupción.',
+            'Neutralizar STS 458/2025 si se pretende aplicar.'
+          ],
+          riesgos: [
+            'Si no se articula bien, el juez puede “salvar” por interpretación amplia.',
+            'Preclusión parcial si no se segmenta el periodo.'
+          ],
+          contraataques: [
+            '“Se trata de vida familiar”: respuesta: el bien no era vivienda habitual y no hay convivencia patrimonial normal.'
+          ]
+        }
+      },
+      {
+        id: 'litisconsorcio',
+        titulo: 'Litisconsorcio pasivo necesario (si procede)',
+        sala: {
+          mensaje: 'Señoría, si hay terceros indispensables para la eficacia del fallo, procede integrar el litisconsorcio.',
+          pedir: [
+            'Que se declare la necesidad de integrar a los litisconsortes pasivos indispensables.',
+            'Suspensión y emplazamiento si procede.'
+          ],
+          base: ['LEC 12 (litisconsorcio).', 'LEC 416–418 (excepciones).']
+        },
+        interno: {
+          checklist: [
+            'Comprobar si hay titulares registrales o cotitulares omitidos.',
+            'Valorar si la falta afecta a la eficacia del fallo.'
+          ],
+          riesgos: [
+            'Si no se plantea ahora, puede considerarse convalidado.',
+            'No forzar si no hay base: puede debilitar la credibilidad.'
+          ],
+          contraataques: [
+            '“No es necesario”: respuesta: explicar la eficacia del fallo sin el tercero.'
+          ]
+        }
+      }
+    ] as ExcepcionProcesalItem[],
+    saneamiento: {
+      sala: {
+        titulo: 'Por qué puede abordarse en AP aunque no se desarrollara con amplitud en la contestación',
+        contenido: [
+          'La AP es fase de saneamiento: el tribunal debe resolver excepciones procesales, defectos de demanda y presupuestos procesales.',
+          'El deber judicial de ordenar y depurar el proceso permite encauzar cuestiones que estén ya planteadas o que sean apreciables de oficio.',
+          'La preclusión es la regla (art. 136 LEC), pero no impide el saneamiento cuando la ley impone resolver y evitar indefensión.'
+        ],
+        base: ['LEC 416, 424 y 425.', 'Art. 24 CE.', 'LEC 136.']
+      },
+      interno: {
+        titulo: 'Sustento técnico (sin vender humo)',
+        contenido: [
+          'En AP el tribunal debe resolver presupuestos procesales y excepciones, incluso apreciables de oficio.',
+          'Si la contestación contenía la excepción en términos mínimos, se puede desarrollar en AP sin vulnerar la preclusión.',
+          'Si no estaba articulada, solo cabe si es apreciable de oficio o afecta a tutela sin indefensión.'
+        ],
+        notas: [
+          'Evitar pedir “novedades” que no son de orden público.',
+          'Conectar siempre con indefensión material y deber de saneamiento.'
+        ]
+      }
+    } as ExcepcionSaneamiento,
+    guionActa: {
+      sala: {
+        principal: [
+          'Señoría, al amparo de los arts. 416 y ss. LEC, interesamos el saneamiento procesal y la resolución de excepciones: (i) depuración del objeto por indebida acumulación; (ii) defectos de concreción de la demanda; y (iii) prescripción de partidas anteriores a 2019.',
+          'Solicitamos que se acote el objeto litigioso por bloques, se excluyan partidas impertinentes y se exija soporte íntegro por partida, dejando constancia expresa en acta.'
+        ].join('\n'),
+        subsidiario: [
+          'Subsidiariamente, si el juzgado decide no excluir acciones, pedimos que se imponga un mandato de concreción inmediata y se condicione la prueba a extractos íntegros/certificados, para evitar indefensión.',
+          'Y, en todo caso, que se fije como cuestión previa la prescripción pre-2019 con resolución expresa.'
+        ].join('\n')
+      },
+      interno: {
+        principal: [
+          'Pedir orden de tratamiento: competencia → acumulación → defectos demanda → prescripción.',
+          'Cerrar con petición de resolución expresa en AP y constancia en acta.'
+        ].join('\n'),
+        subsidiario: [
+          'Si no depura: pedir concreción por partidas + oficios bancarios + advertencia de que sin soporte íntegro no hay prueba válida.',
+          'Mantener protesta por indefensión (art. 24 CE).'
+        ].join('\n'),
+        checklist: [
+          'Mencionar 416/424/425 LEC y 24 CE.',
+          'Evitar ampliar excepciones no planteadas salvo orden público.',
+          'Dejar constancia de preclusión: art. 136 LEC.'
+        ]
+      }
+    } as GuionActa,
+    matrizPreclusion: [
+      {
+        id: 'competencia',
+        momento: 'AP (fase saneamiento)',
+        riesgo: 'alta',
+        clave: 'Competencia: debe resolverse en AP con carácter preferente.',
+        base: ['LEC 48–60.', 'LEC 416–418.'],
+        notaInterna: 'Si no se plantea, riesgo de convalidación y pérdida de nulidad.'
+      },
+      {
+        id: 'acumulacion',
+        momento: 'Contestación / AP',
+        riesgo: 'media',
+        clave: 'Indebida acumulación: oposición en contestación y resolución en AP.',
+        base: ['LEC 402.', 'LEC 71–73.'],
+        notaInterna: 'Si solo se esbozó en contestación, desarrollar en AP con base en saneamiento.'
+      },
+      {
+        id: 'defectos_demanda',
+        momento: 'AP (saneamiento)',
+        riesgo: 'media',
+        clave: 'Defectos de demanda: concreción y claridad.',
+        base: ['LEC 424–425.'],
+        notaInterna: 'Conectar con indefensión material y pedir mandato de concreción.'
+      },
+      {
+        id: 'prescripcion',
+        momento: 'Contestación / AP',
+        riesgo: 'alta',
+        clave: 'Prescripción: excepción material con fuerte efecto preclusivo.',
+        base: ['CC 1964.2 y 1969.', 'LEC 136.'],
+        notaInterna: 'Si no se alegó, difícil salvar; si se alegó mínimamente, desarrollar en AP.'
+      },
+      {
+        id: 'litisconsorcio',
+        momento: 'AP',
+        riesgo: 'media',
+        clave: 'Litisconsorcio necesario: puede apreciarse de oficio.',
+        base: ['LEC 12.', 'LEC 416–418.'],
+        notaInterna: 'Solo activar si la eficacia del fallo queda comprometida.'
+      }
+    ] as MatrizPreclusionItem[],
+    escenariosDecision: [
+      {
+        id: 'admite',
+        decision: 'El juez admite la excepción y depura el objeto',
+        sala: 'Solicitamos que se deje constancia en acta del perímetro del litigio y de las partidas excluidas.',
+        interno: 'Cerrar con resolución expresa y control de preclusión: lo excluido no vuelve.'
+      },
+      {
+        id: 'rechaza',
+        decision: 'El juez rechaza la excepción pero permite seguir',
+        sala: 'Formulamos protesta por indefensión y pedimos mandato de concreción y prueba íntegra.',
+        interno: 'Pedir oficios/pericial; convertir la derrota en estándar probatorio alto.'
+      },
+      {
+        id: 'difere',
+        decision: 'El juez difiere la decisión al momento de sentencia',
+        sala: 'Interesamos que se deje constancia en acta de la cuestión previa y que se limite la prueba a lo pertinente.',
+        interno: 'Guardar protesta y acotar prueba; evitar que se convierta en macro-proceso sin método.'
+      }
+    ] as EscenarioDecision[],
+    jurisprudenciaPendiente: {
+      titulo: 'Jurisprudencia (pendiente de incorporar)',
+      nota: 'PENDIENTE: no se incorpora ROJ/CENDOJ en este módulo. Añadir solo con referencia verificada.'
+    }
+  },
 
   // Sección 3 — lo que ya existía en /analytics/audiencia (sin perderlo)
   hechosControvertidos,

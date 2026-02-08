@@ -117,6 +117,9 @@ const riesgoConfig: Record<'baja' | 'media' | 'alta', { bg: string; border: stri
 
 const navItems = [
   { id: 'saneamiento', label: 'Saneamiento' },
+  { id: 'excepciones', label: 'Excepciones' },
+  { id: 'matriz', label: 'Matriz' },
+  { id: 'escenarios', label: 'Escenarios' },
   { id: 'hechos', label: 'Hechos' },
   { id: 'prueba', label: 'Prueba' },
   { id: 'bloques', label: 'Bloques' },
@@ -544,6 +547,210 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
               <div className="text-sm font-semibold text-white">{fase.titulo}</div>
               <div className="mt-2 text-xs text-slate-200">{fase.resumen}</div>
               <div className="mt-2 text-xs text-emerald-200">{fase.objetivo}</div>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard id="excepciones" title="Excepciones procesales en AP (Picassent)" className="print:break-inside-avoid">
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4">
+            <div className="text-sm font-semibold text-white">{PICASSENT_AP.excepcionesProcesales.saneamiento.sala.titulo}</div>
+            <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-200">
+              {PICASSENT_AP.excepcionesProcesales.saneamiento.sala.contenido.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+            <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-100">
+              {PICASSENT_AP.excepcionesProcesales.saneamiento.sala.base.map((line) => (
+                <span key={line} className="rounded-full border border-slate-600/60 bg-slate-800/60 px-3 py-1">
+                  {line}
+                </span>
+              ))}
+            </div>
+            {!salaMode && (
+              <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs text-emerald-200 print:hidden">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                  {PICASSENT_AP.excepcionesProcesales.saneamiento.interno.titulo}
+                </div>
+                <ul className="mt-2 list-disc space-y-1 pl-4">
+                  {PICASSENT_AP.excepcionesProcesales.saneamiento.interno.contenido.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+                <ul className="mt-3 list-disc space-y-1 pl-4 text-emerald-100/90">
+                  {PICASSENT_AP.excepcionesProcesales.saneamiento.interno.notas.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-2">
+            {PICASSENT_AP.excepcionesProcesales.excepciones.map((item) => (
+              <div key={item.id} className="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-white">{item.titulo}</div>
+                    <p className="mt-2 text-xs text-slate-200">{item.sala.mensaje}</p>
+                  </div>
+                  <CopyButton
+                    text={`${item.titulo}\n${item.sala.mensaje}\n${item.sala.pedir.join('\n')}`}
+                    label="Copiar"
+                  />
+                </div>
+                <div className="mt-3 text-xs text-slate-200">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">Pedir</div>
+                  <ul className="mt-2 list-disc space-y-1 pl-4">
+                    {item.sala.pedir.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-100">
+                  {item.sala.base.map((line) => (
+                    <span key={line} className="rounded-full border border-slate-600/60 bg-slate-800/60 px-3 py-1">
+                      {line}
+                    </span>
+                  ))}
+                </div>
+                {!salaMode && (
+                  <div className="mt-4 grid gap-3 text-xs text-slate-200 print:hidden">
+                    <div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">Checklist</div>
+                      <ul className="mt-2 list-disc space-y-1 pl-4">
+                        {item.interno.checklist.map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">Riesgos</div>
+                      <ul className="mt-2 list-disc space-y-1 pl-4">
+                        {item.interno.riesgos.map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">Contraataques</div>
+                      <ul className="mt-2 list-disc space-y-1 pl-4">
+                        {item.interno.contraataques.map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold text-white">Guion de sala + texto copiable para acta</div>
+                <p className="mt-2 text-xs text-slate-200">Versión principal y subsidiaria para dejar constancia en acta.</p>
+              </div>
+              <CopyButton
+                text={[
+                  'PRINCIPAL:',
+                  PICASSENT_AP.excepcionesProcesales.guionActa.sala.principal,
+                  '',
+                  'SUBSIDIARIO:',
+                  PICASSENT_AP.excepcionesProcesales.guionActa.sala.subsidiario
+                ].join('\n')}
+                label="Copiar acta"
+              />
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs text-emerald-200">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.2em]">Principal</div>
+                <p className="mt-2 whitespace-pre-wrap">{PICASSENT_AP.excepcionesProcesales.guionActa.sala.principal}</p>
+              </div>
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-amber-200">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.2em]">Subsidiario</div>
+                <p className="mt-2 whitespace-pre-wrap">{PICASSENT_AP.excepcionesProcesales.guionActa.sala.subsidiario}</p>
+              </div>
+            </div>
+            {!salaMode && (
+              <div className="mt-4 grid gap-3 md:grid-cols-2 text-xs text-slate-200 print:hidden">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">Notas internas (principal)</div>
+                  <p className="mt-2 whitespace-pre-wrap">{PICASSENT_AP.excepcionesProcesales.guionActa.interno.principal}</p>
+                </div>
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">Notas internas (subsidiario)</div>
+                  <p className="mt-2 whitespace-pre-wrap">{PICASSENT_AP.excepcionesProcesales.guionActa.interno.subsidiario}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">Checklist</div>
+                  <ul className="mt-2 list-disc space-y-1 pl-4">
+                    {PICASSENT_AP.excepcionesProcesales.guionActa.interno.checklist.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <details className="rounded-2xl border border-dashed border-slate-700/60 bg-slate-900/30 p-4">
+            <summary className="cursor-pointer text-xs font-semibold text-slate-200">
+              {PICASSENT_AP.excepcionesProcesales.jurisprudenciaPendiente.titulo}
+            </summary>
+            <p className="mt-2 text-xs text-amber-200">
+              {PICASSENT_AP.excepcionesProcesales.jurisprudenciaPendiente.nota}
+            </p>
+          </details>
+        </div>
+      </SectionCard>
+
+      <SectionCard id="matriz" title="Matriz: momento procesal / riesgo de preclusión" className="print:break-inside-avoid">
+        <div className="space-y-3">
+          {PICASSENT_AP.excepcionesProcesales.matrizPreclusion.map((item) => (
+            <div key={item.id} className="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`rounded-full border px-3 py-1 text-[11px] ${
+                    riesgoConfig[item.riesgo].bg
+                  } ${riesgoConfig[item.riesgo].border} ${riesgoConfig[item.riesgo].text}`}
+                >
+                  Riesgo {riesgoConfig[item.riesgo].label}
+                </span>
+                <span className="text-xs text-slate-200">{item.momento}</span>
+              </div>
+              <div className="mt-2 text-sm font-semibold text-white">{item.clave}</div>
+              <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-100">
+                {item.base.map((line) => (
+                  <span key={line} className="rounded-full border border-slate-600/60 bg-slate-800/60 px-3 py-1">
+                    {line}
+                  </span>
+                ))}
+              </div>
+              {!salaMode && (
+                <p className="mt-3 text-xs text-slate-200 print:hidden">{item.notaInterna}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard id="escenarios" title="Escenarios de decisión judicial + respuesta táctica" className="print:break-inside-avoid">
+        <div className="space-y-3">
+          {PICASSENT_AP.excepcionesProcesales.escenariosDecision.map((escenario) => (
+            <div key={escenario.id} className="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-white">{escenario.decision}</div>
+                  <p className="mt-2 text-xs text-emerald-200">{escenario.sala}</p>
+                </div>
+                <CopyButton text={`${escenario.decision}\n${escenario.sala}`} label="Copiar respuesta" />
+              </div>
+              {!salaMode && (
+                <p className="mt-3 text-xs text-slate-200 print:hidden">{escenario.interno}</p>
+              )}
             </div>
           ))}
         </div>
