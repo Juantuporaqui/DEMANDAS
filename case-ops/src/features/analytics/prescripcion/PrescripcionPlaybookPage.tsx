@@ -1,6 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { prescripcionPicassent } from '../../../content/prescripcion/picassent';
 import { CopyButton } from './CopyButton';
+import { CronologiaMatrix } from './CronologiaMatrix';
+import { DistinguishingSection } from './DistinguishingSection';
+import { ErroresFatalesSection } from './ErroresFatalesSection';
+import { HypothesisToggle } from './HypothesisToggle';
+import { MarcoNormativoSection } from './MarcoNormativoSection';
 import { ScenarioCard } from './ScenarioCard';
 import { StickyTOC } from './StickyTOC';
 
@@ -9,8 +15,15 @@ interface PrescripcionPlaybookPageProps {
 }
 
 export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const content = prescripcionPicassent;
+  const defaultHypothesis = searchParams.get('hyp') === 'H2' ? 'H2' : 'H1';
+  const [hypothesis, setHypothesis] = useState<'H1' | 'H2'>(defaultHypothesis);
+
+  useEffect(() => {
+    setHypothesis(defaultHypothesis);
+  }, [defaultHypothesis]);
 
   const metaBadges = useMemo(
     () => [
@@ -19,13 +32,21 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
       `Cuantía ${content.meta.cuantia}`,
       `AP ${content.meta.audienciaPrevia}`,
       content.meta.version,
+      `Hipótesis ${hypothesis}`,
     ],
-    [content.meta]
+    [content.meta, hypothesis]
   );
 
   const handleCopied = (text: string) => {
     setCopiedText(text);
     setTimeout(() => setCopiedText(null), 2000);
+  };
+
+  const handleHypothesisChange = (value: 'H1' | 'H2') => {
+    setHypothesis(value);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('hyp', value);
+    setSearchParams(nextParams, { replace: true });
   };
 
   const scrollToGuion = () => {
@@ -86,6 +107,22 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
         </div>
       </section>
 
+      <section className="rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4 text-sm text-slate-200 print-card">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Selector de hipótesis</h2>
+        <div className="mt-3">
+          <HypothesisToggle
+            value={hypothesis}
+            onChange={handleHypothesisChange}
+            hint={
+              <p className="text-slate-300">
+                458 solo cambia el <span className="font-semibold text-emerald-200">dies a quo</span>; no altera prueba,
+                exceso, interrupción ni causa. Esta vista solo reordena prioridades, sin borrar el Plan A.
+              </p>
+            }
+          />
+        </div>
+      </section>
+
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-4 sm:space-y-6 print-surface">
           <section id="panel-rapido" className="scroll-mt-24 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4 sm:p-5 text-sm text-slate-200 print-card">
@@ -132,6 +169,13 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
             <p className="mt-4 text-sm font-semibold text-slate-100">{content.resumen.solucionIntro}</p>
             <p className="mt-2 text-sm text-slate-100/90">{content.resumen.solucion}</p>
           </section>
+
+          <MarcoNormativoSection
+            id="marco-normativo"
+            title={content.marcoNormativo.title}
+            subtitle={content.marcoNormativo.subtitle}
+            items={content.marcoNormativo.items}
+          />
 
           <section id="peticion-prioritaria" className="relative scroll-mt-24">
             <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-6 text-sm text-amber-100 shadow-sm md:sticky md:top-6 print-card">
@@ -214,6 +258,24 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
             <p className="mt-3 text-sm font-semibold text-emerald-200">{content.comoTeLaIntentanColar.antidoto}</p>
           </section>
 
+          <CronologiaMatrix
+            id="cronologia-prescripcion"
+            title={content.cronologiaPrescripcion.title}
+            subtitle={content.cronologiaPrescripcion.subtitle}
+            tramos={content.cronologiaPrescripcion.tramos}
+            activeHypothesis={hypothesis}
+          />
+
+          <DistinguishingSection
+            id="distinguishing"
+            title={content.distinguishing.title}
+            subtitle={content.distinguishing.subtitle}
+            intro={content.distinguishing.intro}
+            activeHypothesis={hypothesis}
+            returnTo={returnTo}
+            onCopied={handleCopied}
+          />
+
           <section id="selector-escenarios" className="scroll-mt-24 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-200 print-card">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -239,7 +301,12 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
 
           <section id="plan-a" className="scroll-mt-24 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-200 print-card">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-base font-semibold text-white">{content.planA.title}</h2>
+              <div className="space-y-1">
+                <h2 className="text-base font-semibold text-white">{content.planA.title}</h2>
+                <span className="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                  {hypothesis === 'H1' ? 'Prioridad actual: Plan A' : 'Plan A (siempre activo)'}
+                </span>
+              </div>
               <CopyButton
                 text={[
                   content.planA.title,
@@ -264,7 +331,12 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
 
           <section id="plan-b" className="scroll-mt-24 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-200 print-card">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-base font-semibold text-white">{content.planB.title}</h2>
+              <div className="space-y-1">
+                <h2 className="text-base font-semibold text-white">{content.planB.title}</h2>
+                <span className="inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-200">
+                  {hypothesis === 'H2' ? 'Carril activo: Plan B' : 'Plan B (subsidiario)'}
+                </span>
+              </div>
               <CopyButton
                 text={[
                   content.planB.title,
@@ -375,6 +447,15 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-slate-200">{content.plantillas.peticionesTitle}</h3>
+                <div className="mt-2">
+                  <CopyButton
+                    text={[content.plantillas.peticionesTitle, ...content.plantillas.peticiones.map((item) => `- ${item}`)].join(
+                      '\n'
+                    )}
+                    label="Copiar peticiones"
+                    onCopied={handleCopied}
+                  />
+                </div>
                 <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-slate-300">
                   {content.plantillas.peticiones.map((item) => (
                     <li key={item}>{item}</li>
@@ -383,6 +464,13 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
               </div>
             </div>
           </section>
+
+          <ErroresFatalesSection
+            id="errores-fatales"
+            title={content.erroresFatales.title}
+            subtitle={content.erroresFatales.subtitle}
+            items={content.erroresFatales.items}
+          />
         </div>
 
         <aside className="sticky top-6 hidden h-max lg:block">
