@@ -160,10 +160,10 @@ export const prescripcionPicassent = {
         id: 'tramo-pre-2015-10-07',
         rango: 'Pre 07/10/2015',
         descripcion:
-          'Acciones antiguas sometidas a DT 5ª: es imprescindible tabla por partidas. Parte del origen es pre-matrimonio (préstamo 2006).',
+          'Periodo pre-reforma (07/10/2015): acciones nacidas antes de esa fecha quedan sujetas a la DT 5ª de la Ley 42/2015 y exigen depuración por partidas/bloques.',
         estadoH1: 'PRESCRITO',
         estadoH2: 'PRESCRITO',
-        nota: 'DT 5ª (Ley 42/2015) + origen 2006; la STS 458 no opera igual en partidas pre-matrimonio.',
+        nota: `DT 5ª (Ley 42/2015) y segmentación por bloques. Si existen partidas anteriores al matrimonio (${PICASSENT_FACTS.matrimonio.human}), se tratan como sub-bloque separado; no procede crédito único.`,
       },
       {
         id: 'tramo-2015-10-07-2019-06-24',
@@ -282,7 +282,7 @@ export const prescripcionPicassent = {
       'STS: cuenta nutrida casi exclusivamente por ella → Nosotros: 2 sueldos comparables, 2 cuentas conjuntas, 0 privativos',
       'STS: desequilibrio probado → Nosotros: ningún euro privativo identificable',
       'STS: hipoteca de domicilio = carga familiar implícita → Nosotros: inversión especulativa = comunidad ordinaria (392 CC)',
-      `STS: cónyuge sin formación financiera / sin visibilidad → Nosotros: policía + ${PICASSENT_FACTS.formacionActora} + cotitular + 0 reclamaciones en más de una década`,
+      `STS: cónyuge sin formación financiera / sin visibilidad → Nosotros: policía + ${PICASSENT_FACTS.formacionActora} + cotitular + 0 reclamaciones durante años`,
     ],
   },
   erroresFatales: {
@@ -333,9 +333,9 @@ export const prescripcionPicassent = {
       },
       {
         id: 'error-pre-matrimonio',
-        title: 'Ignorar el origen pre-matrimonial',
-        mal: 'Permitir que se incluyan partidas anteriores al matrimonio como si fueran homogéneas.',
-        bien: 'Aplicar DT 5ª y excluir o segmentar lo pre-matrimonial.',
+        title: 'Ignorar el origen pre-reforma',
+        mal: 'Ignorar la DT 5ª (07/10/2015) y la heterogeneidad de partidas.',
+        bien: `DT 5ª (pre-07/10/2015) + segmentación por bloques/partidas; pre-${PICASSENT_FACTS.matrimonio.human} solo si existen partidas previas al matrimonio.`,
       },
     ],
   },
@@ -380,6 +380,7 @@ export const prescripcionPicassent = {
     { id: 'resumen-60s', label: 'Resumen 60s' },
     { id: 'marco-normativo', label: 'Marco normativo' },
     { id: 'peticion-prioritaria', label: 'Petición prioritaria' },
+    { id: 'tabla-partidas', label: 'Tabla por partidas (A/B/C)' },
     { id: 'regla-de-oro', label: 'Regla de oro' },
     { id: 'como-te-la-intentan-colar', label: 'Cómo te la intentan colar' },
     { id: 'cronologia-prescripcion', label: 'Cronología (H1/H2)' },

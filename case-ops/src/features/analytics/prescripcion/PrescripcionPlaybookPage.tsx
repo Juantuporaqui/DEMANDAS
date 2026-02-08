@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { prescripcionPicassent } from '../../../content/prescripcion/picassent';
 import { CopyButton } from './CopyButton';
 import { CronologiaMatrix } from './CronologiaMatrix';
@@ -9,6 +9,7 @@ import { HypothesisToggle } from './HypothesisToggle';
 import { MarcoNormativoSection } from './MarcoNormativoSection';
 import { ScenarioCard } from './ScenarioCard';
 import { StickyTOC } from './StickyTOC';
+import { TablaPartidasSection } from './TablaPartidasSection';
 
 interface PrescripcionPlaybookPageProps {
   returnTo: string;
@@ -114,12 +115,12 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <a
-              href={returnTo}
+            <Link
+              to={returnTo}
               className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-200 transition hover:border-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.2em]"
             >
               Volver
-            </a>
+            </Link>
             <button
               type="button"
               onClick={() => window.print()}
@@ -251,6 +252,13 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
               <p className="mt-4 text-sm font-semibold text-amber-50">{content.peticionPrioritaria.mantra}</p>
             </div>
           </section>
+
+          <TablaPartidasSection
+            id="tabla-partidas"
+            title="Tabla verificable por partidas (A/B/C)"
+            subtitle="Fuente única: seed DB Picassent. Completar con documento/base/exigibilidad cuando se acrediten."
+            onCopied={handleCopied}
+          />
 
           <section id="regla-de-oro" className="scroll-mt-24 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-200 print-card">
             <div className="flex flex-wrap items-center justify-between gap-3">
