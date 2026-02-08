@@ -1,5 +1,6 @@
 export const PICASSENT_FACTS = {
-  matrimonio: { iso: '2012-08-09', human: '09/08/2012' },
+  // FIX: canonical date
+  matrimonio: { iso: '2013-08-09', human: '09/08/2013' },
   alquilerTuristico: {
     canal: 'TripAdvisor',
     licencia: true,
