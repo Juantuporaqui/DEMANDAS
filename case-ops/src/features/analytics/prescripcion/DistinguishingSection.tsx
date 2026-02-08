@@ -1,0 +1,88 @@
+import { antiSts458 } from '../../../content/prescripcion/antiSts458';
+import { CopyButton } from './CopyButton';
+
+type HypothesisValue = 'H1' | 'H2';
+
+interface DistinguishingSectionProps {
+  id?: string;
+  title: string;
+  subtitle?: string;
+  intro?: string;
+  activeHypothesis: HypothesisValue;
+  returnTo: string;
+  onCopied: (text: string) => void;
+}
+
+const argumentoToneMap: Record<string, string> = {
+  'arg-1': 'border-red-500/40 bg-red-500/5',
+  'arg-2': 'border-orange-500/40 bg-orange-500/5',
+  'arg-3': 'border-yellow-500/40 bg-yellow-500/5',
+  'arg-4': 'border-emerald-500/40 bg-emerald-500/5',
+};
+
+export function DistinguishingSection({
+  id,
+  title,
+  subtitle,
+  intro,
+  activeHypothesis,
+  returnTo,
+  onCopied,
+}: DistinguishingSectionProps) {
+  const link = `/analytics/anti-sts-458-2025?returnTo=${encodeURIComponent(returnTo)}`;
+
+  return (
+    <section id={id} className="scroll-mt-24 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-200 print-card">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-white">{title}</h2>
+          {subtitle ? <p className="mt-1 text-sm text-slate-400">{subtitle}</p> : null}
+        </div>
+        <a
+          href={link}
+          className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200"
+        >
+          Abrir versión extendida
+        </a>
+      </div>
+      {intro ? <p className="mt-3 text-sm text-slate-300">{intro}</p> : null}
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        {antiSts458.argumentos.map((argumento) => (
+          <div
+            key={argumento.id}
+            className={`rounded-2xl border p-4 ${argumentoToneMap[argumento.id] ?? 'border-slate-700/60'}`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  {argumento.score ? `Prioridad ${argumento.score}` : 'Prioridad'}
+                </p>
+                <h3 className="mt-2 text-sm font-semibold text-white">{argumento.title}</h3>
+              </div>
+              <span className="rounded-full border border-slate-600/60 bg-slate-800/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200">
+                {activeHypothesis === 'H2' ? 'Plan B activo' : 'Plan A activo'}
+              </span>
+            </div>
+            {argumento.summary ? <p className="mt-3 text-sm text-slate-300">{argumento.summary}</p> : null}
+            <div className="mt-3 space-y-2 text-xs text-slate-300">
+              {argumento.paragraphs.slice(0, 2).map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+            {argumento.fraseSala ? (
+              <div className="mt-4 rounded-xl border border-emerald-700/40 bg-emerald-900/30 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">
+                    {argumento.fraseSalaLabel ?? 'Frase para sala'}
+                  </p>
+                  <CopyButton text={argumento.fraseSala} label="Copiar" onCopied={onCopied} />
+                </div>
+                <p className="mt-2 text-xs italic text-emerald-200">{argumento.fraseSala}</p>
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}

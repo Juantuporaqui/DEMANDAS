@@ -1,4 +1,3 @@
-// TODO(PRESCRIPCION_V3): Reemplazar todo el objeto con la versión v3.0 DEFINITIVA proporcionada por Juan.
 export const prescripcionPicassent = {
   meta: {
     title: 'Prescripción — P.O. 715/2024 (Picassent)',
@@ -90,60 +89,6 @@ export const prescripcionPicassent = {
     ],
     antidoto: 'Antídoto: bloques + tabla + dies a quo motivado por bloque + prueba.',
   },
-  marcoNormativo: {
-    title: 'Marco normativo (TODO v3)',
-    subtitle: 'Pendiente de volcar el marco normativo v3.',
-    items: [
-      {
-        id: 'todo-marco-normativo-1',
-        norma: 'TODO: norma principal (v3)',
-        texto: 'TODO: texto literal/idea clave (v3).',
-        uso: 'TODO: cómo se usa en sala (v3).',
-      },
-    ],
-  },
-  cronologiaPrescripcion: {
-    title: 'Cronología de prescripción (doble hipótesis)',
-    subtitle: 'Matriz comparativa H1 vs H2.',
-    tramos: [
-      {
-        id: 'tramo-pre-2015-10-07',
-        rango: 'Pre 07/10/2015',
-        descripcion: 'TODO: completar descripción v3 del tramo previo.',
-        estadoH1: 'PRESCRITO',
-        estadoH2: 'PRESCRITO',
-        nota: 'DT 5ª + pre-matrimonio (según v3).',
-      },
-      {
-        id: 'tramo-2015-10-07-2019-06-24',
-        rango: '07/10/2015 – 24/06/2019',
-        descripcion: 'TODO: completar descripción v3 del tramo intermedio.',
-        estadoH1: 'PRESCRITO',
-        estadoH2: 'CAMPO DE BATALLA',
-        nota: 'Potencialmente no prescrito si aplica STS 458/2025 (según v3).',
-      },
-      {
-        id: 'tramo-2019-06-24-2022-08',
-        rango: '24/06/2019 – ago. 2022',
-        descripcion: 'TODO: completar descripción v3 del tramo posterior.',
-        estadoH1: 'NO PRESCRITO',
-        estadoH2: 'NO PRESCRITO',
-      },
-      {
-        id: 'tramo-2022-08-2023-10',
-        rango: 'ago. 2022 – oct. 2023',
-        descripcion: 'TODO: completar descripción v3 del tramo final.',
-        estadoH1: 'NO PRESCRITO',
-        estadoH2: 'NO PRESCRITO',
-      },
-    ],
-  },
-  distinguishing: {
-    title: 'Distinguishing anti-STS 458/2025',
-    subtitle: 'Resumen operativo. Ver versión extendida en /analytics/anti-sts-458-2025.',
-    intro: 'TODO: integrar resumen v3 (sin duplicar texto largo).',
-    ctaLabel: 'Abrir versión extendida',
-  },
   escenarios: {
     title: 'Selector de escenarios (decisión rápida)',
     subtitle: 'En AP no gana el más listo: gana el que impone el marco y fuerza la depuración.',
@@ -230,17 +175,6 @@ export const prescripcionPicassent = {
       'STS: cónyuge sin formación financiera / sin visibilidad → Nosotros: policía + máster económicas + cotitular + 0 reclamaciones en 10 años',
     ],
   },
-  erroresFatales: {
-    title: 'Errores fatales (TODO v3)',
-    subtitle: 'Pendiente de volcar errores fatales v3.',
-    items: [
-      {
-        id: 'todo-error-fatal-1',
-        mal: 'TODO: error fatal (v3).',
-        bien: 'TODO: alternativa correcta (v3).',
-      },
-    ],
-  },
   guion: {
     title: 'Guion de sala (2 minutos)',
     text:
@@ -280,18 +214,14 @@ export const prescripcionPicassent = {
   toc: [
     { id: 'panel-rapido', label: 'Panel rápido' },
     { id: 'resumen-60s', label: 'Resumen 60s' },
-    { id: 'marco-normativo', label: 'Marco normativo' },
     { id: 'peticion-prioritaria', label: 'Petición prioritaria' },
     { id: 'regla-de-oro', label: 'Regla de oro' },
     { id: 'como-te-la-intentan-colar', label: 'Cómo te la intentan colar' },
-    { id: 'cronologia-prescripcion', label: 'Cronología (H1/H2)' },
-    { id: 'distinguishing', label: 'Distinguishing' },
     { id: 'selector-escenarios', label: 'Selector de escenarios' },
     { id: 'plan-a', label: 'Plan A' },
     { id: 'plan-b', label: 'Plan B' },
     { id: 'guion-2-min', label: 'Guion 2 min' },
     { id: 'checklist-24-72', label: 'Checklist 24–72h' },
     { id: 'plantillas', label: 'Plantillas' },
-    { id: 'errores-fatales', label: 'Errores fatales' },
   ],
 } as const;
