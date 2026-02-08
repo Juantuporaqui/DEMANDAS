@@ -3,6 +3,8 @@
 // Ejecución de títulos judiciales - Cuenta hijos
 // ============================================
 
+import type { RefutacionItem } from '../escenarios/types';
+
 export interface ProcedimientoQuart {
   caseId: string;
   titulo: string;
@@ -650,4 +652,23 @@ export function buscarEnQuart(termino: string): string[] {
   return resultados;
 }
 
-export { escenariosQuart } from './escenarios';
+export const matrizRefutacion: RefutacionItem[] = [
+  {
+    alegacion: 'La ejecución reclama 2.400€ por 12 mensualidades completas.',
+    prueba:
+      'Los extractos y el cuadro resumen acreditan que el déficit real es 1.828,73€ y que existen pagos directos adicionales.',
+    documentTitle: 'Extracto',
+  },
+  {
+    alegacion: 'No hay pagos suficientes tras el despacho.',
+    prueba: 'Transferencias post-despacho y facturas de gastos de los hijos acreditan cumplimiento parcial.',
+    documentTitle: 'transferencias',
+  },
+  {
+    alegacion: 'No procede pluspetición ni reducción de cuantía.',
+    prueba: 'Art. 558 LEC y tabla de déficit muestran exceso en la cuantía solicitada.',
+    documentTitle: 'tabla',
+  },
+];
+
+export { escenarios } from './escenarios';
