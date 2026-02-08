@@ -3,6 +3,8 @@
 // Archivo: /src/data/mislata/index.ts
 // ============================================
 
+import type { RefutacionItem } from '../escenarios/types';
+
 // ====================
 // PROCEDIMIENTO
 // ====================
@@ -196,6 +198,12 @@ export const argumentosContestacion: ArgumentoContrario[] = [
     prioridad: 6,
   },
 ];
+
+export const matrizRefutacion: RefutacionItem[] = argumentosContestacion.map((argumento) => ({
+  alegacion: argumento.argumentoVicenta,
+  prueba: argumento.nuestraReplica,
+  documentTitle: 'Extracto',
+}));
 
 // ====================
 // NUESTROS ARGUMENTOS PRINCIPALES
