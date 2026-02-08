@@ -1,3 +1,5 @@
+import { PICASSENT_FACTS } from './picassent.facts';
+
 export const antiSts458 = {
   title: 'Defensa Anti-STS 458/2025 — Distinguishing completo',
   subtitle:
@@ -17,13 +19,14 @@ export const antiSts458 = {
       summary: 'Este es el argumento que puede ganar la prescripción por sí solo.',
       paragraphs: [
         'La STS 458/2025 protege al cónyuge que paga de más la hipoteca de LA CASA DONDE AMBOS VIVEN. Su fundamento es el deber de socorro mutuo (arts. 67, 68 CC) y la «contribución al sostenimiento de las cargas y gastos comunes de la familia, con vocación de permanencia».',
-        'Nuestro caso es radicalmente distinto: El préstamo financió la compra de PARCELAS para construir y vender chalets como negocio inmobiliario especulativo. Cuando cayó el mercado y no se pudo vender, se alquiló y después se explotó como Airbnb. NUNCA fue domicilio familiar. Siempre fue un activo productivo o segunda residencia.',
+        `Nuestro caso es radicalmente distinto: El préstamo financió la compra de PARCELAS para construir y vender chalets como negocio inmobiliario especulativo. Cuando cayó el mercado y no se pudo vender, se alquiló y después se explotó como ${PICASSENT_FACTS.alquilerTuristico.canal} con licencia de alojamiento turístico. NUNCA fue domicilio familiar. Siempre fue un activo productivo o segunda residencia.`,
+        `Además, se enmarca en una ${PICASSENT_FACTS.dinamicaPatrimonial} Esto refuerza que hablamos de inversión/explotación, no de cargas del hogar.`,
         'Un negocio es un negocio. Las deudas de un negocio conjunto se rigen por las normas de la comunidad ordinaria (arts. 392 y ss. CC) y de la sociedad civil (arts. 1665 y ss. CC), no por la lógica protectora del matrimonio.',
         'Refuerzo jurisprudencial: La propia doctrina del TS dice que las cuotas de amortización del préstamo hipotecario para adquisición de vivienda — incluso la FAMILIAR — no se reputan cargas del matrimonio (STS 20/03/2013, RJ 2013/4936; STS 246/2018). Si ni la hipoteca de la casa familiar es carga matrimonial, MUCHO MENOS la hipoteca de unas parcelas de negocio.',
       ],
       fraseSalaLabel: 'Frase para sala',
       fraseSala:
-        '«La STS 458/2025 protege al cónyuge que paga de más la hipoteca de la casa donde ambos viven. No protege al socio de un negocio inmobiliario especulativo. El préstamo financió parcelas para construir y vender chalets. Cuando el negocio fracasó, se alquiló y se explotó como Airbnb. Nunca fue vivienda habitual. Esto es una inversión conjunta, no una carga del matrimonio, y las reglas de prescripción son las generales: desde cada pago.»',
+        `«La STS 458/2025 protege al cónyuge que paga de más la hipoteca de la casa donde ambos viven. No protege al socio de un negocio inmobiliario especulativo. El préstamo financió parcelas para construir y vender chalets. Cuando el negocio fracasó, se alquiló y se explotó como ${PICASSENT_FACTS.alquilerTuristico.canal} con licencia de alojamiento turístico. Nunca fue vivienda habitual. Esto es una inversión conjunta, no una carga del matrimonio, y las reglas de prescripción son las generales: desde cada pago.»`,
     },
     {
       id: 'arg-2',
@@ -45,12 +48,12 @@ export const antiSts458 = {
       score: '7/10',
       paragraphs: [
         'La doctrina del retraso desleal (Verwirkung) es una manifestación de la buena fe (art. 7 CC) que sanciona al titular de un derecho que, pudiendo ejercerlo, no lo ejerce durante un tiempo prolongado generando en la otra parte la confianza legítima de que no lo hará.',
-        'Vicenta era policía con un máster en económicas. Era cotitular de ambas cuentas. Veía todos los movimientos. Durante más de una década NUNCA hizo una transferencia compensatoria, NUNCA reclamó, NUNCA documentó un desequilibrio. Esta inacción no fue por ignorancia — tenía la formación y la información para actuar. Fue por decisión: porque no había desequilibrio, o porque lo aceptaba dentro de la economía conjunta.',
+        `Vicenta era policía con formación económico-empresarial (${PICASSENT_FACTS.formacionActora}). Era cotitular de ambas cuentas. Veía todos los movimientos. Durante más de una década NUNCA hizo una transferencia compensatoria, NUNCA reclamó, NUNCA documentó un desequilibrio. Esta inacción no fue por ignorancia — tenía la formación y la información para actuar. Fue por decisión: porque no había desequilibrio, o porque lo aceptaba dentro de la economía conjunta.`,
         'Esta conducta prolongada y consciente generó en Juan la confianza legítima de que la organización económica era satisfactoria para ambas partes.',
       ],
       fraseSalaLabel: 'Frase para sala',
       fraseSala:
-        '«La demandante, licenciada en económicas y profesional de cuerpos de seguridad, fue cotitular de ambas cuentas durante todo el matrimonio. Tenía acceso completo a la información financiera. Durante más de una década no realizó ninguna transferencia compensatoria, no documentó ningún desequilibrio, no formuló ninguna reclamación. Esta conducta prolongada y consciente generó en mi mandante la confianza legítima de que la organización económica era satisfactoria para ambas partes. Reclamar ahora vulnera la doctrina del retraso desleal como manifestación del art. 7 CC.»',
+        `«La demandante, con formación económico-empresarial (${PICASSENT_FACTS.formacionActora}) y profesional de cuerpos de seguridad, fue cotitular de ambas cuentas durante todo el matrimonio. Tenía acceso completo a la información financiera. Durante más de una década no realizó ninguna transferencia compensatoria, no documentó ningún desequilibrio, no formuló ninguna reclamación. Esta conducta prolongada y consciente generó en mi mandante la confianza legítima de que la organización económica era satisfactoria para ambas partes. Reclamar ahora vulnera la doctrina del retraso desleal como manifestación del art. 7 CC.»`,
     },
     {
       id: 'arg-4',
@@ -67,9 +70,35 @@ export const antiSts458 = {
     },
   ],
   tablaDistinguishing: {
-    title: 'TODO: tabla de distinguishing (pendiente de v3)',
-    headers: ['TODO: campo 1', 'TODO: campo 2'],
-    rows: [['TODO', 'TODO']],
+    title: 'Tabla comparativa de presupuestos fácticos',
+    headers: ['Presupuesto STS 458', 'Nuestro caso (Picassent)', 'Conclusión'],
+    rows: [
+      [
+        'Vivienda habitual y cargas familiares (hipoteca de la casa común).',
+        `Inmueble de inversión con explotación turística reglada (${PICASSENT_FACTS.alquilerTuristico.canal} + licencia de alojamiento turístico). Hogar en otra vivienda (30 km).`,
+        'No es supuesto de cargas del matrimonio; aplica lógica de inversión/patrimonio.',
+      ],
+      [
+        'Razón para no reclamar: proteger convivencia y economía doméstica.',
+        `Dinámica de inversión/explotación patrimonial; la reclamación no “rompe hogar”.`,
+        'No concurre el presupuesto de convivencia protegida que justifica el retraso.',
+      ],
+      [
+        'Congelación del dies a quo hasta separación/disolución.',
+        'Aun admitiendo desplazamiento, exige depuración por bloques y prueba de cada partida; no revive todo indiscriminadamente.',
+        'No suple prueba ni tabla; el dies a quo no blinda partidas heterogéneas.',
+      ],
+      [
+        'Pagos hipotecarios dentro del matrimonio.',
+        'Hay origen pre-matrimonial (préstamo 2006) y partidas anteriores a 2012.',
+        'STS 458 no puede operar igual sobre pagos pre-matrimonio.',
+      ],
+      [
+        'Cónyuge sin visibilidad financiera o sin capacidad para reclamar.',
+        `Cotitularidad + formación económico-empresarial (${PICASSENT_FACTS.formacionActora}); ausencia de reclamación fehaciente por años.`,
+        'Refuerza retraso desleal y debilita presupuesto protector.',
+      ],
+    ],
   },
   ordenIntervencion: {
     title: 'Orden de intervención en sala',
@@ -92,7 +121,8 @@ export const antiSts458 = {
         id: 'orden-3',
         orden: '3º',
         title: 'Argumento 3 — Retraso desleal',
-        description: 'Ataca la buena fe de la reclamación. Policía + máster en económicas + cotitular + 0 reclamaciones en 10+ años.',
+        description:
+          'Ataca la buena fe de la reclamación. Policía + máster Cámara de Comercio + cotitular + 0 reclamaciones en más de una década.',
         tone: 'yellow',
       },
       {
@@ -108,9 +138,9 @@ export const antiSts458 = {
     title: 'Guion completo anti-458 (2 minutos)',
     paragraphs: [
       '«Señoría, si la parte actora invoca la STS 458/2025, esta parte solicita que se examine el encaje fáctico antes de aplicar su doctrina.»',
-      '«Primero: la STS 458/2025 trata de una hipoteca sobre la VIVIENDA HABITUAL de los cónyuges. Nuestro caso es distinto: el préstamo financió parcelas para construir y vender chalets como negocio inmobiliario. Cuando el mercado cayó, se alquiló y se explotó como Airbnb. Nunca fue domicilio familiar. Es una inversión conjunta, regida por la comunidad ordinaria, no por las cargas del matrimonio.»',
+      `«Primero: la STS 458/2025 trata de una hipoteca sobre la VIVIENDA HABITUAL de los cónyuges. Nuestro caso es distinto: el préstamo financió parcelas para construir y vender chalets como negocio inmobiliario. Cuando el mercado cayó, se alquiló y se explotó como ${PICASSENT_FACTS.alquilerTuristico.canal} con licencia de alojamiento turístico. Nunca fue domicilio familiar. Es una inversión conjunta, regida por la comunidad ordinaria, no por las cargas del matrimonio.»`,
       '«Segundo: la STS 458/2025 exige como presupuesto que se demuestre que los fondos procedían casi exclusivamente de uno de los cónyuges. Aquí eso no concurre. Dos sueldos comparables, dos cuentas conjuntas, cero patrimonio privativo. Cada nómina domiciliada en un banco distinto solo para evitar comisiones. No existe un solo euro privativo identificable. Y si la demandante dice que aportó más a la hipoteca, ¿quién aportó más al supermercado, la ropa, los colegios y las facturas? La economía era un todo integrado.»',
-      '«Tercero: la demandante, licenciada en económicas y cotitular de ambas cuentas, tuvo durante más de una década acceso completo a la información financiera y no realizó una sola transferencia compensatoria ni documentó desequilibrio alguno. La doctrina del retraso desleal impide amparar esta conducta.»',
+      `«Tercero: la demandante, con formación económico-empresarial (${PICASSENT_FACTS.formacionActora}) y cotitular de ambas cuentas, tuvo durante más de una década acceso completo a la información financiera y no realizó una sola transferencia compensatoria ni documentó desequilibrio alguno. La doctrina del retraso desleal impide amparar esta conducta.»`,
       '«Por todo ello, solicitamos que no se aplique la STS 458/2025 a este supuesto, y subsidiariamente, que si se aplica, sea exclusivamente a bloques homogéneos con motivación del dies a quo por bloque y prueba específica del desequilibrio.»',
     ],
   },
@@ -130,7 +160,7 @@ export const antiSts458 = {
       {
         id: 'no-3',
         label: '«Ella no era tonta»',
-        detail: 'Suena despectivo. Usa «formación en económicas y acceso completo a la información financiera».',
+        detail: 'Suena despectivo. Usa «formación económico-empresarial y acceso completo a la información financiera».',
       },
       {
         id: 'no-4',

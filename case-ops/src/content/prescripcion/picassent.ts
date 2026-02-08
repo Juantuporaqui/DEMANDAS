@@ -1,4 +1,5 @@
-// TODO(PRESCRIPCION_V3): Reemplazar todo el objeto con la versión v3.0 DEFINITIVA proporcionada por Juan.
+import { PICASSENT_FACTS } from './picassent.facts';
+
 export const prescripcionPicassent = {
   meta: {
     title: 'Prescripción — P.O. 715/2024 (Picassent)',
@@ -8,7 +9,7 @@ export const prescripcionPicassent = {
     status: 'ACTIVO',
     cuantia: '212.677,00 €',
     audienciaPrevia: '10/03/2026 09:45',
-    version: 'v2.0 PRO (web)',
+    version: 'v3.0 DEFINITIVA',
     tags: [
       'prescripción',
       'dies a quo',
@@ -30,6 +31,7 @@ export const prescripcionPicassent = {
     title: 'Panel rápido (para ti)',
     bullets: [
       'Caso: CAS001 · Cuantía: 212.677,00 € · AP: 10/03/2026 09:45',
+      `Matrimonio: ${PICASSENT_FACTS.matrimonio.human}`,
       'Acción prioritaria: Depuración del objeto + resolución por bloques',
       'Regla de oro: Sin tabla, no entra',
     ],
@@ -91,14 +93,62 @@ export const prescripcionPicassent = {
     antidoto: 'Antídoto: bloques + tabla + dies a quo motivado por bloque + prueba.',
   },
   marcoNormativo: {
-    title: 'Marco normativo (TODO v3)',
-    subtitle: 'Pendiente de volcar el marco normativo v3.',
+    title: 'Marco normativo operativo',
+    subtitle: 'Normas mínimas para sostener prescripción, carga de la prueba y depuración del objeto.',
     items: [
       {
-        id: 'todo-marco-normativo-1',
-        norma: 'TODO: norma principal (v3)',
-        texto: 'TODO: texto literal/idea clave (v3).',
-        uso: 'TODO: cómo se usa en sala (v3).',
+        id: 'cc-1964-2',
+        norma: 'Art. 1964.2 CC',
+        texto: 'Prescripción de acciones personales a los cinco años.',
+        uso: 'Corte temporal base por bloque/partida (H1).',
+      },
+      {
+        id: 'cc-1969',
+        norma: 'Art. 1969 CC',
+        texto: 'El tiempo para la prescripción comienza desde que la acción pudo ejercitarse (actio nata).',
+        uso: 'Exigir dies a quo real por partida, no “al final” por defecto.',
+      },
+      {
+        id: 'cc-1973',
+        norma: 'Art. 1973 CC',
+        texto: 'Interrupción de prescripción solo por actos válidos, acreditados y dirigidos.',
+        uso: 'Si alegan interrupción, pedir acto + fecha + contenido + destinatario.',
+      },
+      {
+        id: 'dt-5-ley-42-2015',
+        norma: 'DT 5ª Ley 42/2015',
+        texto: 'Régimen transitorio del nuevo plazo de prescripción.',
+        uso: 'Controlar partidas antiguas y aplicar el punto de corte del 07/10/2015.',
+      },
+      {
+        id: 'cc-1145',
+        norma: 'Art. 1145 CC',
+        texto: 'Reembolso entre codeudores: acción de repetición.',
+        uso: 'Base jurídica del Bloque A y exigencia de prueba de pagos.',
+      },
+      {
+        id: 'lec-217',
+        norma: 'Art. 217 LEC',
+        texto: 'Carga de la prueba del hecho constitutivo.',
+        uso: 'La actora debe probar crédito, cuantía, exigibilidad e interrupción.',
+      },
+      {
+        id: 'lec-426-4',
+        norma: 'Art. 426.4 LEC',
+        texto: 'Complemento de alegaciones por hechos jurídicos nuevos.',
+        uso: 'Introducir doctrina STS 458/2025 en AP si es posterior a contestación.',
+      },
+      {
+        id: 'cc-7',
+        norma: 'Art. 7 CC',
+        texto: 'Buena fe y proscripción del abuso del derecho (retraso desleal).',
+        uso: 'Neutralizar reclamaciones tardías sin soporte probatorio.',
+      },
+      {
+        id: 'ts-188-2011',
+        norma: 'STS 188/2011 + STS 20/03/2013 + STS 246/2018',
+        texto: 'Las cuotas hipotecarias de vivienda familiar no son automáticamente cargas del matrimonio.',
+        uso: 'Refuerzo para negar extensión automática de cargas y exigir prueba.',
       },
     ],
   },
@@ -109,30 +159,34 @@ export const prescripcionPicassent = {
       {
         id: 'tramo-pre-2015-10-07',
         rango: 'Pre 07/10/2015',
-        descripcion: 'TODO: completar descripción v3 del tramo previo.',
+        descripcion:
+          'Acciones antiguas sometidas a DT 5ª: es imprescindible tabla por partidas. Parte del origen es pre-matrimonio (préstamo 2006).',
         estadoH1: 'PRESCRITO',
         estadoH2: 'PRESCRITO',
-        nota: 'DT 5ª + pre-matrimonio (según v3).',
+        nota: 'DT 5ª (Ley 42/2015) + origen 2006; la STS 458 no opera igual en partidas pre-matrimonio.',
       },
       {
         id: 'tramo-2015-10-07-2019-06-24',
         rango: '07/10/2015 – 24/06/2019',
-        descripcion: 'TODO: completar descripción v3 del tramo intermedio.',
+        descripcion:
+          'Bajo H1, prescripción por pago (actio nata). Bajo H2, solo es campo de batalla si se aceptan los presupuestos 458; en todo caso exige depuración y prueba.',
         estadoH1: 'PRESCRITO',
         estadoH2: 'CAMPO DE BATALLA',
-        nota: 'Potencialmente no prescrito si aplica STS 458/2025 (según v3).',
+        nota: 'Solo podría salvarse si hay tabla y motivación de dies a quo por bloque.',
       },
       {
         id: 'tramo-2019-06-24-2022-08',
         rango: '24/06/2019 – ago. 2022',
-        descripcion: 'TODO: completar descripción v3 del tramo posterior.',
+        descripcion:
+          'Normalmente dentro de plazo. La pelea real es de prueba, exceso, trazabilidad y posibles interrupciones válidas.',
         estadoH1: 'NO PRESCRITO',
         estadoH2: 'NO PRESCRITO',
       },
       {
         id: 'tramo-2022-08-2023-10',
         rango: 'ago. 2022 – oct. 2023',
-        descripcion: 'TODO: completar descripción v3 del tramo final.',
+        descripcion:
+          'Post-separación: dentro de plazo, foco en compensaciones y pagos posteriores; la STS 458 no suple prueba.',
         estadoH1: 'NO PRESCRITO',
         estadoH2: 'NO PRESCRITO',
       },
@@ -141,7 +195,8 @@ export const prescripcionPicassent = {
   distinguishing: {
     title: 'Distinguishing anti-STS 458/2025',
     subtitle: 'Resumen operativo. Ver versión extendida en /analytics/anti-sts-458-2025.',
-    intro: 'TODO: integrar resumen v3 (sin duplicar texto largo).',
+    intro:
+      'Resumen de 4 argumentos para distinguir la STS 458/2025: naturaleza de inversión, falta de desequilibrio probado, retraso desleal y llave procesal.',
     ctaLabel: 'Abrir versión extendida',
   },
   escenarios: {
@@ -213,38 +268,81 @@ export const prescripcionPicassent = {
   planB: {
     title: 'Plan B — Anti-STS 458/2025 (4 argumentos reales de distinguishing)',
     enfoque:
-      'Enfoque: distinguir nuestro caso del supuesto de hecho de la STS 458/2025 por 4 vías: naturaleza del préstamo, ausencia de desequilibrio, retraso desleal y herramienta procesal.',
+      'Enfoque: distinguir nuestro caso del supuesto de hecho de la STS 458/2025 con un enfoque procesal de inversión/explotación patrimonial, ausencia de desequilibrio y retraso desleal, más la llave del art. 426.4 LEC.',
     frasesTitle: 'Los 4 argumentos (en orden de fuerza):',
     frases: [
-      '"ARG 1 (9/10) — NEGOCIO, NO VIVIENDA: El préstamo financió parcelas para construir y vender chalets. Cuando el mercado cayó, se alquiló y Airbnb. Nunca fue domicilio familiar. La STS 458/2025 protege la vivienda habitual, no un negocio inmobiliario especulativo. Refuerzo: STS 20/03/2013 y STS 246/2018 — ni siquiera la hipoteca de la casa familiar es carga del matrimonio."',
-      '"ARG 2 (8/10) — SIN DESEQUILIBRIO: La STS 458/2025 requiere que los fondos procedieran casi exclusivamente de uno. Aquí: sueldos comparables, 2 cuentas conjuntas, 0 patrimonio privativo, nóminas en bancos distintos solo por comisiones. Si ella puso más en hipoteca, Juan puso más en el resto. Economía integrada."',
-      '"ARG 3 (7/10) — RETRASO DESLEAL (Verwirkung): Policía con máster en económicas, cotitular de ambas cuentas, 10+ años sin reclamar, sin compensar, sin documentar. Art. 7 CC + confianza legítima."',
-      '"ARG 4 (6/10) — PROCESAL: Art. 426.4 LEC para introducir estos argumentos en AP como complemento de alegaciones por hecho jurídico nuevo (sentencia posterior a contestación). Solo como llave, nunca como argumento de fondo."',
+      `ARG 1 — Negocio, no vivienda: inversión turística (${PICASSENT_FACTS.alquilerTuristico.canal} + licencia de alojamiento turístico).`,
+      'ARG 2 — Sin desequilibrio probado: sueldos comparables y cuentas conjuntas.',
+      `ARG 3 — Retraso desleal: cotitularidad + ${PICASSENT_FACTS.formacionActora} + ausencia de reclamación fehaciente.`,
+      'ARG 4 — Llave procesal: art. 426.4 LEC (doctrina sobrevenida).',
     ],
     filtrosTitle: 'Diferencias fácticas clave vs. STS 458/2025:',
     filtros: [
-      'STS: vivienda habitual → Nosotros: negocio inmobiliario / segunda residencia / Airbnb',
+      `STS: vivienda habitual → Nosotros: negocio inmobiliario / segunda residencia / ${PICASSENT_FACTS.alquilerTuristico.canal} + licencia de alojamiento turístico`,
       'STS: cuenta nutrida casi exclusivamente por ella → Nosotros: 2 sueldos comparables, 2 cuentas conjuntas, 0 privativos',
       'STS: desequilibrio probado → Nosotros: ningún euro privativo identificable',
       'STS: hipoteca de domicilio = carga familiar implícita → Nosotros: inversión especulativa = comunidad ordinaria (392 CC)',
-      'STS: cónyuge sin formación financiera / sin visibilidad → Nosotros: policía + máster económicas + cotitular + 0 reclamaciones en 10 años',
+      `STS: cónyuge sin formación financiera / sin visibilidad → Nosotros: policía + ${PICASSENT_FACTS.formacionActora} + cotitular + 0 reclamaciones en más de una década`,
     ],
   },
   erroresFatales: {
-    title: 'Errores fatales (TODO v3)',
-    subtitle: 'Pendiente de volcar errores fatales v3.',
+    title: 'Errores fatales (evitarlos en sala)',
+    subtitle: 'Checklist rápido para no regalar la prescripción ni el marco probatorio.',
     items: [
       {
-        id: 'todo-error-fatal-1',
-        mal: 'TODO: error fatal (v3).',
-        bien: 'TODO: alternativa correcta (v3).',
+        id: 'error-objeto',
+        title: 'Discutir sin depurar objeto / sin tabla',
+        mal: 'Aceptar un sumatorio global sin fecha, concepto y base jurídica por partida.',
+        bien: 'Exigir tabla verificable por bloques y motivación del dies a quo.',
+      },
+      {
+        id: 'error-credito-global',
+        title: 'Conceder crédito global',
+        mal: 'Tratar todo como “crédito único” y saltarse la prescripción por bloques.',
+        bien: 'Forzar resolución por bloques homogéneos con cuantía separada.',
+      },
+      {
+        id: 'error-458-rotundo',
+        title: 'Negar la 458 apodícticamente',
+        mal: 'Decir “no aplica y punto” sin distinguir hechos ni ofrecer subsidiaria.',
+        bien: 'Distinguishing claro + subsidiaria: si aplica, que sea por bloques.',
+      },
+      {
+        id: 'error-emocional',
+        title: 'Lenguaje emocional',
+        mal: 'Argumentar “es injusto” o “ella sabía” en términos valorativos.',
+        bien: 'Hablar de indefensión, falta de prueba y carga del art. 217 LEC.',
+      },
+      {
+        id: 'error-hechos',
+        title: 'Hechos académicos/canal incorrectos',
+        mal: 'Decir “licenciada en económicas” o “Airbnb” sin base.',
+        bien: `Usar ${PICASSENT_FACTS.formacionActora} y ${PICASSENT_FACTS.alquilerTuristico.canal} + licencia de alojamiento turístico.`,
+      },
+      {
+        id: 'error-interrupcion',
+        title: 'Aceptar interrupción sin prueba',
+        mal: 'Admitir interrupción por simples correos o referencias genéricas.',
+        bien: 'Pedir acto, fecha, contenido y destinatario (art. 1973 CC).',
+      },
+      {
+        id: 'error-pretension-mixta',
+        title: 'Mezclar pagos, gastos e inversiones',
+        mal: 'Combinar cuotas hipotecarias, gastos ordinarios e inversiones como si fueran lo mismo.',
+        bien: 'Separar Bloque A/B/C con base jurídica y pruebas distintas.',
+      },
+      {
+        id: 'error-pre-matrimonio',
+        title: 'Ignorar el origen pre-matrimonial',
+        mal: 'Permitir que se incluyan partidas anteriores al matrimonio como si fueran homogéneas.',
+        bien: 'Aplicar DT 5ª y excluir o segmentar lo pre-matrimonial.',
       },
     ],
   },
   guion: {
     title: 'Guion de sala (2 minutos)',
     text:
-      'Señoría, solicitamos depuración del objeto: la actora formula una reclamación global con hechos y pagos antiguos sin aportar, por bloques/partidas, fecha, concepto, documento, base jurídica, exigibilidad y, en su caso, actos interruptivos. Nuestra posición es técnica: (1) prescripción de lo exigible y no reclamado en plazo; (2) falta de prueba de un crédito exigible y vigente; y (3) subsidiariamente, si se menciona STS 458/2025, limitar estrictamente su alcance: decisión por bloques homogéneos con cuantía separada y motivación del dies a quo por bloque, sin extensión automática a gastos o inversiones.',
+      `Señoría, solicitamos depuración del objeto: la actora formula una reclamación global con hechos y pagos antiguos sin aportar, por bloques/partidas, fecha, concepto, documento, base jurídica, exigibilidad y, en su caso, actos interruptivos. Nuestra posición es técnica: (1) prescripción de lo exigible y no reclamado en plazo; (2) falta de prueba de un crédito exigible y vigente; y (3) subsidiariamente, si se menciona STS 458/2025, limitar estrictamente su alcance: decisión por bloques homogéneos con cuantía separada y motivación del dies a quo por bloque, sin extensión automática a gastos o inversiones. Además, el inmueble se explotó como ${PICASSENT_FACTS.alquilerTuristico.canal} con licencia de alojamiento turístico y responde a una ${PICASSENT_FACTS.dinamicaPatrimonial}`,
   },
   checklist: {
     title: 'Checklist 24–72h (solo lo que mueve la aguja)',

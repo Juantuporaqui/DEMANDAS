@@ -83,6 +83,35 @@ export function DistinguishingSection({
           </div>
         ))}
       </div>
+      <div className="mt-6">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
+          Tabla comparativa (STS 458 vs nuestro caso)
+        </h3>
+        <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-700/60 bg-slate-900/60">
+          <table className="w-full min-w-[640px] text-left text-xs text-slate-300">
+            <thead className="bg-slate-900 text-[11px] uppercase text-slate-400">
+              <tr>
+                {antiSts458.tablaDistinguishing.headers.map((header) => (
+                  <th key={header} className="border-b border-slate-700/60 px-3 py-2">
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {antiSts458.tablaDistinguishing.rows.map((row, rowIndex) => (
+                <tr key={`${row[0]}-${rowIndex}`} className="align-top">
+                  {row.map((cell, cellIndex) => (
+                    <td key={`${cell}-${cellIndex}`} className="px-3 py-3 text-slate-200">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
   );
 }

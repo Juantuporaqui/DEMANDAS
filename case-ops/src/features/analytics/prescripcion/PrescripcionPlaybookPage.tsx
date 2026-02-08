@@ -14,6 +14,34 @@ interface PrescripcionPlaybookPageProps {
   returnTo: string;
 }
 
+const formatMarcoNormativo = (items: typeof prescripcionPicassent.marcoNormativo.items) =>
+  items.map((item) => `- ${item.norma}: ${item.texto} | uso: ${item.uso}`).join('\n');
+
+const formatCronologia = (tramos: typeof prescripcionPicassent.cronologiaPrescripcion.tramos) =>
+  tramos
+    .map((tramo) =>
+      [
+        `- ${tramo.rango}: ${tramo.descripcion}`,
+        `  H1: ${tramo.estadoH1}`,
+        `  H2: ${tramo.estadoH2}`,
+        tramo.nota ? `  Nota: ${tramo.nota}` : null,
+      ]
+        .filter(Boolean)
+        .join('\n')
+    )
+    .join('\n');
+
+const formatErrores = (items: typeof prescripcionPicassent.erroresFatales.items) =>
+  items
+    .map((item) =>
+      [
+        `- ${item.title ?? 'Error'}`,
+        `  MAL: ${item.mal}`,
+        `  BIEN: ${item.bien}`,
+      ].join('\n')
+    )
+    .join('\n');
+
 export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [copiedText, setCopiedText] = useState<string | null>(null);
@@ -175,6 +203,13 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
             title={content.marcoNormativo.title}
             subtitle={content.marcoNormativo.subtitle}
             items={content.marcoNormativo.items}
+            actions={
+              <CopyButton
+                text={[content.marcoNormativo.title, '', formatMarcoNormativo(content.marcoNormativo.items)].join('\n')}
+                label="Copiar marco"
+                onCopied={handleCopied}
+              />
+            }
           />
 
           <section id="peticion-prioritaria" className="relative scroll-mt-24">
@@ -264,6 +299,17 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
             subtitle={content.cronologiaPrescripcion.subtitle}
             tramos={content.cronologiaPrescripcion.tramos}
             activeHypothesis={hypothesis}
+            actions={
+              <CopyButton
+                text={[
+                  content.cronologiaPrescripcion.title,
+                  '',
+                  formatCronologia(content.cronologiaPrescripcion.tramos),
+                ].join('\n')}
+                label="Copiar cronología"
+                onCopied={handleCopied}
+              />
+            }
           />
 
           <DistinguishingSection
@@ -470,6 +516,13 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
             title={content.erroresFatales.title}
             subtitle={content.erroresFatales.subtitle}
             items={content.erroresFatales.items}
+            actions={
+              <CopyButton
+                text={[content.erroresFatales.title, '', formatErrores(content.erroresFatales.items)].join('\n')}
+                label="Copiar errores"
+                onCopied={handleCopied}
+              />
+            }
           />
         </div>
 
