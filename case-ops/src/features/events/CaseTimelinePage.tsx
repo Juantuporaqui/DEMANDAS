@@ -39,7 +39,7 @@ function isValidCaseKey(value: string | null): value is CaseKey {
 
 function getInitialCase(): CaseKey {
   const params = new URLSearchParams(window.location.search);
-  const queryCase = params.get('caseId');
+  const queryCase = params.get('caseKey') ?? params.get('caseId');
   if (isValidCaseKey(queryCase)) {
     return queryCase;
   }
@@ -57,10 +57,26 @@ export function CaseTimelinePage() {
   const latestSearchParamsRef = useRef(searchParams);
 
   useEffect(() => {
-    const requested = searchParams.get('caseId');
-    if (!isValidCaseKey(requested)) return;
-    setActiveCase((prev) => (prev !== requested ? requested : prev));
-  }, [searchParams]);
+    let mounted = true;
+    const requestedKey = searchParams.get('caseKey');
+    if (isValidCaseKey(requestedKey)) {
+      setActiveCase((prev) => (prev !== requestedKey ? requestedKey : prev));
+      return;
+    }
+    const requestedId = searchParams.get('caseId');
+    if (!requestedId) return;
+    casesRepo.getById(requestedId).then((caseData) => {
+      if (!mounted) return;
+      const key = caseData?.caseKey;
+      if (isValidCaseKey(key)) {
+        setActiveCase((prev) => (prev !== key ? key : prev));
+        setSearchParams({ caseKey: key }, { replace: true });
+      }
+    }).catch(console.error);
+    return () => {
+      mounted = false;
+    };
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     latestSearchParamsRef.current = searchParams;
@@ -69,17 +85,18 @@ export function CaseTimelinePage() {
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, activeCase);
     const params = latestSearchParamsRef.current;
-    const current = params.get('caseId');
+    const current = params.get('caseKey');
     if (current === activeCase) return;
     const nextParams = new URLSearchParams(params);
-    const hasExtraParams = Array.from(nextParams.keys()).some((key) => key !== 'caseId');
+    const hasExtraParams = Array.from(nextParams.keys()).some((key) => key !== 'caseKey');
     if (hasExtraParams) {
-      nextParams.set('caseId', activeCase);
+      nextParams.set('caseKey', activeCase);
+      nextParams.delete('caseId');
       setSearchParams(nextParams, { replace: true });
     } else {
-      setSearchParams({ caseId: activeCase }, { replace: true });
+      setSearchParams({ caseKey: activeCase }, { replace: true });
     }
-  }, [activeCase]);
+  }, [activeCase, setSearchParams]);
 
   useEffect(() => {
     let mounted = true;
@@ -88,10 +105,10 @@ export function CaseTimelinePage() {
         if (!mounted) return;
         const next = { ...FALLBACK_CASE_IDS };
         cases.forEach((caseItem) => {
-          const haystack = `${caseItem.id} ${caseItem.title ?? ''} ${caseItem.autosNumber ?? ''}`.toLowerCase();
-          if (haystack.includes('picassent')) next.picassent = caseItem.id;
-          if (haystack.includes('mislata')) next.mislata = caseItem.id;
-          if (haystack.includes('quart')) next.quart = caseItem.id;
+          if (!caseItem.caseKey) return;
+          if (caseItem.caseKey === 'picassent') next.picassent = caseItem.id;
+          if (caseItem.caseKey === 'mislata') next.mislata = caseItem.id;
+          if (caseItem.caseKey === 'quart') next.quart = caseItem.id;
         });
         setCaseIds(next);
       })

@@ -87,3 +87,16 @@ export function isToday(dateStr: string): boolean {
 export function getCurrentDate(): string {
   return toISODate(new Date());
 }
+
+/**
+ * Normalize date strings that may include unknown segments (XX).
+ */
+export function normalizeDate(input?: string | null): { date: string | null; approx: boolean; label?: string } {
+  if (!input) {
+    return { date: null, approx: false };
+  }
+  if (input.includes('XX')) {
+    return { date: null, approx: true, label: 'fecha aproximada' };
+  }
+  return { date: input, approx: false };
+}

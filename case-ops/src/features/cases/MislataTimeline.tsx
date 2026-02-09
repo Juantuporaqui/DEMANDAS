@@ -2,9 +2,10 @@ import { timelineMislata } from '../../data/mislata/timeline';
 import CaseTimelineBase, { type CaseTimelineItem } from './CaseTimelineBase';
 
 export function MislataTimeline() {
-  const items: CaseTimelineItem[] = timelineMislata.map((evento) => ({
+  const items: CaseTimelineItem[] = timelineMislata.map((evento, index) => ({
     id: evento.id,
     fecha: evento.fecha,
+    order: index,
     tipo: evento.tipo,
     titulo: evento.titulo,
     descripcion: evento.descripcion,
