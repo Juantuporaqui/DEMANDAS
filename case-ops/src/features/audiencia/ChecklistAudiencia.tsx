@@ -139,7 +139,7 @@ export function ChecklistAudiencia() {
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-bold text-white">Checklist Audiencia</h1>
           <Link
-            to="/audiencia/telepronter"
+            to="/audiencia/telepronter?caseKey=mislata"
             className="text-sm bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 px-4 py-2 rounded-lg transition-colors"
           >
             Modo Teleprónter →

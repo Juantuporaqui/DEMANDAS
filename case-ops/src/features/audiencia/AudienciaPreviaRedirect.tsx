@@ -9,17 +9,12 @@ export function AudienciaPreviaRedirect() {
   useEffect(() => {
     let mounted = true;
     casesRepo
-      .getAll()
-      .then((cases) => {
+      .getByCaseKey('picassent')
+      .then((picassent) => {
         if (!mounted) return;
-        const picassent = cases.find((c) => {
-          const hay = `${c.id} ${c.title ?? ''} ${c.autosNumber ?? ''}`.toLowerCase();
-          return hay.includes('picassent') || hay.includes('715');
-        });
         if (picassent) {
           navigate(`/cases/${picassent.id}?tab=audiencia`, { replace: true });
         } else {
-          // Fallback to known id
           navigate('/cases/picassent-715-2024?tab=audiencia', { replace: true });
         }
       })

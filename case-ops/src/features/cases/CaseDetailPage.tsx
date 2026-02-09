@@ -82,17 +82,9 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
   const factsAProbar = facts.filter((f: Fact) => f.status === 'a_probar').length;
 
   // Detectar tipo de caso
-  const isPicassent = caseData.id === 'CAS001' ||
-                      caseData.id?.includes('picassent') ||
-                      caseData.title?.toLowerCase().includes('picassent') ||
-                      caseData.autosNumber?.includes('715') ||
-                      caseData.court?.toLowerCase().includes('picassent');
-  const isMislata = caseData.id?.includes('mislata') ||
-                    caseData.title?.toLowerCase().includes('mislata') ||
-                    caseData.autosNumber?.includes('1185');
-  const isQuart = caseData.id?.includes('quart') ||
-                  caseData.title?.toLowerCase().includes('quart') ||
-                  caseData.autosNumber?.includes('1428');
+  const isPicassent = caseData.caseKey === 'picassent';
+  const isMislata = caseData.caseKey === 'mislata';
+  const isQuart = caseData.caseKey === 'quart';
   const caseSlug = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
   const docsBasePath = caseSlug ? `${import.meta.env.BASE_URL}docs/${caseSlug}/escritos` : null;
 
@@ -498,15 +490,9 @@ function TabDocs({ documents, caseId, caseData }: any) {
   const selectedDocKey = searchParams.get('doc');
 
   // Detección robusta: ID del caso, Título o Número de Autos
-  const isPicassent = caseId?.includes('picassent') ||
-                      caseData.title?.toLowerCase().includes('picassent') ||
-                      caseData.autosNumber?.includes('715');
-
-  const isMislata = caseData.title?.toLowerCase().includes('mislata') ||
-                    caseData.autosNumber?.includes('1185');
-
-  const isQuart = caseData.title?.toLowerCase().includes('quart') ||
-                  caseData.autosNumber?.includes('1428');
+  const isPicassent = caseData.caseKey === 'picassent';
+  const isMislata = caseData.caseKey === 'mislata';
+  const isQuart = caseData.caseKey === 'quart';
 
   const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
 
@@ -772,23 +758,22 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
   useEffect(() => {
     let isActive = true;
     const loadFacts = async () => {
-      const [allCases, allFacts] = await Promise.all([casesRepo.getAll(), factsRepo.getAll()]);
-      const findCaseId = (matcher: (c: Case) => boolean) => allCases.find(matcher)?.id;
-      const picassentId = findCaseId(
-        (c) => c.id?.includes('picassent') || c.title?.toLowerCase().includes('picassent') || c.autosNumber?.includes('715'),
-      );
-      const mislataId = findCaseId(
-        (c) => c.id?.includes('mislata') || c.title?.toLowerCase().includes('mislata') || c.autosNumber?.includes('1185'),
-      );
-      const quartId = findCaseId(
-        (c) => c.id?.includes('quart') || c.title?.toLowerCase().includes('quart') || c.autosNumber?.includes('1428'),
-      );
+      const [picassentCase, mislataCase, quartCase] = await Promise.all([
+        casesRepo.getByCaseKey('picassent'),
+        casesRepo.getByCaseKey('mislata'),
+        casesRepo.getByCaseKey('quart'),
+      ]);
+      const [picassentFacts, mislataFacts, quartFacts] = await Promise.all([
+        picassentCase ? factsRepo.getByCaseId(picassentCase.id) : Promise.resolve([]),
+        mislataCase ? factsRepo.getByCaseId(mislataCase.id) : Promise.resolve([]),
+        quartCase ? factsRepo.getByCaseId(quartCase.id) : Promise.resolve([]),
+      ]);
 
       if (isActive) {
         setCaseFacts({
-          picassent: picassentId ? allFacts.filter((fact) => fact.caseId === picassentId) : [],
-          mislata: mislataId ? allFacts.filter((fact) => fact.caseId === mislataId) : [],
-          quart: quartId ? allFacts.filter((fact) => fact.caseId === quartId) : [],
+          picassent: picassentFacts,
+          mislata: mislataFacts,
+          quart: quartFacts,
         });
       }
     };
@@ -808,9 +793,7 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
     };
   }, [caseId]);
 
-  const isQuart = caseId?.includes('quart') ||
-                  caseData?.title?.toLowerCase().includes('quart') ||
-                  caseData?.autosNumber?.includes('1428');
+  const isQuart = caseData?.caseKey === 'quart';
 
   if (isQuart) {
     return <QuartFinancialAnalysis />;
@@ -894,13 +877,13 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
   );
 }
 
-function TabEstrategia({ strategies, caseId }: any) {
-  const isPicassent = caseId?.includes('picassent') || caseId === 'CAS001';
+function TabEstrategia({ strategies, caseId, caseKey }: { strategies: Strategy[]; caseId: string; caseKey?: string }) {
+  const isPicassent = caseKey === 'picassent';
   const caseLabel = isPicassent
     ? 'PICASSENT'
-    : caseId?.includes('mislata')
+    : caseKey === 'mislata'
     ? 'MISLATA'
-    : caseId?.includes('quart')
+    : caseKey === 'quart'
     ? 'QUART'
     : 'CASO';
   const returnTo = `/cases/${caseId}?tab=estrategia`;
@@ -997,7 +980,7 @@ function TabEstrategia({ strategies, caseId }: any) {
             </div>
           )}
           <Link
-            to={`/warroom?caseId=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
+            to={`/warroom?caseKey=${caseKey ?? 'picassent'}`}
             className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-3 transition hover:border-rose-400/60"
           >
             <div className="text-xs font-bold text-rose-300 mb-1">War Room</div>
@@ -1276,13 +1259,13 @@ function TabEstrategia({ strategies, caseId }: any) {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              to={`/warroom?caseId=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
+              to={`/warroom?caseKey=${caseKey ?? 'picassent'}`}
               className="inline-flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-200 transition hover:border-rose-400/60 hover:bg-rose-500/20"
             >
               Abrir War Room
             </Link>
             <Link
-              to={`/warroom/new?caseId=${caseId}&returnTo=${encodeURIComponent(`/cases/${caseId}?tab=estrategia`)}&caseKey=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
+              to={`/warroom/new?caseId=${caseId}&returnTo=${encodeURIComponent(`/cases/${caseId}?tab=estrategia`)}&caseKey=${caseKey ?? 'picassent'}`}
               className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-200 transition hover:border-amber-400/60 hover:bg-amber-500/20"
             >
               + Nueva tarjeta
@@ -1455,18 +1438,18 @@ export function CaseDetailPage() {
           
           // Cargar entidades relacionadas en paralelo para mayor velocidad
           const [allDocs, allEvents, allStrategies, allPartidas, allFacts] = await Promise.all([
-            documentsRepo.getAll(),
-            eventsRepo.getAll(),
-            strategiesRepo.getAll(),
-            partidasRepo.getAll(),
-            factsRepo.getAll()
+            documentsRepo.getByCaseId(id),
+            eventsRepo.getByCaseId(id),
+            strategiesRepo.getByCaseId(id),
+            partidasRepo.getByCaseId(id),
+            factsRepo.getByCaseId(id)
           ]);
 
-          setDocs(allDocs.filter(d => d.caseId === id));
-          setEvents(allEvents.filter(e => e.caseId === id));
-          setStrategies(allStrategies.filter(s => s.caseId === id));
-          setPartidas(allPartidas.filter(p => p.caseId === id));
-          setFacts(allFacts.filter(f => f.caseId === id));
+          setDocs(allDocs);
+          setEvents(allEvents);
+          setStrategies(allStrategies);
+          setPartidas(allPartidas);
+          setFacts(allFacts);
           
         } else {
             navigate('/cases');
@@ -1515,17 +1498,9 @@ export function CaseDetailPage() {
   };
 
   if (!currentCase) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Cargando War Room...</div>;
-  const isPicassent = currentCase.id === 'CAS001' ||
-                      currentCase.id?.includes('picassent') ||
-                      currentCase.title?.toLowerCase().includes('picassent') ||
-                      currentCase.autosNumber?.includes('715') ||
-                      currentCase.court?.toLowerCase().includes('picassent');
-  const isMislata = currentCase.id?.includes('mislata') ||
-                    currentCase.title?.toLowerCase().includes('mislata') ||
-                    currentCase.autosNumber?.includes('1185');
-  const isQuart = currentCase.id?.includes('quart') ||
-                  currentCase.title?.toLowerCase().includes('quart') ||
-                  currentCase.autosNumber?.includes('1428');
+  const isPicassent = currentCase.caseKey === 'picassent';
+  const isMislata = currentCase.caseKey === 'mislata';
+  const isQuart = currentCase.caseKey === 'quart';
 
   const fallbackTimelineItems = events.map((event) => ({
     id: event.id,
@@ -1760,7 +1735,7 @@ export function CaseDetailPage() {
         )}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
         {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
-        {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
+        {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} caseKey={currentCase.caseKey} />}
       </main>
     </div>
   );

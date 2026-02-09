@@ -1,44 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Document, Fact, Partida } from '../../../types';
 import type { EscenarioVista, RefutacionItem } from '../../../data/escenarios/types';
 import { AnalisisTecnico, type MonteCarloSummary } from './AnalisisTecnico';
+import { ensureStrategySeed } from '../../../db/ensureStrategySeed';
+import { casesRepo, scenarioBriefsRepo, scenarioRefutationsRepo } from '../../../db/repositories';
 
 type TabEscenariosProps = {
   caseId: string;
   facts: Fact[];
   partidas: Partida[];
   documents: Document[];
-};
-
-type EscenariosModule = { escenarios?: EscenarioVista[]; default?: EscenarioVista[] };
-const escenariosModules = import.meta.glob('../../../data/*/escenarios.ts', { eager: true }) as Record<
-  string,
-  EscenariosModule
->;
-const escenariosByCase = Object.entries(escenariosModules).reduce((acc, [path, mod]) => {
-  const caseKey = path.split('/').slice(-2, -1)[0];
-  acc[caseKey] = mod.escenarios ?? mod.default ?? [];
-  return acc;
-}, {} as Record<string, EscenarioVista[]>);
-
-type RefutacionModule = { matrizRefutacion?: RefutacionItem[] };
-const refutacionModules = import.meta.glob('../../../data/*/index.ts', { eager: true }) as Record<
-  string,
-  RefutacionModule
->;
-const refutacionByCase = Object.entries(refutacionModules).reduce((acc, [path, mod]) => {
-  const caseKey = path.split('/').slice(-2, -1)[0];
-  acc[caseKey] = mod.matrizRefutacion ?? [];
-  return acc;
-}, {} as Record<string, RefutacionItem[]>);
-
-const getCaseKey = (caseId: string) => {
-  const lower = caseId.toLowerCase();
-  if (lower.includes('picassent')) return 'picassent';
-  if (lower.includes('mislata')) return 'mislata';
-  if (lower.includes('quart')) return 'quart';
-  return lower;
 };
 
 const tipoBadgeStyles: Record<EscenarioVista['tipo'], string> = {
@@ -54,16 +26,45 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
   const [monteCarloSummary, setMonteCarloSummary] = useState<MonteCarloSummary | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const teleprompterRef = useRef<HTMLDivElement>(null);
+  const [escenarios, setEscenarios] = useState<EscenarioVista[]>([]);
+  const [refutacion, setRefutacion] = useState<RefutacionItem[]>([]);
+  const [caseKey, setCaseKey] = useState<string>('');
 
-  const caseKey = useMemo(() => getCaseKey(caseId), [caseId]);
-  const escenarios = escenariosByCase[caseKey] ?? [];
-  const refutacion = refutacionByCase[caseKey] ?? [];
   const selectedEscenario = escenarios[selectedEscenarioIndex] ?? escenarios[0];
   const isPicassent = caseKey === 'picassent';
 
   useEffect(() => {
     setSelectedEscenarioIndex(0);
   }, [caseKey]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadEscenarios = async () => {
+      const resolvedCase = await casesRepo.getById(caseId);
+      if (mounted) {
+        setCaseKey(resolvedCase?.caseKey ?? '');
+      }
+      let [briefs, refutaciones] = await Promise.all([
+        scenarioBriefsRepo.getByCaseId(caseId),
+        scenarioRefutationsRepo.getByCaseId(caseId),
+      ]);
+      if (briefs.length === 0 || refutaciones.length === 0) {
+        await ensureStrategySeed(caseId);
+        [briefs, refutaciones] = await Promise.all([
+          scenarioBriefsRepo.getByCaseId(caseId),
+          scenarioRefutationsRepo.getByCaseId(caseId),
+        ]);
+      }
+      if (mounted) {
+        setEscenarios(briefs);
+        setRefutacion(refutaciones);
+      }
+    };
+    loadEscenarios().catch(console.error);
+    return () => {
+      mounted = false;
+    };
+  }, [caseId]);
 
   useEffect(() => {
     const handler = () => setIsFullscreen(Boolean(document.fullscreenElement));
@@ -274,7 +275,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
               <div className="mt-4 space-y-2">
                 {selectedEscenario?.puntosAClavar?.length ? (
                   selectedEscenario.puntosAClavar.map((punto, index) => {
-                    const key = `${caseKey}-${selectedEscenarioIndex}-${index}`;
+                    const key = `${caseId}-${selectedEscenarioIndex}-${index}`;
                     return (
                       <label
                         key={key}

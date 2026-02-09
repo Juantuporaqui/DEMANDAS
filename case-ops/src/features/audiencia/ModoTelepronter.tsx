@@ -5,9 +5,10 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { frasesClaveVista, argumentosContestacion, nuestrosArgumentos } from '../../data/mislata';
-import { todasLasCitas } from '../../data/jurisprudencia';
-import { estrategiaPicassent } from '../../data/estrategia/informeEstrategico';
+import type { Strategy } from '../../types';
+import { ensureStrategySeed } from '../../db/ensureStrategySeed';
+import { casesRepo, strategiesRepo } from '../../db/repositories';
+import { resolveCaseIdFromUrl } from '../../utils/caseRouting';
 
 interface FraseTeleprompter {
   id: string;
@@ -33,115 +34,71 @@ const filterCategorias: FraseTeleprompter['filterCategoria'][] = [
   'PREGUNTA',
 ];
 
-const resumenLinea = (texto: string) => {
-  const primeraLinea = texto.split('\n')[0]?.trim() ?? '';
-  if (!primeraLinea) return '';
-  const punto = primeraLinea.indexOf('.');
-  if (punto > 0) {
-    return primeraLinea.slice(0, punto + 1);
-  }
-  return primeraLinea;
-};
+type CaseKey = 'picassent' | 'mislata' | 'quart';
 
-// Combinar todas las frases relevantes de Mislata
-function getFrasesMislata(): FraseTeleprompter[] {
+const buildFrasesFromStrategies = (strategies: Strategy[]): FraseTeleprompter[] => {
   const frases: FraseTeleprompter[] = [];
 
-  // Frases clave de Mislata
-  frasesClaveVista.forEach((f, i) => {
-    frases.push({
-      id: `frase-${i}`,
-      categoria: 'FRASE CLAVE',
-      filterCategoria: 'ATAQUE',
-      titulo: f.contexto,
-      frase: f.frase,
-    });
-  });
+  strategies.forEach((strategy) => {
+    const tipoTag = (strategy.tags || []).find((tag) => tag.startsWith('tipo:'));
+    const tipo = (tipoTag?.split(':')[1] ?? 'defensa') as keyof typeof categoriaMap;
+    const baseCategoria = categoriaMap[tipo] ?? 'DEFENSA';
 
-  // Réplicas a argumentos de Vicenta
-  argumentosContestacion.forEach((arg) => {
-    frases.push({
-      id: `replica-${arg.id}`,
-      categoria: 'RÉPLICA',
-      filterCategoria: 'RÉPLICA',
-      titulo: `Contra: ${arg.titulo}`,
-      frase: arg.nuestraReplica.split('\n')[0], // Primera línea
-      subtitulo: arg.articulosInvocados.join(', '),
-    });
-  });
-
-  // Nuestros argumentos
-  nuestrosArgumentos.forEach((arg) => {
-    frases.push({
-      id: `arg-${arg.id}`,
-      categoria: 'ARGUMENTO',
-      filterCategoria: 'DEFENSA',
-      titulo: arg.titulo,
-      frase: arg.cita,
-      subtitulo: arg.fundamento,
-    });
-  });
-
-  // Frases para juez de jurisprudencia
-  todasLasCitas
-    .filter((c) => c.fraseParaJuez && c.procedimientosAplicables.includes('mislata'))
-    .forEach((c) => {
+    if (strategy.attack) {
       frases.push({
-        id: `juris-${c.id}`,
-        categoria: 'JURISPRUDENCIA',
-        filterCategoria: 'DEFENSA',
-        titulo: `${c.tribunal} ${c.numero}`,
-        frase: c.fraseParaJuez!,
-        subtitulo: c.tematica.join(', '),
+        id: `${strategy.id}-attack`,
+        categoria: baseCategoria,
+        filterCategoria: baseCategoria,
+        titulo: strategy.attack,
+        frase: strategy.rebuttal || strategy.attack,
+        subtitulo: strategy.risk,
       });
-    });
+    }
 
-  return frases;
-}
-
-// Combinar todas las frases relevantes de Picassent
-function getFrasesPicassent(): FraseTeleprompter[] {
-  const frases: FraseTeleprompter[] = [];
-
-  estrategiaPicassent.forEach((linea) => {
-    const categoria = categoriaMap[linea.tipo];
-    linea.frasesClave.forEach((frase, index) => {
+    if (strategy.rebuttal) {
       frases.push({
-        id: `${linea.id}-frase-${index}`,
-        categoria,
-        filterCategoria: categoria,
-        titulo: linea.titulo,
-        frase,
-        subtitulo: linea.descripcion,
+        id: `${strategy.id}-rebuttal`,
+        categoria: 'RÉPLICA',
+        filterCategoria: 'RÉPLICA',
+        titulo: strategy.attack || 'Réplica',
+        frase: strategy.rebuttal,
+        subtitulo: strategy.evidencePlan,
       });
-    });
+    }
 
-    const fundamentoResumen = resumenLinea(linea.fundamento);
-    if (fundamentoResumen) {
+    if (strategy.evidencePlan) {
       frases.push({
-        id: `${linea.id}-fundamento`,
+        id: `${strategy.id}-evidence`,
         categoria: 'ARGUMENTO',
-        filterCategoria: categoria,
-        titulo: `${linea.titulo} · Fundamento`,
-        frase: fundamentoResumen,
-        subtitulo: linea.fundamento,
+        filterCategoria: 'DEFENSA',
+        titulo: `${strategy.attack || 'Estrategia'} · Evidencia`,
+        frase: strategy.evidencePlan,
+        subtitulo: strategy.risk,
+      });
+    }
+
+    if (strategy.questions) {
+      frases.push({
+        id: `${strategy.id}-questions`,
+        categoria: 'PREGUNTA',
+        filterCategoria: 'PREGUNTA',
+        titulo: `${strategy.attack || 'Estrategia'} · Preguntas`,
+        frase: strategy.questions,
       });
     }
   });
 
   return frases;
-}
+};
 
 export function ModoTelepronter() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const procParam = searchParams.get('proc');
-  const procedimiento = procParam === 'picassent' ? 'picassent' : 'mislata';
+  const procParam = searchParams.get('proc') as CaseKey | null;
+  const [caseId, setCaseId] = useState<string | null>(null);
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<FraseTeleprompter['filterCategoria']>('TODO');
-  const frases = useMemo(
-    () => (procedimiento === 'picassent' ? getFrasesPicassent() : getFrasesMislata()),
-    [procedimiento],
-  );
+  const frases = useMemo(() => buildFrasesFromStrategies(strategies), [strategies]);
   const filteredFrases = useMemo(
     () =>
       categoryFilter === 'TODO'
@@ -156,6 +113,55 @@ export function ModoTelepronter() {
   const [showTimer, setShowTimer] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const resolveCase = async () => {
+      const resolvedId = await resolveCaseIdFromUrl({}, searchParams);
+      if (!mounted) return;
+      if (resolvedId) {
+        setCaseId(resolvedId);
+        return;
+      }
+      if (procParam) {
+        const byKey = await casesRepo.getByCaseKey(procParam);
+        if (mounted) {
+          setCaseId(byKey?.id ?? null);
+        }
+        return;
+      }
+      const fallbackCase = await casesRepo.getByCaseKey('picassent');
+      if (mounted) {
+        setCaseId(fallbackCase?.id ?? null);
+      }
+    };
+    resolveCase().catch(console.error);
+    return () => {
+      mounted = false;
+    };
+  }, [procParam, searchParams]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadStrategies = async () => {
+      if (!caseId) {
+        setStrategies([]);
+        return;
+      }
+      let data = await strategiesRepo.getByCaseId(caseId);
+      if (data.length === 0) {
+        await ensureStrategySeed(caseId);
+        data = await strategiesRepo.getByCaseId(caseId);
+      }
+      if (mounted) {
+        setStrategies(data);
+      }
+    };
+    loadStrategies().catch(console.error);
+    return () => {
+      mounted = false;
+    };
+  }, [caseId]);
 
   const fraseCount = filteredFrases.length;
   const hasFrases = fraseCount > 0;
@@ -209,7 +215,7 @@ export function ModoTelepronter() {
 
   useEffect(() => {
     setCurrentIndex(0);
-  }, [procedimiento, categoryFilter]);
+  }, [caseId, categoryFilter]);
 
   // Auto play
   useEffect(() => {

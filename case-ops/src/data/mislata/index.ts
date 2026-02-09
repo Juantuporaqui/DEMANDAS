@@ -4,6 +4,12 @@
 // ============================================
 
 import type { RefutacionItem } from '../escenarios/types';
+import { normalizeDate } from '../../utils/dates';
+
+const fechaContestacion = normalizeDate('2025-12-XX');
+const fechaRecursoReposicion = normalizeDate('2025-12-XX');
+const fechaIngresoOct2023 = normalizeDate('2023-10-XX');
+const fechaRetiro2024 = normalizeDate('2024-XX-XX');
 
 // ====================
 // PROCEDIMIENTO
@@ -31,8 +37,12 @@ export const procedimientoMislata = {
   // Fechas clave
   fechaDemanda: '2025-09-24',
   fechaAdmision: '2025-11-19',
-  fechaContestacion: '2025-12-XX', // Presentada tras alzar suspensión
-  fechaRecursoReposicion: '2025-12-XX',
+  fechaContestacion: fechaContestacion.date,
+  fechaContestacionApprox: fechaContestacion.approx,
+  fechaContestacionNota: fechaContestacion.label,
+  fechaRecursoReposicion: fechaRecursoReposicion.date,
+  fechaRecursoReposicionApprox: fechaRecursoReposicion.approx,
+  fechaRecursoReposicionNota: fechaRecursoReposicion.label,
   fechaImpugnacionRecurso: '2025-12-19',
 
   // Procedimiento vinculado
@@ -73,15 +83,15 @@ export const desgloseMislata = {
 
   // Detalle aportaciones Vicenta
   ingresosVicenta: [
-    { fecha: '2023-10-XX', importe: 56200, concepto: 'Ingreso cuota' },
-    { fecha: '2023-10-XX', importe: 56200, concepto: 'Ingreso cuota' },
-    { fecha: '2023-10-XX', importe: 56200, concepto: 'Ingreso cuota' },
-    { fecha: '2023-10-XX', importe: 56200, concepto: 'Ingreso cuota' },
+    { fecha: fechaIngresoOct2023.date, approx: fechaIngresoOct2023.approx, notaFecha: fechaIngresoOct2023.label, importe: 56200, concepto: 'Ingreso cuota' },
+    { fecha: fechaIngresoOct2023.date, approx: fechaIngresoOct2023.approx, notaFecha: fechaIngresoOct2023.label, importe: 56200, concepto: 'Ingreso cuota' },
+    { fecha: fechaIngresoOct2023.date, approx: fechaIngresoOct2023.approx, notaFecha: fechaIngresoOct2023.label, importe: 56200, concepto: 'Ingreso cuota' },
+    { fecha: fechaIngresoOct2023.date, approx: fechaIngresoOct2023.approx, notaFecha: fechaIngresoOct2023.label, importe: 56200, concepto: 'Ingreso cuota' },
   ],
   retirosVicenta: [
-    { fecha: '2024-XX-XX', importe: 65000, concepto: 'Retirada cajero' },
-    { fecha: '2024-XX-XX', importe: 25695, concepto: 'Retirada' },
-    { fecha: '2024-XX-XX', importe: 18200, concepto: 'Retirada' },
+    { fecha: fechaRetiro2024.date, approx: fechaRetiro2024.approx, notaFecha: fechaRetiro2024.label, importe: 65000, concepto: 'Retirada cajero' },
+    { fecha: fechaRetiro2024.date, approx: fechaRetiro2024.approx, notaFecha: fechaRetiro2024.label, importe: 25695, concepto: 'Retirada' },
+    { fecha: fechaRetiro2024.date, approx: fechaRetiro2024.approx, notaFecha: fechaRetiro2024.label, importe: 18200, concepto: 'Retirada' },
   ],
 };
 
