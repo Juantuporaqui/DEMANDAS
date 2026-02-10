@@ -586,26 +586,29 @@ function TabDocs({ documents, caseId, caseData }: any) {
     meta?: string;
   }) => {
     const colorClasses: Record<string, string> = {
-      amber: 'border-amber-500/30 hover:border-amber-500/60 text-amber-100',
-      emerald: 'border-emerald-500/30 hover:border-emerald-500/60 text-emerald-100',
-      rose: 'border-rose-500/30 hover:border-rose-500/60 text-rose-100',
-      blue: 'border-blue-500/30 hover:border-blue-500/60 text-blue-100',
-      violet: 'border-violet-500/30 hover:border-violet-500/60 text-violet-100',
-      cyan: 'border-cyan-500/30 hover:border-cyan-500/60 text-cyan-100',
-      slate: 'border-slate-600/40 hover:border-slate-500/60 text-slate-100',
+      amber: 'border-amber-400/30 shadow-amber-900/20 hover:border-amber-300/70',
+      emerald: 'border-emerald-400/30 shadow-emerald-900/20 hover:border-emerald-300/70',
+      rose: 'border-rose-400/30 shadow-rose-900/20 hover:border-rose-300/70',
+      blue: 'border-blue-400/30 shadow-blue-900/20 hover:border-blue-300/70',
+      violet: 'border-violet-400/30 shadow-violet-900/20 hover:border-violet-300/70',
+      cyan: 'border-cyan-400/30 shadow-cyan-900/20 hover:border-cyan-300/70',
+      slate: 'border-slate-500/40 shadow-slate-900/20 hover:border-slate-300/60',
     };
 
     return (
       <button
         onClick={() => handleSelectDoc(docKey)}
-        className={`group w-full aspect-square rounded-2xl border bg-slate-900/40 p-4 text-left transition-all hover:-translate-y-0.5 hover:bg-slate-900/70 ${colorClasses[color]}`}
+        className={`group w-full rounded-xl border bg-gradient-to-br from-slate-900/95 to-slate-800/60 p-3 sm:p-3.5 text-left shadow-lg backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-slate-800/95 hover:to-slate-700/60 ${colorClasses[color]}`}
       >
-        <div className="flex flex-col justify-between h-full">
-          <div className="text-2xl">{icon}</div>
-          <div>
-            <div className="text-xs sm:text-sm font-semibold text-white leading-snug line-clamp-2">{label}</div>
-            {meta && <div className="text-[10px] text-slate-400 mt-1 line-clamp-1">{meta}</div>}
+        <div className="flex items-start gap-2.5 sm:gap-3 min-h-[58px] sm:min-h-[62px]">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-lg">
+            {icon}
           </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[12px] sm:text-[13px] font-semibold text-white leading-snug line-clamp-2">{label}</div>
+            {meta && <div className="mt-1 text-[10px] font-medium uppercase tracking-wide text-slate-400 line-clamp-1">{meta}</div>}
+          </div>
+          <ChevronRight size={14} className="mt-1 shrink-0 text-slate-500 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-300" />
         </div>
       </button>
     );
@@ -699,7 +702,7 @@ function TabDocs({ documents, caseId, caseData }: any) {
           <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
             <Scale size={12} /> Autos y escritos
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3">
             {manualDocItems.map((doc) => (
               <DocGridButton key={doc.id} docKey={doc.id} icon={doc.icon} label={doc.label} color={doc.color} />
             ))}
@@ -712,7 +715,7 @@ function TabDocs({ documents, caseId, caseData }: any) {
           <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
             <FileText size={12} /> Documentos subidos ({autoDocs.length})
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3">
             {autoDocs.map((doc: AutoDocument) => (
               <DocGridButton
                 key={doc.id}
@@ -732,7 +735,7 @@ function TabDocs({ documents, caseId, caseData }: any) {
           <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
             <FileText size={12} /> PDFs del expediente ({pdfDocuments.length})
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3">
             {pdfDocuments.map((pdf) => (
               <DocGridButton
                 key={pdf.id}
@@ -752,13 +755,13 @@ function TabDocs({ documents, caseId, caseData }: any) {
           <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
             <Upload size={12} /> Archivo digital ({documents.length})
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3">
             {documents.map((doc: Document) => (
               <div
                 key={doc.id}
-                className="w-full aspect-square rounded-2xl border border-slate-700/50 bg-slate-900/40 p-4 text-left text-slate-300"
+                className="w-full rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/60 p-3 sm:p-3.5 text-left text-slate-300 shadow-lg"
               >
-                <div className="flex flex-col justify-between h-full">
+                <div className="flex items-start gap-2.5 sm:gap-3 min-h-[58px] sm:min-h-[62px]">
                   <div className="text-xl">📎</div>
                   <div>
                     <div className="text-xs font-semibold text-white line-clamp-2">{doc.title}</div>
