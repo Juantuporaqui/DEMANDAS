@@ -94,10 +94,10 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
       )}
 
       <section className="rounded-2xl sm:rounded-3xl border border-slate-700/60 bg-slate-900/60 p-4 sm:p-6 text-slate-100 shadow-sm print-card">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-3">
+        <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0 space-y-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+              <p className="break-words text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
                 {content.meta.tags.join(' · ')}
               </p>
               <h1 className="mt-2 text-2xl font-semibold text-white md:text-3xl">{content.hero.title}</h1>
@@ -107,7 +107,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
               {metaBadges.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-slate-600/60 bg-slate-800/50 px-3 py-1 text-xs font-semibold text-slate-200"
+                  className="max-w-full rounded-full border border-slate-600/60 bg-slate-800/50 px-3 py-1 text-center text-xs font-semibold text-slate-200 break-words"
                 >
                   {item}
                 </span>
@@ -165,7 +165,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
 
           <section id="resumen-60s" className="scroll-mt-24 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-6 text-sm text-slate-100 print-card">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-base font-semibold text-white">{content.resumen.title}</h2>
+              <h2 className="min-w-0 break-words text-base font-semibold text-white">{content.resumen.title}</h2>
               <CopyButton
                 text={[
                   content.resumen.title,

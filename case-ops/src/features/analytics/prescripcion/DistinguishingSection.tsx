@@ -36,7 +36,7 @@ export function DistinguishingSection({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-base font-semibold text-white">{title}</h2>
-          {subtitle ? <p className="mt-1 text-sm text-slate-400">{subtitle}</p> : null}
+          {subtitle ? <p className="mt-1 break-words text-sm text-slate-400">{subtitle}</p> : null}
         </div>
         <a
           href={link}
@@ -45,7 +45,7 @@ export function DistinguishingSection({
           Abrir versión extendida
         </a>
       </div>
-      {intro ? <p className="mt-3 text-sm text-slate-300">{intro}</p> : null}
+      {intro ? <p className="mt-3 break-words text-sm text-slate-300">{intro}</p> : null}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {antiSts458.argumentos.map((argumento) => (
           <div

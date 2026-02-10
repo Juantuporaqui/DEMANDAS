@@ -19,9 +19,9 @@ export function ErroresFatalesSection({ id, title, subtitle, items, actions }: E
   return (
     <section id={id} className="scroll-mt-24 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-5 text-sm text-slate-200 print-card">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-white">{title}</h2>
-          {subtitle ? <p className="mt-1 text-sm text-slate-400">{subtitle}</p> : null}
+        <div className="min-w-0">
+          <h2 className="break-words text-base font-semibold text-white">{title}</h2>
+          {subtitle ? <p className="mt-1 break-words text-sm text-slate-400">{subtitle}</p> : null}
         </div>
         {actions}
       </div>
