@@ -509,6 +509,8 @@ function TabDocs({ documents, caseId, caseData }: any) {
                   caseData.autosNumber?.includes('1428');
 
   const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
+  const caseSlug = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
+  const docsBasePath = caseSlug ? `${import.meta.env.BASE_URL}docs/${caseSlug}/escritos` : null;
 
   // Obtener PDFs del caso actual
   const casoKeyPDF = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
@@ -518,8 +520,8 @@ function TabDocs({ documents, caseId, caseData }: any) {
   const manualDocItems = [
     ...(isPicassent
       ? [
-          { id: 'demanda-picassent', label: 'Demanda Contraria', icon: '📜', color: 'amber' },
-          { id: 'contestacion-picassent', label: 'Contestación', icon: '🛡️', color: 'emerald' },
+          { id: 'link-demanda-picassent', label: 'Demanda Contraria', icon: '📜', color: 'amber' },
+          { id: 'link-contestacion-picassent', label: 'Contestación', icon: '🛡️', color: 'emerald' },
         ]
       : []),
     ...(isMislata
@@ -548,6 +550,11 @@ function TabDocs({ documents, caseId, caseData }: any) {
   ]);
 
   const selectedPDF = selectedDocKey ? pdfDocuments.find((pdf) => pdf.id === selectedDocKey) : null;
+  const selectedExternalUrl = selectedDocKey === 'link-demanda-picassent'
+    ? `${docsBasePath}/demanda.html`
+    : selectedDocKey === 'link-contestacion-picassent'
+      ? `${docsBasePath}/contestacion.html`
+      : null;
   const selectedContent = selectedDocKey ? LEGAL_DOCS_MAP[selectedDocKey] : null;
   const selectedTitle = selectedDocKey ? docTitleMap.get(selectedDocKey) : null;
 
@@ -637,6 +644,21 @@ function TabDocs({ documents, caseId, caseData }: any) {
                 title={selectedPDF.titulo}
                 className="flex-1"
               />
+            </div>
+          ) : selectedExternalUrl ? (
+            <div className="flex flex-col h-[70vh]">
+              <div className="flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800">
+                <h3 className="text-sm font-medium text-white truncate">{selectedTitle}</h3>
+                <a
+                  href={selectedExternalUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-cyan-300 hover:text-cyan-200"
+                >
+                  Abrir en pestaña nueva ↗
+                </a>
+              </div>
+              <iframe src={selectedExternalUrl} title={selectedTitle || 'Documento'} className="flex-1 w-full bg-white" />
             </div>
           ) : selectedContent ? (
             <TextReader content={selectedContent} />

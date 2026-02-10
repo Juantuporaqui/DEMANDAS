@@ -11,8 +11,6 @@
 //   - src/data/picassent/   → Caso Picassent (P.O. 715/2024)
 // ============================================
 
-import { CONTESTACION_PICASSENT_TEXT } from './docs/contestacionPicassent';
-import { DEMANDA_PICASSENT_TEXT } from './docs/demandaPicassent';
 import {
   procedimientoMislata,
   argumentosContestacion,
@@ -40,12 +38,6 @@ export type { AutoDocument } from './documentLoader';
 
 // Documentos manuales (generados desde TypeScript)
 const MANUAL_DOCS: Record<string, string> = {
-  // --------------------------------------------------------------------------
-  // CASO PICASSENT (715/2024) - Documentos Reales
-  // --------------------------------------------------------------------------
-  'demanda-picassent': DEMANDA_PICASSENT_TEXT,
-  'contestacion-picassent': CONTESTACION_PICASSENT_TEXT,
-
   // --------------------------------------------------------------------------
   // CASO MISLATA (J.V. 1185/2025) - Reclamación cuotas hipotecarias
   // --------------------------------------------------------------------------
