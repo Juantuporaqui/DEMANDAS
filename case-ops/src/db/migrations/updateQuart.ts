@@ -21,12 +21,17 @@ import { timelineQuart } from '../../data/quart/timeline';
 export async function migrateQuartCase(): Promise<{ success: boolean; message: string }> {
   try {
     // 1. Buscar caso Quart existente
-    let quartCase = await casesRepo.getByCaseKey('quart');
+    const allCases = await casesRepo.getAll();
+    let quartCase = allCases.find(
+      (c) =>
+        c.title.toLowerCase().includes('quart') ||
+        c.autosNumber?.includes('1428/2025') ||
+        c.autosNumber?.includes('892/2023')
+    );
 
     // 2. Si existe, actualizar. Si no, crear.
     if (quartCase) {
       await db.cases.update(quartCase.id, {
-        caseKey: 'quart',
         title: 'ETJ 1428/2025 · Ejecución Cuenta Hijos',
         court: procedimientoQuart.juzgado,
         autosNumber: procedimientoQuart.ejecucion.numero,
@@ -42,7 +47,6 @@ export async function migrateQuartCase(): Promise<{ success: boolean; message: s
       console.log('Caso Quart actualizado:', quartCase.id);
     } else {
       quartCase = await casesRepo.create({
-        caseKey: 'quart',
         title: 'ETJ 1428/2025 · Ejecución Cuenta Hijos',
         court: procedimientoQuart.juzgado,
         autosNumber: procedimientoQuart.ejecucion.numero,

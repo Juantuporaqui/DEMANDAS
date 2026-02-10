@@ -22,12 +22,10 @@ import type {
   Rule,
   ScenarioModel,
   ScenarioNode,
-  ScenarioBrief,
-  ScenarioRefutation,
 } from '../types';
 
 // Database Schema Version
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 4;
 
 // Database class extending Dexie
 class CaseOpsDB extends Dexie {
@@ -45,8 +43,6 @@ class CaseOpsDB extends Dexie {
   tasks!: EntityTable<Task, 'id'>;
   links!: EntityTable<Link, 'id'>;
   rules!: EntityTable<Rule, 'id'>;
-  scenario_briefs!: EntityTable<ScenarioBrief, 'id'>;
-  scenario_refutations!: EntityTable<ScenarioRefutation, 'id'>;
   scenario_models!: EntityTable<ScenarioModel, 'id'>;
   scenario_nodes!: EntityTable<ScenarioNode, 'id'>;
   auditLogs!: EntityTable<AuditLog, 'id'>;
@@ -63,7 +59,7 @@ class CaseOpsDB extends Dexie {
       counters: 'id',
 
       // Cases - main litigation containers
-      cases: 'id, &caseKey, title, court, type, status, parentCaseId, updatedAt, *tags',
+      cases: 'id, title, court, type, status, parentCaseId, updatedAt, *tags',
 
       // Documents - metadata only (blobs in docFiles)
       documents: 'id, caseId, title, docType, hashSha256, fileId, annexCode, updatedAt, *tags',
@@ -97,12 +93,6 @@ class CaseOpsDB extends Dexie {
 
       // Rules - legal modifiers for scenarios
       rules: 'id, caseId, title, updatedAt, *appliesToTags',
-
-      // Scenario briefs - audiencia tactics (escenarios)
-      scenario_briefs: 'id, caseId, tipo, updatedAt',
-
-      // Scenario refutations - audiencia matrix
-      scenario_refutations: 'id, caseId, updatedAt',
 
       // Scenario models - alternative assumptions
       scenario_models: 'id, caseId, name, updatedAt',

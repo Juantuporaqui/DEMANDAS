@@ -2,9 +2,7 @@ import { AlertTriangle, Calendar, CreditCard, Mail, Scale } from 'lucide-react';
 
 export interface CaseTimelineItem {
   id: string;
-  fecha: string | null;
-  approx?: boolean;
-  order?: number;
+  fecha: string;
   tipo: string;
   titulo: string;
   descripcion: string;
@@ -35,8 +33,7 @@ interface CaseTimelineBaseProps {
 const formatCents = (cents: number) =>
   (cents / 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 
-const formatIsoDate = (fecha: string | null, approx?: boolean) => {
-  if (!fecha) return approx ? 'fecha aproximada' : 'sin fecha';
+const formatIsoDate = (fecha: string) => {
   const [year, month, day] = fecha.split('-');
   if (!year || !month || !day) return fecha;
   return `${day}/${month}/${year}`;
@@ -65,17 +62,13 @@ const defaultMetaForTipo = (tipo: string): CaseTimelineMeta => {
 
 export function CaseTimelineBase({ title, subtitle, items, getMeta }: CaseTimelineBaseProps) {
   const eventosPorAño = items.reduce((acc, evt) => {
-    const año = evt.fecha ? evt.fecha.split('-')[0] : 'Sin fecha';
+    const año = evt.fecha.split('-')[0];
     if (!acc[año]) acc[año] = [];
     acc[año].push(evt);
     return acc;
   }, {} as Record<string, CaseTimelineItem[]>);
 
-  const años = Object.keys(eventosPorAño).sort((a, b) => {
-    if (a === 'Sin fecha') return 1;
-    if (b === 'Sin fecha') return -1;
-    return a.localeCompare(b);
-  });
+  const años = Object.keys(eventosPorAño).sort((a, b) => a.localeCompare(b));
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -90,12 +83,7 @@ export function CaseTimelineBase({ title, subtitle, items, getMeta }: CaseTimeli
       <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-5">
         <div className="space-y-6">
           {años.map((año) => {
-            const eventos = [...eventosPorAño[año]].sort((a, b) => {
-              if (a.fecha && b.fecha) return a.fecha.localeCompare(b.fecha);
-              if (a.fecha) return -1;
-              if (b.fecha) return 1;
-              return (a.order ?? 0) - (b.order ?? 0);
-            });
+            const eventos = [...eventosPorAño[año]].sort((a, b) => a.fecha.localeCompare(b.fecha));
 
             return (
               <div key={año}>
@@ -126,9 +114,7 @@ export function CaseTimelineBase({ title, subtitle, items, getMeta }: CaseTimeli
                           <IconComponent className={`${meta.text} shrink-0 mt-0.5`} size={16} />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs text-slate-500 font-mono">
-                                {formatIsoDate(evento.fecha, evento.approx)}
-                              </span>
+                              <span className="text-xs text-slate-500 font-mono">{formatIsoDate(evento.fecha)}</span>
                               <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-500/20 text-slate-200 uppercase">
                                 {formatTipoLabel(evento.tipo)}
                               </span>
