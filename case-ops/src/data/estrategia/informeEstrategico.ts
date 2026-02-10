@@ -429,7 +429,9 @@ export const estrategiaMislata: LineaEstrategica[] = [
 // ============================================
 
 export function getEstrategiaPorProcedimiento(proc: Procedimiento): LineaEstrategica[] {
-  return proc === 'picassent' ? estrategiaPicassent : estrategiaMislata;
+  if (proc === 'picassent') return estrategiaPicassent;
+  if (proc === 'mislata') return estrategiaMislata;
+  return [];
 }
 
 export function getEstrategiaPorTipo(proc: Procedimiento, tipo: TipoEstrategia): LineaEstrategica[] {
