@@ -3,368 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demanda Juicio Verbal - Mislata</title>
+    <title>Demanda de Juicio Verbal - Reclamación de Cantidad</title>
     <style>
+        /* RESET Y BASE */
         body {
-            font-family: 'Georgia', 'Times New Roman', Times, serif;
-            line-height: 1.8;
-            color: #1a202c;
-            background-color: #f5f5f0;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            color: #000;
+            background-color: #f0f0f0;
             margin: 0;
-            padding: 24px;
-            font-size: 16px;
-            -webkit-font-smoothing: antialiased;
+            padding: 20px;
         }
-        .paper {
-            max-width: 860px;
+
+        /* CONTENEDOR TIPO FOLIO */
+        .document-container {
+            background-color: #fff;
             margin: 0 auto;
-            background: #ffffff;
-            padding: 72px 80px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.08);
-            border: 1px solid #e8e8e0;
-            border-radius: 2px;
+            padding: 40px 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #dcdcdc;
+            width: 100%;
+            max-width: 900px;
+            box-sizing: border-box;
         }
-        header {
+
+        /* ESTILOS PARA MÓVIL */
+        @media (max-width: 600px) {
+            body { padding: 0; }
+            .document-container {
+                padding: 20px;
+                box-shadow: none;
+                border: none;
+            }
+        }
+
+        /* TÍTULOS */
+        h1 {
+            font-size: 16pt;
             text-align: center;
-            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 40px;
             text-transform: uppercase;
-            margin-bottom: 48px;
-            font-size: 1.15em;
-            border-bottom: 2px solid #1a202c;
-            padding-bottom: 16px;
-            letter-spacing: 0.04em;
+            letter-spacing: 1px;
         }
-        .intro {
-            text-align: justify;
-            margin-bottom: 32px;
-        }
+
         h2 {
+            font-size: 14pt;
             text-align: center;
-            text-transform: uppercase;
-            font-size: 1.1em;
-            letter-spacing: 0.08em;
-            margin-top: 40px;
-            margin-bottom: 24px;
-            color: #1a202c;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 5px 0;
         }
+
         h3 {
-            font-size: 1em;
-            font-weight: bold;
-            text-transform: uppercase;
-            border-bottom: 1px solid #d1d5db;
-            padding-bottom: 8px;
-            margin-top: 32px;
-            letter-spacing: 0.02em;
-            color: #374151;
+            font-size: 12pt;
+            text-decoration: underline;
+            margin-top: 25px;
+            margin-bottom: 15px;
         }
+
         h4 {
-            font-size: 1em;
-            font-weight: bold;
-            margin-top: 24px;
+            font-size: 12pt;
             font-style: italic;
-            color: #374151;
+            font-weight: normal;
+            margin-top: 20px;
         }
+
+        /* TEXTO GENERAL */
         p {
+            margin-bottom: 15px;
             text-align: justify;
-            margin-bottom: 16px;
-            hyphens: auto;
         }
+
+        /* LISTAS Y OTROS */
         ul {
-            list-style-type: none;
-            padding-left: 24px;
+            list-style-type: disc;
+            margin-left: 20px;
+            padding-left: 10px;
         }
+
+        ol {
+            margin-left: 20px;
+            padding-left: 10px;
+        }
+        
         li {
-            margin-bottom: 12px;
-            line-height: 1.7;
+            margin-bottom: 10px;
+            text-align: justify;
         }
+
+        /* ÉNFASIS Y RESALTADOS */
+        strong { font-weight: bold; }
+        
+        .suplico-box {
+            background-color: #fcfcfc;
+            border-left: 4px solid #333;
+            padding: 15px 20px;
+            margin: 30px 0;
+            text-align: justify;
+        }
+
+        .otrosi {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px dashed #ccc;
+        }
+
+        .signature {
+            margin-top: 60px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .date-place {
+            margin-top: 40px;
+            text-align: right;
+            font-style: italic;
+        }
+
+        /* TABLAS */
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.875em;
-            margin: 24px 0;
-        }
-        th, td {
-            border: 1px solid #9ca3af;
-            padding: 10px 12px;
-            text-align: center;
-            vertical-align: middle;
-        }
-        th {
-            background-color: #f3f4f6;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.8em;
-            letter-spacing: 0.04em;
-            color: #374151;
-        }
-        td {
-            color: #4b5563;
-        }
-        .highlight {
-            background-color: #fef3c7;
-            padding: 2px 6px;
-            border-radius: 2px;
-        }
-        strong {
-            color: #111827;
-        }
-        em {
-            color: #4b5563;
-        }
-        blockquote {
-            border-left: 3px solid #d1d5db;
             margin: 20px 0;
-            padding: 12px 24px;
-            background: #f9fafb;
-            color: #4b5563;
-            font-style: italic;
+            font-size: 11pt;
         }
-        .footer-legal {
-            margin-top: 48px;
-            padding-top: 20px;
-            border-top: 1px solid #d1d5db;
-            font-size: 0.9em;
-            color: #6b7280;
+
+        table th, table td {
+            border: 1px solid #333;
+            padding: 6px 10px;
+            text-align: left;
         }
-        @media (max-width: 768px) {
-            body { padding: 12px; }
-            .paper { padding: 32px 24px; }
+
+        table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
         }
-        @media print {
-            body { background: white; padding: 0; }
-            .paper { box-shadow: none; border: none; padding: 40px; margin: 0; }
+
+        table td.right, table th.right {
+            text-align: right;
+        }
+
+        table .total-row {
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+
+        /* NOTA ACLARATORIA */
+        .nota-aclaratoria {
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+
+        .nota-aclaratoria p {
+            margin-bottom: 10px;
+        }
+
+        /* EJEMPLO ILUSTRATIVO */
+        .ejemplo {
+            margin-left: 30px;
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
 
-<div class="paper">
-    <header>
-        [cite_start]AL JUZGADO DE PRIMERA INSTANCIA DE MISLATA<span class="source-ref">[cite: 784, 785]</span>
-    </header>
+<div class="document-container">
 
-    <div class="intro">
-        <p>
-            <strong>ROSA CALVO BARBER</strong> (320 ICPV), Procuradora de los Tribunales, en nombre y representación de <strong>D. [cite_start]JUAN RODRÍGUEZ CRESPO</strong>, cuya representación se conferirá mediante comparecencia apud acta y bajo la dirección letrada de D. Óscar Javier Benita Godoy (11365 ICAV), ante el Juzgado comparezco y, como mejor proceda en Derecho, <strong>DIGO:</strong><span class="source-ref">[cite: 786]</span>
-        </p>
-        <p>
-            Que mediante el presente escrito formulo <strong>DEMANDA DE JUICIO VERBAL</strong> en ejercicio de acción de reclamación de cantidad y cumplimiento de obligaciones contractuales frente a <strong>Dña. VICENTA JIMÉNEZ VERA</strong>, mayor de edad, con DNI nº 52.708.915-E, y domicilio en C/ Isabel de Villena, 2-5, C.P. [cite_start]46920, Mislata (Valencia), en base a los siguientes:<span class="source-ref">[cite: 787-789]</span>
-        </p>
-    </div>
+    <h1>A LA SECCIÓN CIVIL Y DE INSTRUCCIÓN DEL TRIBUNAL DE INSTANCIA DE MISLATA</h1>
+
+    <p><strong>ROSA CALVO BARBER</strong> (320 ICPV), Procuradora de los Tribunales, en nombre y representación de <strong>D. JUAN RODRÍGUEZ CRESPO</strong>, mayor de edad, con D.N.I. nº 48.380.305-N, y domicilio en C/ Lope de Vega n.7, C.P. 46930, Quart de Poblet (Valencia), cuya representación se conferirá mediante comparecencia apud acta y bajo la dirección letrada de D. Óscar Javier Benita Godoy (11365 ICAV), ante el Juzgado comparezco y, como mejor proceda en Derecho, <strong>DIGO:</strong></p>
+
+    <p>Que mediante el presente escrito formulo <strong>DEMANDA DE JUICIO VERBAL</strong> sobre reclamación de cantidad, en ejercicio de la acción de repetición derivada del incumplimiento de obligaciones contractuales, frente a <strong>Dña. Vicenta Jiménez Vera</strong>, mayor de edad, con DNI nº 52.708.915-E, y domicilio en C/ Isabel de Villena, 2-5, C.P. 46920, Mislata (Valencia), en base a los siguientes:</p>
 
     <h2>HECHOS</h2>
 
-    <h3>PRIMERO.- Del préstamo hipotecario</h3>
-    <p>
-        En fecha 18 de junio de 2009, D. Juan Rodríguez Crespo y Dña. [cite_start]Vicenta Jiménez Vera firmaron un préstamo hipotecario solidario con Kutxabank, subrogado por Barclays, entidad que finalmente fue absorbida por Caixabank, bajo el contrato n.º 9620.299-687761-04, por un importe de <strong>310.000 euros</strong>.<span class="source-ref">[cite: 791, 792]</span>
-    </p>
-    <p>
-        [cite_start]El demandante aportó su vivienda privativa, sita en Calle Lope de Vega 7bj, Quart de Poblet (Valencia), como garantía hipotecaria.<span class="source-ref">[cite: 793]</span> Se acompaña como <strong>doc. [cite_start]1</strong> copia de la escritura de préstamo hipotecario y subrogación del mismo, destacando las cláusulas de solidaridad y titularidad conjunta.<span class="source-ref">[cite: 794]</span>
-    </p>
-    <p>
-        Tanto el Sr. Rodríguez como la Sra. [cite_start]Jiménez son titulares al 50% del referido préstamo, lo que implica una obligación de pago solidaria de las cuotas mensuales en la cuenta asociada al mismo (IBAN ES32 2100 5284 9122 0039 0906).<span class="source-ref">[cite: 795][cite_start]</span> En la actualidad, están divorciados en virtud de sentencia judicial 892/23 del Juzgado de Primera Instancia e Instrucción nº 1 de Quart de Poblet, de fecha 17 de octubre de 2023, siendo que el régimen matrimonial constante el matrimonio era el de separación de bienes.<span class="source-ref">[cite: 796]</span> Se acompaña como <strong>doc. [cite_start]2</strong> sentencia de divorcio.<span class="source-ref">[cite: 797]</span>
-    </p>
+    <h3>PRIMERO.- Del préstamo hipotecario solidario y de la garantía real.</h3>
 
-    <h3>SEGUNDO.- Incumplimiento de las obligaciones contractuales</h3>
-    <p>
-        A partir de agosto de 2023, Dña. Vicenta Jiménez Vera cesó en sus aportaciones, dando origen a la situación de impago que motiva esta reclamación. [cite_start]No obstante en octubre de 2023, la demandada realizó tres aportaciones de 560 € cada una de ellas, motivada por la inmediata celebración del juicio de divorcio contencioso, que se iba a producir esa misma semana.<span class="source-ref">[cite: 799]</span>
-    </p>
-    <p>
-        [cite_start]El análisis del extracto bancario oficial de la cuenta común demuestra un patrón recurrente originado por dicho incumplimiento:<span class="source-ref">[cite: 800]</span>
-    </p>
-    <ul>
-        <li>1. [cite_start]Ejecuta un primer cargo parcial del recibo, dejando la cuenta en un descubierto técnico (generalmente de -300,00 €).<span class="source-ref">[cite: 802]</span></li>
-        <li>2. [cite_start]Posteriormente, carga el resto del recibo, aumentando el saldo deudor y generando las correspondientes comisiones por descubierto.<span class="source-ref">[cite: 803]</span></li>
-    </ul>
-    <p>
-        [cite_start]Esta situación deudora es sistemáticamente corregida mediante <strong>aportaciones económicas realizadas en exclusiva por D. Juan Rodríguez Crespo</strong> desde su cuenta personal, mediante ingreso en efectivo, pago con tarjeta, transferencia, etc., quien se ve obligado a cubrir no solo su 50% de la obligación, sino la totalidad de la deuda generada para evitar mayores perjuicios.<span class="source-ref">[cite: 804][cite_start]</span> Se acompaña certificado de titularidad de la cuenta del Sr. Rodriguez en la entidad BBVA.<span class="source-ref">[cite: 805]</span>
-    </p>
+    <p>En fecha 22 de agosto de 2006, D. Juan Rodríguez Crespo y Dña. Vicenta Jiménez Vera firmaron un préstamo con garantía hipotecaria con Kutxabank por un importe inicial de 310.000 euros, subrogado en fecha 18 de junio de 2009 por Barclays Bank, entidad que finalmente fue absorbida por Caixabank, S.A., bajo el contrato n.º 9620.299-687761-04.</p>
 
-    <h3>TERCERO.- De las aportaciones realizadas por D. Juan Rodríguez Crespo</h3>
-    <p>
-        [cite_start]Para sufragar la deuda común generada por el impago de la otra parte, D. Juan Rodríguez Crespo se ha visto forzado a realizar las siguientes aportaciones, cuya suma asciende a un total de <strong>14.560,38 €</strong>.<span class="source-ref">[cite: 807]</span>
-    </p>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>Fecha de Aportación Juan</th>
-                <th>Importe</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>29/Sep/2023</td><td>855,43 €</td></tr>
-            <tr><td>29/Sep/2023</td><td>300,00 €</td></tr>
-            <tr><td>02/Oct/2023</td><td>2.330,00 €</td></tr>
-            <tr><td>20/Nov/2023</td><td>562,00 €</td></tr>
-            <tr><td>15/Dic/2023</td><td>565,00 €</td></tr>
-            <tr><td>16/Ene/2024</td><td>561,00 €</td></tr>
-            <tr><td>15/Feb/2024</td><td>562,00 €</td></tr>
-            <tr><td>18/Mar/2024</td><td>562,00 €</td></tr>
-            <tr><td>19/Abr/2024</td><td>560,00 €</td></tr>
-            <tr><td>24/Abr/2024</td><td>388,81 €</td></tr>
-            <tr><td>23/Abr/2024</td><td>560,00 €</td></tr>
-            <tr><td>22/Jul/2024</td><td>553,00 €</td></tr>
-            <tr><td>30/Ago/2024</td><td>553,00 €</td></tr>
-            <tr><td>21/Nov/2024</td><td>634,02 €</td></tr>
-            <tr><td>16/Dic/2024</td><td>553,00 €</td></tr>
-            <tr><td>15/Ene/2025</td><td>553,00 €</td></tr>
-            <tr><td>05/Feb/2025</td><td>553,00 €</td></tr>
-            <tr><td>23/Jun/2025 (Marzo)</td><td>553,00 €</td></tr>
-            <tr><td>23/Jun/2025 (Abril)</td><td>553,04 €</td></tr>
-            <tr><td>26/Jun/2025 (Mayo)</td><td>553,05 €</td></tr>
-            <tr><td>26/Jun/2025 (Junio)</td><td>563,60 €</td></tr>
-            <tr><td>02/Sep/2025 (Julio y Agosto)</td><td>1.132,43 €</td></tr>
-            <tr>
-                <th>TOTAL APORTADO POR JUAN</th>
-                <th>14.560,38 €</th>
-            </tr>
-        </tbody>
-    [cite_start]</table><span class="source-ref">[cite: 809]</span>
+    <p>Tanto el Sr. Rodríguez como la Sra. Jiménez son prestatarios, deudores del referido préstamo, lo que implica una obligación de pago solidaria de las cuotas mensuales en la cuenta asociada al mismo (IBAN ES32 2100 5284 9122 0039 0906), cuenta de titularidad compartida y designada como vehículo para el pago de las cuotas.</p>
 
-    <h3>CUARTO.- Análisis cronológico de movimientos (Ago 2023 - Jun 2025)</h3>
-    <p>
-        La siguiente tabla detalla, con precisión y basándose en el extracto bancario, la secuencia de hechos, demostrando cómo las aportaciones de D. Juan Rodríguez Crespo han sufragado la deuda común y las disposiciones de fondos de Dña. [cite_start]Vicenta Jiménez Vera.<span class="source-ref">[cite: 811, 812]</span>
-    </p>
+    <p>Es relevante para la correcta contextualización de los hechos señalar una circunstancia particular y asimétrica en la constitución de la garantía del préstamo. Dado que el capital prestado estaba destinado a la construcción de una vivienda unifamiliar, un inmueble futuro y, por tanto, no hipotecable en el momento de la firma, y ante la carencia de bienes inmuebles de titularidad de Dña. Vicenta Jiménez Vera que pudieran servir como aval, D. Juan Rodríguez Crespo, actuando de buena fe y para que fuera viable el proyecto común, ofreció su vivienda privativa, sita en Calle Lope de Vega 7, bajo, de Quart de Poblet (Valencia), como única garantía hipotecaria ante la entidad financiera.</p>
+
+    <p>Esta situación de extrema vulnerabilidad patrimonial, en la que el único bien que responde ante un eventual impago total es de titularidad exclusiva del Sr. Rodríguez, es un factor que ha sido instrumentalizado por la Sra. Jiménez Vera como medida de presión, al cesar en sus obligaciones de pago con el pleno conocimiento de que las consecuencias más graves de una ejecución hipotecaria recaerían únicamente sobre el patrimonio del demandante y siendo que tiene capacidad económica para ello, lo cual denota que ha actuado de mala fe. Se acompaña como <strong>doc. 1</strong> la escritura de préstamo con garantía hipotecaria con Kutxa, y como <strong>doc. 2</strong> la escritura de subrogación del mismo por Barclays Bank.</p>
+
+    <p>Las partes están divorciadas en virtud de sentencia judicial nº 892/23 dictada por el Juzgado de Primera Instancia e Instrucción nº 1 de Quart de Poblet, de fecha 17 de octubre de 2023, si bien la separación de hecho y el cese efectivo de la convivencia se habían producido 14 meses antes, el 1 de Septiembre de 2022, meses en los que la demandada sí cumplía con el pago del 50% de la cuota del préstamo. Siendo que el régimen económico matrimonial constante el matrimonio era el de separación de bienes. Se acompaña como <strong>doc. 3</strong> sentencia de divorcio y convenio regulador.</p>
+
+    <p>En la actualidad existe un procedimiento judicial entre las partes, juicio ordinario nº 715/24 sobre división de la cosa común y reclamación de cantidad ante la sección civil y de instrucción del Tribunal de instancia de Picassent Plaza nº 1, que, a fecha de la presente demanda, está pendiente de señalamiento de la audiencia previa.</p>
+
+    <h3>SEGUNDO.- Del incumplimiento contractual</h3>
+
+    <p>Interesa señalar que el cumplimiento de las obligaciones de pago por parte de la demandada se mantuvo con relativa normalidad hasta que le fue notificada la demanda de divorcio contencioso interpuesta por mi mandante. A partir de ese momento, concretamente en agosto de 2023, Dña. Vicenta Jiménez Vera cesó en sus aportaciones, utilizando el impago de la hipoteca común como una evidente medida de presión, dando origen a la situación que motiva esta reclamación.</p>
+
+    <p>Prueba de esta instrumentalización es que en octubre de 2023, la demandada realizó tres aportaciones puntuales. Dichos pagos no fueron casuales, sino que coincidieron de forma intencionada con la semana en que se celebraba el juicio de divorcio, en un claro intento de aparentar una solvencia y voluntad de pago que desapareció inmediatamente después, <strong>cesando de nuevo y ya de forma definitiva sus pagos a partir de noviembre de 2023</strong>, es decir, desde hace casi dos años.</p>
+
+    <p>El incumplimiento de la demandada activa una perjudicial operativa bancaria por parte de Caixabank, S.A. en la gestión de los impagos parciales, que es la causa directa de la fragmentación de los pagos y de la generación de costes adicionales que genera un ciclo de endeudamiento.</p>
+
+    <p>El proceso es el siguiente:</p>
+
+    <ol>
+        <li><strong>Intento de débito:</strong> En la fecha de vencimiento (generalmente el día 18 de cada mes), el sistema intenta debitar el importe íntegro de la cuota mensual de la cuenta conjunta.</li>
+        <li><strong>Generación de descubierto:</strong> Al ser el saldo insuficiente, la cuenta queda en situación de descubierto por el importe no atendido, generando un saldo deudor y las correspondientes comisiones por reclamación de posiciones deudoras.</li>
+        <li><strong>Aplicación de ingresos posteriores:</strong> Cualquier abono posterior en la cuenta, como las transferencias ordenadas por el Sr. Rodríguez para solventar la situación, es aplicado por la entidad de forma prioritaria a regularizar el saldo deudor, es decir, a cancelar primero el descubierto y las comisiones generadas.</li>
+        <li><strong>Cobro parcial de la cuota:</strong> Únicamente el importe remanente, una vez cancelado el descubierto, queda disponible para que la entidad proceda a realizar un "cobro parcial" de la cuota hipotecaria impagada. Estos pagos parciales se imputan primero a los intereses de demora, luego a los intereses ordinarios y, finalmente, al capital.</li>
+    </ol>
+
+    <p>Este mecanismo provoca que una única cuota mensual se liquide a través de múltiples apuntes de cobro, en fechas distintas y por importes variables, generando un efecto dominó donde el retraso en una cuota provoca el impago de las siguientes y acumula costes que son soportados exclusivamente por mi representado.</p>
+
+    <p>Como ejemplo ilustrativo, la cuota con vencimiento el 18/01/2024, que ascendía a 1.123,50 euros, se liquidó en tres pagos diferidos financiados exclusivamente por D. Juan, demostrando la complejidad y el perjuicio descritos:</p>
+
+    <div class="ejemplo">
+        <p>&#9679; <strong>Primer Pago (16/02/2024):</strong> Se realiza un cobro de 265,57 euros, destinados a cubrir 1,55 euros de intereses de demora y 264,02 euros de intereses ordinarios.</p>
+        <p>&#9679; <strong>Segundo Pago (19/03/2024):</strong> Se realiza un cobro de 562,00 euros, aplicados a 1,84 euros de intereses de demora, 384,99 euros de intereses ordinarios y, finalmente, 175,17 euros de capital.</p>
+        <p>&#9679; <strong>Tercer Pago (20/04/2024):</strong> Se realiza un cobro final de 330,45 euros, que liquida la deuda pendiente cubriendo 299,32 euros de capital, 1,08 euros de intereses de demora y, adicionalmente, una comisión por reclamación de impago de 30,05 euros.</p>
+    </div>
+
+    <p>Este ejemplo evidencia que D. Juan Rodríguez Crespo no solo está asumiendo la mitad de la cuota que corresponde a la Sra. Jiménez Vera, sino que además está financiando en solitario la totalidad de los costes accesorios (intereses de demora, comisiones por reclamación de impago y comisiones por descubierto) que son consecuencia directa y exclusiva del incumplimiento de la demandada.</p>
+
+    <h3>TERCERO.- Descapitalización de la cuenta común por parte de la demandada.</h3>
+
+    <p>El comportamiento de la demandada no está motivado por su falta de liquidez, va más allá y revela un patrón de actuación que sugiere una acción proactiva y deliberada para descapitalizar la cuenta conjunta, imposibilitando el cumplimiento de la obligación de pago común y generando una situación de asfixia económica en mi mandante.</p>
+
+    <p>El mes de agosto de 2023 marca el punto de inflexión donde se inicia este patrón. La secuencia de eventos, reconstruida a partir del extracto de la cuenta, que más adelante se aporta, es la siguiente:</p>
+
+    <ol>
+        <li><strong>11/08/2023:</strong> Se registra un ingreso de 562,00 euros atribuido a Dña. Vicenta Jiménez Vera. La cuenta presenta un saldo positivo de 650,61 euros.</li>
+        <li><strong>17/08/2023:</strong> Se produce una retirada injustificada de efectivo de 650,00 euros, con el concepto explícito "Vicenta Jiménez V". Esta operación se ejecuta intencionadamente tan solo un día antes de la fecha de vencimiento de la cuota hipotecaria.</li>
+        <li><strong>Resultado:</strong> La cuenta queda con un saldo residual de apenas 0,61 euros, provocando deliberadamente el impago de la cuota del día 18 y el inicio del ciclo de descubiertos y comisiones.</li>
+    </ol>
+
+    <p>Este patrón de comportamiento, que evidencia una clara mala fe, no es un hecho aislado. Se consolida en noviembre de 2023, mes en que la Sra. Jiménez Vera cesa definitivamente sus aportaciones.</p>
+
+    <p>Lejos de intentar paliar la situación, y significativamente <strong>tras la celebración del juicio contencioso por divorcio</strong>, realiza dos retiradas de fondos para fines ajenos al pago de la cuota hipotecaria por un total de 438,95 euros (256,95 euros el 03/11 y 182,00 euros el 16/11). <strong>Esta cantidad no es aleatoria; es la cifra que descapitaliza prácticamente por completo la cuenta</strong>, dejándola sin fondos para afrontar la cuota hipotecaria, en lo que constituye un acto deliberado de asfixia económica hacia mi mandante.</p>
+
+    <p>Estas acciones, unidas a la ya mencionada asimetría en la garantía hipotecaria, demuestran una conducta tendente a provocar el impago y trasladar la totalidad de la carga y el riesgo al demandante.</p>
+
+    <h3>CUARTO.- Cuantificación de las aportaciones y disposiciones de cada cotitular.</h3>
+
+    <p>El análisis pormenorizado de la documentación bancaria permite cuantificar con exactitud las aportaciones reales y efectivas de cada una de las partes al sostenimiento de la obligación común durante el período comprendido entre agosto de 2023 y octubre de 2025.</p>
+
+    <p><strong>Tabla 1: Aportaciones Íntegras de D. Juan Rodríguez Crespo.</strong></p>
+    <p>La siguiente tabla detalla cada una de las aportaciones dinerarias realizadas por D. Juan Rodríguez Crespo a la cuenta conjunta, demostrando su esfuerzo constante y solitario para atender las obligaciones comunes.</p>
 
     <table>
         <thead>
             <tr>
                 <th>Fecha</th>
-                <th>Detalle Operación</th>
-                <th>Aportación Juan</th>
-                <th>Movimiento Vicenta</th>
-                <th>Pago Hipoteca / Gastos</th>
-                <th>Saldo</th>
+                <th>Concepto / Origen</th>
+                <th class="right">Importe (€)</th>
             </tr>
         </thead>
         <tbody>
-            <tr><td>11/08/2023</td><td class="text-left">Ingreso de Dña. Vicenta</td><td></td><td>+ 562,00 €</td><td></td><td>+ 650,61 €</td></tr>
-            <tr><td>17/08/2023</td><td class="text-left">Disposición unilateral Dña. Vicenta</td><td></td><td>- 650,00 €</td><td></td><td>+ 0,61 €</td></tr>
-            <tr><td>18/08/2023</td><td class="text-left">Vence cuota. Pago parcial y descubierto</td><td></td><td></td><td>- 300,61 €</td><td>- 300,00 €</td></tr>
-            <tr><td>20/08/2023</td><td class="text-left">Cobro resto cuota Agosto</td><td></td><td></td><td>- 823,04 €</td><td>- 1.123,04 €</td></tr>
-            <tr><td>29/09/2023</td><td class="text-left">Aportación Juan (cubrir descubierto)</td><td>+ 823,04 €</td><td></td><td></td><td>- 300,00 €</td></tr>
-            <tr><td>29/09/2023</td><td class="text-left">Aportación Juan (cubrir descubierto)</td><td>+ 300,61 €</td><td></td><td></td><td>+ 0,61 €</td></tr>
-            <tr><td>30/09/2023</td><td class="text-left">Vence cuota Sept. Pago parcial y descubierto</td><td></td><td></td><td>- 300,61 €</td><td>- 300,00 €</td></tr>
-            <tr><td>01/10/2023</td><td class="text-left">Cargo comisión descubierto Sept.</td><td></td><td></td><td>- 20,48 €</td><td>- 320,48 €</td></tr>
-            <tr><td>02/10/2023</td><td class="text-left">Aportación de D. Juan</td><td>+ 900,00 €</td><td></td><td></td><td>+ 579,52 €</td></tr>
-            <tr><td>02/10/2023</td><td class="text-left">Segunda aportación de D. Juan</td><td>+ 900,00 €</td><td></td><td></td><td>+ 1.479,52 €</td></tr>
-            <tr><td>02/10/2023</td><td class="text-left">Cobro resto cuota Sept.</td><td></td><td></td><td>- 855,43 €</td><td>+ 624,09 €</td></tr>
-            <tr><td>02/10/2023</td><td class="text-left">Tercera aportación de D. Juan</td><td>+ 530,00 €</td><td></td><td></td><td>+ 1.154,09 €</td></tr>
-            <tr><td>02/10/2023</td><td class="text-left">El banco cobra el recibo completo con demora</td><td></td><td></td><td>- 1.154,35 €</td><td>- 0,26 €</td></tr>
-            <tr><td>02/10/2023</td><td class="text-left">Ingreso de Dña. Vicenta</td><td></td><td>+ 562,00 €</td><td></td><td>+ 561,74 €</td></tr>
-            <tr><td>02/10/2023</td><td class="text-left">Ingreso de Dña. Vicenta</td><td></td><td>+ 562,00 €</td><td></td><td>+ 1.123,74 €</td></tr>
-            <tr><td>03/10/2023</td><td class="text-left">Pago gasto común (Diputación)</td><td></td><td></td><td>- 25,00 €</td><td>+ 1.098,74 €</td></tr>
-            <tr><td>04/10/2023</td><td class="text-left">Pago gasto común (Agua)</td><td></td><td></td><td>- 98,11 €</td><td>+ 1.000,63 €</td></tr>
-            <tr><td>17/10/2023</td><td class="text-left">Ingreso de Dña. Vicenta</td><td></td><td>+ 562,00 €</td><td></td><td>+ 1.562,63 €</td></tr>
-            <tr><td>18/10/2023</td><td class="text-left">Se paga cuota Octubre</td><td></td><td></td><td>- 1.123,50 €</td><td>+ 439,13 €</td></tr>
-            <tr><td>03/11/2023</td><td class="text-left">Retirada Vicenta</td><td></td><td>- 256,95 €</td><td></td><td>+ 182,18 €</td></tr>
-            <tr><td>16/11/2023</td><td class="text-left">Retirada Vicenta</td><td></td><td>- 182,00 €</td><td></td><td>+ 0,18 €</td></tr>
-            <tr><td>18/11/2023</td><td class="text-left">Vence cuota Nov. Pago parcial</td><td></td><td></td><td>- 300,18 €</td><td>- 300,00 €</td></tr>
-            <tr><td>20/11/2023</td><td class="text-left">Aportación de D. Juan</td><td>+ 562,00 €</td><td></td><td></td><td>+ 262,00 €</td></tr>
-            <tr><td>20/11/2023</td><td class="text-left">Cobro resto cuota Noviembre</td><td></td><td></td><td>- 823,50 €</td><td>- 561,50 €</td></tr>
-            <tr><td>15/12/2023</td><td class="text-left">Aportación D. Juan (cubrir descubierto)</td><td>+ 565,00 €</td><td></td><td></td><td>+ 3,50 €</td></tr>
-            <tr><td>18/12/2023</td><td class="text-left">Vence cuota Dic. Pago parcial</td><td></td><td></td><td>- 303,50 €</td><td>- 300,00 €</td></tr>
-            <tr><td>18/12/2023</td><td class="text-left">Cobro resto cuota Diciembre</td><td></td><td></td><td>- 820,00 €</td><td>- 1.120,00 €</td></tr>
-            <tr><td>01/01/2024</td><td class="text-left">Cargo comisión descubierto</td><td></td><td></td><td>- 20,43 €</td><td>- 1.140,43 €</td></tr>
-            <tr><td>10/01/2024</td><td class="text-left">Cargo comisión</td><td></td><td></td><td>- 1,00 €</td><td>- 1.141,43 €</td></tr>
-            <tr><td>11/01/2024</td><td class="text-left">Cargo comisión</td><td></td><td></td><td>- 16,00 €</td><td>- 1.157,43 €</td></tr>
-            <tr><td>16/01/2024</td><td class="text-left">Aportación de D. Juan</td><td>+ 561,00 €</td><td></td><td></td><td>- 596,43 €</td></tr>
-            <tr><td>15/02/2024</td><td class="text-left">Aportación de D. Juan</td><td>+ 562,00 €</td><td></td><td></td><td>- 34,43 €</td></tr>
-            <tr><td>16/02/2024</td><td class="text-left">Se liquida pago parcial atrasado</td><td></td><td></td><td>- 265,57 €</td><td>- 300,00 €</td></tr>
-            <tr><td>18/03/2024</td><td class="text-left">Aportación de D. Juan</td><td>+ 562,00 €</td><td></td><td></td><td>+ 262,00 €</td></tr>
-            <tr><td>19/03/2024</td><td class="text-left">Se liquida pago parcial atrasado</td><td></td><td></td><td>- 562,00 €</td><td>- 300,00 €</td></tr>
-            <tr><td>01/04/2024</td><td class="text-left">Cargo comisión descubierto</td><td></td><td></td><td>- 21,11 €</td><td>- 321,11 €</td></tr>
-            <tr><td>19/04/2024</td><td class="text-left">Aportación de D. Juan</td><td>+ 560,00 €</td><td></td><td></td><td>+ 238,89 €</td></tr>
-            <tr><td>20/04/2024</td><td class="text-left">Se liquida pago parcial atrasado</td><td></td><td></td><td>- 330,45 €</td><td>- 91,56 €</td></tr>
-            <tr><td>20/04/2024</td><td class="text-left">Se liquida otro pago parcial atrasado</td><td></td><td></td><td>- 208,44 €</td><td>- 300,00 €</td></tr>
-            <tr><td>23/04/2024</td><td class="text-left">Aportación de D. Juan</td><td>+ 560,00 €</td><td></td><td></td><td>+ 260,00 €</td></tr>
-            <tr><td>24/04/2024</td><td class="text-left">Se liquida pago parcial atrasado</td><td></td><td></td><td>- 560,00 €</td><td>- 300,00 €</td></tr>
-            <tr><td>01/07/2024</td><td class="text-left">Cargo comisión descubierto</td><td></td><td></td><td>- 5,86 €</td><td>- 305,86 €</td></tr>
-            <tr><td>20/07/2024</td><td class="text-left">Aportación de D. Juan</td><td>+ 553,00 €</td><td></td><td></td><td>+ 247,14 €</td></tr>
-            <tr><td>20/07/2024</td><td class="text-left">Se liquida pago parcial atrasado</td><td></td><td></td><td>- 547,14 €</td><td>- 300,00 €</td></tr>
-            <tr><td>30/08/2024</td><td class="text-left">Aportación de D. Juan</td><td>+ 553,00 €</td><td></td><td></td><td>+ 253,00 €</td></tr>
-            <tr><td>30/08/2024</td><td class="text-left">Se liquida pago parcial atrasado</td><td></td><td></td><td>- 51,43 €</td><td>+ 201,57 €</td></tr>
-            <tr><td>31/08/2024</td><td class="text-left">Se liquida pago parcial atrasado</td><td></td><td></td><td>- 501,57 €</td><td>- 300,00 €</td></tr>
-            <tr><td>01/10/2024</td><td class="text-left">Cargo comisión descubierto</td><td></td><td></td><td>- 5,58 €</td><td>- 305,58 €</td></tr>
-            <tr><td>14/12/2024</td><td class="text-left">Aportación de D. Juan</td><td>+ 553,00 €</td><td></td><td></td><td>+ 247,42 €</td></tr>
-            <tr><td>15/12/2024</td><td class="text-left">Cargo comisión descubierto</td><td></td><td></td><td>- 90,00 €</td><td>+ 157,42 €</td></tr>
-            <tr><td>01/01/2025</td><td class="text-left">Cargo comisión descubierto</td><td></td><td></td><td>- 5,57 €</td><td>+ 151,85 €</td></tr>
-            <tr><td>15/01/2025</td><td class="text-left">Aportación de D. Juan</td><td>+ 553,00 €</td><td></td><td></td><td>+ 704,85 €</td></tr>
-            <tr><td>05/02/2025</td><td class="text-left">Aportación de D. Juan</td><td>+ 553,00 €</td><td></td><td></td><td>+ 1.257,85 €</td></tr>
-            <tr><td>10/02/2025</td><td class="text-left">Pago último recibo completo</td><td></td><td></td><td>- 1.142,34 €</td><td>+ 115,51 €</td></tr>
-            <tr><td>23/06/2025</td><td class="text-left">Aportaciones de D. Juan</td><td>+ 553,00 €</td><td>+ 553,04 €</td><td></td><td>+ 1.161,55 €</td></tr>
-            <tr><td>23/06/2025</td><td class="text-left">Pago recibo completo</td><td></td><td></td><td>- 1.148,53 €</td><td>+ 13,02 €</td></tr>
-            <tr><td>25/07/2025</td><td class="text-left">Aportaciones de D. Juan</td><td>+ 553,05 €</td><td>+ 563,60 €</td><td></td><td>+ 1.129,67 €</td></tr>
-            <tr><td>25/07/2025</td><td class="text-left">Aportación de D. Juan</td><td></td><td></td><td>- 1.129,16 €</td><td>+ 0,51 €</td></tr>
-            <tr><td>03/09/2025</td><td class="text-left">Juan paga con tarjeta recibo completo (jul/ago)</td><td>1.132,43 €</td><td></td><td>- 1.132,43 €</td><td>PAGO EXTERNO</td></tr>
+            <tr><td>02.10.2023</td><td>Transferencia desde BBVA</td><td class="right">530,00</td></tr>
+            <tr><td>02.10.2023</td><td>Transferencia desde BBVA</td><td class="right">900,00</td></tr>
+            <tr><td>02.10.2023</td><td>Transferencia desde BBVA</td><td class="right">900,00</td></tr>
+            <tr><td>20.11.2023</td><td>Transferencia desde BBVA</td><td class="right">562,00</td></tr>
+            <tr><td>14.12.2023</td><td>Transferencia desde BBVA</td><td class="right">565,00</td></tr>
+            <tr><td>16.01.2024</td><td>Transferencia desde BBVA</td><td class="right">561,00</td></tr>
+            <tr><td>15.02.2024</td><td>Transferencia desde BBVA</td><td class="right">562,00</td></tr>
+            <tr><td>18.03.2024</td><td>Transferencia desde BBVA</td><td class="right">562,00</td></tr>
+            <tr><td>19.04.2024</td><td>Transferencia desde BBVA</td><td class="right">560,00</td></tr>
+            <tr><td>23.04.2024</td><td>Transferencia desde BBVA</td><td class="right">560,00</td></tr>
+            <tr><td>24.04.2024</td><td>Aportación vía Bizum (tercero)</td><td class="right">388,81</td></tr>
+            <tr><td>25.04.2024</td><td>Ingreso en ventanilla</td><td class="right">562,00</td></tr>
+            <tr><td>19.07.2024</td><td>Transferencia desde BBVA</td><td class="right">553,00</td></tr>
+            <tr><td>29.08.2024</td><td>Transferencia desde BBVA</td><td class="right">553,00</td></tr>
+            <tr><td>24.11.2024</td><td>Ingreso en ventanilla</td><td class="right">634,02</td></tr>
+            <tr><td>13.12.2024</td><td>Transferencia desde BBVA</td><td class="right">553,00</td></tr>
+            <tr><td>14.01.2025</td><td>Transferencia desde BBVA</td><td class="right">553,00</td></tr>
+            <tr><td>04.02.2025</td><td>Transferencia desde BBVA</td><td class="right">553,00</td></tr>
+            <tr><td>23.06.2025</td><td>Transferencia desde BBVA</td><td class="right">553,00</td></tr>
+            <tr><td>23.06.2025</td><td>Transferencia desde BBVA</td><td class="right">553,04</td></tr>
+            <tr><td>24.06.2025</td><td>Transferencia desde BBVA</td><td class="right">553,05</td></tr>
+            <tr><td>24.06.2025</td><td>Transferencia desde BBVA</td><td class="right">563,60</td></tr>
+            <tr><td>03.09.2025</td><td>Pago con tarjeta</td><td class="right">1.132,43</td></tr>
+            <tr><td>03.10.2025</td><td>Pago con tarjeta</td><td class="right">1.135,93</td></tr>
+            <tr class="total-row"><td colspan="2">TOTAL APORTADO POR D. JUAN RODRÍGUEZ CRESPO</td><td class="right">15.102,88 €</td></tr>
         </tbody>
-    [cite_start]</table><span class="source-ref">[cite: 813]</span>
-    <p>
-        En prueba de lo manifestado se adjuntan como <strong>doc. [cite_start]3</strong> los extractos bancarios de la cuenta IBAN ES32 2100 5284 9122 0039 0906 que acreditan todo lo detallado.<span class="source-ref">[cite: 814]</span>
-    </p>
+    </table>
 
-    <h3>QUINTO.- De la determinación de la deuda</h3>
-    [cite_start]<p>Para determinar la cantidad exacta que D. Juan Rodríguez Crespo ha pagado en exceso, se procede al siguiente cálculo:<span class="source-ref">[cite: 816]</span></p>
+    <p>En prueba de las aportaciones realizadas por el demandante se acompaña como <strong>doc. 4</strong> los justificantes de las mismas.</p>
 
-    <div class="calculation-box">
-        <h4>1. Cálculo de la Deuda Común Total</h4>
-        <div class="calc-line"><span>Pagos Hipoteca:</span> <span>14.268,24 €</span></div>
-        <div class="calc-line"><span>Comisiones Bancarias:</span> <span>169,03 €</span></div>
-        <div class="calc-line"><span>Gastos Comunes (Agua, Dip.):</span> <span>123,11 €</span></div>
-        <div class="total-line"><span>TOTAL DEUDA COMÚN:</span> <span>14.569,81 €</span></div>
+    <div class="nota-aclaratoria">
+        <p><strong>Nota aclaratoria sobre la aportación del 25 de abril de 2024 (562,00 €)</strong></p>
+        <p>En relación a dicha operación, se hace constar lo siguiente:</p>
+        <p>Dicho movimiento no dispone de justificante individual emitido por la entidad financiera, ni puede ser descargado a través de banca electrónica, según confirmación recibida por la oficina de Caixabank y por el servicio de atención en línea; habiendo solicitado mi mandante el justificante del pago. Se acompaña como <strong>doc. 5</strong> el escrito de solicitud de fecha 10 de octubre de 2025.</p>
+        <p>1- No obstante, el análisis correlativo del saldo diario de la cuenta vinculada al préstamo evidencia que el ingreso sí se produjo materialmente, toda vez que:</p>
+        <p style="margin-left: 20px;">- el saldo negativo existente con anterioridad quedó regularizado ese día,<br>
+        - el banco procedió al cobro completo del recibo hipotecario inmediatamente después,<br>
+        - y no se generó nuevo descubierto ni comisión de impago tras esa fecha.</p>
+        <p>2- De la secuencia contable se infiere, por tanto, que la aportación de 562,00 € se realizó mediante ingreso personal de Juan Rodríguez Crespo, conforme a las prácticas habituales de CaixaBank en operaciones conjuntas de este tipo.</p>
+        <p>3- En consecuencia, se mantiene dicha aportación dentro del cómputo total de las efectuadas por D. Juan Rodríguez Crespo, por constituir una operación acreditada indirectamente mediante la trazabilidad del saldo y el cargo subsiguiente del préstamo.</p>
+        <p>4- Esta consideración se realiza conforme a criterios de contabilidad y de presunción de veracidad bancaria, atendiendo a la continuidad de los asientos contables y a la inexistencia de contradicciones entre los extractos mensuales y los recibos del préstamo hipotecario.</p>
+    </div>
 
-        <h4>2. Obligación de Pago (50%)</h4>
-        <div class="calc-line"><span>Obligación Juan:</span> <span>7.284,90 €</span></div>
-        <div class="calc-line"><span>Obligación Vicenta:</span> <span>7.284,90 €</span></div>
+    <p><strong>Tabla 2: Aportaciones y disposiciones de Dña. Vicenta Jiménez Vera y determinación de su aportación neta.</strong></p>
+    <p>Esta tabla presenta el flujo neto de fondos atribuible a Dña. Vicenta, contraponiendo sus escasas aportaciones con las retiradas de efectivo que realizó para fines particulares, demostrando que su contribución efectiva fue mínima.</p>
 
-        <h4>3. Aportación Neta Realizada</h4>
-        <div class="calc-line"><span>Aportación Total de D. Juan:</span> <span>14.404,88 €</span></div>
-        <div class="calc-line"><span>Aportación Neta Dña. Vicenta:</span> <span>1.159,05 €</span></div>
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Concepto</th>
+                <th class="right">Aportaciones (€)</th>
+                <th class="right">Disposiciones (€)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>11.08.2023</td><td>Traspaso Propio</td><td class="right">562,00</td><td class="right"></td></tr>
+            <tr><td>17.08.2023</td><td>Retirada "Vicenta Jiménez V"</td><td class="right"></td><td class="right">650,00</td></tr>
+            <tr><td>02.10.2023</td><td>Traspaso Propio</td><td class="right">562,00</td><td class="right"></td></tr>
+            <tr><td>02.10.2023</td><td>Traspaso Propio</td><td class="right">562,00</td><td class="right"></td></tr>
+            <tr><td>17.10.2023</td><td>Traspaso Propio</td><td class="right">562,00</td><td class="right"></td></tr>
+            <tr><td>03.11.2023</td><td>Retirada "Matrícula Conserv"</td><td class="right"></td><td class="right">256,95</td></tr>
+            <tr><td>16.11.2023</td><td>Retirada "Futbito Guillermo"</td><td class="right"></td><td class="right">182,00</td></tr>
+            <tr class="total-row"><td colspan="2">TOTALES</td><td class="right">2.248,00</td><td class="right">1.088,95</td></tr>
+            <tr class="total-row"><td colspan="2">FLUJO NETO DE FONDOS DE DÑA. VICENTA JIMÉNEZ VERA</td><td colspan="2" class="right">+1.159,05</td></tr>
+        </tbody>
+    </table>
 
-        <h4>4. Determinación de Cantidad a Reclamar</h4>
-        <div class="calc-line"><span>Aportación Real de D. Juan:</span> <span>14.404,88 €</span></div>
-        <div class="calc-line"><span>(-) Obligación de Pago (50%):</span> <span>- 7.284,90 €</span></div>
-        <div class="total-line" style="color: #c0392b;"><span>CANTIDAD PAGADA EN EXCESO (RECLAMADA):</span> <span>7.119,98 €</span></div>
-    [cite_start]</div><span class="source-ref">[cite: 821-833]</span>
+    <p>Como se constata, si bien la demandada realizó, hace 2 años, aportaciones por valor de 2.248 euros, también dispuso de 1.088,95 euros para fines ajenos a la obligación hipotecaria. Por tanto, su aportación neta efectiva al sostenimiento de las cargas comunes fue de tan solo 1.159,05 euros.</p>
 
-    <p>
-        En definitiva, D. Juan Rodríguez Crespo ha asumido de forma continuada la obligación de pago que correspondía a Dña. [cite_start]Vicenta Jiménez Vera, abonando un total de <strong>7.119,98 €</strong> por encima del 50% de la deuda común que le era exigible.<span class="source-ref">[cite: 834, 835]</span>
-    </p>
+    <p>En prueba de lo manifestado se adjuntan como <strong>doc. 6</strong> el extracto bancario de la cuenta IBAN ES32 2100 5284 9122 0039 0906.</p>
 
-    <h3>SEXTO.- Cumplimiento requisito de procedibilidad</h3>
-    <p>
-        Que mi representado presentó solicitud de mediación en fecha 15 de abril de 2025, ante el Servicio de mediación del ICAV (asunto 89/2025), el cual finalizó porque la demandada no quiso aceptar su participación. [cite_start]Se acompaña certificado del Servicio de Mediación.<span class="source-ref">[cite: 838, 839]</span>
-    </p>
+    <h3>QUINTO.- Determinación de la deuda reclamada.</h3>
+
+    <p><strong>Tabla 3: Historial de liquidación de cuotas hipotecarias y gastos asociados</strong></p>
+    <p>Esta tabla reconstruye el coste real y total de cada cuota hipotecaria durante el período analizado, sumando al importe ordinario (capital e intereses) todos los gastos adicionales generados por el impago.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Vencimiento</th>
+                <th>Fecha Liquidación</th>
+                <th class="right">Cuota 1</th>
+                <th class="right">Cuota 2</th>
+                <th class="right">Cuota 3</th>
+                <th class="right">Total (€)</th>
+                <th class="right">Descubierto/Reclamación (€)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>18.08.2023</td><td>30.09.2023</td><td class="right">300,61</td><td class="right">825,18</td><td class="right">---</td><td class="right">1.123,50</td><td class="right">32,54+20,48</td></tr>
+            <tr><td>18.09.2023</td><td>02.10.2023</td><td class="right">1.123,50</td><td class="right">----</td><td class="right">---</td><td class="right">1.123,50</td><td class="right">30,05</td></tr>
+            <tr><td>18.10.2023</td><td>18.10.2023</td><td class="right">1.123,50</td><td class="right">---</td><td class="right">---</td><td class="right">1.123,50</td><td class="right">---</td></tr>
+            <tr><td>18.11.2023</td><td>18.11.2023</td><td class="right">300,18</td><td class="right">823,50</td><td class="right">---</td><td class="right">1.123,50</td><td class="right">---</td></tr>
+            <tr><td>18.12.2023</td><td>18.12.2023</td><td class="right">303,50</td><td class="right">820,00</td><td class="right">---</td><td class="right">1.123,50</td><td class="right">20,43</td></tr>
+            <tr><td>18.01.2024</td><td>20.04.2024</td><td class="right">265,57</td><td class="right">562,00</td><td class="right">330,45</td><td class="right">1.158,02</td><td class="right">21,11</td></tr>
+            <tr><td>18.02.2024</td><td>24.04.2024</td><td class="right">208,44</td><td class="right">560,00</td><td class="right">388,81</td><td class="right">1.157,25</td><td class="right">5,86</td></tr>
+            <tr><td>18.03.2024</td><td>18.08.2024</td><td class="right">562,00</td><td class="right">547,14</td><td class="right">51,43</td><td class="right">1.160,57</td><td class="right">---</td></tr>
+            <tr><td>18.04.2024</td><td>31.08.2024</td><td class="right">501,57</td><td class="right">634,02</td><td class="right">----</td><td class="right">1.135,59</td><td class="right">5,58+5,57</td></tr>
+            <tr><td>18.05.2024</td><td>10.02.2025</td><td class="right">1.142,34</td><td class="right">---</td><td class="right">---</td><td class="right">1.142,34</td><td class="right">---</td></tr>
+            <tr><td>18.06.2024</td><td>24.06.2025</td><td class="right">1.148,53</td><td class="right">---</td><td class="right">---</td><td class="right">1.148,53</td><td class="right">---</td></tr>
+            <tr><td>18.07.2024</td><td>24.06.2025</td><td class="right">1.129,16</td><td class="right">---</td><td class="right">---</td><td class="right">1.129,16</td><td class="right">---</td></tr>
+            <tr><td>18.08.2024</td><td>03.09.2025</td><td class="right">1.132,43</td><td class="right">---</td><td class="right">---</td><td class="right">1.132,43</td><td class="right">---</td></tr>
+            <tr><td>18.09.2024</td><td>03.10.2025</td><td class="right">1.135,92</td><td class="right">---</td><td class="right">---</td><td class="right">1.135,92</td><td class="right"></td></tr>
+            <tr class="total-row"><td colspan="5">TOTALES</td><td class="right">15.917,31</td><td class="right">141,62 €</td></tr>
+            <tr class="total-row"><td colspan="6" style="text-align:right;">TOTAL CUOTAS + COMISIONES</td><td class="right">16.058,93 €</td></tr>
+        </tbody>
+    </table>
+
+    <p>Gastos de mantenimiento de cuentas. 15/12/25 y 30/12/25: 60 y 90 € respectivamente, reseñados en doc. 6 (extracto) como "Cuota día día". Total 150 €</p>
+    <p><strong>Total suma 16.058,93 + 150 = 16.208,93 €</strong></p>
+
+    <p>A fecha de la presente demanda la última cuota liquidada es la de septiembre de 2024. En prueba de ello se acompaña cómo <strong>doc. 7</strong> los recibos del préstamo hipotecario desde agosto de 2023 hasta octubre de 2025.</p>
+
+    <p><strong>Tabla 4: Otros Gastos comunes, atribuibles a ambos titulares.</strong></p>
+    <p>Puesto que en la cuenta no hay gastos privativos, únicamente gastos comunes y atribuibles a ambos titulares, tales como el impuesto IBI del bien común, cargado a través de diputación, la factura de agua del bien común y peticiones de extractos (solicitados por Vicenta) y cuotas de mantenimiento de la cuenta, se procede a detallar dichos gastos mínimos en comparación con los cargos hipotecarios, para la completa y exacta cuadratura de todas las cifras presentes en la actual demanda.</p>
+
+    <table>
+        <tbody>
+            <tr><td>03/10/2023</td><td>DIPUTACIÓN</td><td class="right">25,00</td></tr>
+            <tr><td>01/10/2023</td><td>AGUA</td><td class="right">98,11</td></tr>
+            <tr><td>11/01/2024</td><td>EXTRACTO</td><td class="right">1,00</td></tr>
+            <tr><td>11/01/2024</td><td>EXTRACTO</td><td class="right">16,00</td></tr>
+            <tr class="total-row"><td colspan="2">TOTAL</td><td class="right">140,11</td></tr>
+        </tbody>
+    </table>
+
+    <p><strong>Esta cantidad no es tenida en cuenta para el cálculo</strong></p>
+
+    <p><strong>Cálculo del exceso de aportación de D. Juan Rodríguez Crespo</strong></p>
+
+    <p>Para determinar la cantidad exacta que D. Juan Rodríguez Crespo ha pagado en exceso de su obligación hipotecaria, se realiza el siguiente cálculo, basado en los extractos y recibos oficiales de CaixaBank y en las aportaciones efectivamente realizadas por cada cotitular.</p>
+
+    <p><strong>Paso 1. Cálculo de la obligación total conjunta</strong></p>
+    <p>Se suman todos los cargos que benefician a ambas partes durante el período analizado, comprendido entre agosto de 2023 y octubre de 2025:</p>
+    <p>Cuotas hipotecarias y comisiones asociadas: <strong>16.208,93 €</strong></p>
+
+    <p><strong>Paso 2. Determinación de la obligación individual (50%)</strong></p>
+    <p>Dado que ambos titulares figuran como cotitulares solidarios del préstamo, la obligación se distribuye por partes iguales:</p>
+    <p>16.208,93 € ÷ 2 = <strong>8.104,46 €</strong></p>
+    <p>Cada titular debía aportar 8.104,46 € durante el periodo analizado.</p>
+
+    <p><strong>Paso 3. Cálculo del saldo de cada cotitular</strong></p>
+
+    <p><em>Dña. Vicenta Jiménez Vera</em></p>
+    <table>
+        <tbody>
+            <tr><td>Obligación del 50%</td><td class="right">8.104,46 €</td></tr>
+            <tr><td>Aportación neta efectiva (Anexo 2)</td><td class="right">-1.159,05 €</td></tr>
+            <tr class="total-row"><td>Déficit de aportación de Vicenta</td><td class="right">-6.945,41 €</td></tr>
+        </tbody>
+    </table>
+
+    <p><em>D. Juan Rodríguez Crespo</em></p>
+    <table>
+        <tbody>
+            <tr><td>Total aportado según Anexo 1</td><td class="right">15.102,88 €</td></tr>
+            <tr><td>Obligación del 50%</td><td class="right">-8.104,46 €</td></tr>
+            <tr class="total-row"><td>Exceso de aportación de Juan</td><td class="right">+6.998,42 €</td></tr>
+        </tbody>
+    </table>
+
+    <p><strong>Paso 4. Conclusión del cálculo</strong></p>
+    <p>Del análisis contable efectuado y acreditado documentalmente, se desprende que D. Juan Rodríguez Crespo ha asumido en solitario la carga económica del préstamo, realizando aportaciones por 15.102,88 €, frente a las 1.159,05 € aportadas por Dña. Vicenta Jiménez Vera.</p>
+
+    <p>De ello resulta un exceso de aportación de 6.998,42 € por parte del Sr. Rodríguez, que ha servido para cubrir el déficit de -6.945,41 € de la Sra. Jiménez, compensando la totalidad de su falta de contribución.</p>
+
+    <p>La pequeña diferencia entre el exceso aportado por el Sr. Rodríguez de 6.998,42 y el defecto de la Sra. Jiménez de 6.945,41, se corresponde con los recibos cargados de titularidad conjunta, pequeños redondeos y comisiones de servicio aplicadas por la entidad bancaria en distintos momentos del período, sin relevancia económica material.</p>
+
+    <p>En consecuencia, <strong>se reclama la cantidad más prudente y favorable a la demandada, fijando la cuantía objeto de demanda en 6.945,41 € (seis mil novecientos cuarenta y cinco euros con cuarenta y un céntimos)</strong>, más los intereses legales y las costas procesales.</p>
+
+    <p>Otra prueba de buena fe y de la voluntad de simplificar el proceso por parte del actor, es que ha sufragado también los costes generados por el incumplimiento contractual de la demandada, en particular los intereses de demora, comisiones de mantenimiento y reclamaciones bancarias, que no habrían existido de haber cumplido la demandada su obligación de pago del 50% de las cuotas mensuales.</p>
+
+    <p>La demandada fue requerida por el demandante mediante burofax, de fecha 10 de enero de 2024, y también por la entidad bancaria en varias ocasiones para que regularice los pagos no satisfechos del contrato, entre otras mediante comunicaciones de fecha y 5 de septiembre de 2024 y 13 de marzo de 2025, haciendo caso omiso a todo ello y generando una deuda constante en claro perjuicio al actor. En prueba de lo manifestado se acompaña como <strong>doc. 8</strong> el citado burofax y las dos comunicaciones remitidas por la entidad bancaria a la demandada.</p>
+
+    <p><strong>Por todo lo expuesto, se solicita que se estime íntegramente la presente demanda y que se condene a Dña. Vicenta Jiménez Vera al reembolso a mi representado de la cantidad de 6.945,41 €, más intereses legales y costas.</strong></p>
+
+    <h3>SEXTO.- Cumplimiento del requisito de procedibilidad.</h3>
+
+    <p>Que mi representado presentó solicitud de mediación en fecha 15 de abril de 2025, ante el Servicio de mediación del ICAV, que dio lugar al asunto 89/2025, el cual finalizó sin acuerdo porque la demandada no quiso aceptar su participación en el mismo.</p>
+
+    <p>Se acompaña como <strong>doc. 9</strong> el certificado del Servicio de Mediación del ICAV de fecha 25 de mayo de 2025.</p>
 
     <h2>FUNDAMENTOS DE DERECHO</h2>
 
-    <p><strong>I. [cite_start]Jurisdicción y Competencia:</strong> Corresponde a los Juzgados de Primera Instancia (Arts. 9 y 36 LOPJ) y al del domicilio de la demandada (Art. 52.1.7ª LEC).<span class="source-ref">[cite: 842, 843]</span></p>
-    <p><strong>II. Capacidad y Legitimación:</strong> Conforme a los arts. 6 y 7 LEC. [cite_start]Legitimación activa del acreedor y pasiva de la deudora solidaria.<span class="source-ref">[cite: 845-847]</span></p>
-    <p><strong>III. [cite_start]Procedimiento:</strong> Juicio Verbal (Art. 250.2 y 437 LEC).<span class="source-ref">[cite: 849]</span></p>
-    <p><strong>IV. [cite_start]Procedibilidad:</strong> Ley Orgánica 1/2025 (MASC).<span class="source-ref">[cite: 851]</span></p>
-    
-    <p><strong>V. Obligación contractual y solidaridad:</strong> Art. [cite_start]1091 y 1145 del Código Civil.<span class="source-ref">[cite: 853, 854]</span></p>
-    <div class="jurisprudence">
-        [cite_start]<p>Audiencia Provincial la Coruña, sentencia de 14.10.2013: «...reclama de sus codeudores.»<span class="source-ref">[cite: 857-859]</span></p>
-        [cite_start]<p>Audiencia Provincial de Valencia, sentencia de 30.12.2014: «...con derecho al cobro de la mitad del importe de aquella.»<span class="source-ref">[cite: 860-862]</span></p>
+    <p><strong>I. Jurisdicción y Competencia</strong></p>
+    <p>-Corresponde a los Juzgados de Primera Instancia, conforme a los artículos 9 y 36 de la Ley Orgánica del Poder Judicial (LOPJ).</p>
+    <p>-La competencia territorial corresponde al Juzgado del domicilio de la demandada, según el artículo 52.1.7ª de la Ley de Enjuiciamiento Civil (LEC).</p>
+
+    <p><strong>II. Capacidad y Legitimación</strong></p>
+    <p>-Las partes ostentan capacidad para ser parte y para comparecer en juicio conforme a los artículos 6 y 7 LEC.</p>
+    <p>-La legitimación activa corresponde al demandante como acreedor de las cantidades reclamadas, por el incumplimiento contractual de la demandada.</p>
+    <p>-La legitimación pasiva a la demandada como deudora de las obligaciones contraídas solidariamente.</p>
+
+    <p><strong>III. Procedimiento</strong></p>
+    <p>El presente procedimiento se sustanciará por los trámites del Juicio Verbal, conforme a los artículos 250.2 y 437 y ss. de la LEC</p>
+
+    <p><strong>IV. Cuantía de la demanda</strong></p>
+    <p>La cuantía de la demanda a los efectos de lo dispuesto en el art. 253.1 de la LEC es la de 6.945,41 euros (seis mil novecientos cuarenta y cinco euros con cuarenta y un céntimos) en aplicación de la regla 1ª del art. 251 de la LEC, según la cual si se reclama una cantidad de dinero determinada, la cuantía de la demanda estará representada por dicha cantidad.</p>
+    <p>De ahí la preceptiva representación por procurador y la defensa por abogado, conforme a los arts. 23.2.1º y 31.2.1º de la LEC.</p>
+
+    <p><strong>V. Procedibilidad</strong></p>
+    <p>La Ley Orgánica 1/2025, de 2 de enero, de medidas en materia de eficiencia del Servicio Público de Justicia dedica su TÍTULO II (Medidas en materia de eficiencia procesal), CAPÍTULO I a los Medios adecuados de solución de controversias en vía no jurisdiccional (MASC) (artículos 2- 19).</p>
+
+    <p><strong>VI. Obligación contractual y solidaridad en el préstamo hipotecario</strong></p>
+
+    <ul>
+        <li><strong>Artículo 1091 del Código Civil (CC):</strong> "Las obligaciones que nacen de los contratos tienen fuerza de ley entre las partes y deben cumplirse a tenor de los mismos".</li>
+        <li><strong>Artículo 1145 CC:</strong> "El pago hecho por uno de los deudores solidarios extingue la obligación. El que pagó sólo puede reclamar de sus codeudores la parte que a cada uno corresponda, con los intereses del anticipo". En este caso, del pago de las cuotas del préstamo hipotecario nace el derecho de repetición de mi mandante respecto a la parte de la deuda por él satisfecha que correspondía a la demandada.</li>
+    </ul>
+
+    <p>La jurisprudencia es unánime al respecto, como establecen, entre otras, la Sentencia de la Audiencia Provincial de La Coruña de 14.10.2013 y la Sentencia de la Audiencia Provincial de Valencia de 30.12.2014, que reconocen el derecho de regreso del deudor solidario que pagó al acreedor para reclamar de sus codeudores.</p>
+
+    <p>Al respecto, Audiencia Provincial la Coruña, sentencia de 14.10.2013: «… Ello fundamenta la pretensión ejercitada por D. Doroteo y estimada por la sentencia que ahora se combate en esta apelación de reclamar contra Dª Teodora la mitad de lo que él pago en exclusiva del préstamo hipotecario suscrito para la adquisición de la vivienda, más una amortización por importe de 4.191,96 euros, bien se contemple desde la perspectiva del art. 395, en relación con el art. 393 Código Civil, como acción de regreso del copropietario que abonó gastos que habían de repartirse entre todos los comuneros, bien, incluso, con base en el art. 1145.2º como la propia del deudor solidario que pagó al acreedor y reclama de sus codeudores.»</p>
+
+    <p>Audiencia Provincial de Valencia, sentencia de 30.12.2014: «ya que las cuotas pagadas por el demandante extinta la relación «more uxorio», generan en aquél un crédito frente a la comunidad, en base al art. 393 del Código Civil, y frente a la demandada, por haber suscrito conjuntamente el préstamo, con derecho al cobro de la mitad del importe de aquella (artículo 1145 C.C).»</p>
+
+    <p>- Art. 1108 Código Civil: " Si la obligación consistiere en el pago de una cantidad de dinero, y el deudor incurriere en mora, la indemnización de daños y perjuicios, no habiendo pacto en contrario, consistirá en el pago de los intereses convenidos, y a falta de convenio, en el interés legal".</p>
+
+    <p><strong>VII. Costas, mala fe y abuso de derecho.</strong></p>
+
+    <ul>
+        <li><strong>Artículo 7 CC:</strong> "Los derechos deberán ejercitarse conforme a las exigencias de la buena fe". La negativa de la demandada a participar en la mediación y su incumplimiento reiterado en el pago de la obligación, incluso haciendo caso omiso al ser requerida para ello, constituyen un ejercicio de mala fe y abuso de derecho.</li>
+        <li>La mala fe y el abuso de derecho de la demandada quedan acreditados no solo por su incumplimiento reiterado, sino por el patrón de descapitalización deliberada de la cuenta común detallado en el HECHO TERCERO, y por la instrumentalización de la situación de vulnerabilidad patrimonial del demandante, cuya vivienda privativa constituye la única garantía del préstamo, tal y como se ha expuesto en el HECHO PRIMERO.</li>
+        <li><strong>Artículo 394 LEC:</strong> Conforme al principio de vencimiento objetivo, las costas deben ser impuestas a la parte demandada.</li>
+    </ul>
+
+    <p>Por lo expuesto,</p>
+
+    <div class="suplico-box">
+        <p><strong>SUPLICO AL JUZGADO</strong> que, tenga por presentado este escrito con sus documentos y copias, teniéndome por comparecido y parte en la representación que ostento, y ordenando se entiendan conmigo las sucesivas actuaciones; se sirva admitir a trámite la demanda de juicio verbal sobre reclamación de cantidad contra Dña. Vicenta Jiménez Vera, acuerde dar traslado a la demandada para que comparezca y conteste y, previos los trámites legales oportunos, dicte sentencia por la que acuerde condenar a la demandada a abonar a mi representado la cantidad de <strong>6.945,41 € (seis mil novecientos cuarenta y cinco euros con cuarenta y un céntimos)</strong> más intereses legales y con expresa imposición de las costas procesales a la parte demandada.</p>
     </div>
 
-    <p><strong>VI. COSTAS:</strong> Art. 394 LEC. [cite_start]La negativa a la mediación y el incumplimiento reiterado constituyen mala fe (Art. 7 CC).<span class="source-ref">[cite: 864-866]</span></p>
-
-    <div class="suplico">
-        <h3>SUPLICO AL JUZGADO</h3>
-        <p>
-            [cite_start]Que, teniendo por presentado este escrito con sus copias y documentos adjuntos, se sirva admitirlo y, previos los trámites legales oportunos, dicte en su día sentencia por la que acuerde condenar a la demandada a abonar al demandante la cantidad de <strong>7.119,98 €</strong>, correspondiente al 50% de las cuotas hipotecarias satisfechas por el demandante desde octubre de 2023 hasta la fecha, más los intereses legales devengados desde cada fecha de incumplimiento hasta su completo pago y al pago de las costas procesales.<span class="source-ref">[cite: 868]</span>
-        </p>
-        <p>
-            [cite_start]<strong>OTROSÍ DIGO:</strong> Que dirija atento oficio a la entidad Caixabank oficina 5284 sita en Calle Blasco Ibáñez nº 21-bajo de Aldaya, a fin de que aporte a los autos los burofaxes y comunicaciones enviadas a la demandada por impago de las cuotas hipotecarias.<span class="source-ref">[cite: 869]</span>
-        </p>
-        [cite_start]<p><strong>SUPLICO AL JUZGADO</strong> que acuerde conforme a lo interesado.<span class="source-ref">[cite: 870]</span></p>
+    <div class="otrosi">
+        <p><strong>OTROSÍ DIGO:</strong> Que, para el completo esclarecimiento de los hechos, se interesa que se dirija atento oficio a la entidad Caixabank, S.A., oficina 5284 sita en Calle Blasco Ibáñez nº 21-bajo de Aldaia, a fin de que aporte a los autos el justificante del ingreso realizado por mi representado de fecha 25 de abril de 2024 por importe de 562 euros.</p>
+        <p><strong>SUPLICO AL JUZGADO</strong> que acuerde conforme a lo interesado.</p>
     </div>
 
-    <div class="date-sign">
-        [cite_start]<p>Es justicia que pido en Valencia, a 24 de septiembre de 2025</p><span class="source-ref">[cite: 871]</span>
+    <div class="date-place">Es justicia que pido en Valencia, a 13 de octubre de 2025.</div>
+
+    <div class="signature">
+        <p>Fdo. Rosa Calvo Barber</p>
+        <p>Procuradora</p>
     </div>
 
 </div>
