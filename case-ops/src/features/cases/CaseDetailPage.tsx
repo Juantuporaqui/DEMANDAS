@@ -48,6 +48,7 @@ import CaseTimelineBase from './CaseTimelineBase';
 import { MislataTimeline } from './MislataTimeline';
 import { QuartTimeline } from './QuartTimeline';
 import { TabAudienciaPreviaPicassent } from './tabs/TabAudienciaPreviaPicassent';
+import { TabDefensa360Quart } from './tabs/TabDefensa360Quart';
 import { TabEscenarios } from './tabs/TabEscenarios';
 import Badge from '../../ui/components/Badge';
 import {
@@ -540,6 +541,7 @@ function TabDocs({ documents, caseId, caseData }: any) {
           { id: 'demanda-ejecucion-quart', label: 'Demanda Ejecución (Vicenta)', icon: '📜', color: 'amber' },
           { id: 'oposicion-quart', label: 'Nuestra Oposición', icon: '🛡️', color: 'emerald' },
           { id: 'impugnacion-quart', label: 'Impugnación (Vicenta)', icon: '🚨', color: 'rose' },
+          { id: 'providencia-quart', label: 'Providencia y vista', icon: '🗓️', color: 'blue' },
           { id: 'argumentos-quart', label: 'Argumentos y Riesgos', icon: '⚔️', color: 'violet' },
         ]
       : []),
@@ -1630,6 +1632,7 @@ export function CaseDetailPage() {
               { id: 'cronologia', label: '🕒 Cronología', shortLabel: '🕒' },
               { id: 'estrategia', label: '♟️ Estrategia (Matriz)', shortLabel: '♟️' },
               ...(isPicassent ? [{ id: 'audiencia', label: '⚖️ Sala (AP)', shortLabel: '⚖️' }] : []),
+              ...(isQuart ? [{ id: 'defensa360', label: '🛡️ Defensa 360', shortLabel: '🛡️' }] : []),
               { id: 'escenarios', label: '🧠 Escenarios (Grafo)', shortLabel: '🧠' },
               { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
               { id: 'docs', label: '📂 Documentos', shortLabel: '📂' },
@@ -1653,6 +1656,8 @@ export function CaseDetailPage() {
                           ? 'Estr.'
                           : tab.id === 'audiencia'
                             ? 'Aud.'
+                            : tab.id === 'defensa360'
+                              ? 'D360'
                             : tab.id === 'escenarios'
                               ? 'Esc.'
                               : 'Docs'}
@@ -1796,6 +1801,7 @@ export function CaseDetailPage() {
           </div>
         )}
         {activeTab === 'audiencia' && isPicassent && <TabAudienciaPreviaPicassent caseId={id!} isReadMode={isReadMode} />}
+        {activeTab === 'defensa360' && isQuart && <TabDefensa360Quart />}
         {activeTab === 'escenarios' && (
           <TabEscenarios caseId={currentCase.id} facts={facts} partidas={partidas} documents={docs} />
         )}
