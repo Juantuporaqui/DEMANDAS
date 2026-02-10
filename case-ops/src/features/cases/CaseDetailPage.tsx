@@ -49,10 +49,11 @@ import { MislataTimeline } from './MislataTimeline';
 import { QuartTimeline } from './QuartTimeline';
 import { TabAudienciaPreviaPicassent } from './tabs/TabAudienciaPreviaPicassent';
 import { TabDefensa360Quart } from './tabs/TabDefensa360Quart';
+import { TabDefensa360Mislata } from './tabs/TabDefensa360Mislata';
 import { TabEscenarios } from './tabs/TabEscenarios';
 import Badge from '../../ui/components/Badge';
 import {
-  estrategiaPicassent,
+  getEstrategiaPorProcedimiento,
   type LineaEstrategica,
   type TipoEstrategia,
   type Prioridad,
@@ -231,6 +232,17 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
             >
               🛡️ Ver contestación
             </a>
+            {isMislata && (
+              <>
+                <a href={`${docsBasePath}/demanda-juicio-verbal-reclamacion-cantidad.html`} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40">⚔️ Demanda JV</a>
+                <a href={`${docsBasePath}/recurso-reposicion.html`} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40">🧾 Reposición</a>
+                <a href={`${docsBasePath}/escrito-impugnacion.html`} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40">🗂️ Impugnación</a>
+                <a href={`${docsBasePath}/contestacion-demanda.html`} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40">🛡️ Contestación</a>
+                <a href={`${docsBasePath}/alegaciones-impugnacion.html`} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40">📝 Alegaciones</a>
+                <a href={`${docsBasePath}/solicitud-prueba.html`} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40">📚 Solicitud prueba</a>
+                <a href={`${docsBasePath}/contra-prueba.html`} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 hover:border-emerald-400/40">🔬 Contra-prueba</a>
+              </>
+            )}
             {isQuart && (
               <a
                 href={`${docsBasePath}/impugnacion.html`}
@@ -939,11 +951,13 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
 
 function TabEstrategia({ strategies, caseId }: any) {
   const isPicassent = caseId?.includes('picassent') || caseId === 'CAS001';
+  const isMislata = caseId?.includes('mislata');
+  const isQuart = caseId?.includes('quart');
   const caseLabel = isPicassent
     ? 'PICASSENT'
-    : caseId?.includes('mislata')
+    : isMislata
     ? 'MISLATA'
-    : caseId?.includes('quart')
+    : isQuart
     ? 'QUART'
     : 'CASO';
   const returnTo = `/cases/${caseId}?tab=estrategia`;
@@ -955,7 +969,9 @@ function TabEstrategia({ strategies, caseId }: any) {
 
   const normalizedStrategies = Array.isArray(strategies) ? strategies : [];
 
-  const filteredLineas = estrategiaPicassent.filter((linea) => {
+  const estrategiaDataset = isPicassent ? getEstrategiaPorProcedimiento('picassent') : isMislata ? getEstrategiaPorProcedimiento('mislata') : [];
+
+  const filteredLineas = estrategiaDataset.filter((linea) => {
     const query = lineaSearch.trim().toLowerCase();
     const searchBlob = [
       linea.titulo,
@@ -1058,7 +1074,7 @@ function TabEstrategia({ strategies, caseId }: any) {
         </div>
       </div>
 
-      {isPicassent && (
+      {!isQuart && (
         <>
           <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4 print-surface">
             <div className="flex items-center justify-between mb-4">
@@ -1199,7 +1215,7 @@ function TabEstrategia({ strategies, caseId }: any) {
           <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <div>
-                <h4 className="text-sm font-semibold text-white">Matriz estratégica (Picassent)</h4>
+                <h4 className="text-sm font-semibold text-white">Matriz estratégica ({caseLabel})</h4>
                 <p className="text-xs text-slate-400">Líneas de defensa, ataques, réplicas y preguntas.</p>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
@@ -1308,6 +1324,13 @@ function TabEstrategia({ strategies, caseId }: any) {
             </div>
           </div>
         </>
+      )}
+
+      {isQuart && (
+        <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
+          <h4 className="text-sm font-semibold text-white">Defensa 360 / Escenarios</h4>
+          <p className="mt-2 text-xs text-slate-400">Este caso se gestiona en la pestaña “Defensa 360” y en “Escenarios”. La matriz estratégica no aplica para Quart.</p>
+        </div>
       )}
 
       {/* Tarjetas de sala (War Room) — bloque minimal */}
@@ -1632,6 +1655,7 @@ export function CaseDetailPage() {
               { id: 'cronologia', label: '🕒 Cronología', shortLabel: '🕒' },
               { id: 'estrategia', label: '♟️ Estrategia (Matriz)', shortLabel: '♟️' },
               ...(isPicassent ? [{ id: 'audiencia', label: '⚖️ Sala (AP)', shortLabel: '⚖️' }] : []),
+              ...(isMislata ? [{ id: 'defensa1145', label: '🛡️ Defensa 1145', shortLabel: '🛡️' }] : []),
               ...(isQuart ? [{ id: 'defensa360', label: '🛡️ Defensa 360', shortLabel: '🛡️' }] : []),
               { id: 'escenarios', label: '🧠 Escenarios (Grafo)', shortLabel: '🧠' },
               { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
@@ -1656,8 +1680,10 @@ export function CaseDetailPage() {
                           ? 'Estr.'
                           : tab.id === 'audiencia'
                             ? 'Aud.'
-                            : tab.id === 'defensa360'
-                              ? 'D360'
+                            : tab.id === 'defensa1145'
+                              ? 'D1145'
+                              : tab.id === 'defensa360'
+                                ? 'D360'
                             : tab.id === 'escenarios'
                               ? 'Esc.'
                               : 'Docs'}
@@ -1802,6 +1828,7 @@ export function CaseDetailPage() {
         )}
         {activeTab === 'audiencia' && isPicassent && <TabAudienciaPreviaPicassent caseId={id!} isReadMode={isReadMode} />}
         {activeTab === 'defensa360' && isQuart && <TabDefensa360Quart />}
+        {activeTab === 'defensa1145' && isMislata && <TabDefensa360Mislata />}
         {activeTab === 'escenarios' && (
           <TabEscenarios caseId={currentCase.id} facts={facts} partidas={partidas} documents={docs} />
         )}

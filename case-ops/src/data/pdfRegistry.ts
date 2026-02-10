@@ -81,10 +81,9 @@ export const pdfsPicassent: PDFDocument[] = [
 export const pdfsMislata: PDFDocument[] = [
   pdf('Doc_02_RecursoReposicion.pdf', 'Recurso de reposición', 'escrito'),
   pdf('Doc_03_Impugnacion.pdf', 'Impugnación', 'escrito'),
-  pdf('Doc_04_ContestacionDemanda.pdf', 'Contestación a la demanda', 'contestacion'),
   pdf('Doc_06_AlegacionesImpugnacion.pdf', 'Alegaciones a la impugnación', 'escrito'),
   pdf('Doc_07_ContrPrueba.pdf', 'Contradicción / impugnación de prueba', 'prueba'),
-  pdf('Doc_08_SolPrueva.pdf', 'Solicitud de prueba', 'prueba'),
+  pdf('Doc_08_SolPrueba.pdf', 'Solicitud de prueba', 'prueba'),
 ];
 
 // ============================================
