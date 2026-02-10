@@ -52,6 +52,7 @@ import { TabEscenarios } from './tabs/TabEscenarios';
 import Badge from '../../ui/components/Badge';
 import {
   estrategiaPicassent,
+  estrategiaMislata,
   type LineaEstrategica,
   type TipoEstrategia,
   type Prioridad,
@@ -894,8 +895,12 @@ function TabEstrategia({ strategies, caseId, caseKey }: { strategies: Strategy[]
   const [selectedLinea, setSelectedLinea] = useState<LineaEstrategica | null>(null);
 
   const normalizedStrategies = Array.isArray(strategies) ? strategies : [];
+  const estrategiaBase =
+    caseKey === 'mislata' || caseKey === 'quart'
+      ? estrategiaMislata
+      : estrategiaPicassent;
 
-  const filteredLineas = estrategiaPicassent.filter((linea) => {
+  const filteredLineas = estrategiaBase.filter((linea) => {
     const query = lineaSearch.trim().toLowerCase();
     const searchBlob = [
       linea.titulo,
@@ -999,8 +1004,7 @@ function TabEstrategia({ strategies, caseId, caseKey }: { strategies: Strategy[]
       </div>
 
       {isPicassent && (
-        <>
-          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4 print-surface">
+        <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4 print-surface">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h4 className="text-sm font-semibold text-white">Analíticas (trabajo previo)</h4>
@@ -1135,11 +1139,12 @@ function TabEstrategia({ strategies, caseId, caseKey }: { strategies: Strategy[]
               </Link>
             </div>
           </div>
+        )}
 
-          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
+      <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <div>
-                <h4 className="text-sm font-semibold text-white">Matriz estratégica (Picassent)</h4>
+                <h4 className="text-sm font-semibold text-white">Matriz estratégica ({caseLabel})</h4>
                 <p className="text-xs text-slate-400">Líneas de defensa, ataques, réplicas y preguntas.</p>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
@@ -1247,8 +1252,6 @@ function TabEstrategia({ strategies, caseId, caseKey }: { strategies: Strategy[]
               )}
             </div>
           </div>
-        </>
-      )}
 
       {/* Tarjetas de sala (War Room) — bloque minimal */}
       <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
