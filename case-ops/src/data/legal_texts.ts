@@ -325,6 +325,26 @@ tienen NATURALEZA ALIMENTICIA:
 juzgado califica los 200€/mes como "alimentos" en sentido estricto.
   `,
 
+  'providencia-quart': `
+═══════════════════════════════════════════════════════════════════════════════
+                    PROVIDENCIA DE SEÑALAMIENTO DE VISTA
+                    PIEZA DE OPOSICIÓN ETJ 1428.1/2025
+═══════════════════════════════════════════════════════════════════════════════
+
+ÓRGANO: Juzgado de Primera Instancia nº 1 de Quart de Poblet
+FECHA PROVIDENCIA: ${procedimientoQuart.piezaOposicion.providenciaVista}
+VISTA SEÑALADA: ${procedimientoQuart.piezaOposicion.fechaVista}
+HORA: ${procedimientoQuart.piezaOposicion.horaVista}
+
+La resolución acuerda la celebración de vista en la pieza de oposición y
+ordena su notificación a las partes personadas para su comparecencia.
+
+Utilidad táctica:
+• Encauza el calendario procesal de la oposición.
+• Permite ordenar prueba documental para depuración de cuantía.
+• Delimita el momento oral para insistir en el carril tasado del art. 556 LEC.
+  `,
+
   'argumentos-quart': `
 ═══════════════════════════════════════════════════════════════════════════════
                     ARGUMENTOS Y ANÁLISIS DE RIESGOS
