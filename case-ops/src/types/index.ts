@@ -136,7 +136,6 @@ export interface Counter {
 
 export interface Case {
   id: string; // CAS001
-  caseKey: string; // picassent | mislata | quart
   title: string;
   court: string;
   autosNumber: string;
@@ -300,32 +299,6 @@ export interface Strategy {
   evidencePlan: string;
   questions: string;
   tags: string[];
-  createdAt: number;
-  updatedAt: number;
-}
-
-export interface ScenarioBrief {
-  id: string; // SB001
-  caseId: string;
-  tipo: 'favorable' | 'neutral' | 'hostil';
-  titulo: string;
-  mensaje60s: string;
-  puntosAClavar: string[];
-  queConceder: string[];
-  planB: string[];
-  documentosDeMano: string[];
-  createdAt: number;
-  updatedAt: number;
-}
-
-export interface ScenarioRefutation {
-  id: string; // SR001
-  caseId: string;
-  alegacion: string;
-  prueba: string;
-  documentId?: string;
-  documentTitle?: string;
-  page?: number;
   createdAt: number;
   updatedAt: number;
 }

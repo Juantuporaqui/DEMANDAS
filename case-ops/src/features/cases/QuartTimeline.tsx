@@ -2,10 +2,9 @@ import { timelineQuart } from '../../data/quart/timeline';
 import CaseTimelineBase, { type CaseTimelineItem } from './CaseTimelineBase';
 
 export function QuartTimeline() {
-  const items: CaseTimelineItem[] = timelineQuart.map((evento, index) => ({
+  const items: CaseTimelineItem[] = timelineQuart.map((evento) => ({
     id: evento.id,
     fecha: evento.fecha,
-    order: index,
     tipo: evento.tipo,
     titulo: evento.titulo,
     descripcion: evento.descripcion,

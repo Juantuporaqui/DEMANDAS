@@ -52,10 +52,23 @@ function isValidCaseKey(value: string | null): value is CaseKey {
   return value === 'picassent' || value === 'mislata' || value === 'quart';
 }
 
+function coerceToCaseKey(
+  param: string | null,
+  caseIds: Record<CaseKey, string>,
+): CaseKey | null {
+  if (!param) return null;
+  if (isValidCaseKey(param)) return param;
+  const match = (Object.keys(caseIds) as CaseKey[]).find(
+    (k) => caseIds[k] === param,
+  );
+  return match ?? null;
+}
+
 function getInitialCase(): CaseKey {
   const params = new URLSearchParams(window.location.search);
-  const paramRaw = params.get('caseKey') ?? params.get('caseId');
-  if (isValidCaseKey(paramRaw)) return paramRaw;
+  const paramRaw = params.get('caseId');
+  const key = coerceToCaseKey(paramRaw, FALLBACK_CASE_IDS);
+  if (key) return key;
   const stored = window.localStorage.getItem(STORAGE_KEY);
   if (isValidCaseKey(stored)) {
     return stored;
@@ -82,11 +95,7 @@ function formatRelativeDate(dateStr: string | undefined): string {
 
 export function WarRoomPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [strategiesByCase, setStrategiesByCase] = useState<Record<CaseKey, Strategy[]>>({
-    picassent: [],
-    mislata: [],
-    quart: [],
-  });
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [activeCase, setActiveCase] = useState<CaseKey>(getInitialCase);
@@ -95,26 +104,22 @@ export function WarRoomPage() {
   const latestSearchParamsRef = useRef(searchParams);
 
   useEffect(() => {
-    let mounted = true;
-    const requestedKey = searchParams.get('caseKey');
-    if (isValidCaseKey(requestedKey)) {
-      setActiveCase((prev) => (prev !== requestedKey ? requestedKey : prev));
-      return;
+    strategiesRepo.getAll().then((data) => {
+      setStrategies(data);
+      setLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    const requestedRaw = searchParams.get('caseId');
+    const requested = coerceToCaseKey(requestedRaw, caseIds);
+    if (!requested) return;
+    setActiveCase((prev) => (prev !== requested ? requested : prev));
+    // Normalize URL if the raw param was a real caseId (not a key)
+    if (requestedRaw && !isValidCaseKey(requestedRaw) && requested) {
+      setSearchParams({ caseId: requested }, { replace: true });
     }
-    const requestedId = searchParams.get('caseId');
-    if (!requestedId) return;
-    casesRepo.getById(requestedId).then((caseData) => {
-      if (!mounted) return;
-      const key = caseData?.caseKey;
-      if (isValidCaseKey(key)) {
-        setActiveCase((prev) => (prev !== key ? key : prev));
-        setSearchParams({ caseKey: key }, { replace: true });
-      }
-    }).catch(console.error);
-    return () => {
-      mounted = false;
-    };
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, caseIds, setSearchParams]);
 
   useEffect(() => {
     latestSearchParamsRef.current = searchParams;
@@ -123,16 +128,15 @@ export function WarRoomPage() {
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, activeCase);
     const params = latestSearchParamsRef.current;
-    const current = params.get('caseKey');
+    const current = params.get('caseId');
     if (current === activeCase) return;
     const nextParams = new URLSearchParams(params);
-    const hasExtraParams = Array.from(nextParams.keys()).some((key) => key !== 'caseKey');
+    const hasExtraParams = Array.from(nextParams.keys()).some((key) => key !== 'caseId');
     if (hasExtraParams) {
-      nextParams.set('caseKey', activeCase);
-      nextParams.delete('caseId');
+      nextParams.set('caseId', activeCase);
       setSearchParams(nextParams, { replace: true });
     } else {
-      setSearchParams({ caseKey: activeCase }, { replace: true });
+      setSearchParams({ caseId: activeCase }, { replace: true });
     }
   }, [activeCase, setSearchParams]);
 
@@ -144,10 +148,10 @@ export function WarRoomPage() {
         if (!mounted) return;
         const next = { ...FALLBACK_CASE_IDS };
         cases.forEach((caseItem) => {
-          if (!caseItem.caseKey) return;
-          if (caseItem.caseKey === 'picassent') next.picassent = caseItem.id;
-          if (caseItem.caseKey === 'mislata') next.mislata = caseItem.id;
-          if (caseItem.caseKey === 'quart') next.quart = caseItem.id;
+          const haystack = `${caseItem.id} ${caseItem.title ?? ''} ${caseItem.autosNumber ?? ''} ${caseItem.court ?? ''}`.toLowerCase();
+          if (haystack.includes('picassent')) next.picassent = caseItem.id;
+          if (haystack.includes('mislata')) next.mislata = caseItem.id;
+          if (haystack.includes('quart')) next.quart = caseItem.id;
         });
         setCaseIds(next);
       })
@@ -159,32 +163,9 @@ export function WarRoomPage() {
     };
   }, []);
 
-  useEffect(() => {
-    let mounted = true;
-    const loadStrategies = async () => {
-      const entries = await Promise.all(
-        (Object.keys(caseIds) as CaseKey[]).map(async (key) => {
-          const data = await strategiesRepo.getByCaseId(caseIds[key]);
-          return [key, data] as const;
-        })
-      );
-      if (!mounted) return;
-      setStrategiesByCase({
-        picassent: entries.find(([key]) => key === 'picassent')?.[1] ?? [],
-        mislata: entries.find(([key]) => key === 'mislata')?.[1] ?? [],
-        quart: entries.find(([key]) => key === 'quart')?.[1] ?? [],
-      });
-      setLoading(false);
-    };
-    loadStrategies().catch(console.error);
-    return () => {
-      mounted = false;
-    };
-  }, [caseIds]);
-
   const customStrategies = useMemo(() => {
-    return strategiesByCase[activeCase] ?? [];
-  }, [activeCase, strategiesByCase]);
+    return strategies.filter((strategy) => strategy.caseId === caseIds[activeCase]);
+  }, [activeCase, caseIds, strategies]);
 
   const filteredStrategies = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -197,11 +178,11 @@ export function WarRoomPage() {
 
   const customCounts = useMemo(() => {
     return {
-      picassent: strategiesByCase.picassent.length,
-      mislata: strategiesByCase.mislata.length,
-      quart: strategiesByCase.quart.length,
+      picassent: strategies.filter((strategy) => strategy.caseId === caseIds.picassent).length,
+      mislata: strategies.filter((strategy) => strategy.caseId === caseIds.mislata).length,
+      quart: strategies.filter((strategy) => strategy.caseId === caseIds.quart).length,
     };
-  }, [strategiesByCase]);
+  }, [caseIds, strategies]);
 
   const getRiskColor = (riskText: string) => {
     const text = (riskText || '').toLowerCase();

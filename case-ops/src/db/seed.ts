@@ -39,8 +39,6 @@ export async function seedDatabase(): Promise<boolean> {
       'rules',
       'scenario_models',
       'scenario_nodes',
-      'scenario_briefs',
-      'scenario_refutations',
     ];
     for (const c of counters) await counterRepo.setCounter(c, 0);
 
@@ -48,7 +46,6 @@ export async function seedDatabase(): Promise<boolean> {
     // 1. CASO PRINCIPAL - PICASSENT
     // =====================================================================
     const mainCase = await casesRepo.create({
-      caseKey: 'picassent',
       title: 'P.O. 715/2024 · División Cosa Común y Reclamación',
       court: 'JPI nº 1 de Picassent',
       autosNumber: '715/2024',
@@ -69,7 +66,6 @@ export async function seedDatabase(): Promise<boolean> {
     // 2. CASOS SECUNDARIOS - QUART Y MISLATA
     // =====================================================================
     const quartCase = await casesRepo.create({
-      caseKey: 'quart',
       title: 'ETJ 1428/2025 · Ejecución Cuenta Hijos',
       court: 'Juzgado de Primera Instancia nº 1 de Quart de Poblet',
       autosNumber: '1428/2025',
@@ -88,7 +84,6 @@ export async function seedDatabase(): Promise<boolean> {
     });
 
     const mislataCase = await casesRepo.create({
-      caseKey: 'mislata',
       title: 'J.V. 1185/2025 · Reclamación Cuotas Hipotecarias',
       court: 'JPI nº 3 de Mislata',
       autosNumber: '1185/2025',

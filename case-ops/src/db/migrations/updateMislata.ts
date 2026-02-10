@@ -10,14 +10,19 @@ import { procedimientoMislata, desgloseMislata, argumentosContestacion } from '.
 
 export async function migrateMislataCase(): Promise<{ success: boolean; message: string }> {
   try {
-    // 1. Buscar caso Mislata existente (por caseKey)
-    let mislataCase = await casesRepo.getByCaseKey('mislata');
+    // 1. Buscar caso Mislata existente (por título o autos)
+    const allCases = await casesRepo.getAll();
+    let mislataCase = allCases.find(
+      (c) =>
+        c.title.toLowerCase().includes('mislata') ||
+        c.autosNumber?.includes('1185/2025') ||
+        c.autosNumber?.includes('128/2024')
+    );
 
     // 2. Si existe, actualizar. Si no, crear.
     if (mislataCase) {
       // Actualizar caso existente
       await db.cases.update(mislataCase.id, {
-        caseKey: 'mislata',
         title: 'J.V. 1185/2025 · Reclamación Cuotas Hipotecarias',
         court: procedimientoMislata.juzgado,
         autosNumber: procedimientoMislata.autos,
@@ -33,7 +38,6 @@ export async function migrateMislataCase(): Promise<{ success: boolean; message:
     } else {
       // Crear nuevo caso
       mislataCase = await casesRepo.create({
-        caseKey: 'mislata',
         title: 'J.V. 1185/2025 · Reclamación Cuotas Hipotecarias',
         court: procedimientoMislata.juzgado,
         autosNumber: procedimientoMislata.autos,

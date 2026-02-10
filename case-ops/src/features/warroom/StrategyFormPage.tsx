@@ -10,8 +10,12 @@ import type { Case } from '../../types';
 type CaseKey = 'picassent' | 'mislata' | 'quart';
 
 function inferCaseKey(caseId: string, cases: Case[]): CaseKey | null {
-  const match = cases.find((x) => x.id === caseId);
-  return (match?.caseKey as CaseKey) ?? null;
+  const c = cases.find((x) => x.id === caseId);
+  const hay = `${caseId} ${c?.title ?? ''} ${c?.autosNumber ?? ''} ${c?.court ?? ''}`.toLowerCase();
+  if (hay.includes('picassent') || hay.includes('715')) return 'picassent';
+  if (hay.includes('mislata') || hay.includes('1185')) return 'mislata';
+  if (hay.includes('quart') || hay.includes('1428')) return 'quart';
+  return null;
 }
 
 export function StrategyFormPage() {
@@ -83,11 +87,11 @@ export function StrategyFormPage() {
     }
     const effectiveCaseId = savedCaseId || formData.caseId;
     if (queryCaseKey && ['picassent', 'mislata', 'quart'].includes(queryCaseKey)) {
-      navigate(`/warroom?caseKey=${queryCaseKey}`);
+      navigate(`/warroom?caseId=${queryCaseKey}`);
       return;
     }
     const inferred = inferCaseKey(effectiveCaseId, cases);
-    navigate(inferred ? `/warroom?caseKey=${inferred}` : '/warroom');
+    navigate(inferred ? `/warroom?caseId=${inferred}` : '/warroom');
   }
 
   async function handleSubmit(e: React.FormEvent) {

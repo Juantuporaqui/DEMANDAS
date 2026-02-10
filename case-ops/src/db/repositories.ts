@@ -23,8 +23,6 @@ import type {
   Rule,
   ScenarioModel,
   ScenarioNode,
-  ScenarioBrief,
-  ScenarioRefutation,
 } from '../types';
 import { generateUUID } from '../utils/id';
 
@@ -78,8 +76,6 @@ const ID_PREFIXES: Record<string, string> = {
   strategies: 'W',
   tasks: 'T',
   rules: 'R',
-  scenario_briefs: 'SB',
-  scenario_refutations: 'SR',
   scenario_models: 'SM',
   scenario_nodes: 'SN',
 };
@@ -124,10 +120,6 @@ export const counterRepo = {
 export const casesRepo = {
   async getAll(): Promise<Case[]> {
     return db.cases.orderBy('updatedAt').reverse().toArray();
-  },
-
-  async getByCaseKey(caseKey: string): Promise<Case | undefined> {
-    return db.cases.where('caseKey').equals(caseKey).first();
   },
 
   async getById(id: string): Promise<Case | undefined> {
@@ -704,90 +696,6 @@ export const strategiesRepo = {
           s.tags.some((t) => t.toLowerCase().includes(lower))
       )
       .toArray();
-  },
-};
-
-// ============================================
-// Scenario Briefs Repository (Escenarios)
-// ============================================
-
-export const scenarioBriefsRepo = {
-  async getAll(): Promise<ScenarioBrief[]> {
-    return db.scenario_briefs.orderBy('updatedAt').reverse().toArray();
-  },
-
-  async getByCaseId(caseId: string): Promise<ScenarioBrief[]> {
-    return db.scenario_briefs.where('caseId').equals(caseId).toArray();
-  },
-
-  async getById(id: string): Promise<ScenarioBrief | undefined> {
-    return db.scenario_briefs.get(id);
-  },
-
-  async create(data: Omit<ScenarioBrief, 'id' | 'createdAt' | 'updatedAt'>): Promise<ScenarioBrief> {
-    return db.transaction('rw', db.counters, db.scenario_briefs, db.auditLogs, async () => {
-      const id = await counterRepo.getNextIdInTransaction('scenario_briefs');
-      const now = Date.now();
-      const entry: ScenarioBrief = {
-        ...data,
-        id,
-        createdAt: now,
-        updatedAt: now,
-      };
-      await db.scenario_briefs.add(entry);
-      await auditRepo.log('create', 'scenario_model', id);
-      return entry;
-    });
-  },
-
-  async update(id: string, updates: Partial<ScenarioBrief>): Promise<void> {
-    await db.scenario_briefs.update(id, {
-      ...updates,
-      updatedAt: Date.now(),
-    });
-    await auditRepo.log('update', 'scenario_model', id);
-  },
-};
-
-// ============================================
-// Scenario Refutations Repository (Matriz)
-// ============================================
-
-export const scenarioRefutationsRepo = {
-  async getAll(): Promise<ScenarioRefutation[]> {
-    return db.scenario_refutations.orderBy('updatedAt').reverse().toArray();
-  },
-
-  async getByCaseId(caseId: string): Promise<ScenarioRefutation[]> {
-    return db.scenario_refutations.where('caseId').equals(caseId).toArray();
-  },
-
-  async getById(id: string): Promise<ScenarioRefutation | undefined> {
-    return db.scenario_refutations.get(id);
-  },
-
-  async create(data: Omit<ScenarioRefutation, 'id' | 'createdAt' | 'updatedAt'>): Promise<ScenarioRefutation> {
-    return db.transaction('rw', db.counters, db.scenario_refutations, db.auditLogs, async () => {
-      const id = await counterRepo.getNextIdInTransaction('scenario_refutations');
-      const now = Date.now();
-      const entry: ScenarioRefutation = {
-        ...data,
-        id,
-        createdAt: now,
-        updatedAt: now,
-      };
-      await db.scenario_refutations.add(entry);
-      await auditRepo.log('create', 'scenario_model', id);
-      return entry;
-    });
-  },
-
-  async update(id: string, updates: Partial<ScenarioRefutation>): Promise<void> {
-    await db.scenario_refutations.update(id, {
-      ...updates,
-      updatedAt: Date.now(),
-    });
-    await auditRepo.log('update', 'scenario_model', id);
   },
 };
 
