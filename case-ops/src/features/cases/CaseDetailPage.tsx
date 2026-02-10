@@ -509,7 +509,6 @@ function TabDocs({ documents, caseId, caseData }: any) {
                   caseData.autosNumber?.includes('1428');
 
   const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
-
   // Obtener PDFs del caso actual
   const casoKeyPDF = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
   const pdfDocuments = casoKeyPDF ? getPDFsByCaso(casoKeyPDF) : [];
@@ -518,16 +517,20 @@ function TabDocs({ documents, caseId, caseData }: any) {
   const manualDocItems = [
     ...(isPicassent
       ? [
-          { id: 'demanda-picassent', label: 'Demanda Contraria', icon: '📜', color: 'amber' },
-          { id: 'contestacion-picassent', label: 'Contestación', icon: '🛡️', color: 'emerald' },
+          { id: 'link-demanda-picassent', label: 'Demanda Contraria', icon: '📜', color: 'amber' },
+          { id: 'link-contestacion-picassent', label: 'Contestación', icon: '🛡️', color: 'emerald' },
         ]
       : []),
     ...(isMislata
       ? [
-          { id: 'demanda-mislata', label: 'Nuestra Demanda', icon: '📄', color: 'emerald' },
-          { id: 'contestacion-mislata', label: 'Contestación Vicenta', icon: '🚨', color: 'rose' },
-          { id: 'argumentos-mislata', label: 'Argumentos Clave', icon: '⚔️', color: 'blue' },
-          { id: 'frases-vista-mislata', label: 'Frases Vista', icon: '🎯', color: 'violet' },
+          { id: 'link-doc01-mislata', label: 'Doc_01_verbal reclamac cantidad', icon: '📄', color: 'emerald' },
+          { id: 'link-doc02-mislata', label: 'Doc_02_RecursoReposicion', icon: '🧾', color: 'blue' },
+          { id: 'link-doc03-mislata', label: 'Doc_03_Impugnacion', icon: '⚖️', color: 'violet' },
+          { id: 'link-doc04-mislata', label: 'Doc_04_ContestacionDemanda', icon: '🛡️', color: 'rose' },
+          { id: 'link-doc06-mislata', label: 'Doc_06_AlegacionesImpugnacion', icon: '📝', color: 'cyan' },
+          { id: 'link-doc07-mislata', label: 'Doc_07_ContrPrueba', icon: '🔎', color: 'amber' },
+          { id: 'link-doc08-mislata', label: 'Doc_08_SolPrueva', icon: '📌', color: 'slate' },
+          { id: 'link-doc09-mislata', label: 'Doc_09_RecursoRevision', icon: '📚', color: 'blue' },
         ]
       : []),
     ...(isQuart
@@ -548,6 +551,20 @@ function TabDocs({ documents, caseId, caseData }: any) {
   ]);
 
   const selectedPDF = selectedDocKey ? pdfDocuments.find((pdf) => pdf.id === selectedDocKey) : null;
+  const externalDocMap: Record<string, string> = {
+    'link-demanda-picassent': `${import.meta.env.BASE_URL}docs/picassent/escritos/demanda.html`,
+    'link-contestacion-picassent': `${import.meta.env.BASE_URL}docs/picassent/escritos/contestacion.html`,
+    'link-doc01-mislata': `${import.meta.env.BASE_URL}docs/mislata/escritos/Doc_01_verbal_reclamac_cantidad.html`,
+    'link-doc02-mislata': `${import.meta.env.BASE_URL}docs/mislata/escritos/Doc_02_RecursoReposicion.html`,
+    'link-doc03-mislata': `${import.meta.env.BASE_URL}docs/mislata/escritos/Doc_03_Impugnacion.html`,
+    'link-doc04-mislata': `${import.meta.env.BASE_URL}docs/mislata/escritos/Doc_04_ContestacionDemanda.html`,
+    'link-doc06-mislata': `${import.meta.env.BASE_URL}docs/mislata/escritos/Doc_06_AlegacionesImpugnacion.html`,
+    'link-doc07-mislata': `${import.meta.env.BASE_URL}docs/mislata/escritos/Doc_07_ContrPrueba.html`,
+    'link-doc08-mislata': `${import.meta.env.BASE_URL}docs/mislata/escritos/Doc_08_SolPrueva.html`,
+    'link-doc09-mislata': `${import.meta.env.BASE_URL}docs/mislata/escritos/Doc_09_RecursoRevision.html`,
+  };
+
+  const selectedExternalUrl = selectedDocKey ? externalDocMap[selectedDocKey] ?? null : null;
   const selectedContent = selectedDocKey ? LEGAL_DOCS_MAP[selectedDocKey] : null;
   const selectedTitle = selectedDocKey ? docTitleMap.get(selectedDocKey) : null;
 
@@ -579,26 +596,29 @@ function TabDocs({ documents, caseId, caseData }: any) {
     meta?: string;
   }) => {
     const colorClasses: Record<string, string> = {
-      amber: 'border-amber-500/30 hover:border-amber-500/60 text-amber-100',
-      emerald: 'border-emerald-500/30 hover:border-emerald-500/60 text-emerald-100',
-      rose: 'border-rose-500/30 hover:border-rose-500/60 text-rose-100',
-      blue: 'border-blue-500/30 hover:border-blue-500/60 text-blue-100',
-      violet: 'border-violet-500/30 hover:border-violet-500/60 text-violet-100',
-      cyan: 'border-cyan-500/30 hover:border-cyan-500/60 text-cyan-100',
-      slate: 'border-slate-600/40 hover:border-slate-500/60 text-slate-100',
+      amber: 'border-amber-400/30 shadow-amber-900/20 hover:border-amber-300/70',
+      emerald: 'border-emerald-400/30 shadow-emerald-900/20 hover:border-emerald-300/70',
+      rose: 'border-rose-400/30 shadow-rose-900/20 hover:border-rose-300/70',
+      blue: 'border-blue-400/30 shadow-blue-900/20 hover:border-blue-300/70',
+      violet: 'border-violet-400/30 shadow-violet-900/20 hover:border-violet-300/70',
+      cyan: 'border-cyan-400/30 shadow-cyan-900/20 hover:border-cyan-300/70',
+      slate: 'border-slate-500/40 shadow-slate-900/20 hover:border-slate-300/60',
     };
 
     return (
       <button
         onClick={() => handleSelectDoc(docKey)}
-        className={`group w-full aspect-square rounded-2xl border bg-slate-900/40 p-4 text-left transition-all hover:-translate-y-0.5 hover:bg-slate-900/70 ${colorClasses[color]}`}
+        className={`group w-full rounded-xl border bg-gradient-to-br from-slate-900/95 to-slate-800/60 p-3 sm:p-3.5 text-left shadow-lg backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-slate-800/95 hover:to-slate-700/60 ${colorClasses[color]}`}
       >
-        <div className="flex flex-col justify-between h-full">
-          <div className="text-2xl">{icon}</div>
-          <div>
-            <div className="text-xs sm:text-sm font-semibold text-white leading-snug line-clamp-2">{label}</div>
-            {meta && <div className="text-[10px] text-slate-400 mt-1 line-clamp-1">{meta}</div>}
+        <div className="flex items-start gap-2.5 sm:gap-3 min-h-[58px] sm:min-h-[62px]">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-lg">
+            {icon}
           </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[12px] sm:text-[13px] font-semibold text-white leading-snug line-clamp-2">{label}</div>
+            {meta && <div className="mt-1 text-[10px] font-medium uppercase tracking-wide text-slate-400 line-clamp-1">{meta}</div>}
+          </div>
+          <ChevronRight size={14} className="mt-1 shrink-0 text-slate-500 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-300" />
         </div>
       </button>
     );
@@ -606,47 +626,56 @@ function TabDocs({ documents, caseId, caseData }: any) {
 
   if (selectedDocKey) {
     return (
-      <div className="space-y-4">
-        <button
-          onClick={handleBackToGrid}
-          className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white"
-        >
-          <ChevronRight className="rotate-180" size={18} />
-          Volver a documentos
-        </button>
+      <div className="fixed inset-0 z-[80] bg-slate-950"> 
+        <div className="flex h-full flex-col"> 
+          <div className="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-950/95 px-4 py-3 backdrop-blur"> 
+            <button
+              onClick={handleBackToGrid}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm text-slate-200 hover:border-slate-500 hover:text-white"
+            >
+              <ChevronRight className="rotate-180" size={18} />
+              Volver atrás
+            </button>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden min-h-[60vh]">
-          {selectedPDF && casoKeyPDF ? (
-            <div className="flex flex-col h-[70vh]">
-              <div className="flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-lg">{tipoDocIcons[selectedPDF.tipo] || '📄'}</span>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-medium text-white truncate">{selectedPDF.titulo}</h3>
-                    {selectedPDF.descripcion && (
-                      <p className="text-[10px] text-slate-500 line-clamp-1">{selectedPDF.descripcion}</p>
-                    )}
-                  </div>
-                </div>
-                {selectedPDF.fecha && (
-                  <span className="text-[10px] text-slate-500">{selectedPDF.fecha}</span>
-                )}
-              </div>
+            <div className="min-w-0 flex-1 text-center"> 
+              <h3 className="truncate text-sm font-medium text-white">{selectedTitle || 'Documento'}</h3>
+            </div>
+
+            {selectedExternalUrl ? (
+              <a
+                href={selectedExternalUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-cyan-300 hover:text-cyan-200"
+              >
+                Abrir en pestaña nueva ↗
+              </a>
+            ) : (
+              <div className="w-[120px]" />
+            )}
+          </div>
+
+          <div className="min-h-0 flex-1 bg-slate-950"> 
+            {selectedPDF && casoKeyPDF ? (
               <EmbeddedPDFViewer
                 url={getPDFUrl(casoKeyPDF, selectedPDF.archivo)}
                 title={selectedPDF.titulo}
-                className="flex-1"
+                className="h-full"
               />
-            </div>
-          ) : selectedContent ? (
-            <TextReader content={selectedContent} />
-          ) : (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-500">
-              <FileText size={48} className="mb-4 opacity-20" />
-              <p className="text-sm">No se encontró contenido para este documento.</p>
-              {selectedTitle && <p className="text-xs text-slate-600 mt-2">{selectedTitle}</p>}
-            </div>
-          )}
+            ) : selectedExternalUrl ? (
+              <iframe src={selectedExternalUrl} title={selectedTitle || 'Documento'} className="h-full w-full bg-white" />
+            ) : selectedContent ? (
+              <div className="h-full overflow-y-auto p-4 sm:p-6"> 
+                <TextReader content={selectedContent} />
+              </div>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center text-slate-500"> 
+                <FileText size={48} className="mb-4 opacity-20" />
+                <p className="text-sm">No se encontró contenido para este documento.</p>
+                {selectedTitle && <p className="mt-2 text-xs text-slate-600">{selectedTitle}</p>}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -677,7 +706,7 @@ function TabDocs({ documents, caseId, caseData }: any) {
           <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
             <Scale size={12} /> Autos y escritos
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3">
             {manualDocItems.map((doc) => (
               <DocGridButton key={doc.id} docKey={doc.id} icon={doc.icon} label={doc.label} color={doc.color} />
             ))}
@@ -690,7 +719,7 @@ function TabDocs({ documents, caseId, caseData }: any) {
           <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
             <FileText size={12} /> Documentos subidos ({autoDocs.length})
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3">
             {autoDocs.map((doc: AutoDocument) => (
               <DocGridButton
                 key={doc.id}
@@ -710,7 +739,7 @@ function TabDocs({ documents, caseId, caseData }: any) {
           <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
             <FileText size={12} /> PDFs del expediente ({pdfDocuments.length})
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3">
             {pdfDocuments.map((pdf) => (
               <DocGridButton
                 key={pdf.id}
@@ -730,13 +759,13 @@ function TabDocs({ documents, caseId, caseData }: any) {
           <h4 className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
             <Upload size={12} /> Archivo digital ({documents.length})
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-3">
             {documents.map((doc: Document) => (
               <div
                 key={doc.id}
-                className="w-full aspect-square rounded-2xl border border-slate-700/50 bg-slate-900/40 p-4 text-left text-slate-300"
+                className="w-full rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-900/90 to-slate-800/60 p-3 sm:p-3.5 text-left text-slate-300 shadow-lg"
               >
-                <div className="flex flex-col justify-between h-full">
+                <div className="flex items-start gap-2.5 sm:gap-3 min-h-[58px] sm:min-h-[62px]">
                   <div className="text-xl">📎</div>
                   <div>
                     <div className="text-xs font-semibold text-white line-clamp-2">{doc.title}</div>
