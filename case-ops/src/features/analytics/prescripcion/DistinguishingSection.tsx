@@ -34,18 +34,18 @@ export function DistinguishingSection({
   return (
     <section id={id} className="scroll-mt-24 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-200 print-card">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <h2 className="text-base font-semibold text-white">{title}</h2>
-          {subtitle ? <p className="mt-1 text-sm text-slate-400">{subtitle}</p> : null}
+          {subtitle ? <p className="mt-1 break-words text-sm text-slate-400">{subtitle}</p> : null}
         </div>
         <a
           href={link}
-          className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200"
+          className="max-w-full rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200"
         >
           Abrir versión extendida
         </a>
       </div>
-      {intro ? <p className="mt-3 text-sm text-slate-300">{intro}</p> : null}
+      {intro ? <p className="mt-3 break-words text-sm text-slate-300">{intro}</p> : null}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {antiSts458.argumentos.map((argumento) => (
           <div
@@ -53,13 +53,13 @@ export function DistinguishingSection({
             className={`rounded-2xl border p-4 ${argumentoToneMap[argumento.id] ?? 'border-slate-700/60'}`}
           >
             <div className="flex items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                   {argumento.score ? `Prioridad ${argumento.score}` : 'Prioridad'}
                 </p>
-                <h3 className="mt-2 text-sm font-semibold text-white">{argumento.title}</h3>
+                <h3 className="mt-2 break-words text-sm font-semibold text-white">{argumento.title}</h3>
               </div>
-              <span className="rounded-full border border-slate-600/60 bg-slate-800/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200">
+              <span className="shrink-0 rounded-full border border-slate-600/60 bg-slate-800/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200">
                 {activeHypothesis === 'H2' ? 'Plan B activo' : 'Plan A activo'}
               </span>
             </div>
