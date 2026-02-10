@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Copy, FileText } from 'lucide-react';
 import Badge from '../../../ui/components/Badge';
@@ -10,6 +10,7 @@ import {
   pagosDirectosJuan,
 } from '../../../data/quart';
 import { DEFENSA_360_QUART } from '../../../data/quart/defensa360';
+import { EMAIL_REGULARIZACION } from '../../../data/quart/evidencias';
 
 const probTone = {
   alta: 'ok',
@@ -24,6 +25,34 @@ const carrilTone = {
 
 const eurosToCents = (euros: number) => Math.round(euros * 100);
 
+function highlight(text: string, parts: string[]): ReactNode {
+  if (!parts.length) {
+    return text;
+  }
+
+  const escapedParts = parts
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length)
+    .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+
+  if (!escapedParts.length) {
+    return text;
+  }
+
+  const matcher = new RegExp(`(${escapedParts.join('|')})`, 'g');
+  const segments = text.split(matcher);
+
+  return segments.map((segment, index) => (
+    parts.includes(segment) ? (
+      <mark key={`hl-${index}`} className="rounded bg-amber-400/30 px-0.5 text-amber-100">
+        {segment}
+      </mark>
+    ) : (
+      <span key={`tx-${index}`}>{segment}</span>
+    )
+  ));
+}
+
 export function TabDefensa360Quart() {
   const [included, setIncluded] = useState<Record<string, boolean>>(
     Object.fromEntries(
@@ -32,6 +61,8 @@ export function TabDefensa360Quart() {
   );
   const [toast, setToast] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [includeBuenaFe, setIncludeBuenaFe] = useState(true);
 
   const cifras = useMemo(() => {
     const pilarPago = argumentosOposicion.find((item) => item.codigo === '556.1_LEC_cumplimiento_pago');
@@ -67,8 +98,15 @@ export function TabDefensa360Quart() {
       'OTROSÍ DIGO: se reserva el ejercicio de las acciones declarativas que en Derecho correspondan respecto de extremos no ventilables en el cauce tasado de esta ejecución.',
     ];
 
-    return [...intro, '', ...bloques, '', ...suplica].join('\n');
-  }, [selectedPilares]);
+    const bloqueBuenaFe = includeBuenaFe
+      ? [
+          '',
+          '“Se acompaña email de fecha [●], aportado a efectos meramente contextuales, en el que esta parte propone regularizar y normalizar aportaciones y establecer control de retiradas, con la finalidad de evitar litigiosidad y asegurar el destino finalista a favor de los menores. No se invoca como requisito procesal, sino como indicio de buena fe (art. 7 CC) y lealtad procesal (art. 247 LEC), así como para fijar la cronología objetiva de los hechos.”',
+        ]
+      : [];
+
+    return [...intro, '', ...bloques, '', ...suplica, ...bloqueBuenaFe].join('\n');
+  }, [includeBuenaFe, selectedPilares]);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -103,6 +141,75 @@ export function TabDefensa360Quart() {
             <Badge tone="warn">NO usar compensación como eje</Badge>
           </div>
         </div>
+      </section>
+
+      <section className="card-base card-elevated rounded-2xl p-4 sm:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-base font-semibold text-white">Prueba clave: Email de regularización</h3>
+              <Badge tone="info">Email</Badge>
+              <Badge tone="ok">Buena fe</Badge>
+            </div>
+            <p className="text-xs text-slate-400">{EMAIL_REGULARIZACION.descripcionCorta}</p>
+            <p className="text-[11px] text-slate-500">
+              No es mediación ni requisito; se aporta como cronología y buena fe (CC 7 / LEC 247).
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setEmailModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg border border-violet-400/40 bg-violet-500/10 px-3 py-1.5 text-xs font-semibold text-violet-100 hover:bg-violet-500/20"
+            >
+              <FileText className="h-3.5 w-3.5" /> Ver email completo
+            </button>
+            <button
+              type="button"
+              onClick={() => copyText(EMAIL_REGULARIZACION.cuerpo ?? '', 'email')}
+              className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-100 hover:bg-emerald-500/20"
+            >
+              <Copy className="h-3.5 w-3.5" /> Copiar email
+            </button>
+          </div>
+        </div>
+
+        <ul className="mt-4 grid gap-2 text-sm text-slate-200 sm:grid-cols-2">
+          {(EMAIL_REGULARIZACION.bullets ?? []).map((bullet) => (
+            <li key={bullet} className="rounded-lg border border-slate-700/70 bg-slate-900/40 px-3 py-2">
+              • {bullet}
+            </li>
+          ))}
+        </ul>
+
+        {EMAIL_REGULARIZACION.riesgo && (
+          <div className="mt-4 rounded-xl border border-rose-400/30 bg-rose-500/5 p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <h4 className="text-sm font-semibold text-rose-100">Riesgo procesal</h4>
+              <Badge tone={EMAIL_REGULARIZACION.riesgo.nivel === 'alto' ? 'danger' : 'warn'}>
+                {EMAIL_REGULARIZACION.riesgo.nivel.toUpperCase()}
+              </Badge>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-200">Por qué</p>
+                <ul className="mt-1 space-y-1 text-sm text-rose-100/90">
+                  {EMAIL_REGULARIZACION.riesgo.porQue.map((item) => (
+                    <li key={item}>• {item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-200">Lectura defensiva recomendada</p>
+                <ul className="mt-1 space-y-1 text-sm text-emerald-100/90">
+                  {EMAIL_REGULARIZACION.riesgo.mitigacion.map((item) => (
+                    <li key={item}>• {item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="card-base rounded-2xl p-4 sm:p-5">
@@ -286,11 +393,59 @@ export function TabDefensa360Quart() {
           <p className="text-xs text-slate-400">
             Se incluirán {selectedPilares.length} pilares (tasados/contexto según tu selección).
           </p>
+          <label className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-200">
+            <input
+              type="checkbox"
+              checked={includeBuenaFe}
+              onChange={() => setIncludeBuenaFe((prev) => !prev)}
+              className="h-3.5 w-3.5"
+            />
+            Añadir buena fe (email regularización)
+          </label>
           <textarea
             readOnly
             value={escritoGenerado}
             className="h-[48dvh] w-full rounded-xl border border-slate-700 bg-slate-950/70 p-3 text-xs leading-relaxed text-slate-200"
           />
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={emailModalOpen}
+        onClose={() => setEmailModalOpen(false)}
+        title="Email de regularización"
+        footer={(
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setEmailModalOpen(false)}
+              className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200"
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              onClick={() => copyText(EMAIL_REGULARIZACION.cuerpo ?? '', 'email')}
+              className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-100"
+            >
+              Copiar email
+            </button>
+          </div>
+        )}
+      >
+        <div className="space-y-3">
+          <p className="text-xs text-slate-400">
+            Riesgo procesal del email: lectura contextual para buena fe y cronología objetiva (no requisito procesal).
+          </p>
+          <div className="max-h-[50dvh] overflow-auto rounded-xl border border-slate-700 bg-slate-950/70 p-3 text-sm leading-relaxed text-slate-200">
+            <p className="whitespace-pre-wrap">
+              {highlight(EMAIL_REGULARIZACION.cuerpo ?? '', [
+                'iré poniéndome al día con los pagos',
+                'conforme pueda',
+                'yo no puedo pagar tanto',
+              ])}
+            </p>
+          </div>
         </div>
       </Modal>
     </div>

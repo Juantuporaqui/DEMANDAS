@@ -122,30 +122,34 @@ export const DEFENSA_360_QUART: DefensaPilar[] = [
     tags: ['contexto', 'buena-fe', 'costas'],
   },
   {
-    id: 'pilar-5-mala-fe-notificaciones',
+    id: 'pilar-5-mala-fe-cronologia',
     carril: 'contexto',
-    titulo: 'Mala fe procesal / notificaciones y presión',
+    titulo: 'Mala fe / presión / cronología',
     claim15s:
-      'Se empleó el proceso como presión y se usaron datos de notificación que dificultan el contradictorio: se interesa corrección y costas.',
+      'La secuencia oferta de normalización → demanda refuerza la buena fe de esta parte y la proporcionalidad en costas.',
     parrafoEscrito:
-      'También en plano contextual, esta parte interesa que se valore la conducta procesal desplegada en relación con la estrategia de presión y con los datos de comunicación utilizados, por su eventual impacto en la calidad del contradictorio. La alegación se formula en términos sobrios, sin descalificaciones personales, y orientada a la tutela de la lealtad procesal (art. 247 LEC) y al correcto marco de actos de comunicación (arts. 155-156 LEC, si procede en la pieza). No se invoca como motivo tasado de oposición, sino como presupuesto para acordar la corrección que corresponda y para la decisión sobre costas o advertencias procesales.',
-    encaje: ['Art. 247 LEC', 'Arts. 155-156 LEC (comunicaciones, si procede)'],
+      'También en plano de contexto/costas, esta parte interesa que se valore la cronología objetiva de los hechos, incluyendo el intento de regularización extraprocesal y la posterior activación de la ejecución. Esta línea se formula con sobriedad y sin convertirla en motivo tasado autónomo, pues el carril principal sigue siendo pago/cumplimiento y depuración de cuantía ex art. 556 LEC. El email aportado se invoca únicamente como indicio de buena fe (art. 7 CC) y lealtad procesal (art. 247 LEC), útil para enmarcar la proporcionalidad de la respuesta procesal y la eventual decisión sobre costas.',
+    encaje: ['Art. 7 CC (buena fe)', 'Art. 247 LEC (lealtad procesal)'],
     probabilidad: 'media',
     pruebas: [
-      { label: 'Demanda de ejecución (datos de comunicación)', docId: 'demanda-ejecucion-quart' },
+      {
+        label: 'Email de regularización (buena fe y cronología)',
+        note: 'Evidencia interna: email-regularizacion-cuenta-ninos',
+      },
+      { label: 'Demanda de ejecución (secuencia temporal)', docId: 'demanda-ejecucion-quart' },
       { label: 'Providencia de señalamiento', docId: 'providencia-quart' },
-      { label: 'Escrito de oposición (alegación domicilio)', docId: 'oposicion-quart' },
+      { label: 'Escrito de oposición (marco tasado de defensa)', docId: 'oposicion-quart' },
     ],
     contra: {
       vicenta: [
-        impugnacionById['qrt-imp-4']?.descripcion ?? '',
+        'Reconoce que no paga.',
         impugnacionById['qrt-imp-2']?.descripcion ?? '',
       ].filter(Boolean),
       respuesta: [
-        'El ejecutado compareció y articuló defensa, pero ello no impide depurar prácticas de notificación mejorables.',
-        'La pretensión se limita a corrección de forma y costas, sin convertir este bloque en motivo tasado de archivo.',
+        'Ofrecimiento de regularización sin reconocimiento; el núcleo de oposición es pago/liquidación (556). El email refuerza buena fe (CC 7, LEC 247).',
+        'Este bloque se mantiene en contexto/costas/credibilidad, sin desplazar el examen tasado del saldo efectivamente debido.',
       ],
     },
-    tags: ['contexto', 'notificaciones', 'presión'],
+    tags: ['contexto', 'cronologia', 'buena-fe'],
   },
 ];
