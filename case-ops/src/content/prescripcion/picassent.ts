@@ -79,6 +79,7 @@ export const prescripcionPicassent = {
       'Sin base jurídica (acción): NO ENTRA.',
       'Sin exigibilidad explicada (dies a quo): NO ENTRA.',
       'Si alegan interrupción y no la acreditan: cae / prescribe / no probado.',
+      `Si ${PICASSENT_FACTS.reclamacionExtrajudicial.short} → no hay interrupción; se aplica prescripción por tramos y, además, refuerza retraso desleal (art. 7 CC).`,
       'No mezclar: cuotas ≠ gastos ≠ inversiones.',
     ],
   },
@@ -88,6 +89,7 @@ export const prescripcionPicassent = {
       'Presentan un sumatorio de años.',
       'Evitan tabla por partidas y sustituyen prueba por narrativa.',
       'Invocan STS 458/2025 para que el plazo empiece “al final”.',
+      `Silencio previo total: ${PICASSENT_FACTS.reclamacionExtrajudicial.short} (sin acto concreto no hay interrupción: art. 1973 CC).`,
       'Piden al juez tratarlo como un crédito único a liquidar.',
     ],
     antidoto: 'Antídoto: bloques + tabla + dies a quo motivado por bloque + prueba.',
@@ -273,7 +275,7 @@ export const prescripcionPicassent = {
     frases: [
       `ARG 1 — Negocio, no vivienda: inversión turística (${PICASSENT_FACTS.alquilerTuristico.canal} + licencia de alojamiento turístico).`,
       'ARG 2 — Sin desequilibrio probado: sueldos comparables y cuentas conjuntas.',
-      `ARG 3 — Retraso desleal: cotitularidad + ${PICASSENT_FACTS.formacionActora} + ausencia de reclamación fehaciente.`,
+      `ARG 3 — Retraso desleal: cotitularidad + ${PICASSENT_FACTS.formacionActora} + ${PICASSENT_FACTS.reclamacionExtrajudicial.short}`,
       'ARG 4 — Llave procesal: art. 426.4 LEC (doctrina sobrevenida).',
     ],
     filtrosTitle: 'Diferencias fácticas clave vs. STS 458/2025:',
@@ -282,7 +284,7 @@ export const prescripcionPicassent = {
       'STS: cuenta nutrida casi exclusivamente por ella → Nosotros: 2 sueldos comparables, 2 cuentas conjuntas, 0 privativos',
       'STS: desequilibrio probado → Nosotros: ningún euro privativo identificable',
       'STS: hipoteca de domicilio = carga familiar implícita → Nosotros: inversión especulativa = comunidad ordinaria (392 CC)',
-      `STS: cónyuge sin formación financiera / sin visibilidad → Nosotros: policía + ${PICASSENT_FACTS.formacionActora} + cotitular + 0 reclamaciones durante años`,
+      `STS: cónyuge sin formación financiera / sin visibilidad → Nosotros: policía + ${PICASSENT_FACTS.formacionActora} + cotitular + ${PICASSENT_FACTS.reclamacionExtrajudicial.short}`,
     ],
   },
   erroresFatales: {
@@ -342,7 +344,7 @@ export const prescripcionPicassent = {
   guion: {
     title: 'Guion de sala (2 minutos)',
     text:
-      `Señoría, solicitamos depuración del objeto: la actora formula una reclamación global con hechos y pagos antiguos sin aportar, por bloques/partidas, fecha, concepto, documento, base jurídica, exigibilidad y, en su caso, actos interruptivos. Nuestra posición es técnica: (1) prescripción de lo exigible y no reclamado en plazo; (2) falta de prueba de un crédito exigible y vigente; y (3) subsidiariamente, si se menciona STS 458/2025, limitar estrictamente su alcance: decisión por bloques homogéneos con cuantía separada y motivación del dies a quo por bloque, sin extensión automática a gastos o inversiones. Además, el inmueble se explotó como ${PICASSENT_FACTS.alquilerTuristico.canal} con licencia de alojamiento turístico y responde a una ${PICASSENT_FACTS.dinamicaPatrimonial}`,
+      `Señoría, solicitamos depuración del objeto: la actora formula una reclamación global con hechos y pagos antiguos sin aportar, por bloques/partidas, fecha, concepto, documento, base jurídica, exigibilidad y, en su caso, actos interruptivos. Además, ${PICASSENT_FACTS.reclamacionExtrajudicial.short}, lo que excluye la interrupción del art. 1973 CC y refuerza la buena fe (art. 7 CC). Nuestra posición es técnica: (1) prescripción de lo exigible y no reclamado en plazo; (2) falta de prueba de un crédito exigible y vigente; y (3) subsidiariamente, si se menciona STS 458/2025, limitar estrictamente su alcance: decisión por bloques homogéneos con cuantía separada y motivación del dies a quo por bloque, sin extensión automática a gastos o inversiones. Además, el inmueble se explotó como ${PICASSENT_FACTS.alquilerTuristico.canal} con licencia de alojamiento turístico y responde a una ${PICASSENT_FACTS.dinamicaPatrimonial}`,
   },
   checklist: {
     title: 'Checklist 24–72h (solo lo que mueve la aguja)',
