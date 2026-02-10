@@ -128,35 +128,35 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           <Eye size={16} /> Resumen ejecutivo
           <Badge tone="muted">{caseLabel}</Badge>
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 auto-rows-fr">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4 auto-rows-fr">
           {/* Parte contraria */}
-          <div className="card-base card-subtle p-3 h-full">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Parte contraria</div>
+          <div className="card-base card-subtle rounded-xl p-2.5 sm:p-3 h-full col-span-2 sm:col-span-1">
+            <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-500 mb-1">Parte contraria</div>
             <div className="space-y-1.5">
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-slate-600">Demandante</div>
-                <div className="text-xs font-medium text-rose-300">{opposingParty || '—'}</div>
+                <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-600">Demandante</div>
+                <div className="text-[11px] sm:text-xs font-medium text-rose-300 leading-snug">{opposingParty || '—'}</div>
               </div>
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-slate-600">Abogada</div>
-                <div className="text-xs font-medium text-rose-200">{opposingLawyer || '—'}</div>
+                <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-600">Abogada</div>
+                <div className="text-[11px] sm:text-xs font-medium text-rose-200 leading-snug">{opposingLawyer || '—'}</div>
               </div>
             </div>
           </div>
           {/* Juzgado */}
-          <div className="card-base card-subtle p-3 h-full">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Juzgado</div>
-            <div className="text-sm font-medium text-slate-200">{caseData.court}</div>
+          <div className="card-base card-subtle rounded-xl p-2.5 sm:p-3 h-full">
+            <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-500 mb-1">Juzgado</div>
+            <div className="text-xs sm:text-sm font-medium text-slate-200 leading-snug">{caseData.court}</div>
           </div>
           {/* Autos */}
-          <div className="card-base card-subtle p-3 h-full">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Autos</div>
-            <div className="text-sm font-medium text-slate-200 font-mono">{caseData.autosNumber}</div>
+          <div className="card-base card-subtle rounded-xl p-2.5 sm:p-3 h-full">
+            <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-500 mb-1">Autos</div>
+            <div className="text-xs sm:text-sm font-medium text-slate-200 font-mono break-all">{caseData.autosNumber}</div>
           </div>
           {/* Rol */}
-          <div className="card-base card-subtle p-3 h-full">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Rol procesal</div>
-            <div className={`text-sm font-bold uppercase ${
+          <div className="card-base card-subtle rounded-xl p-2.5 sm:p-3 h-full">
+            <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-500 mb-1">Rol procesal</div>
+            <div className={`text-xs sm:text-sm font-bold uppercase leading-snug ${
               caseData.clientRole === 'demandante' || caseData.clientRole === 'ejecutante'
                 ? 'text-emerald-400'
                 : 'text-amber-400'
@@ -164,29 +164,29 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           </div>
           {/* NIG */}
           {caseData.nig && (
-            <div className="card-base card-subtle p-3 h-full">
-              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">NIG</div>
-              <div className="text-xs font-medium text-slate-300 font-mono">{caseData.nig}</div>
+            <div className="card-base card-subtle rounded-xl p-2.5 sm:p-3 h-full col-span-2 sm:col-span-1">
+              <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-500 mb-1">NIG</div>
+              <div className="text-[11px] sm:text-xs font-medium text-slate-300 font-mono break-all">{caseData.nig}</div>
             </div>
           )}
           {/* Próximo hito */}
           {vistaEvent && (
-            <div className="card-base card-subtle border border-amber-500/30 p-3 h-full">
-              <div className="text-[10px] uppercase tracking-wider text-amber-500 mb-1">Próximo hito</div>
-              <div className="text-sm font-medium text-amber-300">{formatDate(vistaEvent.date)}</div>
-              <div className="text-[10px] text-slate-500">{vistaEvent.title}</div>
+            <div className="card-base card-subtle rounded-xl border border-amber-500/30 p-2.5 sm:p-3 h-full col-span-2 sm:col-span-1">
+              <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-amber-500 mb-1">Próximo hito</div>
+              <div className="text-xs sm:text-sm font-medium text-amber-300">{formatDate(vistaEvent.date)}</div>
+              <div className="text-[9px] sm:text-[10px] text-slate-500 leading-snug">{vistaEvent.title}</div>
             </div>
           )}
           {/* Cuantía Procesal */}
-          <div className="card-base card-subtle border border-rose-500/30 p-3 h-full">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Cuantía procesal (demanda)</div>
-            <div className="text-lg font-bold text-rose-400">{formatCurrency(amounts.totalDemand)}</div>
+          <div className="card-base card-subtle rounded-xl border border-rose-500/30 p-2.5 sm:p-3 h-full col-span-2 sm:col-span-1">
+            <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-500 mb-1">Cuantía procesal (demanda)</div>
+            <div className="text-base sm:text-lg font-bold text-rose-400 leading-tight">{formatCurrency(amounts.totalDemand)}</div>
           </div>
           {/* Nº Hechos */}
-          <div className="card-base card-subtle p-3 h-full">
-            <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nº hechos</div>
-            <div className="text-lg font-bold text-slate-200">{hechosCount}</div>
-            <div className="text-[10px] text-slate-500">{factsControvertidos} controvertidos</div>
+          <div className="card-base card-subtle rounded-xl p-2.5 sm:p-3 h-full">
+            <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nº hechos</div>
+            <div className="text-base sm:text-lg font-bold text-slate-200">{hechosCount}</div>
+            <div className="text-[9px] sm:text-[10px] text-slate-500">{factsControvertidos} controvertidos</div>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 auto-rows-fr">
