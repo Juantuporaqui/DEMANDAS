@@ -524,10 +524,14 @@ function TabDocs({ documents, caseId, caseData }: any) {
       : []),
     ...(isMislata
       ? [
-          { id: 'demanda-mislata', label: 'Nuestra Demanda', icon: '📄', color: 'emerald' },
-          { id: 'contestacion-mislata', label: 'Contestación Vicenta', icon: '🚨', color: 'rose' },
-          { id: 'argumentos-mislata', label: 'Argumentos Clave', icon: '⚔️', color: 'blue' },
-          { id: 'frases-vista-mislata', label: 'Frases Vista', icon: '🎯', color: 'violet' },
+          { id: 'mislata-demanda-juicio-verbal', label: 'Demanda de juicio verbal (reclamación de cantidad)', icon: '📄', color: 'emerald' },
+          { id: 'mislata-recurso-reposicion', label: 'Recurso de reposición', icon: '🧾', color: 'blue' },
+          { id: 'mislata-escrito-impugnacion', label: 'Escrito de impugnación', icon: '⚔️', color: 'violet' },
+          { id: 'mislata-contestacion-demanda', label: 'Contestación a la demanda', icon: '🛡️', color: 'rose' },
+          { id: 'mislata-alegaciones-impugnacion', label: 'Alegaciones a la impugnación', icon: '📝', color: 'amber' },
+          { id: 'mislata-contra-prueba', label: 'Propuesta de contra-prueba', icon: '🔬', color: 'cyan' },
+          { id: 'mislata-solicitud-prueba', label: 'Solicitud de prueba', icon: '📚', color: 'emerald' },
+          { id: 'mislata-recurso-revision', label: 'Recurso de revisión', icon: '📌', color: 'blue' },
         ]
       : []),
     ...(isQuart
@@ -550,6 +554,20 @@ function TabDocs({ documents, caseId, caseData }: any) {
   const selectedPDF = selectedDocKey ? pdfDocuments.find((pdf) => pdf.id === selectedDocKey) : null;
   const selectedContent = selectedDocKey ? LEGAL_DOCS_MAP[selectedDocKey] : null;
   const selectedTitle = selectedDocKey ? docTitleMap.get(selectedDocKey) : null;
+  const selectedHtmlUrl = selectedDocKey
+    ? ({
+        'demanda-picassent': `${import.meta.env.BASE_URL}docs/picassent/escritos/demanda.html`,
+        'contestacion-picassent': `${import.meta.env.BASE_URL}docs/picassent/escritos/contestacion.html`,
+        'mislata-demanda-juicio-verbal': `${import.meta.env.BASE_URL}docs/mislata/escritos/demanda-juicio-verbal-reclamacion-cantidad.html`,
+        'mislata-recurso-reposicion': `${import.meta.env.BASE_URL}docs/mislata/escritos/recurso-reposicion.html`,
+        'mislata-escrito-impugnacion': `${import.meta.env.BASE_URL}docs/mislata/escritos/escrito-impugnacion.html`,
+        'mislata-contestacion-demanda': `${import.meta.env.BASE_URL}docs/mislata/escritos/contestacion-demanda.html`,
+        'mislata-alegaciones-impugnacion': `${import.meta.env.BASE_URL}docs/mislata/escritos/alegaciones-impugnacion.html`,
+        'mislata-contra-prueba': `${import.meta.env.BASE_URL}docs/mislata/escritos/contra-prueba.html`,
+        'mislata-solicitud-prueba': `${import.meta.env.BASE_URL}docs/mislata/escritos/solicitud-prueba.html`,
+        'mislata-recurso-revision': `${import.meta.env.BASE_URL}docs/mislata/escritos/recurso-revision.html`,
+      } as Record<string, string>)[selectedDocKey]
+    : null;
 
   const handleSelectDoc = (docKey: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -591,13 +609,13 @@ function TabDocs({ documents, caseId, caseData }: any) {
     return (
       <button
         onClick={() => handleSelectDoc(docKey)}
-        className={`group w-full aspect-square rounded-2xl border bg-slate-900/40 p-4 text-left transition-all hover:-translate-y-0.5 hover:bg-slate-900/70 ${colorClasses[color]}`}
+        className={`group w-full rounded-xl border bg-slate-900/40 p-3 text-left transition-all hover:-translate-y-0.5 hover:bg-slate-900/70 ${colorClasses[color]}`}
       >
-        <div className="flex flex-col justify-between h-full">
-          <div className="text-2xl">{icon}</div>
-          <div>
-            <div className="text-xs sm:text-sm font-semibold text-white leading-snug line-clamp-2">{label}</div>
-            {meta && <div className="text-[10px] text-slate-400 mt-1 line-clamp-1">{meta}</div>}
+        <div className="flex items-start gap-3">
+          <div className="text-xl leading-none">{icon}</div>
+          <div className="min-w-0 flex-1">
+            <div className="text-xs sm:text-sm font-semibold text-white leading-snug">{label}</div>
+            {meta && <div className="text-[10px] text-slate-400 mt-1 truncate">{meta}</div>}
           </div>
         </div>
       </button>
@@ -606,18 +624,35 @@ function TabDocs({ documents, caseId, caseData }: any) {
 
   if (selectedDocKey) {
     return (
-      <div className="space-y-4">
-        <button
-          onClick={handleBackToGrid}
-          className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white"
-        >
-          <ChevronRight className="rotate-180" size={18} />
-          Volver a documentos
-        </button>
+      <div className="space-y-3">
+        <div className="sticky top-2 z-20 rounded-xl border border-slate-800 bg-slate-950/95 px-3 py-2 shadow-lg backdrop-blur">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <button
+                onClick={handleBackToGrid}
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:border-slate-500 hover:text-white"
+              >
+                <ChevronRight className="rotate-180" size={14} />
+                Volver
+              </button>
+              <h3 className="truncate text-sm font-semibold text-white">{selectedTitle || 'Documento'}</h3>
+            </div>
+            {selectedHtmlUrl && (
+              <a
+                href={selectedHtmlUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-700 px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:border-slate-500 hover:text-white"
+              >
+                Abrir en pestaña nueva
+              </a>
+            )}
+          </div>
+        </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden min-h-[60vh]">
+        <div className="rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden min-h-[calc(100vh-14rem)]">
           {selectedPDF && casoKeyPDF ? (
-            <div className="flex flex-col h-[70vh]">
+            <div className="flex flex-col h-[calc(100vh-14rem)] min-h-[520px]">
               <div className="flex items-center justify-between p-3 bg-slate-900 border-b border-slate-800">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-lg">{tipoDocIcons[selectedPDF.tipo] || '📄'}</span>
@@ -638,6 +673,12 @@ function TabDocs({ documents, caseId, caseData }: any) {
                 className="flex-1"
               />
             </div>
+          ) : selectedHtmlUrl ? (
+            <iframe
+              src={selectedHtmlUrl}
+              title={selectedTitle || 'Documento HTML'}
+              className="h-[calc(100vh-14rem)] min-h-[520px] w-full border-0 bg-white"
+            />
           ) : selectedContent ? (
             <TextReader content={selectedContent} />
           ) : (
