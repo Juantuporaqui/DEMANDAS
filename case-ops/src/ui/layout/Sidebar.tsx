@@ -88,10 +88,13 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
   };
 
   const navItemBase =
-    'group relative flex items-center gap-3 rounded-[var(--radius-md)] text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40';
-  const navItemActive = 'bg-amber-500/12 text-amber-300 shadow-[inset_0_1px_0_rgba(251,191,36,0.08)]';
+    'group relative flex items-center gap-3 rounded-[var(--radius-md)] text-sm font-medium transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40';
+  const navItemActive = 'bg-amber-500/10 text-amber-300 shadow-[inset_0_1px_0_rgba(251,191,36,0.06),_0_0_12px_-3px_rgba(251,191,36,0.08)]';
   const navItemInactive =
     'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] border border-transparent';
+
+  const tooltipClass =
+    'pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-xl bg-slate-900/95 px-3.5 py-2 text-xs font-medium text-slate-100 opacity-0 shadow-2xl shadow-black/50 transition-all duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.08] backdrop-blur-sm';
 
   return (
     <aside
@@ -99,19 +102,27 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
         collapsed ? 'w-[72px]' : 'w-[272px]'
       }`}
       style={{
-        background: 'linear-gradient(180deg, rgba(10, 15, 26, 0.97) 0%, rgba(17, 24, 39, 0.95) 100%)',
-        backdropFilter: 'blur(20px)',
+        background: 'linear-gradient(180deg, rgba(7, 11, 20, 0.98) 0%, rgba(15, 23, 41, 0.96) 100%)',
+        backdropFilter: 'blur(24px) saturate(1.3)',
       }}
     >
+      {/* Right edge gradient highlight */}
+      <div
+        className="absolute top-0 right-0 bottom-0 w-[1px] pointer-events-none"
+        style={{
+          background: 'linear-gradient(180deg, transparent 0%, rgba(251, 191, 36, 0.06) 30%, rgba(96, 165, 250, 0.04) 70%, transparent 100%)',
+        }}
+      />
+
       {/* Logo */}
-      <div className="px-4 py-5 flex items-center gap-3 border-b border-white/[0.06]">
-        <div className="w-9 h-9 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[10px] flex items-center justify-center font-black text-slate-900 shadow-lg shadow-amber-500/20 text-lg flex-shrink-0">
+      <div className="px-4 py-5 flex items-center gap-3 border-b border-white/[0.06] relative">
+        <div className="w-9 h-9 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[10px] flex items-center justify-center font-black text-slate-900 shadow-lg shadow-amber-500/25 text-lg flex-shrink-0 breathe">
           C
         </div>
         {!collapsed && (
           <div className="min-w-0">
             <span className="text-white font-bold tracking-tight text-[15px] block leading-tight">CASE OPS</span>
-            <span className="text-[10px] text-[var(--dim)] uppercase tracking-[0.15em]">Legal Command</span>
+            <span className="text-[10px] text-[var(--dim)] uppercase tracking-[0.18em]">Legal Command Center</span>
           </div>
         )}
         <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
@@ -119,14 +130,14 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
             onClick={handleClearCache}
             disabled={isClearing}
             title="Limpiar cache"
-            className="p-1.5 rounded-lg text-[var(--dim)] hover:text-amber-400 hover:bg-white/[0.06] transition-all disabled:opacity-50"
+            className="p-1.5 rounded-lg text-[var(--dim)] hover:text-amber-400 hover:bg-white/[0.06] transition-all duration-200 disabled:opacity-50"
           >
             <RefreshCw size={14} className={isClearing ? 'animate-spin' : ''} />
           </button>
           <button
             onClick={onToggleCollapse}
             title={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
-            className="p-1.5 rounded-lg text-[var(--dim)] hover:text-amber-400 hover:bg-white/[0.06] transition-all"
+            className="p-1.5 rounded-lg text-[var(--dim)] hover:text-amber-400 hover:bg-white/[0.06] transition-all duration-200"
           >
             {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
@@ -138,7 +149,8 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
         {/* Centro de Control */}
         <div>
           {!collapsed && (
-            <div className="px-3 mb-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--dim)]">
+            <div className="px-3 mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--dim)] flex items-center gap-2">
+              <span className="w-4 h-[1px] bg-gradient-to-r from-transparent to-[var(--dim)]" style={{ opacity: 0.3 }} />
               Centro de Control
             </div>
           )}
@@ -157,9 +169,7 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
                 <span className="flex h-8 w-8 items-center justify-center flex-shrink-0">{item.icon}</span>
                 {!collapsed && <span className="truncate">{item.label}</span>}
                 {collapsed && (
-                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 opacity-0 shadow-xl shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.06]">
-                    {item.label}
-                  </span>
+                  <span className={tooltipClass}>{item.label}</span>
                 )}
               </NavLink>
             ))}
@@ -171,13 +181,13 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
           {!collapsed && (
             <button
               onClick={() => setFrentesExpanded(!frentesExpanded)}
-              className="w-full px-3 mb-3 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--dim)] hover:text-slate-300 transition-colors"
+              className="w-full px-3 mb-3 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--dim)] hover:text-slate-300 transition-colors duration-200"
             >
               <span className="flex items-center gap-2">
                 <Building2 size={12} />
                 Frentes Judiciales
               </span>
-              <ChevronDown size={12} className={`transition-transform duration-200 ${frentesExpanded ? 'rotate-180' : ''}`} />
+              <ChevronDown size={12} className={`transition-transform duration-250 ${frentesExpanded ? 'rotate-180' : ''}`} />
             </button>
           )}
 
@@ -210,14 +220,12 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
                       <>
                         <span className="truncate text-[13px]">{caseItem.title}</span>
                         {urgency === 'urgente' && (
-                          <span className="ml-auto flex-shrink-0 w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                          <span className="ml-auto flex-shrink-0 glow-dot glow-dot-amber" style={{ width: '6px', height: '6px' }} />
                         )}
                       </>
                     )}
                     {collapsed && (
-                      <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 opacity-0 shadow-xl shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.06]">
-                        {caseItem.title}
-                      </span>
+                      <span className={tooltipClass}>{caseItem.title}</span>
                     )}
                   </NavLink>
                 );
@@ -236,16 +244,21 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
                 </span>
                 {!collapsed && <span className="text-xs text-[var(--dim)]">+ Ver todos</span>}
                 {collapsed && (
-                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 opacity-0 shadow-xl shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.06]">
-                    Ver todos los casos
-                  </span>
+                  <span className={tooltipClass}>Ver todos los casos</span>
                 )}
               </NavLink>
             </div>
           )}
         </div>
 
+        {/* Navegacion principal */}
         <div>
+          {!collapsed && (
+            <div className="px-3 mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--dim)] flex items-center gap-2">
+              <span className="w-4 h-[1px] bg-gradient-to-r from-transparent to-[var(--dim)]" style={{ opacity: 0.3 }} />
+              Navegacion
+            </div>
+          )}
           <div className="space-y-0.5">
             {NAV_ITEMS.slice(1).map(item => (
               <NavLink
@@ -261,9 +274,7 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
                 <span className="flex h-8 w-8 items-center justify-center flex-shrink-0">{item.icon}</span>
                 {!collapsed && <span className="truncate">{item.label}</span>}
                 {collapsed && (
-                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 opacity-0 shadow-xl shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.06]">
-                    {item.label}
-                  </span>
+                  <span className={tooltipClass}>{item.label}</span>
                 )}
               </NavLink>
             ))}
@@ -273,7 +284,8 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
         {/* Herramientas */}
         <div>
           {!collapsed && (
-            <div className="px-3 mb-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--dim)]">
+            <div className="px-3 mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--dim)] flex items-center gap-2">
+              <span className="w-4 h-[1px] bg-gradient-to-r from-transparent to-[var(--dim)]" style={{ opacity: 0.3 }} />
               Herramientas
             </div>
           )}
@@ -292,9 +304,7 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
                 <span className="flex h-8 w-8 items-center justify-center flex-shrink-0">{item.icon}</span>
                 {!collapsed && <span className="truncate">{item.label}</span>}
                 {collapsed && (
-                  <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-100 opacity-0 shadow-xl shadow-black/40 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 border border-white/[0.06]">
-                    {item.label}
-                  </span>
+                  <span className={tooltipClass}>{item.label}</span>
                 )}
               </NavLink>
             ))}
@@ -306,10 +316,10 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
       <div className="px-4 py-4 border-t border-white/[0.06]">
         <div className="flex items-center justify-between text-[10px] text-[var(--dim)]">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.4)]" />
+            <div className="glow-dot glow-dot-green" style={{ width: '7px', height: '7px' }} />
             {!collapsed && <span>Sistema Activo</span>}
           </div>
-          {!collapsed && <span className="font-mono text-[var(--dim)]">v2.0</span>}
+          {!collapsed && <span className="font-mono text-[var(--dim)] opacity-60">v3.0</span>}
         </div>
       </div>
     </aside>
