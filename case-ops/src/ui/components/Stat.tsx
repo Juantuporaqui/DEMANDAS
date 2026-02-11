@@ -9,11 +9,11 @@ type StatProps = {
 export default function Stat({ label, value, delta }: StatProps) {
   return (
     <div className="flex flex-col gap-2">
-      <span className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${textMuted}`}>
+      <span className={`text-[11px] font-semibold uppercase tracking-[0.14em] ${textMuted}`}>
         {label}
       </span>
       <div className="flex items-baseline justify-between gap-3">
-        <span className={`text-2xl font-bold tracking-tight ${textPrimary}`}>
+        <span className={`text-2xl font-bold tracking-tight count-enter ${textPrimary}`}>
           {value}
         </span>
         {delta ? (

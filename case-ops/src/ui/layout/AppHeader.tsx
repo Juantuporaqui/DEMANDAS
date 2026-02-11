@@ -92,14 +92,22 @@ export function AppHeader() {
       className="sticky top-0 z-40 border-b border-white/[0.06]"
       style={{
         paddingTop: 'env(safe-area-inset-top)',
-        background: 'rgba(10, 15, 26, 0.82)',
-        backdropFilter: 'blur(20px) saturate(1.3)',
-        WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
+        background: 'rgba(7, 11, 20, 0.85)',
+        backdropFilter: 'blur(24px) saturate(1.4)',
+        WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
       }}
     >
+      {/* Top edge highlight */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[1px] pointer-events-none"
+        style={{
+          background: 'linear-gradient(90deg, transparent 0%, rgba(251, 191, 36, 0.08) 20%, rgba(96, 165, 250, 0.06) 50%, rgba(167, 139, 250, 0.08) 80%, transparent 100%)',
+        }}
+      />
+
       <div className="mx-auto flex w-full items-center justify-between gap-3 px-3 py-3 sm:px-5 sm:py-4 lg:px-8">
         <div className="flex flex-col gap-0.5 sm:gap-1 min-w-0 flex-1">
-          <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--dim)]">
+          <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--dim)]">
             Contexto
           </span>
           <span className="text-[13px] sm:text-[15px] font-semibold tracking-tight text-[var(--text)] truncate">
@@ -107,7 +115,7 @@ export function AppHeader() {
           </span>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)] whitespace-nowrap">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)] whitespace-nowrap backdrop-blur-sm">
             Fase: {phaseLabel}
           </span>
         </div>

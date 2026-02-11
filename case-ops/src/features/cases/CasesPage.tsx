@@ -1,5 +1,5 @@
 // ============================================
-// CASE OPS - Cases List (Dark Mode Fusion)
+// CASE OPS - Cases List (Premium v3)
 // ============================================
 
 import { useEffect, useMemo, useState } from 'react';
@@ -153,7 +153,19 @@ export function CasesPage() {
       return 0;
     });
   }, [cases]);
-  if (loading) return <div className="p-8 text-center text-slate-500">Cargando casos...</div>;
+
+  if (loading) {
+    return (
+      <div className="space-y-6 p-8">
+        <div className="skeleton h-32 rounded-2xl" />
+        <div className="skeleton h-8 w-64 rounded-lg" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="skeleton h-64 rounded-2xl" />
+          <div className="skeleton h-64 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   const picassentCase = mainCases.find((caseItem) => {
     const title = caseItem.title?.toLowerCase() || '';
@@ -172,40 +184,51 @@ export function CasesPage() {
   const resumenContador = getResumenContador();
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-500/10 via-slate-900/80 to-slate-950/80 p-4 sm:p-6 shadow-lg">
-        <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+    <div className="space-y-8 stagger-children">
+      {/* Hero — Proximo Hito */}
+      <div className="rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-500/8 via-slate-900/80 to-slate-950/80 p-5 sm:p-7 shadow-[var(--shadow-2)] hero-shine relative overflow-hidden">
+        {/* Top edge highlight */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[1px] pointer-events-none"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(251, 191, 36, 0.15) 30%, rgba(251, 191, 36, 0.25) 50%, rgba(251, 191, 36, 0.15) 70%, transparent 100%)',
+          }}
+        />
+
+        <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 relative z-10">
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.4em] text-amber-200">
-              Próximo hito
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.4em] text-gradient-gold">
+              Proximo hito
             </p>
-            <h2 className="mt-1 text-lg sm:text-2xl font-semibold text-white truncate">
+            <h2 className="mt-1.5 text-lg sm:text-2xl font-semibold text-white truncate tracking-tight">
               {proximoHitoLabel}
             </h2>
-            <p className="mt-1 text-sm text-slate-300">
+            <p className="mt-1.5 text-sm text-slate-300">
               {formatDate(proximoHitoDate)} · {resumenAudiencia.sala}
             </p>
           </div>
-          <div className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-5 py-3 text-center">
-            <div className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-200">Cuenta atrás</div>
-            <div className="mt-1 text-2xl font-semibold text-amber-100">{proximoHitoDays}</div>
+          <div className="rounded-xl border border-amber-400/30 bg-amber-400/8 px-5 py-3 text-center backdrop-blur-sm breathe">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-amber-200">Cuenta atras</div>
+            <div className="mt-1 text-2xl sm:text-3xl font-bold text-amber-100 tracking-tight count-enter">{proximoHitoDays}</div>
           </div>
         </div>
       </div>
 
+      {/* Section Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-[var(--dim)] mb-1.5 flex items-center gap-2">
+            <span className="accent-line" />
             Procedimientos principales
           </p>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white">Mapa de frentes judiciales</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gradient-premium tracking-tight">Mapa de frentes judiciales</h1>
+          <p className="mt-1.5 text-sm text-slate-400 leading-relaxed">
             {mainCases.length} procedimientos activos con su documentación, hechos y estrategia.
           </p>
         </div>
         <Link
           to="/analytics"
-          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-emerald-400/40"
+          className="rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 transition-all duration-250 hover:border-emerald-400/30 hover:bg-emerald-400/5 hover:text-emerald-200 hover:shadow-[0_0_20px_-5px_rgba(52,211,153,0.1)] backdrop-blur-sm"
         >
           Ver tablero ejecutivo
         </Link>
@@ -214,7 +237,7 @@ export function CasesPage() {
       {cases.length === 0 ? (
         <EmptyState title="Sin casos" description="Crea tu primer procedimiento judicial." />
       ) : (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2 stagger-children">
           {mainCases.map((caseItem, index) => {
             const accent = CARD_STYLES[index % CARD_STYLES.length];
             const docs = documents.filter((doc) => doc.caseId === caseItem.id);

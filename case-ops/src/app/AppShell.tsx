@@ -1,5 +1,5 @@
 // ============================================
-// CASE OPS — Main Application Shell (Premium)
+// CASE OPS — Main Application Shell (Premium v3)
 // ============================================
 
 import { Outlet, ScrollRestoration, useMatches } from 'react-router-dom';
@@ -24,9 +24,14 @@ export function AppShell() {
 
   return (
     <div
-      className="min-h-screen font-sans selection:bg-amber-500/25 gradient-mesh"
+      className="min-h-screen font-sans selection:bg-amber-500/25 noise-overlay"
       style={{ backgroundColor: 'var(--bg)', color: 'var(--text)' }}
     >
+      {/* Ambient Aurora Background */}
+      <div className="ambient-bg" aria-hidden="true">
+        <div className="ambient-orb" />
+      </div>
+
       {/* Sidebar Desktop */}
       <Sidebar
         collapsed={isSidebarCollapsed}
@@ -35,7 +40,7 @@ export function AppShell() {
 
       {/* Contenido Principal */}
       <main
-        className={`min-h-screen flex flex-col transition-all duration-300 ease-out ${
+        className={`relative z-10 min-h-screen flex flex-col transition-all duration-300 ease-out ${
           isSidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-[272px]'
         }`}
       >
@@ -50,7 +55,7 @@ export function AppShell() {
         <AppFooter />
       </main>
 
-      {/* Navegación Móvil */}
+      {/* Navegacion Movil */}
       <BottomNav />
 
       <ScrollRestoration />
