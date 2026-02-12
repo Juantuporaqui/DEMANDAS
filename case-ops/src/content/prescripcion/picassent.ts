@@ -33,7 +33,7 @@ export const prescripcionPicassent = {
       'Caso: CAS001 · Cuantía: 212.677,00 € · AP: 10/03/2026 09:45',
       `Matrimonio: ${PICASSENT_FACTS.matrimonio.human}`,
       'Acción prioritaria: Depuración del objeto + resolución por bloques',
-      'Regla de oro: Sin tabla, no entra',
+      'Regla operativa: sin tabla verificable no puede efectuarse control de prescripción',
     ],
   },
   resumen: {
@@ -73,26 +73,26 @@ export const prescripcionPicassent = {
     mantra: '“Sin tabla verificable no se puede fijar prescripción ni cuantía.”',
   },
   reglaDeOro: {
-    title: 'Regla de oro (operativa)',
+    title: 'Reglas operativas de contradicción y prueba',
     bullets: [
-      'Sin fecha + documento: NO ENTRA.',
-      'Sin base jurídica (acción): NO ENTRA.',
-      'Sin exigibilidad explicada (dies a quo): NO ENTRA.',
-      'Si alegan interrupción y no la acreditan: cae / prescribe / no probado.',
+      'Sin fecha y sin documento, la alegación carece de individualización suficiente para su contradicción.',
+      'Sin identificación de la acción y su base jurídica, no puede determinarse el plazo aplicable.',
+      'Sin explicación de exigibilidad y dies a quo por partida, no puede practicarse control de prescripción.',
+      'Si se invoca interrupción, debe concretarse y acreditarse: acto, fecha, contenido, destinatario y soporte fehaciente.',
       `Si ${PICASSENT_FACTS.reclamacionExtrajudicial.short} → no hay interrupción; se aplica prescripción por tramos y, además, refuerza retraso desleal (art. 7 CC).`,
       'No mezclar: cuotas ≠ gastos ≠ inversiones.',
     ],
   },
   comoTeLaIntentanColar: {
-    title: 'Cómo te la intentan colar (patrón típico)',
+    title: 'Patrones habituales de articulación de la pretensión',
     bullets: [
-      'Presentan un sumatorio de años.',
-      'Evitan tabla por partidas y sustituyen prueba por narrativa.',
-      'Invocan STS 458/2025 para que el plazo empiece “al final”.',
+      'Presentación de cuantías globales por periodos amplios.',
+      'Sustitución de la prueba individualizada por una narrativa genérica.',
+      'Invocación de STS 458/2025 para desplazar el dies a quo sin justificar identidad de supuesto.',
       `Silencio previo total: ${PICASSENT_FACTS.reclamacionExtrajudicial.short} (sin acto concreto no hay interrupción: art. 1973 CC).`,
-      'Piden al juez tratarlo como un crédito único a liquidar.',
+      'Pretensión de tratar partidas heterogéneas como un crédito único a liquidar.',
     ],
-    antidoto: 'Antídoto: bloques + tabla + dies a quo motivado por bloque + prueba.',
+    antidoto: 'Respuesta procesal: depuración del objeto + tabla verificable por bloques/partidas + dies a quo motivado + exigencia de prueba.',
   },
   marcoNormativo: {
     title: 'Marco normativo operativo',
@@ -171,7 +171,7 @@ export const prescripcionPicassent = {
         id: 'tramo-2015-10-07-2019-06-24',
         rango: '07/10/2015 – 24/06/2019',
         descripcion:
-          'Bajo H1, prescripción por pago (actio nata). Bajo H2, solo es campo de batalla si se aceptan los presupuestos 458; en todo caso exige depuración y prueba.',
+          'Bajo H1, prescripción por pago (actio nata). Bajo H2, exige verificar presupuestos fácticos de STS 458/2025; en todo caso, depuración y prueba por partidas.',
         estadoH1: 'PRESCRITO',
         estadoH2: 'CAMPO DE BATALLA',
         nota: 'Solo podría salvarse si hay tabla y motivación de dies a quo por bloque.',
@@ -195,8 +195,8 @@ export const prescripcionPicassent = {
     ],
   },
   distinguishing: {
-    title: 'Distinguishing anti-STS 458/2025',
-    subtitle: 'Resumen operativo. Ver versión extendida en /analytics/anti-sts-458-2025.',
+    title: 'Respuesta procesal frente a STS 458/2025',
+    subtitle: 'Resumen operativo con acceso inmediato a ficha y sentencia en PDF.',
     intro:
       'Resumen de 4 argumentos para distinguir la STS 458/2025: naturaleza de inversión, falta de desequilibrio probado, retraso desleal y llave procesal.',
     ctaLabel: 'Abrir versión extendida',
@@ -207,7 +207,7 @@ export const prescripcionPicassent = {
     items: [
       {
         id: 'escenario-1',
-        title: 'Escenario 1 — STS 458/2025 NO entra · Juez NO la compra',
+        title: 'Escenario 1 — STS 458/2025 no invocada; aplicación de regla general de actio nata por pago (H1)',
         sostener:
           'Prescripción por exigibilidad real: cada partida/bloque reclamable era ejercitable en su momento; lo no reclamado en plazo no puede sobrevivir como “deuda viva”.',
         pedir: [
@@ -219,7 +219,7 @@ export const prescripcionPicassent = {
       },
       {
         id: 'escenario-2',
-        title: 'Escenario 2 — STS 458/2025 NO la invocan · Juez la menciona / la compra',
+        title: 'Escenario 2 — STS 458/2025 introducida como criterio por el tribunal; delimitación estricta de su alcance',
         sostener:
           'STS 458/2025 no autoriza mezclar acciones ni sustituye la prueba: como mínimo obliga a delimitar alcance y resolver por bloques homogéneos.',
         pedir: [
@@ -231,7 +231,7 @@ export const prescripcionPicassent = {
       },
       {
         id: 'escenario-3',
-        title: 'Escenario 3 — STS 458/2025 SÍ la invocan · Juez NO la compra',
+        title: 'Escenario 3 — STS 458/2025 invocada por la actora; el tribunal no aprecia identidad de supuesto',
         sostener: 'Vuelta a prescripción + falta de prueba: sin crédito exigible y vigente acreditado, cae.',
         pedir: [
           'Exclusión de lo remoto por prescripción/no individualización.',
@@ -242,7 +242,7 @@ export const prescripcionPicassent = {
       },
       {
         id: 'escenario-4',
-        title: 'Escenario 4 — STS 458/2025 SÍ la invocan · Juez SÍ la compra',
+        title: 'Escenario 4 — STS 458/2025 considerada aplicable; aplicación parcial y por bloques homogéneos',
         sostener:
           'Aunque el juez asuma STS 458/2025 para un bloque concreto, NO puede: convertir A+B+C en un crédito único, extenderla a gastos/inversiones sin depuración, fijar dies a quo “al final” sin punto de corte probado y motivación por bloque.',
         pedir: [
@@ -251,6 +251,19 @@ export const prescripcionPicassent = {
         ],
         riesgo: 'Reactivación masiva de partidas antiguas.',
         contramedida: 'Motivación reforzada + no extensión automática + tabla + carga de prueba.',
+      },
+
+      {
+        id: 'escenario-5',
+        title: 'Escenario 5 — El tribunal difiere la prescripción a sentencia; aun así, depuración, concreción y carga probatoria',
+        sostener:
+          'Aunque el tribunal reserve la valoración final, la contradicción exige delimitación del objeto, individualización de partidas y fijación de hechos controvertidos.',
+        pedir: [
+          'Requerimiento de individualización por partidas/bloques para ordenar la prueba y evitar indefensión.',
+          'Fijación expresa de hechos controvertidos y carga probatoria por partida (existencia, cuantía, acción, exigibilidad, interrupción).',
+        ],
+        riesgo: 'Llegar a juicio con objeto difuso y prueba inabordable.',
+        contramedida: 'Forzar arquitectura probatoria en AP: tabla verificable, documentos y hechos controvertidos.',
       },
     ],
   },
@@ -383,8 +396,8 @@ export const prescripcionPicassent = {
     { id: 'marco-normativo', label: 'Marco normativo' },
     { id: 'peticion-prioritaria', label: 'Petición prioritaria' },
     { id: 'tabla-partidas', label: 'Tabla por partidas (A/B/C)' },
-    { id: 'regla-de-oro', label: 'Regla de oro' },
-    { id: 'como-te-la-intentan-colar', label: 'Cómo te la intentan colar' },
+    { id: 'regla-de-oro', label: 'Reglas operativas de contradicción y prueba' },
+    { id: 'como-te-la-intentan-colar', label: 'Patrones habituales de articulación' },
     { id: 'cronologia-prescripcion', label: 'Cronología (H1/H2)' },
     { id: 'distinguishing', label: 'Distinguishing' },
     { id: 'selector-escenarios', label: 'Selector de escenarios' },

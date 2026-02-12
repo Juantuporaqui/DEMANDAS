@@ -7,6 +7,7 @@ import { DistinguishingSection } from './DistinguishingSection';
 import { ErroresFatalesSection } from './ErroresFatalesSection';
 import { HypothesisToggle } from './HypothesisToggle';
 import { MarcoNormativoSection } from './MarcoNormativoSection';
+import { LegalReferenceText } from './LegalReferenceText';
 import { ScenarioCard } from './ScenarioCard';
 import { StickyTOC } from './StickyTOC';
 import { TablaPartidasSection } from './TablaPartidasSection';
@@ -42,6 +43,17 @@ const formatErrores = (items: typeof prescripcionPicassent.erroresFatales.items)
       ].join('\n')
     )
     .join('\n');
+
+const salaTemplates = {
+  principal:
+    'Con carácter previo, y a efectos de depuración del objeto del proceso, se interesa que la parte actora individualice la pretensión mediante relación por partidas o bloques homogéneos, indicando para cada una: fecha o periodo, concepto, cuantía exacta, base jurídica (acción ejercitada), momento de exigibilidad y dies a quo con motivación, así como el documento soporte. Sin dicha individualización, la pretensión queda reducida a una narrativa global que impide contradicción efectiva y control de prescripción.',
+  carga:
+    'Se interesa que se fijen como hechos controvertidos, por cada partida o bloque, (i) la existencia del pago, (ii) su cuantía, (iii) la razón jurídica del eventual reintegro, (iv) la exigibilidad y el dies a quo, y (v) la interrupción, si se invoca; con expresa atribución de la carga probatoria a quien sostiene el hecho constitutivo.',
+  interrupcion:
+    'Para el caso de que la actora alegue interrupción, se interesa su concreción y acreditación: acto interruptivo concreto, fecha, contenido, destinatario y soporte fehaciente, a fin de permitir la contradicción y su valoración jurídica.',
+  cierre:
+    'La cuestión no es “relato contra relato”: es acción aplicable, exigibilidad, dies a quo, prueba por partidas y, en su caso, interrupción acreditada. Sin eso, no existe un crédito verificable.',
+};
 
 export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageProps) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -183,20 +195,20 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
                 onCopied={handleCopied}
               />
             </div>
-            <p className="mt-3 text-sm text-slate-100/90">{content.resumen.intro}</p>
+          <p className="mt-3 text-sm text-slate-100/90"><LegalReferenceText text={content.resumen.intro} /></p>
             <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-slate-100/90">
               {content.resumen.puntos.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}><LegalReferenceText text={item} /></li>
               ))}
             </ol>
             <p className="mt-4 text-sm font-semibold text-slate-100">{content.resumen.riesgoIntro}</p>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-100/90">
               {content.resumen.riesgos.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}><LegalReferenceText text={item} /></li>
               ))}
             </ul>
             <p className="mt-4 text-sm font-semibold text-slate-100">{content.resumen.solucionIntro}</p>
-            <p className="mt-2 text-sm text-slate-100/90">{content.resumen.solucion}</p>
+            <p className="mt-2 text-sm text-slate-100/90"><LegalReferenceText text={content.resumen.solucion} /></p>
           </section>
 
           <MarcoNormativoSection
@@ -274,7 +286,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
             </div>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-300">
               {content.reglaDeOro.bullets.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}><LegalReferenceText text={item} /></li>
               ))}
             </ul>
           </section>
@@ -289,16 +301,33 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
                   '',
                   content.comoTeLaIntentanColar.antidoto,
                 ].join('\n')}
-                label="Copiar antídoto"
+                label="Copiar respuesta"
                 onCopied={handleCopied}
               />
             </div>
             <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-slate-300">
               {content.comoTeLaIntentanColar.bullets.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}><LegalReferenceText text={item} /></li>
               ))}
             </ol>
-            <p className="mt-3 text-sm font-semibold text-emerald-200">{content.comoTeLaIntentanColar.antidoto}</p>
+            <p className="mt-3 text-sm font-semibold text-emerald-200"><LegalReferenceText text={content.comoTeLaIntentanColar.antidoto} /></p>
+          </section>
+
+          <section id="resumen-peticiones" className="scroll-mt-24 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-sm text-slate-100 print-card">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-base font-semibold text-white">Resumen y peticiones (modo sala)</h2>
+            </div>
+            <div className="mt-4 space-y-4">
+              {Object.entries(salaTemplates).map(([key, text]) => (
+                <div key={key} className="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">{key}</p>
+                    <CopyButton text={text} label="Copiar" onCopied={handleCopied} />
+                  </div>
+                  <p className="mt-2 text-sm text-slate-200"><LegalReferenceText text={text} /></p>
+                </div>
+              ))}
+            </div>
           </section>
 
           <CronologiaMatrix
