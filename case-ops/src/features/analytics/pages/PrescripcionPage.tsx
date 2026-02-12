@@ -11,7 +11,6 @@ export function PrescripcionPage() {
   const caseIdAliases: Record<string, string> = {
     picassent: 'picassent',
     cas001: 'picassent',
-    cas002: 'picassent',
   };
   const caseId = caseIdAliases[requestedCaseId] ?? requestedCaseId;
   const returnToParam = searchParams.get('returnTo');

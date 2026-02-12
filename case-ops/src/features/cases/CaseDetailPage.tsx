@@ -1085,7 +1085,7 @@ function TabEstrategia({ strategies, caseId }: any) {
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
               <Link
-                to={`/analytics/prescripcion?caseId=picassent&returnTo=${encodeURIComponent(returnTo)}`}
+                to={`/analytics/prescripcion?caseId=${caseId}&returnTo=${encodeURIComponent(returnTo)}`}
                 className="group block w-full rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.99]"
               >
                 <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 mb-3">
