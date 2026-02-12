@@ -46,6 +46,7 @@ import { AudienciaPreviaRedirect } from '../features/audiencia/AudienciaPreviaRe
 import { ModoTelepronter } from '../features/audiencia/ModoTelepronter';
 import { ChecklistAudiencia } from '../features/audiencia/ChecklistAudiencia';
 import { ToolsPage } from '../features/tools/ToolsPage';
+import { IntegrityPage } from '../features/tools/IntegrityPage';
 import { JurisprudenciaPage } from '../features/jurisprudencia/JurisprudenciaPage';
 import { EvidenceComparePage } from '../features/evidence/EvidenceComparePage';
 import { FairLiquidationPage } from '../features/finance/FairLiquidationPage';
@@ -157,6 +158,11 @@ export const router = createBrowserRouter(
           path: 'tools/comparador-evidencia',
           element: <EvidenceComparePage />,
           handle: { pageMode: 'wide' },
+        },
+        {
+          path: 'tools/integridad',
+          element: <IntegrityPage />,
+          handle: { pageMode: 'prose' },
         },
         // Jurisprudencia
         {

@@ -71,3 +71,8 @@ export default defineConfig([
   },
 ])
 ```
+
+## Integridad de datos (autosNumber)
+
+- Se añadió deduplicación segura por `autosNumber` y reasignación transaccional de entidades relacionadas.
+- Nueva herramienta manual en `/tools/integridad` para detectar duplicados y estrategias huérfanas.

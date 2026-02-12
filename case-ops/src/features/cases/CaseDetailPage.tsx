@@ -34,6 +34,7 @@ import { TextReader } from '../../ui/components/TextReader';
 import { LEGAL_DOCS_MAP, AUTO_DOCS } from '../../data/legal_texts';
 import type { AutoDocument } from '../../data/legal_texts';
 import { formatCurrency } from '../../utils/validators';
+import { getCaseKey } from '../../utils/caseKey';
 import { getCaseAmounts } from '../../utils/moneyCase';
 // Análisis financiero específico para Quart
 import { QuartFinancialAnalysis } from './QuartFinancialAnalysis';
@@ -84,18 +85,11 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
   const factsAProbar = facts.filter((f: Fact) => f.status === 'a_probar').length;
 
   // Detectar tipo de caso
-  const isPicassent = caseData.id === 'CAS001' ||
-                      caseData.id?.includes('picassent') ||
-                      caseData.title?.toLowerCase().includes('picassent') ||
-                      caseData.autosNumber?.includes('715') ||
-                      caseData.court?.toLowerCase().includes('picassent');
-  const isMislata = caseData.id?.includes('mislata') ||
-                    caseData.title?.toLowerCase().includes('mislata') ||
-                    caseData.autosNumber?.includes('1185');
-  const isQuart = caseData.id?.includes('quart') ||
-                  caseData.title?.toLowerCase().includes('quart') ||
-                  caseData.autosNumber?.includes('1428');
-  const caseSlug = isPicassent ? 'picassent' : isMislata ? 'mislata' : isQuart ? 'quart' : null;
+  const caseKey = getCaseKey(caseData);
+  const isPicassent = caseKey === 'picassent';
+  const isMislata = caseKey === 'mislata';
+  const isQuart = caseKey === 'quart';
+  const caseSlug = caseKey === 'other' ? null : caseKey;
   const docsBasePath = caseSlug ? `${import.meta.env.BASE_URL}docs/${caseSlug}/escritos` : null;
 
   const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
@@ -506,20 +500,14 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
 // ============================================
 // 2. TAB DOCUMENTOS (El Lector Inteligente - MÓVIL FULLSCREEN)
 // ============================================
-function TabDocs({ documents, caseId, caseData }: any) {
+function TabDocs({ documents, caseData }: any) {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedDocKey = searchParams.get('doc');
 
-  // Detección robusta: ID del caso, Título o Número de Autos
-  const isPicassent = caseId?.includes('picassent') ||
-                      caseData.title?.toLowerCase().includes('picassent') ||
-                      caseData.autosNumber?.includes('715');
-
-  const isMislata = caseData.title?.toLowerCase().includes('mislata') ||
-                    caseData.autosNumber?.includes('1185');
-
-  const isQuart = caseData.title?.toLowerCase().includes('quart') ||
-                  caseData.autosNumber?.includes('1428');
+  const caseKey = getCaseKey(caseData);
+  const isPicassent = caseKey === 'picassent';
+  const isMislata = caseKey === 'mislata';
+  const isQuart = caseKey === 'quart';
 
   const caseLabel = isPicassent ? 'PICASSENT' : isMislata ? 'MISLATA' : isQuart ? 'QUART' : 'CASO';
 
@@ -828,16 +816,17 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
     let isActive = true;
     const loadFacts = async () => {
       const [allCases, allFacts] = await Promise.all([casesRepo.getAll(), factsRepo.getAll()]);
-      const findCaseId = (matcher: (c: Case) => boolean) => allCases.find(matcher)?.id;
-      const picassentId = findCaseId(
-        (c) => c.id?.includes('picassent') || c.title?.toLowerCase().includes('picassent') || c.autosNumber?.includes('715'),
-      );
-      const mislataId = findCaseId(
-        (c) => c.id?.includes('mislata') || c.title?.toLowerCase().includes('mislata') || c.autosNumber?.includes('1185'),
-      );
-      const quartId = findCaseId(
-        (c) => c.id?.includes('quart') || c.title?.toLowerCase().includes('quart') || c.autosNumber?.includes('1428'),
-      );
+      const keyedCases = allCases.reduce((acc, item) => {
+        const key = getCaseKey(item);
+        if (key !== 'other' && !acc[key]) {
+          acc[key] = item.id;
+        }
+        return acc;
+      }, {} as Record<'picassent' | 'mislata' | 'quart', string | undefined>);
+
+      const picassentId = keyedCases.picassent;
+      const mislataId = keyedCases.mislata;
+      const quartId = keyedCases.quart;
 
       if (isActive) {
         setCaseFacts({
@@ -863,9 +852,7 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
     };
   }, [caseId]);
 
-  const isQuart = caseId?.includes('quart') ||
-                  caseData?.title?.toLowerCase().includes('quart') ||
-                  caseData?.autosNumber?.includes('1428');
+  const isQuart = getCaseKey(caseData) === 'quart';
 
   if (isQuart) {
     return <QuartFinancialAnalysis />;
@@ -949,10 +936,11 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
   );
 }
 
-function TabEstrategia({ strategies, caseId }: any) {
-  const isPicassent = caseId?.includes('picassent') || caseId === 'CAS001';
-  const isMislata = caseId?.includes('mislata');
-  const isQuart = caseId?.includes('quart');
+function TabEstrategia({ strategies, caseId, caseData }: any) {
+  const caseKey = getCaseKey(caseData);
+  const isPicassent = caseKey === 'picassent';
+  const isMislata = caseKey === 'mislata';
+  const isQuart = caseKey === 'quart';
   const caseLabel = isPicassent
     ? 'PICASSENT'
     : isMislata
@@ -970,6 +958,17 @@ function TabEstrategia({ strategies, caseId }: any) {
   const normalizedStrategies = Array.isArray(strategies) ? strategies : [];
 
   const estrategiaDataset = isPicassent ? getEstrategiaPorProcedimiento('picassent') : isMislata ? getEstrategiaPorProcedimiento('mislata') : [];
+
+
+  const suspiciousStrategiesCount =
+    caseKey === 'other'
+      ? 0
+      : normalizedStrategies.filter((strategy: Strategy) => {
+          const tagsBlob = (strategy.tags || []).join(' ').toLowerCase();
+          const textBlob = `${strategy.attack} ${strategy.rebuttal}`.toLowerCase();
+          return !tagsBlob.includes(caseKey) && !textBlob.includes(caseKey);
+        }).length;
+  const suspiciousRatio = normalizedStrategies.length > 0 ? suspiciousStrategiesCount / normalizedStrategies.length : 0;
 
   const filteredLineas = estrategiaDataset.filter((linea) => {
     const query = lineaSearch.trim().toLowerCase();
@@ -1033,6 +1032,14 @@ function TabEstrategia({ strategies, caseId }: any) {
 
   return (
     <div className="space-y-6">
+
+      {normalizedStrategies.length > 2 && suspiciousRatio > 0.7 && (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-100">
+          <strong>Alerta de integridad:</strong> se han detectado estrategias potencialmente fuera de contexto para este caso.
+          <Link to="/tools/integridad" className="ml-1 underline text-amber-300 hover:text-amber-200">Revisar en Herramientas → Integridad</Link>.
+        </div>
+      )}
+
       {/* Microcopy: Qué va dónde */}
       <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-4">
         <h4 className="text-sm font-semibold text-white mb-3">Qué va dónde</h4>
@@ -1056,7 +1063,7 @@ function TabEstrategia({ strategies, caseId }: any) {
             </div>
           )}
           <Link
-            to={`/warroom?caseId=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
+            to={`/warroom?caseId=${isPicassent ? 'picassent' : isMislata ? 'mislata' : 'quart'}`}
             className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-3 transition hover:border-rose-400/60"
           >
             <div className="text-xs font-bold text-rose-300 mb-1">War Room</div>
@@ -1342,13 +1349,13 @@ function TabEstrategia({ strategies, caseId }: any) {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              to={`/warroom?caseId=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
+              to={`/warroom?caseId=${isPicassent ? 'picassent' : isMislata ? 'mislata' : 'quart'}`}
               className="inline-flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-200 transition hover:border-rose-400/60 hover:bg-rose-500/20"
             >
               Abrir War Room
             </Link>
             <Link
-              to={`/warroom/new?caseId=${caseId}&returnTo=${encodeURIComponent(`/cases/${caseId}?tab=estrategia`)}&caseKey=${isPicassent ? 'picassent' : caseId?.includes('mislata') ? 'mislata' : 'quart'}`}
+              to={`/warroom/new?caseId=${caseId}&returnTo=${encodeURIComponent(`/cases/${caseId}?tab=estrategia`)}&caseKey=${isPicassent ? 'picassent' : isMislata ? 'mislata' : 'quart'}`}
               className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-200 transition hover:border-amber-400/60 hover:bg-amber-500/20"
             >
               + Nueva tarjeta
@@ -1479,6 +1486,16 @@ function TabEstrategia({ strategies, caseId }: any) {
 // ============================================
 // COMPONENTE PRINCIPAL (FIXED WITH AUTO-REPAIR)
 // ============================================
+
+function allCasesByAutos(cases: Case[]): Record<string, string[]> {
+  return cases.reduce((acc, caseItem) => {
+    const key = (caseItem.autosNumber || '').trim();
+    if (!key) return acc;
+    acc[key] = [...(acc[key] ?? []), caseItem.id];
+    return acc;
+  }, {} as Record<string, string[]>);
+}
+
 export function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -1497,6 +1514,7 @@ export function CaseDetailPage() {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [partidas, setPartidas] = useState<Partida[]>([]);
   const [facts, setFacts] = useState<Fact[]>([]); 
+  const [repairNotice, setRepairNotice] = useState<string | null>(null);
 
   // FIX: UseEffect con auto-reparación integrada
   useEffect(() => {
@@ -1508,6 +1526,8 @@ export function CaseDetailPage() {
         try {
           const result = await repairCaseLinks(id);
           if (result.repaired) {
+            const movedTotal = Object.values(result.movedCounts).reduce((sum, value) => sum + value, 0);
+            setRepairNotice(`Se repararon ${movedTotal} entidades por duplicados.`);
             console.log('Case links repaired:', result.movedCounts);
           }
         } catch (repairError) {
@@ -1528,12 +1548,24 @@ export function CaseDetailPage() {
             factsRepo.getAll()
           ]);
 
+          const filteredStrategies = allStrategies.filter(s => s.caseId === id);
           setDocs(allDocs.filter(d => d.caseId === id));
           setEvents(allEvents.filter(e => e.caseId === id));
-          setStrategies(allStrategies.filter(s => s.caseId === id));
+          setStrategies(filteredStrategies);
           setPartidas(allPartidas.filter(p => p.caseId === id));
           setFacts(allFacts.filter(f => f.caseId === id));
-          
+
+          if (import.meta.env.DEV) {
+            const dupAutos = allCasesByAutos(await casesRepo.getAll());
+            console.debug('[integrity][case-detail]', {
+              caseId: c.id,
+              autosNumber: c.autosNumber,
+              filteredStrategies: filteredStrategies.length,
+              totalStrategies: allStrategies.length,
+              duplicateAutos: dupAutos,
+            });
+          }
+
         } else {
             navigate('/cases');
         }
@@ -1581,17 +1613,10 @@ export function CaseDetailPage() {
   };
 
   if (!currentCase) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Cargando War Room...</div>;
-  const isPicassent = currentCase.id === 'CAS001' ||
-                      currentCase.id?.includes('picassent') ||
-                      currentCase.title?.toLowerCase().includes('picassent') ||
-                      currentCase.autosNumber?.includes('715') ||
-                      currentCase.court?.toLowerCase().includes('picassent');
-  const isMislata = currentCase.id?.includes('mislata') ||
-                    currentCase.title?.toLowerCase().includes('mislata') ||
-                    currentCase.autosNumber?.includes('1185');
-  const isQuart = currentCase.id?.includes('quart') ||
-                  currentCase.title?.toLowerCase().includes('quart') ||
-                  currentCase.autosNumber?.includes('1428');
+  const caseKey = getCaseKey(currentCase);
+  const isPicassent = caseKey === 'picassent';
+  const isMislata = caseKey === 'mislata';
+  const isQuart = caseKey === 'quart';
 
   const fallbackTimelineItems = events.map((event) => ({
     id: event.id,
@@ -1606,6 +1631,11 @@ export function CaseDetailPage() {
   return (
     <div className="min-h-screen bg-slate-950 pb-20 font-sans">
       {/* HEADER - Optimizado para móvil */}
+      {repairNotice && (
+        <div className="mx-3 mt-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs text-amber-100">
+          {repairNotice} <Link className="underline" to="/tools/integridad">Ver detalles de integridad</Link>
+        </div>
+      )}
       <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-20 shadow-xl">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 pt-3 sm:pt-4 pb-0">
           <div className="flex justify-between items-start mb-3 sm:mb-4 gap-2">
@@ -1833,8 +1863,8 @@ export function CaseDetailPage() {
           <TabEscenarios caseId={currentCase.id} facts={facts} partidas={partidas} documents={docs} />
         )}
         {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
-        {activeTab === 'docs' && <TabDocs documents={docs} caseId={id} caseData={currentCase} />}
-        {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} />}
+        {activeTab === 'docs' && <TabDocs documents={docs} caseData={currentCase} />}
+        {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} caseData={currentCase} />}
       </main>
     </div>
   );
