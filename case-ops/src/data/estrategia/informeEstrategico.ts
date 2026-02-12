@@ -7,11 +7,13 @@ export type Procedimiento = 'picassent' | 'mislata' | 'quart';
 export type TipoEstrategia = 'defensa' | 'ataque' | 'replica' | 'pregunta';
 export type Prioridad = 'critica' | 'alta' | 'media' | 'baja';
 export type Estado = 'pendiente' | 'preparado' | 'usado' | 'descartado';
+export type TamanoTarjeta = 'normal' | 'grande';
 
 export interface LineaEstrategica {
   id: string;
   procedimiento: Procedimiento;
   tipo: TipoEstrategia;
+  tamano?: TamanoTarjeta;
   titulo: string;
   descripcion: string;
   fundamento: string;
@@ -34,6 +36,7 @@ export const estrategiaPicassent: LineaEstrategica[] = [
     id: 'pic-def-1',
     procedimiento: 'picassent',
     tipo: 'defensa',
+    tamano: 'grande',
     titulo: 'PRESCRIPCIÓN RADICAL',
     descripcion: 'El 70% de las reclamaciones está prescrito. Hechos de 2006, 2008, 2014 superan cualquier plazo.',
     fundamento: 'Art. 1964 CC (5 años) + DT 5ª Ley 42/2015 (máximo 7/10/2020 para acciones anteriores a 2015)',
@@ -118,6 +121,7 @@ export const estrategiaPicassent: LineaEstrategica[] = [
     id: 'pic-def-6',
     procedimiento: 'picassent',
     tipo: 'defensa',
+    tamano: 'grande',
     titulo: 'CONSECUENCIAS ADVERSAS DE DOCS INCOMPLETOS (Art. 329 LEC)',
     descripcion:
       'Los Docs 39, 41, 43, 45 están recortados. El Art. 329 LEC permite al tribunal tener por ciertos los hechos que la otra parte alegue si se aportan documentos incompletos.',
@@ -246,6 +250,80 @@ export const estrategiaPicassent: LineaEstrategica[] = [
     notasInternas:
       'No discutir “cómo vivió”. Enmarcar como: (1) calificación jurídica de pagos (deuda propia), (2) asimetría de garantía privativa, (3) integridad documental, (4) trazabilidad bancaria obligatoria.',
   },
+
+  {
+    id: 'pic-def-9',
+    procedimiento: 'picassent',
+    tipo: 'defensa',
+    tamano: 'grande',
+    titulo: 'PRÉSTAMO KUTXA 22/08/2006 (310.000€): SOLIDARIDAD + GARANTÍA PRIVATIVA + TASACIÓN/LTV + TRAZABILIDAD',
+    descripcion:
+      'Tarjeta macro (nivel Prescripción/Excepción). Esta escritura fija hechos duros: (i) Vicenta figura como DEUDORA (no hipotecante), (ii) existe responsabilidad SOLIDARIA, (iii) la garantía real recae sobre vivienda PRIVATIVA del demandado, (iv) el préstamo (310.000€) es coherente con un LTV prudencial ~80% respecto del valor de referencia pactado en escritura (387.960,24€), y (v) se identifica la cuenta de domiciliación. Consecuencia procesal: lo que ella denomine “aportación” debe depurarse (pago de deuda propia ≠ inversión privativa), y el destino real de fondos exige trazabilidad bancaria completa + pericial contable.',
+    fundamento: `I) CITAS LITERALES (escritura Kutxa 22/08/2006)
+1) Roles:
+   • “PARTE DEUDORA-HIPOTECANTE: DON JUAN RODRÍGUEZ CRESPO.”
+   • “PARTE DEUDORA-NO HIPOTECANTE: DOÑA VICENTA JIMÉNEZ VERA.”
+2) Principal:
+   • “Kutxa entrega… la suma de TRESCIENTOS DIEZ MIL EUROS (310.000,00 €).”
+3) Solidaridad:
+   • “Los prestatarios responden solidariamente del cumplimiento de las obligaciones dimanantes de este contrato.”
+4) Carácter privativo + garantía:
+   • “Pertenece a DON JUAN RODRÍGUEZ CRESPO, en pleno dominio, con carácter privativo…”
+   • “DON JUAN RODRÍGUEZ CRESPO constituye hipoteca… sobre la finca…” (Lope de Vega 7, Quart)
+5) Cuenta domiciliada (tira de oficio bancario):
+   • “La parte prestataria domicilia el pago… en la cuenta número 2101060471001178701 de Kutxa.”
+6) Valor de referencia para ejecución/subasta:
+   • “tasan los interesados la finca hipotecada en… (387.960,24 €)”
+7) Integridad material del instrumento:
+   • “extendido en quince folios… el presente y sus catorce anteriores…”
+
+II) CUANTIFICACIÓN (sin dogmas, con matemáticas)
+• Principal préstamo: 310.000,00 €.
+• Valor de referencia en escritura: 387.960,24 €.
+• LTV = 310.000 / 387.960,24 = 0,799051 → 79,905%.
+  (Conclusión: ratio alineada con práctica prudencial ~80% en vivienda. NO afirmar “jamás se presta más”: existen excepciones con garantías adicionales; aquí se usa como coherencia financiera y, sobre todo, como palanca de prueba.)
+• Tasación Tinsa: EXISTE según el demandado → APORTARLA y recalcular LTV sobre el valor homologado. (Dejar constancia como prueba a solicitar/aportar, sin inventar cifra si no consta.)
+
+III) LÍNEAS DE DEFENSA (material + probatoria)
+A) Pago de deuda propia (solidaridad): si la actora pagó cuotas/recibos del préstamo, en principio estaba cumpliendo obligación propia frente al banco. Eso NO es automáticamente “aportación privativa” al patrimonio del demandado. Como mucho, derecho de regreso por exceso probado (art. 1145 CC) y pago-a-pago.
+B) Garantía privativa = aportación estructural del demandado: la financiación se consigue gravando un bien privativo del demandado. El colateral y el riesgo patrimonial privativo los asume él. Esto obliga a depurar el relato de “yo puse todo”.
+C) Destino real de fondos: la casa ya era privativa (título 2000). El préstamo 2006 no financia su compra. El destino (parcelas/obra/inversión u otros) solo se acredita con trazabilidad bancaria (disposiciones, transferencias, pagos a terceros).
+D) Integridad documental: aportar “solo 5 páginas” de una escritura extendida en 15 folios es selección material. Procede exigir copia íntegra/testimonio y anexos (incluida Tinsa si se aporta).
+
+IV) AUDIENCIA PREVIA (encaje limpio)
+• art. 426 LEC: alegación complementaria sin cambiar pretensión → depuración probatoria.
+• art. 428 LEC: fijación de HECHOS CONTROVERTIDOS: condición deudora actora; solidaridad; vivienda privativa como garantía; cuenta domiciliada; valor de referencia y/o tasación Tinsa; destino real de fondos; integridad documental.
+• art. 429 LEC: PRUEBA: oficio bancario + pericial contable + aportación íntegra escritura/anexos.
+`,
+    prioridad: 'critica',
+    estado: 'preparado',
+    articulosRelacionados: [
+      'art. 217 LEC',
+      'art. 426 LEC',
+      'art. 428 LEC',
+      'art. 429 LEC',
+      'art. 329 LEC',
+      'art. 1145 CC'
+    ],
+    documentosSoporte: [
+      'Escritura Kutxa 22/08/2006 (COPIA ÍNTEGRA)',
+      'Tasación Tinsa (aportar)',
+      'Oficio Kutxa: histórico préstamo 25.1863109.4',
+      'Oficio Kutxa: extractos cuenta 2101060471001178701',
+      'Pericial contable: reconstrucción de flujos'
+    ],
+    frasesClave: [
+      '“Señoría: la actora es DEUDORA y hay SOLIDARIDAD. Pagar cuotas no es inversión privativa; como mucho, regreso por exceso probado (art. 1145 CC).”',
+      '“La garantía real recae sobre vivienda privativa del demandado: la financiación se obtuvo con su riesgo patrimonial. Esto obliga a depurar el relato de aportaciones.”',
+      '“Pedimos fijar como HECHOS CONTROVERTIDOS el origen y destino real de fondos y la integridad documental de la escritura.”',
+      '“Solicitamos PRUEBA objetiva: oficio bancario (histórico + extractos completos de la cuenta domiciliada) y pericial contable.”'
+    ],
+    riesgos:
+      'Riesgo: que intenten minimizar el valor 387.960,24€ como “tipo subasta”. Mitigación: el núcleo no es el tipo, sino solidaridad + deuda propia + cuenta domiciliada + necesidad de trazabilidad; y, además, aportar tasación Tinsa para valor homologado.',
+    notasInternas:
+      'No hablar de “cómo vivió”. Enmarcar SIEMPRE en: (1) calificación jurídica de pagos (deuda propia), (2) asimetría de garantía privativa, (3) integridad documental, (4) trazabilidad bancaria obligatoria.'
+  },
+
 
   // ATAQUES
   {

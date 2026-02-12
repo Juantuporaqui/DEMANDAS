@@ -988,6 +988,15 @@ function TabEstrategia({ strategies, caseId, caseData }: any) {
     return tipoOk && prioridadOk && estadoOk && searchOk;
   });
 
+  const sortedLineas = [...filteredLineas].sort((a, b) => {
+    const aBig = a.tamano === 'grande' ? 1 : 0;
+    const bBig = b.tamano === 'grande' ? 1 : 0;
+    if (aBig !== bBig) return bBig - aBig;
+    const prioRank: Record<Prioridad, number> = { critica: 4, alta: 3, media: 2, baja: 1 };
+    if (prioRank[a.prioridad] !== prioRank[b.prioridad]) return prioRank[b.prioridad] - prioRank[a.prioridad];
+    return a.id.localeCompare(b.id);
+  });
+
   const handleCopyPhrase = async (phrase: string) => {
     try {
       await navigator.clipboard.writeText(phrase);
@@ -1275,12 +1284,17 @@ function TabEstrategia({ strategies, caseId, caseData }: any) {
               </select>
             </div>
             <div className="space-y-3">
-              {filteredLineas.map((linea) => (
-                <button
+              {sortedLineas.map((linea) => {
+                const isBig = linea.tamano === 'grande';
+
+                return <button
                   key={linea.id}
                   type="button"
                   onClick={() => setSelectedLinea(linea)}
-                  className="w-full rounded-2xl border border-slate-800/60 bg-slate-950/30 p-4 text-left transition hover:border-emerald-500/40 hover:bg-slate-900/60 print-card"
+                  className={`w-full rounded-2xl border text-left transition hover:bg-slate-900/60 print-card ${isBig
+                    ? 'border-rose-500/40 hover:border-rose-500/70 bg-gradient-to-br from-rose-950/30 to-slate-950/30 p-6'
+                    : 'border-slate-800/60 bg-slate-950/30 p-4 hover:border-emerald-500/40'
+                  }`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <h5 className="text-sm font-semibold text-white">{linea.titulo}</h5>
@@ -1294,9 +1308,14 @@ function TabEstrategia({ strategies, caseId, caseData }: any) {
                       <span className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-indigo-200">
                         {linea.estado}
                       </span>
+                      {isBig && (
+                        <span className="rounded-full border border-rose-300/30 bg-rose-500/10 px-2 py-0.5 text-rose-200">
+                          macro
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-slate-400 line-clamp-2">{linea.descripcion}</p>
+                  <p className={isBig ? 'mt-3 text-xs text-slate-300 line-clamp-5' : 'mt-2 text-xs text-slate-400 line-clamp-2'}>{linea.descripcion}</p>
                   {linea.articulosRelacionados.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {linea.articulosRelacionados.map((art) => (
@@ -1321,8 +1340,8 @@ function TabEstrategia({ strategies, caseId, caseData }: any) {
                       ))}
                     </div>
                   )}
-                </button>
-              ))}
+                </button>;
+              })}
               {filteredLineas.length === 0 && (
                 <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 p-6 text-center text-xs text-slate-500">
                   Sin estrategias con los filtros seleccionados.
