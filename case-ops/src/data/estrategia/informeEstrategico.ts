@@ -185,6 +185,67 @@ export const estrategiaPicassent: LineaEstrategica[] = [
     notasInternas:
       'Usar como “palanca de prueba”: no discutir estilos de vida. Objetivo: obligar a AEAT/TGSS/banco + pericial contable y, si no hay trazabilidad, pedir que se limite la reclamación a lo efectivamente acreditado.',
   },
+  {
+    id: 'pic-def-8',
+    procedimiento: 'picassent',
+    tipo: 'defensa',
+    titulo: 'PRÉSTAMO KUTXA 22/08/2006: SOLIDARIDAD, GARANTÍA PRIVATIVA, TASACIÓN/LTV Y TRAZABILIDAD',
+    descripcion:
+      'Esta escritura (Kutxa, 22/08/2006) es un “ancla de hechos duros”: (1) Vicenta figura como DEUDORA aunque no hipotecante, (2) existe responsabilidad SOLIDARIA, (3) la garantía real recae sobre vivienda PRIVATIVA del demandado, y (4) el principal financiado (310.000 €) es coherente con un LTV prudencial cercano al 80% respecto del valor de referencia (387.960,24 €) reflejado en la propia escritura. Consecuencia procesal: lo que la actora llame “aportación” debe depurarse, porque pagar cuotas en una deuda propia/solidaria NO es inversión privativa salvo exceso acreditado; y el destino real de fondos exige trazabilidad (oficio bancario + pericial contable).',
+    fundamento:
+      'CITAS LITERALES (escritura Kutxa 22/08/2006; fragmentos exactos):\n' +
+      '• “PARTE DEUDORA-HIPOTECANTE: DON JUAN RODRÍGUEZ CRESPO.”\n' +
+      '• “PARTE DEUDORA-NO HIPOTECANTE: DOÑA VICENTA JIMÉNEZ VERA.”\n' +
+      '• “Kutxa entrega… la suma de TRESCIENTOS DIEZ MIL EUROS (310.000,00 €).”\n' +
+      '• “Los prestatarios responden solidariamente del cumplimiento de las obligaciones dimanantes de este contrato.”\n' +
+      '• “Pertenece a DON JUAN RODRÍGUEZ CRESPO, en pleno dominio, con carácter privativo…” (título: Auto 10/10/2000).\n' +
+      '• “tasan los interesados la finca hipotecada en… (387.960,24 €).”\n' +
+      '• “extendido en quince folios… el presente y sus catorce anteriores…” (integridad: si solo se aportan 5 páginas, es recorte material).\n' +
+      '• “La parte prestataria domicilia el pago… en la cuenta número 2101060471001178701 de Kutxa.”\n\n' +
+      'CUANTIFICACIÓN (objetiva, verificable):\n' +
+      '• Fecha escritura: 22/08/2006.\n' +
+      '• Principal: 310.000,00 €.\n' +
+      '• Valor de referencia en escritura para ejecución/subasta: 387.960,24 €.\n' +
+      '• LTV = 310.000 / 387.960,24 = 0,799051 → 79,905%.\n' +
+      '  (Conclusión prudencial: ratio alineada con el estándar habitual ~80% en vivienda; no se afirma como absoluto, pero sí como coherencia financiera).\n\n' +
+      'LÍNEAS DE DEFENSA (material + procesal):\n' +
+      '1) PAGO DE DEUDA PROPIA (solidaridad): Si la actora pagó cuotas/recibos del préstamo, en principio estaba cumpliendo obligación propia frente a Kutxa. No puede presentarse automáticamente como “aportación privativa al patrimonio del demandado”. Solo cabría, en su caso, un DERECHO DE REGRESO por exceso de pago sobre su parte (art. 1145 CC), y siempre acreditado pago a pago.\n' +
+      '2) GARANTÍA PRIVATIVA = APORTACIÓN ESTRUCTURAL DEL DEMANDADO: La financiación se obtiene gravando una vivienda privativa del demandado. La actora no aporta garantía real; su relato de “yo puse el dinero” debe confrontarse con el hecho de que el colateral y el riesgo patrimonial privativo lo soporta el demandado.\n' +
+      '3) DESTINO DE FONDOS: la vivienda ya era privativa (Auto 2000), por tanto el préstamo 2006 no financia la compra de esa casa. El destino real (parcelas/obra/inversión u otros) se acredita con trazabilidad bancaria (disposiciones, transferencias a terceros, recibos, movimientos de la cuenta domiciliada).\n' +
+      '4) INTEGRIDAD DOCUMENTAL: si la actora aportó “solo 5 páginas”, existe riesgo de sesgo por selección. Debe exigirse copia íntegra/testimonio completo y anexos (incluida tasación Tinsa si existe) para contradicción plena.\n\n' +
+      'AUDIENCIA PREVIA (palanca limpia):\n' +
+      '• art. 426 LEC: alegación complementaria: “esto no es juicio moral, es depuración probatoria”.\n' +
+      '• art. 428 LEC: HECHOS CONTROVERTIDOS a fijar: (i) condición deudora de actora, (ii) solidaridad, (iii) carácter privativo del inmueble y su aportación como garantía, (iv) ratio LTV coherente ~80%, (v) integridad documental, (vi) destino y trazabilidad de fondos.\n' +
+      '• art. 429 LEC: PRUEBA: oficio a entidad/archivo (histórico préstamo, disposiciones, cuadro amortización, recibos), extractos completos de la cuenta domiciliada, y pericial contable de reconstrucción de flujos.\n\n' +
+      'NOTA TÉCNICA (para blindar): el valor 387.960,24 € consta en escritura como tipo/valor a efectos de ejecución; adicionalmente puede existir tasación formal de Tinsa. Usar ambos como coherencia financiera/LTV, sin convertirlo en “verdad absoluta”, y centrar el tiro en la TRazabilidad bancaria.',
+    prioridad: 'critica',
+    estado: 'preparado',
+    articulosRelacionados: [
+      'art. 217 LEC',
+      'art. 426 LEC',
+      'art. 428 LEC',
+      'art. 429 LEC',
+      'art. 1145 CC',
+      'Ley 2/1981 art. 5 (referencia LTV 60/80)',
+    ],
+    documentosSoporte: [
+      'Escritura Kutxa 22/08/2006 (COPIA ÍNTEGRA + anexos)',
+      'Tasación Tinsa (si consta/si se aporta)',
+      'Oficio Kutxa: histórico préstamo 25.1863109.4 (disposiciones, cuadro amortización, recibos)',
+      'Oficio Kutxa: extractos COMPLETOS cuenta domiciliada 2101060471001178701',
+      'Pericial contable: reconstrucción de flujos (disposición → pagos → destino)',
+    ],
+    frasesClave: [
+      '“Señoría, esto no es un juicio moral: la actora es DEUDORA y existe SOLIDARIDAD. Pagar cuotas no es aportación privativa; como mucho, regreso por exceso probado (art. 1145 CC).”',
+      '“La garantía real recae sobre vivienda privativa del demandado: la financiación se obtuvo con su riesgo patrimonial, lo que obliga a depurar el relato de aportaciones.”',
+      '“Pedimos fijar como HECHOS CONTROVERTIDOS la condición deudora, la solidaridad, el carácter privativo del bien hipotecado y el destino real de los fondos.”',
+      '“Solicitamos PRUEBA objetiva: oficio bancario (histórico y extractos completos de la cuenta domiciliada) y pericial contable. Lo no trazado no puede convertirse en condena.”',
+    ],
+    riesgos:
+      'Riesgo: que intenten desviar con “irrelevante” o “solo tipo subasta”. Mitigación: (i) el núcleo es solidaridad + deuda propia + trazabilidad; (ii) el LTV es solo coherencia prudencial, no dogma; (iii) pedir oficio y pericial para destino real de fondos.',
+    notasInternas:
+      'No discutir “cómo vivió”. Enmarcar como: (1) calificación jurídica de pagos (deuda propia), (2) asimetría de garantía privativa, (3) integridad documental, (4) trazabilidad bancaria obligatoria.',
+  },
 
   // ATAQUES
   {
