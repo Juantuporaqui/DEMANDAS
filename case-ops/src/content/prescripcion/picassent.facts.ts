@@ -13,7 +13,7 @@ export const PICASSENT_FACTS = {
     licencia: true,
     nota: 'Con licencia de alojamiento turístico (nº/fecha: pendiente de concretar si no consta en autos).',
   },
-  formacionActora: 'Máster impartido por la Cámara de Comercio (formación económico-empresarial).',
+  formacionActora: 'Máster en formación económico-empresarial impartido por la Cámara de Comercio.',
   reclamacionExtrajudicial: {
     short: 'No consta reclamación extrajudicial fehaciente previa a la demanda.',
     long: `Desde 2006 y durante la convivencia, la separación (${PICASSENT_SEPARACION.human}) y el divorcio (${PICASSENT_DIVORCIO.human}), hasta la demanda (${PICASSENT_DEMANDA.human}), no consta (ni se aporta) una sola reclamación extrajudicial fehaciente (correo/burofax) reclamando cantidad alguna o afirmando pago en exceso.`,
