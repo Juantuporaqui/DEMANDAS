@@ -708,7 +708,7 @@ function TabDocs({ documents, caseData }: any) {
           <p className="text-xs text-slate-500">Selecciona un documento para abrir el visor</p>
         </div>
         <Link
-          to={`/documents/new?caseId=${caseId}`}
+          to={`/documents/new?caseId=${caseData.id}`}
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white shadow-lg shadow-blue-900/20 hover:bg-blue-500"
         >
           <Upload size={14} /> Subir nuevo
