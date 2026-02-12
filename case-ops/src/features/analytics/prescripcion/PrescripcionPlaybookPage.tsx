@@ -20,6 +20,8 @@ import { LegalReferenceText } from './LegalReferenceText';
 import { ScenarioCard } from './ScenarioCard';
 import { StickyTOC } from './StickyTOC';
 import { TablaPartidasSection } from './TablaPartidasSection';
+import { APStackSection } from './APStackSection';
+import { AP_STACK_ITEMS } from './apStack';
 
 interface PrescripcionPlaybookPageProps {
   returnTo: string;
@@ -115,7 +117,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
       )}
 
       {/* ───── CABECERA (siempre visible) ───── */}
-      <section className="rounded-2xl sm:rounded-3xl border border-slate-700/60 bg-slate-900/60 p-4 sm:p-6 text-slate-100 shadow-sm print-card">
+      <section className="sticky top-3 z-20 rounded-2xl sm:rounded-3xl border border-slate-700/60 bg-slate-900/95 p-4 sm:p-6 text-slate-100 shadow-sm print-card">
         <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0 space-y-3">
             <div>
@@ -157,6 +159,149 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
           <p className="mt-2 text-emerald-100/80">{content.hero.metaRealNote}</p>
         </div>
       </section>
+
+      <APStackSection onCopied={handleCopied} />
+
+      <section className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-sm text-slate-100 print-card">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-white">Peticiones prioritarias (P0)</h2>
+          <CopyButton
+            text={[
+              'Peticiones prioritarias (P0)',
+              ...AP_STACK_ITEMS[0].pedir.map((entry, index) => `${index + 1}) ${entry}`),
+            ].join('\n')}
+            label="Copiar peticiones"
+            onCopied={handleCopied}
+          />
+        </div>
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-emerald-100/95">
+          {AP_STACK_ITEMS[0].pedir.map((entry) => (
+            <li key={entry}><LegalReferenceText text={entry} /></li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-100 print-card">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-white">Anti-STS 458/2025</h2>
+          <a
+            href="/docs/STS_458_2025.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full border border-indigo-400/50 px-3 py-1 text-xs font-semibold text-indigo-100"
+            title="STS 458/2025: desplazamiento del dies a quo en supuestos concretos; exige identidad de presupuesto y prueba."
+          >
+            Abrir STS 458/2025
+          </a>
+        </div>
+        <p className="mt-2 text-sm text-slate-300">
+          La STS 458/2025 solo puede operar con delimitación fáctica estricta y resolución por bloques homogéneos. No
+          autoriza, por sí sola, la reconstrucción global de periodos extensos sin prueba detallada ni desplaza de forma
+          automática el régimen general de prescripción.
+        </p>
+        <div className="mt-3 grid gap-2 md:grid-cols-2">
+          {AP_STACK_ITEMS.filter((item) => ['P3', 'P4', 'P5', 'P6', 'P7'].includes(item.id)).map((item) => (
+            <details key={item.id} className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-3">
+              <summary className="cursor-pointer text-sm font-semibold text-white">{item.id} — {item.title}</summary>
+              <p className="mt-2 text-xs text-slate-300"><LegalReferenceText text={item.tesis} /></p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-100 print-card">
+        <h2 className="text-base font-semibold text-white">Jurisprudencia y normativa</h2>
+        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-300">
+          <li><LegalReferenceText text="STS 458/2025" /></li>
+          <li><LegalReferenceText text="Art. 217 LEC" /></li>
+          <li><LegalReferenceText text="Art. 1969 CC" /></li>
+          <li><LegalReferenceText text="Art. 1964.2 CC" /></li>
+          <li><LegalReferenceText text="Art. 1973 CC" /></li>
+          <li><a href="/docs/prescripcion_cas001.pdf" target="_blank" rel="noopener noreferrer" className="text-emerald-300 underline">PDF completo de prescripción (CAS001)</a></li>
+        </ul>
+      </section>
+
+      <section className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-5 text-sm text-slate-100 print-card">
+        <h2 className="text-base font-semibold text-white">Modo sala — guiones automáticos</h2>
+        <div className="mt-3 grid gap-3 md:grid-cols-3">
+          {[
+            {
+              name: '60s',
+              items: ['P0', 'P1'],
+            },
+            {
+              name: '2m',
+              items: ['P0', 'P1', 'P2', 'P3'],
+            },
+            {
+              name: '5m',
+              items: ['P0', 'P1', 'P2', 'P3', 'P4'],
+            },
+          ].map((script) => {
+            const selected = AP_STACK_ITEMS.filter((item) => script.items.includes(item.id));
+            const scriptText = selected
+              .map((item) => `${item.id} — ${item.title}\n${item.fraseSala}`)
+              .join('\n\n');
+            return (
+              <article key={script.name} className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold text-white">Guion {script.name}</h3>
+                  <CopyButton text={scriptText} label="Copiar" onCopied={handleCopied} />
+                </div>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-slate-300">
+                  {selected.map((item) => (
+                    <li key={item.id}>{item.id} — {item.title}</li>
+                  ))}
+                </ul>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="hidden print:block rounded-xl border border-slate-400 p-4 text-black bg-white">
+        <h2 className="text-lg font-semibold">Resumen imprimible AP — CAS001</h2>
+        <p className="mt-1 text-sm">Panel rápido + peticiones + guion 2 minutos + ranking de argumentos.</p>
+        <h3 className="mt-3 font-semibold">Peticiones prioritarias</h3>
+        <ol className="list-decimal pl-5 text-sm">
+          {AP_STACK_ITEMS[0].pedir.map((entry) => (
+            <li key={entry}>{entry}</li>
+          ))}
+        </ol>
+        <h3 className="mt-3 font-semibold">Guion 2 minutos</h3>
+        <ul className="list-disc pl-5 text-sm">
+          {AP_STACK_ITEMS.filter((item) => ['P0', 'P1', 'P2', 'P3'].includes(item.id)).map((item) => (
+            <li key={item.id}>{item.id}: {item.fraseSala}</li>
+          ))}
+        </ul>
+        <h3 className="mt-3 font-semibold">Ranking</h3>
+        <ul className="list-disc pl-5 text-sm">
+          {AP_STACK_ITEMS.map((item) => (
+            <li key={item.id}>{item.id} — {item.title}</li>
+          ))}
+        </ul>
+      </section>
+
+      <footer className="rounded-2xl border border-slate-700/60 bg-slate-900/40 p-5 text-sm text-slate-200 print-card">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <h3 className="font-semibold text-white">Checklist 72h</h3>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              <li>Actualizar tabla A/B/C con documentos efectivamente aportados.</li>
+              <li>Preparar petición P0 literal y copia inmediata para sala.</li>
+              <li>Verificar cómputo de tramos y cortes temporales aplicables.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold text-white">Errores críticos a evitar</h3>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              <li>Entrar en fondo sin depurar previamente el objeto litigioso.</li>
+              <li>Aceptar un crédito global sin individualización de partidas.</li>
+              <li>Admitir extensión automática de STS 458/2025 sin bloques ni motivación.</li>
+            </ul>
+          </div>
+        </div>
+      </footer>
 
       {/* ───── SELECTOR DE HIPÓTESIS (siempre visible) ───── */}
       <section className="rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4 text-sm text-slate-200 print-card">

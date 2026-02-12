@@ -64,6 +64,7 @@ export function LegalReferenceText({ text, className }: LegalReferenceTextProps)
               onClick={() => setActiveRef(token.ref ?? null)}
               className="font-semibold text-emerald-300 underline decoration-dotted underline-offset-2 hover:text-emerald-200"
               aria-label={`Abrir referencia jurídica: ${token.value}`}
+              title={token.ref.summary}
             >
               {token.value}
             </button>
@@ -92,6 +93,16 @@ export function LegalReferenceText({ text, className }: LegalReferenceTextProps)
                   className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200"
                 >
                   Ver sentencia en PDF
+                </a>
+              ) : null}
+              {activeRef.externalUrl ? (
+                <a
+                  href={activeRef.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-200"
+                >
+                  Ver BOE
                 </a>
               ) : null}
             </div>
