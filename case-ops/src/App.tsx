@@ -2,18 +2,24 @@
 // CASE OPS - Main App Component
 // ============================================
 
-import { useEffect, useState } from 'react';
+import { type CSSProperties, type FormEvent, useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './app/router';
 import { seedDatabase } from './db/seed';
 import './index.css';
 
+const AUTH_SESSION_KEY = 'caseops.authenticated';
+const AUTH_USERNAME = import.meta.env.VITE_APP_USERNAME ?? 'admin';
+const AUTH_PASSWORD = import.meta.env.VITE_APP_PASSWORD ?? 'CaseOps2026!';
+
 function App() {
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     initializeApp();
+    setIsAuthenticated(sessionStorage.getItem(AUTH_SESSION_KEY) === 'true');
   }, []);
 
   async function initializeApp() {
@@ -25,6 +31,11 @@ function App() {
       console.error('Initialization error:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     }
+  }
+
+  function handleAuthenticated() {
+    sessionStorage.setItem(AUTH_SESSION_KEY, 'true');
+    setIsAuthenticated(true);
   }
 
   if (error) {
@@ -60,7 +71,105 @@ function App() {
     );
   }
 
+  if (!isAuthenticated) {
+    return <LoginGate onAuthenticated={handleAuthenticated} />;
+  }
+
   return <RouterProvider router={router} />;
 }
+
+function LoginGate({ onAuthenticated }: { onAuthenticated: () => void }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (username === AUTH_USERNAME && password === AUTH_PASSWORD) {
+      setError(null);
+      onAuthenticated();
+      return;
+    }
+
+    setError('Credenciales incorrectas. Contacta al administrador.');
+  }
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'grid',
+        placeItems: 'center',
+        padding: 24,
+        background: 'var(--bg)',
+        color: 'var(--text)',
+      }}
+    >
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          width: '100%',
+          maxWidth: 420,
+          border: '1px solid var(--border)',
+          borderRadius: 16,
+          padding: 24,
+          background: 'var(--surface)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+          boxShadow: '0 12px 30px rgba(0,0,0,0.22)',
+        }}
+      >
+        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Acceso privado</h1>
+        <p style={{ margin: 0, color: 'var(--text-muted)' }}>
+          Esta web contiene información confidencial. Introduce usuario y contraseña.
+        </p>
+
+        <label style={{ display: 'grid', gap: 6, marginTop: 6 }}>
+          <span>Usuario</span>
+          <input
+            autoComplete="username"
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            required
+            style={inputStyle}
+          />
+        </label>
+
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span>Contraseña</span>
+          <input
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            style={inputStyle}
+          />
+        </label>
+
+        {error ? (
+          <p style={{ margin: 0, color: 'var(--color-danger)' }} role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <button type="submit" className="btn btn-primary" style={{ marginTop: 4 }}>
+          Iniciar sesión
+        </button>
+      </form>
+    </div>
+  );
+}
+
+const inputStyle: CSSProperties = {
+  width: '100%',
+  border: '1px solid var(--border)',
+  borderRadius: 10,
+  padding: '10px 12px',
+  background: 'var(--bg)',
+  color: 'var(--text)',
+};
 
 export default App;
