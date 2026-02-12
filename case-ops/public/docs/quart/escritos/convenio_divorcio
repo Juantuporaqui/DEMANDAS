@@ -1,281 +1,262 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentencia de Divorcio Nº 362/2023</title>
-    <style>
-        /* RESET Y BASE */
-        body {
-            font-family: "Times New Roman", Times, serif;
-            font-size: 12pt;
-            line-height: 1.6;
-            color: #000;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-        }
-
-        /* CONTENEDOR TIPO FOLIO */
-        .document-container {
-            background-color: #fff;
-            margin: 0 auto;
-            padding: 40px 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 1px solid #dcdcdc;
-            width: 100%;
-            max-width: 900px; /* Ancho A4 en escritorio */
-            box-sizing: border-box;
-        }
-
-        /* MÓVIL */
-        @media (max-width: 600px) {
-            body { padding: 0; }
-            .document-container {
-                padding: 20px;
-                box-shadow: none;
-                border: none;
-            }
-        }
-
-        /* ENCABEZADOS */
-        .header-court {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        .header-info {
-            text-align: left;
-            margin-bottom: 30px;
-            font-size: 11pt;
-        }
-
-        h1 {
-            font-size: 14pt;
-            text-align: center;
-            font-weight: bold;
-            margin: 30px 0;
-            text-decoration: underline;
-        }
-
-        h2 {
-            font-size: 13pt;
-            text-align: center;
-            font-weight: bold;
-            margin-top: 25px;
-            text-transform: uppercase;
-        }
-
-        h3 {
-            font-size: 12pt;
-            font-weight: bold;
-            text-decoration: underline;
-            margin-top: 20px;
-        }
-
-        p {
-            margin-bottom: 15px;
-            text-align: justify;
-        }
-
-        /* ESTILOS ESPECÍFICOS */
-        .fallo {
-            margin-top: 30px;
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-left: 5px solid #000;
-        }
-
-        .party-block {
-            margin-bottom: 15px;
-            padding-left: 20px;
-        }
-
-        .csv-footer {
-            font-size: 8pt;
-            color: #666;
-            text-align: center;
-            margin-top: 50px;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-            word-break: break-all;
-        }
-        
-        .page-break {
-            border-top: 2px dashed #ccc;
-            margin: 40px 0;
-            text-align: center;
-            color: #888;
-            font-size: 10pt;
-            padding-top: 10px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="document-container">
-
-    <div class="header-court">
-        JUZGADO DE PRIMERA INSTANCIA Nº 1<br>
-        QUART DE POBLET<br>
-        Avenida VILLALBA DE LUGO, 15 1<br>
-        TELÉFONO 96 120 76 07
-    </div>
-
-    <div class="header-info">
-        <p><strong>N.I.G.:</strong> 46102-41-1-2023-0002538</p>
-        <p><strong>Procedimiento:</strong> Asunto Civil 000892/2023</p>
-    </div>
-
-    <h1>SENTENCIA Nº 362/2023</h1>
-
-    <p><strong>JUEZ QUE LA DICTA:</strong> D/D SANDRA LOZANO LÓPEZ<br>
-    <strong>Lugar:</strong> QUART DE POBLET<br>
-    <strong>Fecha:</strong> diecisiete de octubre de dos mil veintitrés</p>
-
-    <div class="party-block">
-        [cite_start]<p><strong>PARTE DEMANDANTE:</strong> JUAN RODRIGUEZ CREPO [cite: 1014]<br>
-        Abogado: GONZALEZ GUMIEL, VICTORIA<br>
-        Procurador: MOLLA SANCHIS, BEGOÑA</p>
-    </div>
-
-    <div class="party-block">
-        [cite_start]<p><strong>PARTE DEMANDADA:</strong> VICENTA JIMENEZ VERA [cite: 1016]<br>
-        Abogado: GOMEZ MARTIN, MARIA AUXILIADORA<br>
-        Procurador: LUZZY AGUILAR, ISABEL</p>
-    </div>
-
-    <p><strong>OBJETO DEL JUICIO:</strong> Derecho de familia</p>
-
-    <p>SANDRA LOZANO LÓPEZ, Juez del JUZGADO DE PRIMERA INSTANCIA E INSTRUCCIÓN Nº 1 DE QUART DE POBLET, ha visto los presentes autos de Familia. Divorcio contencioso [DIC] 000892/2023, promovidos por JUAN RODRIGUEZ CREPO, representado/a/s por el/la Procurador/a de los Tribunales D/ª. MOLLA SANCHIS, BEGOÑA, y asistido/a/s por el/la Letrado/a D/. Victoria González Gumiel, contra VICENTA JIMENEZ VERA, representado/a/s por el/la Procurador/a de los Tribunales D/ª. LUZZY AGUILAR, ISABEL, y asistido/a/s por el/la Letrado/a D/. Mª Auxiliadora Gómez Martín, habiendo sido parte el Ministerio Fiscal, representado por D/ª. [cite_start]Margarita Gomà, habiendo recaído la presente resolución en base a los siguientes: [cite: 1018, 1019, 1020, 1021, 1022, 1023, 1024]</p>
-
-    <h2>ANTECEDENTES DE HECHO</h2>
-
-    [cite_start]<p><strong>PRIMERO.-</strong> La parte actora, JUAN RODRIGUEZ CREPO, a través de su representación procesal, formuló demanda de divorcio contencioso frente a VICENTA JIMENEZ VERA, alegando los hechos y fundamentos de derecho que consideró de aplicación, y terminó suplicando al Juzgado el dictado de una sentencia por la que se declarase el divorcio del matrimonio compuesto por ambos cónyuges y las demás medidas que tuvo por oportunas. [cite: 1026]</p>
-
-    <div class="csv-footer">CSV:NEXJSEXY DUFGH6AQ M VIXU8M URL de validación:https://www.tramita.gva.es/csv-front/index.faces?cadena NEXJSEXY DUFGH6AQ:M VIXURM</div>
-    <div class="page-break">--- Página 2 ---</div>
-
-    [cite_start]<p><strong>SEGUNDO.-</strong> Admitida a trámite la demanda de divorcio presentada, y de conformidad con lo dispuesto en el artículo 753 de la Ley de Enjuiciamiento Civil, se dio traslado a la parte demandada y al Ministerio Fiscal, que contestaron en legal forma en los términos que figuran en autos, señalándose la correspondiente vista principal. [cite: 1028]</p>
-
-    <p><strong>TERCERO.-</strong> Al acto de la vista principal, celebrada el día 16 de octubre de 2023, comparecieron las partes debidamente asistidas y representadas, manifestando al inicio del acto haber llegado un acuerdo, presentando a tal efecto convenio regulador de divorcio para su homologación. [cite_start]A continuación, las partes prestaron oralmente su conformidad y ratificación a dicho acuerdo, sin que el Ministerio Fiscal tuviera nada que oponer, quedando los autos vistos para sentencia, todo lo cual consta debidamente registrado en soporte apto para la grabación y reproducción del sonido y de la imagen. [cite: 1029, 1030]</p>
-
-    <h2>FUNDAMENTOS DE DERECHO</h2>
-
-    <h3>PRIMERO.- Divorcio.</h3>
-
-    <p>El artículo 85 del Código Civil, dispone que:<br>
-    [cite_start]"El matrimonio se disuelve, sea cual fuere la forma y el tiempo de su celebración, por la muerte o la declaración de fallecimiento de uno de los cónyuges y por el divorcio." [cite: 1033, 1034, 1035]</p>
-
-    <p>Por su parte, el artículo 86 del Código Civil, dispone que:<br>
-    [cite_start]"Se decretará judicialmente el divorcio, cualquiera que sea la forma de celebración del matrimonio, a petición de uno solo de los cónyuges, de ambos o de uno con el consentimiento del otro, cuando concurran los requisitos y circunstancias exigidos en el artículo 81." [cite: 1036, 1037]</p>
-
-    <p>Tal artículo 81 del Código Civil dispone asimismo que:<br>
-    [cite_start]"Se decretará judicialmente la separación cuando existan hijos menores no emancipados o con la capacidad modificada judicialmente que dependan de sus progenitores, cualquiera que sea la forma de celebración del matrimonio: [cite: 1038, 1039]</p>
-
-    <p>1.º A petición de ambos cónyuges o de uno con el consentimiento del otro, una vez transcurridos tres meses desde la celebración del matrimonio. [cite_start]A la demanda se acompañará una propuesta de convenio regulador redactada conforme al artículo 90 de este Código. [cite: 1040, 1041]</p>
-
-    <p>2.º A petición de uno solo de los cónyuges, una vez transcurridos tres meses desde la celebración del matrimonio. [cite_start]No será preciso el transcurso de este plazo para la interposición de la demanda cuando se acredite la existencia de un riesgo para la vida, la integridad física, [cite: 1042, 1043]</p>
-
-    <div class="csv-footer">CSV:NEXJSEXY DUFGH6AQ MBVIXUXM URL de validación:https://www.tramita.gva.es/csv-front/index. faces/cadena-NEXJSEXY DUFGH6AQ MAVIXU8M</div>
-    <div class="page-break">--- Página 3 ---</div>
-
-    [cite_start]<p>la libertad, la integridad moral o libertad e indemnidad sexual del cónyuge demandante o de los hijos de ambos o de cualquiera de los miembros del matrimonio. [cite: 1045]</p>
-
-    [cite_start]<p>A la demanda se acompañará propuesta fundada de las medidas que hayan de regular los efectos derivados de la separación." [cite: 1046]</p>
-
-    <p>En los presentes autos ha quedado probado que los litigantes contrajeron matrimonio civil el día 9 de agosto de 2013, según consta en la certificación de la inscripción del matrimonio en el Registro Civil de Valencia (documento 1 de la demanda). [cite_start]Así, habiendo transcurrido el citado lapso de tiempo, procede decretar el divorcio del matrimonio formado por Juan Rodríguez Crespo y Vicenta Jiménez Vera, con todos los efectos legales inherentes previstos en el Código Civil. [cite: 1047, 1048]</p>
-
-    <h3>SEGUNDO.- Del acuerdo.</h3>
-
-    [cite_start]<p>En el acto de la vista las partes pusieron de manifiesto el acuerdo alcanzado para regular las consecuencias del divorcio, y las medidas que debían regir en relación al/los hijo/a/s del matrimonio, Guillermo y Raúl, manifestando el Ministerio Fiscal su no oposición a la aprobación del referido acuerdo. [cite: 1050]</p>
-
-    <p>El artículo 90 del Código Civil dispone en su apartado segundo que:<br>
-    [cite_start]"Los acuerdos de los cónyuges adoptados para regular las consecuencias de la nulidad, separación y divorcio presentados ante el órgano judicial serán aprobados por el Juez salvo si son dañosos para los hijos o gravemente perjudiciales para uno de los cónyuges". [cite: 1051, 1052]</p>
-
-    [cite_start]<p>En la presente resolución, a la vista de los acuerdos adoptados por las partes, dada la conformidad del Ministerio Fiscal y no observándose medida alguna que sea dañosa para el/la/los hijo/a/s del matrimonio o gravemente perjudicial para alguno de los cónyuges, se procede a su total aprobación y conforme se hará constar en la parte dispositiva de la presente resolución. [cite: 1053]</p>
-
-    <h3>TERCERO.- Costas.</h3>
-
-    [cite_start]<p>Dada la especial naturaleza de las pretensiones deducidas en este procedimiento, no ha lugar a la imposición de costas a ninguno de los litigantes. [cite: 1055]</p>
-
-    [cite_start]<p>Vistos los preceptos legales, y demás de general y pertinente aplicación, [cite: 1056]</p>
-
-    <div class="fallo">
-        <h2>FALLO</h2>
-        <p>ESTIMO PARCIALMENTE la demanda interpuesta por el/la Procurador/a de los Tribunales D/ . [cite_start]Begoña Molla Sanchis, en nombre y representación de D. Juan Rodríguez [cite: 1058, 1059]</p>
-    </div>
-
-    <div class="csv-footer">CSV:NEXJSEXY DUFGH6AQ:M VIXURM URL de validación:https://www.tramita.gva.es/csv-front/index.faces?cadena NEXJSEXY DUFGH6AQ:M VIXURM</div>
-    <div class="page-break">--- Página 4 ---</div>
-
-    [cite_start]<p>[...] la libertad, la integridad moral o libertad e indemnidad sexual del cónyuge demandante o de los hijos de ambos o de cualquiera de los miembros del matrimonio. [cite: 1061]</p>
-    [cite_start]<p>A la demanda se acompañará propuesta fundada de las medidas que hayan de regular los efectos derivados de la separación." [cite: 1062]</p>
-    <p>En los presentes autos ha quedado probado que los litigantes contrajeron matrimonio civil el día 9 de agosto de 2013, según consta en la certificación de la inscripción del matrimonio en el Registro Civil de Valencia (documento 1 de la demanda). [cite_start]Así, habiendo transcurrido el citado lapso de tiempo, procede decretar el divorcio del matrimonio formado por Juan Rodríguez Crespo y Vicenta Jiménez Vera, con todos los efectos legales inherentes previstos en el Código Civil. [cite: 1063, 1064]</p>
-    
-    <h3>SEGUNDO.- Del acuerdo.</h3>
-    [cite_start]<p>En el acto de la vista las partes pusieron de manifiesto el acuerdo alcanzado para regular las consecuencias del divorcio, y las medidas que debían regir en relación al/los hijo/a/s del matrimonio, Guillermo y Raúl, manifestando el Ministerio Fiscal su no oposición a la aprobación del referido acuerdo. [cite: 1066]</p>
-    <p>El artículo 90 del Código Civil dispone en su apartado segundo que:<br>
-    [cite_start]"Los acuerdos de los cónyuges adoptados para regular las consecuencias de la nulidad, separación y divorcio presentados ante el órgano judicial serán aprobados por el Juez salvo si son dañosos para los hijos o gravemente perjudiciales para uno de los cónyuges". [cite: 1067, 1068]</p>
-    [cite_start]<p>En la presente resolución, a la vista de los acuerdos adoptados por las partes, dada la conformidad del Ministerio Fiscal y no observándose medida alguna que sea dañosa para el/la/los hijo/a/s del matrimonio o gravemente perjudicial para alguno de los cónyuges, se procede a su total aprobación y conforme se hará constar en la parte dispositiva de la presente resolución. [cite: 1069]</p>
-    
-    <h3>TERCERO.- Costas.</h3>
-    [cite_start]<p>Dada la especial naturaleza de las pretensiones deducidas en este procedimiento, no ha lugar a la imposición de costas a ninguno de los litigantes. [cite: 1071]</p>
-    [cite_start]<p>Vistos los preceptos legales, y demás de general y pertinente aplicación, [cite: 1072]</p>
-
-    <div class="fallo">
-        <h2>FALLO</h2>
-        <p>ESTIMO PARCIALMENTE la demanda interpuesta por el/la Procurador/a de los Tribunales D/. [cite_start]Begoña Molla Sanchis, en nombre y representación de D. Juan Rodríguez [cite: 1074, 1075]</p>
-    </div>
-
-    <div class="csv-footer">CSV:NEXJSEXY DUFGH6AQ:M8VIXU8M URL de validación:https://www.tramita.gva.es/csv-front/index.faces?cadena NEXJSEXY DUFGH6AQ:M8VIXUXM</div>
-    <div class="page-break">--- Página 5 ---</div>
-
-    <div class="fallo">
-        <p>Crespo, contra Dª. Vicenta González Gumiel, representado por el/la Procurador/a de los Tribunales D/ª. Isabel Luzzy Aguilar, y en consecuencia, DECLARO disuelto por divorcio el matrimonio formado por D. Juan Rodríguez Crespo y Dª. [cite_start]Vicenta González Gumiel, con todos los efectos legales inherentes a este pronunciamiento, y en particular APRUEBO el acuerdo alcanzado por las partes, en relación con las medidas que han de regir sobre el/la/los hijo/a/s, Guillermo y Raúl, en los términos que son de ver en el convenio regulador que se acompaña a la presente resolución, formando parte de la misma. [cite: 1077, 1078, 1079]</p>
-        [cite_start]<p>No ha lugar a hacer expreso pronunciamiento sobre la imposición de costas. [cite: 1080]</p>
-    </div>
-
-    [cite_start]<p>Notifíquese la presente resolución a las partes, haciéndoles saber que la misma no es firme y que contra ella cabe interponer recurso de apelación en el plazo de veinte días ante este Juzgado, que deberá sustanciarse y resolverse por la Audiencia Provincial de Valencia, conforme a lo dispuesto en los artículos 455 y siguientes de la Ley de Enjuiciamiento Civil. [cite: 1081]</p>
-
-    [cite_start]<p>Una vez que sea firme, deberá ser inscrita en el Registro Civil de Valencia, y al margen de la inscripción del matrimonio. [cite: 1082]</p>
-
-    [cite_start]<p>Así por esta mi sentencia, la pronuncio, mando y firmo, SANDRA LOZANO LÓPEZ, Juez del JUZGADO DE PRIMERA INSTANCIA E INSTRUCCIÓN N° 1 DE QUART DE POBLET. [cite: 1083]</p>
-
-    <p><strong>PUBLICACIÓN.-</strong> Dada, leída y publicada fue la anterior sentencia por el/la Sr/a. [cite_start]Juez que la dictó, estando el/la mismo/a celebrando audiencia pública en el mismo día de la fecha, de lo que yo, el/la Letrado A. Justicia doy fe, en QUART DE POBLET, a diecisiete de octubre de dos mil veintitrés [cite: 1084, 1085]</p>
-
-    <div class="csv-footer">CSV:NEXJSEXY DUFGH6AQ:MKVIXUKM URL de validación:https://www.trumita.gva.es/cav-front/index. faces?cadena NEXJSEXY DUFGH6AQ MIVIXURM</div>
-    <div class="page-break">--- Página 6 ---</div>
-
-    <p>01 de agosto, del 01 al 16 de agosto y del 16 al 31 de agosto. [cite_start]Respecto a estas vacaciones de verano de julio y agosto, en los años pares las primeras quincenas las disfrutará la madre, y las segundas quincenas las disfrutará el padre: y los años imparcs, las primeras quincenas las disfrutará el padre y las segundas quincenas las disfrutará la madre, sin perjuicio, que los progenitores de común acuerdo establezcan otra división. [cite: 1087, 1088]</p>
-
-    [cite_start]<p>- En estos periodos vacacionales los hijos serán recogidos por el progenitor que le corresponda iniciar su periodo de estancia con los hijos, en el domicilio del otro progenitor a las 17.00 horas, salvo que las partes de común acuerdo establezcan otro horario. [cite: 1089]</p>
-
-    [cite_start]<p>Durante los periodos vacacionales, el progenitor con el que se encuentren los hijos menores deberá comunicar al otro el lugar en el que vayan a permanecer los hijos durante el tiempo de vacaciones, así como los traslados, viajes, etc., y a facilitar un número de teléfono de contacto, que se encuentre disponible, favoreciendo la comunicación del otro progenitor y los hijos. [cite: 1090]</p>
-
-    [cite_start]<p>4".- ALIMENTOS Y GASTOS DE LOS HIJOS: interesamos que cada uno de los progenitores atienda directamente los gastos y atenciones ordinarias de los hijos comunes durante el tiempo que permanezcan en su compañía, incluyéndose en éstos los gastos de alimentación, habitación, vestido, calzado, higiene y ocio de los hijos. Es decir, los gastos ordinarios que se ocasionen durante el periodo en que los hijos se encuentren con cada progenitor serán por cuenta del progenitor custodio en ese momento. [cite: 1091]</p>
-
-    <p>Los demás gastos necesarios de los hijos, tanto ordinarios como extraordinarios, deberán abonarse por mitad entre ambos progenitores. [cite_start]En todo caso, se considerarán incluidos en este concepto los siguientes: [cite: 1092, 1093]</p>
-
-    [cite_start]<p>1.- Gastos escolares derivados de la asistencia de los hijos a centro educativo o formativo de cualquier tipo, incluidos matrículas, mensualidades, tasas, compra de libros y material escolar, Tablet, ordenador, recursos didácticos, comedor, transporte, uniformes, asociación de padres de alumnos, seguro escolar, gabinete psicopedagógico, clases de repaso, clases de idiomas, escuela y/o campamentos de verano, excursiones, viajes de fin de estudios, cursos en el extranjero, actividad de inglés tanto las cuotas mensuales como los gastos por libros y/o material, música tanto cuotas mensuales [cite: 1094]</p>
-
-    <div class="page-break">--- Página 7 ---</div>
-
-    [cite_start]<p>5". ATRIBUCIÓN DEL USO Y DISFRUTE DE LA VIVIENDA FAMILIAR. Respecto a la atribución del uso y disfrute de la vivienda familiar, sita en Quart de Poblet, Barrio del Cristo, calle Lope de Vega, nº 7, así como su ajuar, muebles y enseres, se le atribuye a la esposa, Dº Vicenta Jiménez Vera, e hijos hasta el próximo dia 1 de noviembre de 2024. Ese día, deberá dejar libre y a disposición del Sr. Rodríguez la misma, con entrega de llaves a las 20:00 horas. Durante el referido periodo, los suministros y gastos ordinarios serán a cargo de la Sra. Jimenez y a partir de la referida fecha pasará hacerse cargo de todos los gastos el Sr. Rodriguez. En la actualidad los suministros constan a nombre del Sr. Rodríguez, comprometiéndose a realizar todos los tramites necesarios para el cambio de titularidad de los referidos suministros para que dicha titularidad sea ostentada por la Sra. Jimenez [cite: 1096, 1097]</p>
-
-    [cite_start]<p>6.- NO SE ESTABLEZCA PENSIÓN COMPENSATORIA alguna a los cónyuges, habida cuenta de la no existencia de desequilibrio. [cite: 1098]</p>
-
-    [cite_start]<p>7.- DE LA DECLARACION DE IRPF. [cite: 1099]</p>
-
-    [cite_start]<p>Los cónyuges cada año realizarán la declaración conjunta con los menores a su favor de manera alternativa, a los efectos de la declaración del impuesto de la renta de las personas fisica. [cite: 1100]</p>
-
-    [cite_start]<p>De manera que, el año fiscal par será la madre quien efectué la declaración conjunta con los hijos, y el año fiscal impar será el padre quien efectúe la declaración conjunta de la renta con los hijos [cite: 1101]</p>
-
-    [cite_start]<p>Ambos suscriben y se ratifican estando conformes con las medidas referidas en el lugar y fecha indicados. [cite: 1102]</p>
-
-</div>
-
-</body>
-</html>
+<!doctype html><html lang='es'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Sentencia de Divorcio (Doc 01) – OCR</title><style>body{margin:0;font-family:system-ui;background:#f6f7f9;color:#111827}header{position:sticky;top:0;background:rgba(246,247,249,.96);border-bottom:1px solid #e5e7eb}main{max-width:1024px;margin:0 auto;padding:16px}section{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin:14px 0}pre{white-space:pre-wrap;word-wrap:break-word;background:#fbfbfd;border:1px dashed #e5e7eb;border-radius:10px;padding:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.45}a{display:inline-block;margin:4px 6px 0 0;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;text-decoration:none;color:#111827;font-size:12px}</style></head><body><header><main><div style='display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap'><div><strong>Sentencia de Divorcio (Doc 01) – OCR</strong><div style='font-size:12px;color:#6b7280'>Fuente: Doc_01_SentenciaDivorcio.pdf • Generado: 2026-02-12 07:25:28 • 7 páginas</div><div style='font-size:12px;color:#6b7280'>Texto por OCR (spa). Aviso: OCR puede contener errores puntuales de caracteres. Páginas con timeout: 0.</div></div></div></main></header><main><section><strong>Ir a página</strong><div><a href='#p1'>Pág. 1</a><a href='#p2'>Pág. 2</a><a href='#p3'>Pág. 3</a><a href='#p4'>Pág. 4</a><a href='#p5'>Pág. 5</a><a href='#p6'>Pág. 6</a><a href='#p7'>Pág. 7</a></div></section><section id='p1'><div><strong>Página 1</strong></div><pre>&gt;]
+JUZGADO DE PRIMERA INSTANCIA N* 1
+QUART DE POBLET
+AVenida VILLALBA DE LUGO.15 1
+TELÉFONO: 96 120 7607
+NIG: 46102-41-1-2023-0002508
+Procedimiento: Asunto Civil 000892/2023
+EN NCIA N* 362/2023
+JUEZ QUE LA DICTA: D/D* SANDRA LOZANO LÓPEZ
+Lugar: QUART DE POBLET
+| Fecha: diecisiete de octubre de dos mil veintitrés
+PARTE DEMANDANTE: JUAN RODRIGUEZ CREPO
+Abogado: GONZALEZ GUMIEL, VICTORIA
+e Procurador: MOLLA SANCHIS, BEGOÑA
+PARTE DEMANDADA VICENTA JIMENEZ VERA
+Abogado: GOMEZ MARTIN, MARIA AUXILIADORA
+Procurador: LUZZY AGUILAR, ISABEL
+OBJETO DEL JUICIO: Derecho de familia
+SANDRA LOZANO LÓPEZ, Juez del JUZGADO DE PRIMERA INSTANCIA E
+INSTRUCCIÓN N&#x27; 1 DE QUART DE POBLET, ha visto los presentes autos de Familia.
+Divorcio contencioso [DIC] - 000892/2023, promovidos por JUAN RODRIGUEZ
+CREPO, representado/a/s por el/la Procurador/a de los Tribunales D/*. MOLLA SANCHIS,
+BEGOÑA, y asistido/a/s por el/la Letrado/a DF. Victoria González Gumiel, contra
+VICENTA JIMENEZ VERA, representado/a/s por ella Procurador/a de los Tribunales D/*.
+LUZZY AGUILAR, ISABEL, y asistido/a/s por el/la Letrado/a D/. M* Auxiliadora Gómez
+Martín, habiendo sido parte el Ministerio Fiscal, representado por D/*. Margarita Goma,
+habiendo recaído la presente resolución en base a los siguientes:
+ANTECEDENTES DE HECHO
+PRIMERO.- La parte actora, JUAN RODRIGUEZ CREPO, a través de su
+representación procesal, formuló demanda de divorcio contencioso frente a VICENTA
+JIMENEZ VERA, alegando los hechos y fundamentos de derecho que consideró de
+aplicación, y terminó suplicando al Juzgado el dictado de una sentencia por la que se
+declarase el divorcio del matrimonio compuesto por ambos cónyuges y las demás medidas
+que tuvo por oportunas.
+OIVENISERY DUFMAAQMIVIXUNA URL dela mp ndo ett EXISY DUI MANU
+]
+</pre></section><section id='p2'><div><strong>Página 2</strong></div><pre>SEGUNDO.- Admitida a trámite la demanda de divorcio presentada, y de
+conformidad con lo dispuesto en el artículo 753 de la Ley de Enjuiciamiento Civil, se dio
+traslado a la parte demandada y al Ministerio Fiscal, que contestaron en legal forma en los
+términos que figuran en autos, señalándose la correspondiente vista principal.
+
+TERCERO.- Al acto de la vista principal, celebrada el día 16 de octubre de 2023,
+comparecieron las partes debidamente asistidas y representadas, manifestando al inicio del
+acto haber llegado un acuerdo, presentando a tal efecto convenio regulador de divorcio para
+su homologación. A continuación, las partes prestaron oralmente su conformidad y
+ratificación a dicho acuerdo, sin que el Ministerio Fiscal tuviera nada que oponer, quedando
+los autos vistos para sentencia, todo lo cual consta debidamente registrado en soporte apto
+para la grabación y reproducción del sonido y de la imagen.
+
+FUNDAMENTOS DE DERECHO
+
+PRIMERO-- Divorcio.
+
+El artículo 85 del Código Civil, dispone que:
+
+“El matrimonio se disuelve, sea cual fuere la forma y el tiempo de su celebración, por
+la muerte o la declaración de fallecimiento de uno de los cónyuges y por el divorcio.”
+
+Por su parte, el artículo 86 del Código Civil, dispone que:
+
+“Se decretará judicialmente el divorcio, cualquiera que sea la forma de celebración
+del matrimonio, a petición de uno solo de los cónyuges, de ambos o de uno con el
+consentimiento del otro, cuando concurran los requisitos y circunstancias exigidos en el
+artículo 81.”
+
+Tal artículo 81 del Código Civil dispone asimismo que:
+
+“Se decretará judicialmente la separación cuando existan hijos menores no
+emancipados o con la capacidad modificada judicialmente que dependan de sus progenitores,
+cualquiera que sea la forma de celebración del matrimonio:
+
+12 A petición de ambos cónyuges o de uno con el consentimiento del otro, una vez
+transcurridos tres meses desde la celebración del matrimonio. A la demanda se acompañará
+una propuesta de convenio regulador redactada conforme al artículo 90 de este Código.
+celebración del matrimonio. No será preciso el transcurso de este plazo para la interposición
+de la demanda cuando se acredite la existencia de un riesgo para la vida, la integridad física,
+
+CIVIMENSEY DUCHA AVI. UL ev mi et onde NEXSEX Y DUNA QMIVIAA
+</pre></section><section id='p3'><div><strong>Página 3</strong></div><pre> _cERQOÓORBBmrBrereézeuu QoS &#x27;
+la libertad, la integridad moral o libertad e indemnidad sexual del cónyuge demandante o de
+los hijos de ambos o de cualquiera de los miembros del matrimonio.
+
+A la demanda se acompañará propuesta fundada de las medidas que hayan de regular
+los efectos derivados de la separación.”
+
+En los presentes autos ha quedado probado que los litigantes contrajeron matrimonio
+civil el día 9 de agosto de 2013, según consta en la certificación de la inscripción del
+matrimonio en el Registro Civil de Valencia (documento 1 de la demanda). Así, habiendo
+transcurrido el citado lapso de tiempo, procede decretar el divorcio del matrimonio formado
+por Juan Rodríguez Crespo y Vicenta Jiménez Vera, con todos los efectos legales inherentes
+previstos en el Código Civil.
+
+SEGUNDO.- Del acuerdo.
+
+En el acto de la vista las partes pusieron de manifiesto el acuerdo alcanzado para
+regular las consecuencias del divorcio, y las medidas que debían regir en relación al/los
+hijo/a/s del matrimonio, Guillermo y Raúl, manifestando el Ministerio Fiscal su no oposición
+a la aprobación del referido acuerdo.
+
+El artículo 90 del Código Civil dispone en su apartado segundo que:
+
+“Los acuerdos de los cónyuges adoptados para regular las consecuencias de la
+nulidad, separación y divorcio presentados ante el órgano judicial serán aprobados por el
+
+aid &gt; Ñ A ares m
+
+En la presente resolución, a la vista de los acuerdos adoptados por las partes, dada la
+conformidad del Ministerio Fiscal y no observándose medida alguna que sea dañosa para
+el/la/los hijo/a/s del matrimonio o gravemente perjudicial para alguno de los cónyuges, se
+procede a su total aprobación y conforme se hará constar en la parte dispositiva de la
+presente resolución,
+
+TERCERO. Costas.
+
+Dada la especial naturaleza de las pretensiones deducidas en este procedimiento, no
+ha lugar a la imposición de costas a ninguno de los litigantes.
+
+Vistos los preceptos legales, y demás de general y pertinente aplicación,
+
+FALLO |
+ESTIMO PARCIALMENTE la demanda interpuesta por el/la Procurador/a de los
+Tribunales D/*. Begoña Molla Sanchis, en nombre y representación de D. Juan Rodríguez
+COBVNEXISEXY DUFGHEAQMAVIXUNM — URL de validación hope www ara qa ear fonvinde acescaderarMEXISEXY.DUFGIHGAQMEVIXUIM |
+</pre></section><section id='p4'><div><strong>Página 4</strong></div><pre>O eEBemuBErE Ezmzíóíé&lt;—KARKQQ 2. o. o — y
+la libertad, la integridad moral o libertad e indemnidad sexual del cónyuge demandante o de
+los hijos de ambos o de cualquiera de los miembros del matrimonio.
+
+A la demanda se acompañará propuesta fundada de las medidas que hayan de regular
+los efectos derivados de la separación.”
+
+En los presentes autos ha quedado probado que los litigantes contrajeron matrimonio
+civil el día 9 de agosto de 2013, según consta en la certificación de la inscripción del
+matrimonio en el Registro Civil de Valencia (documento 1 de la demanda). Así, habiendo
+transcurrido el citado lapso de tiempo, procede decretar el divorcio del matrimonio formado
+por Juan Rodríguez Crespo y Vicenta Jiménez Vera, con todos los efectos legales inherentes
+previstos en el Código Civil.
+
+SEGUNDO.- Del acuerdo.
+
+En el acto de la vista las partes pusieron de manifiesto el acuerdo alcanzado para
+regular las consecuencias del divorcio, y las medidas que debían regir en relación al/los
+hijo/a/s del matrimonio, Guillermo y Raúl, manifestando el Ministerio Fiscal su no oposición
+a la aprobación del referido acuerdo.
+
+El artículo 90 del Código Civil dispone en su apartado segundo que:
+
+“Los acuerdos de Jos cónyuges adoptados para regular las consecuencias de la
+nulidad, separación y divorcio presentados ante el órgano judicial serán aprobados por el
+
+Y &gt; mi did
+
+En la presente resolución, a la vista de los acuerdos adoptados por las partes, dada la
+conformidad del Ministerio Fiscal y no observándose medida alguna que sea dañosa para
+ella/los hijo/a/s del matrimonio o gravemente perjudicial para alguno de los cónyuges, se
+procede a su total aprobación y conforme se hará constar en la parte dispositiva de la
+presente resolución.
+
+TERCERO. Costas.
+
+Dada la especial naturaleza de las pretensiones deducidas en este procedimiento, no
+ha lugar a la imposición de costas a ninguno de los litigantes.
+
+Vistos los preceptos legales, y demás de general y pertinente aplicación,
+
+|
+FALLO
+ESTIMO PARCIALMENTE la demanda interpuesta por ella Procurador/a de los
+Tribunales D/*. Begoña Molla Sanchis, en nombre y representación de D. Juan Rodríguez.
+ECO A |
+</pre></section><section id='p5'><div><strong>Página 5</strong></div><pre>Crespo, contra D*. Vicenta González Gumiel, representado por el/la Procurador/a de los
+Tribunales D/*. Isabel Luzzy Aguilar, y en consecuencia, DECLARO disuelto por divorcio
+el matrimonio formado por D. Juan Rodríguez Crespo y D*. Vicenta González Gumiel, con
+todos los efectos legales inherentes a este pronunciamiento, y en particular APRUEBO el
+acuerdo alcanzado por las partes, en relación con las medidas que han de regir sobre el/la/los
+hijo/a/s, Guillermo y Raúl, en los términos que son de ver en el convenio regulador que se
+acompaña a la presente resolución, formando parte de la misma.
+No ha lugar a hacer expreso pronunciamiento sobre la imposición de costas
+
+Notifíquese la presente resolución a las partes, haciéndoles saber que la misma no es
+firme y que contra ella cabe interponer recurso de apelación en el plazo de veinte días ante
+este Juzgado, que deberá sustanciarse y resolverse por la Audiencia Provincial de Valencia,
+conforme a lo dispuesto en los artículos 455 y siguientes de la Ley de Enjuiciamiento Civil.
+
+Una vez que sea firme, deberá ser inscrita en el Registro Civil de Valencia, y al
+margen de la inscripción del matrimonio.
+
+Así por esta mi sentencia, la pronuncio, mando y firmo, SANDRA LOZANO
+LÓPEZ, Juez del JUZGADO DE PRIMERA INSTANCIA E INSTRUCCIÓN N? 1 DE
+QUART DE POBLET.
+
+PUBLICACIÓN.- Dada, leída y publicada fue la anterior sentencia por el/la Sr/a.
+Juez que la dictó, estando el/la mismo/a celebrando audiencia pública en el mismo día de la
+fecha, de lo que yo, el/la Letrado A. Justicia doy fe, en QUART DE POBLET , a diecisiete
+de octubre de dos mil veintitrés s
+CSVINESEXY DUFGMAD MEVIXUNA UL de vabdcimps nv ai qu ode een NEXISEY DUIMAO MIVEXUEA
+</pre></section><section id='p6'><div><strong>Página 6</strong></div><pre>L
+OL de agosto. del Ol al 16 de agosto y del 16 al 31 de agosto. Respecto a estas
+vacaciones de verano de julio y agosto, en los años pares las primeras quincenas las
+disfrutará la madre, y las segundas quincenas las disfrutará el padre: y los años impares,
+las primeras quincenas las disfrutará el padre y las segundas quincenas las disfrutará la
+madre, sin perjuicio, que los progenitores de común acuerdo establezcan otra división
+- En estos periodos vacacionales los hijos serán recogidos por el progenitor que
+le corresponda iniciar su periodo de estancia con los hijos, en el domicilio del otro
+progenitor a las 17.00 horas, salvo que las partes de común acuerdo establezcan otro
+horario.
+- Durante los periodos vacacionales, el progenitor con el que se ericuentren los
+hijos menores deberá comunicar al otro el lugar en el que vayan a permanecer los hijos
+durante el tiempo de vacaciones, así como los traslados, viajes, etc., y a facilitar un
+número de teléfono de contacto, que se encuentre disponible, favoreciendo la
+comunicación del otro progenitor y los hijos.
+4&quot;.- ALIMENTOS Y GASTOS DE LOS HIJOS: interesamos que cada uno de
+los progenitores atienda directamente los gastos y atenciones ordinarias de los hijos
+comunes durante el tiempo que permanezcan en su compañía, incluyéndose en éstos los
+gastos de alimentación, habitación, vestido, calzado, higiene y ocio de los hijos. Es
+decir, los gastos ordinarios que se ocasionen durante el periodo en que los hijos se
+encuentren,con cada progenitor serán por cuenta del progenitor custodio en ese
+momento.
+|
+Los demás gastos necesarios de los hijos, tanto ordinarios como !
+extraordinarios, deberán abonarse por mitad entre ambos progenitores. En todo caso, |
+se considerarán incluidos en este concepto los siguientes: W+
+1.- Gastos escolares derivados de la asistencia de los hijos a centro educativo o f
+formativo de cualquier tipo, incluidos matrículas, mensualidades, tasas, compra de |
+libros y material escolar, Tablet, ordenador, recursos didácticos, comedor, transporte, y
+uniformes, asociación de padres de alumnos, seguro escolar, gabinete psicopedagógico, E
+clases de repaso, clases de idiomas, escuela y/o campamentos de verano, excursiones,
+viajes de fin de estudios, cursos en el extranjero, actividad de inglés tanto las cuotas 2
+mensuales como los gastos por libros y/o material, música -tanto cuotas mensuales
+5
+o A
+</pre></section><section id='p7'><div><strong>Página 7</strong></div><pre>$&#x27;. ATRIBUCIÓN DEL USO Y DISFRUTE DE LA VIVIENDA
+FAMILIAR. Respecto a la atribución del uso y disfrute de la vivienda famhar, sta en
+¡Quart de Poblet, Barrio del Cristo, calle Lope de Vega, n* 7, así como su ajuar, muebles
+y enseres, se le atribuye a la esposa, D* Vicenta Jiménez Vera, e hijos hasta el próximo
+día 1 de noviembre de 2024. Fse día, deberá dejar libre y a disposición del Sr
+Rodriguez la misma, con entrega de llaves a las 20:00 horas. Durante el referido
+periodo, los suministros y gastos ordinarios serán a cargo de la Sra. Jimenez y a partir
+de la referida fecha pasará hacerse cargo de todos los gastos el Sr. Rodríguez. En la
+actualidad los suministros constan a nombre del Sr. Rodríguez, comprometiéndose a
+realizar todos los tramites necesarios para cl cambio de titularidad de los referidos
+suministros para que dicha titularidad sea ostentada por la Sra. Jimenez.
+
+6&#x27;- NO SE ESTABLEZCA PENSIÓN COMPENSATORIA alguna a los
+cónyuges, habida cuenta de la no existencia de desequilibrio.
+
+7.- DE LA DECLARACION DE IRPF.
+
+Los cónyuges cada año realizarán la declaración conjunta con los menores a su
+favor de manera alternativa, a los eftctos de la declaración del impuesto de la renta de
+las personas fisica. De manera que, el año fiscal par será la madre quien electué la
+declaración conjunta con los hijos, y el año fiscal impar será el padre quien cfoctúe la
+declaración conjunta de la renta con los hijos
+
+Ambos suscriben y se ratifican estando conformes con las medidas veferidas en Pal
+el lugar y fecha indicados.
+
+W
+Vi
+Á
+&lt;A
+)
+</pre></section></main></body></html>
