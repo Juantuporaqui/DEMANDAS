@@ -7,7 +7,12 @@ import { PrescripcionPlaybookPage } from '../prescripcion/PrescripcionPlaybookPa
 export function PrescripcionPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const caseId = (searchParams.get('caseId') || 'picassent').toLowerCase();
+  const requestedCaseId = (searchParams.get('caseId') || 'picassent').toLowerCase();
+  const caseIdAliases: Record<string, string> = {
+    picassent: 'picassent',
+    cas001: 'picassent',
+  };
+  const caseId = caseIdAliases[requestedCaseId] ?? requestedCaseId;
   const returnToParam = searchParams.get('returnTo');
   const returnTo = returnToParam || '/cases/CAS001?tab=estrategia';
   const isPicassent = caseId === prescripcionPicassent.meta.caseId;

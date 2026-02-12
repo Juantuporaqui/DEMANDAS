@@ -1,5 +1,6 @@
 import { antiSts458 } from '../../../content/prescripcion/antiSts458';
 import { CopyButton } from './CopyButton';
+import { LegalReferenceText } from './LegalReferenceText';
 
 type HypothesisValue = 'H1' | 'H2';
 
@@ -19,6 +20,17 @@ const argumentoToneMap: Record<string, string> = {
   'arg-3': 'border-yellow-500/40 bg-yellow-500/5',
   'arg-4': 'border-emerald-500/40 bg-emerald-500/5',
 };
+
+function normalizeForensicText(text: string) {
+  return text
+    .replace(/destruye/gi, 'desvirtúa')
+    .replace(/especulativo/gi, 'de inversión inmobiliaria')
+    .replace(/nunca fue/gi, 'no consta acreditado que fuera')
+    .replace(/fácticamente imposible/gi, 'insuficientemente acreditado en términos de trazabilidad')
+    .replace(/\bNO\b/g, 'no')
+    .replace(/\bNUNCA\b/g, 'no consta acreditado')
+    .replace(/\bSÍ\b/g, 'sí');
+}
 
 export function DistinguishingSection({
   id,
@@ -45,7 +57,7 @@ export function DistinguishingSection({
           Abrir versión extendida
         </a>
       </div>
-      {intro ? <p className="mt-3 break-words text-sm text-slate-300">{intro}</p> : null}
+      {intro ? <p className="mt-3 break-words text-sm text-slate-300"><LegalReferenceText text={intro} /></p> : null}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {antiSts458.argumentos.map((argumento) => (
           <div
@@ -57,60 +69,26 @@ export function DistinguishingSection({
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                   {argumento.score ? `Prioridad ${argumento.score}` : 'Prioridad'}
                 </p>
-                <h3 className="mt-2 break-words text-sm font-semibold text-white">{argumento.title}</h3>
+                <h3 className="mt-2 break-words text-sm font-semibold text-white">{normalizeForensicText(argumento.title)}</h3>
               </div>
               <span className="shrink-0 rounded-full border border-slate-600/60 bg-slate-800/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200">
                 {activeHypothesis === 'H2' ? 'Plan B activo' : 'Plan A activo'}
               </span>
             </div>
-            {argumento.summary ? <p className="mt-3 text-sm text-slate-300">{argumento.summary}</p> : null}
-            <div className="mt-3 space-y-2 text-xs text-slate-300">
-              {argumento.paragraphs.slice(0, 2).map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
+            {argumento.summary ? <p className="mt-3 text-sm text-slate-300"><LegalReferenceText text={normalizeForensicText(argumento.summary)} /></p> : null}
             {argumento.fraseSala ? (
               <div className="mt-4 rounded-xl border border-emerald-700/40 bg-emerald-900/30 p-3">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">
-                    {argumento.fraseSalaLabel ?? 'Frase para sala'}
+                    Formulación breve para sala
                   </p>
-                  <CopyButton text={argumento.fraseSala} label="Copiar" onCopied={onCopied} />
+                  <CopyButton text={normalizeForensicText(argumento.fraseSala)} label="Copiar" onCopied={onCopied} />
                 </div>
-                <p className="mt-2 text-xs italic text-emerald-200">{argumento.fraseSala}</p>
+                <p className="mt-2 text-xs italic text-emerald-200"><LegalReferenceText text={normalizeForensicText(argumento.fraseSala)} /></p>
               </div>
             ) : null}
           </div>
         ))}
-      </div>
-      <div className="mt-6">
-        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
-          Tabla comparativa (STS 458 vs nuestro caso)
-        </h3>
-        <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-700/60 bg-slate-900/60">
-          <table className="w-full min-w-[640px] text-left text-xs text-slate-300">
-            <thead className="bg-slate-900 text-[11px] uppercase text-slate-400">
-              <tr>
-                {antiSts458.tablaDistinguishing.headers.map((header) => (
-                  <th key={header} className="border-b border-slate-700/60 px-3 py-2">
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {antiSts458.tablaDistinguishing.rows.map((row, rowIndex) => (
-                <tr key={`${row[0]}-${rowIndex}`} className="align-top">
-                  {row.map((cell, cellIndex) => (
-                    <td key={`${cell}-${cellIndex}`} className="px-3 py-3 text-slate-200">
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
     </section>
   );
