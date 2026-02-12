@@ -20,5 +20,5 @@ export const PICASSENT_FACTS = {
     sala: 'En un periodo de casi dos décadas —desde 2006, pasando por separación y divorcio— no consta una sola reclamación extrajudicial fehaciente previa a la demanda. Ese silencio excluye la interrupción del art. 1973 CC y refuerza el retraso desleal (art. 7 CC).',
   },
   dinamicaPatrimonial:
-    'Dinámica de inversión/explotación patrimonial (chalet turístico, piso en Valencia para alquiler/venta, negocio de pádel indoor, producción agraria superintensiva, etc.).',
+    'dinámica de inversión y explotación patrimonial, según consta en la documental aportada.',
 } as const;
