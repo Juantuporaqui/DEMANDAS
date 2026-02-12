@@ -1084,31 +1084,33 @@ function TabEstrategia({ strategies, caseId }: any) {
               </div>
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
-              <Link
-                to={`/analytics/prescripcion?caseId=picassent&returnTo=${encodeURIComponent(returnTo)}`}
-                className="group block w-full rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.99]"
-              >
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 mb-3">
-                  <Scale className="w-6 h-6 text-emerald-400" />
-                </div>
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <h4 className="text-lg font-bold text-white">Prescripción</h4>
-                  <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
-                    4 escenarios
-                  </span>
-                </div>
-                <p className="text-sm text-slate-400 mb-3">
-                  Mapa de escenarios + checklist probatorio.
-                </p>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    STS 458/2025
-                  </span>
-                </div>
-                <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
-                  Abrir prescripción <ChevronRight className="w-4 h-4 ml-1" />
-                </div>
-              </Link>
+              {isPicassent && (
+                <Link
+                  to={`/analytics/prescripcion?caseId=picassent&returnTo=${encodeURIComponent(returnTo)}`}
+                  className="group block w-full rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.99]"
+                >
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 mb-3">
+                    <Scale className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    <h4 className="text-lg font-bold text-white">Prescripción</h4>
+                    <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-slate-700/60 text-slate-200 border border-slate-600/60">
+                      4 escenarios
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-400 mb-3">
+                    Mapa de escenarios + checklist probatorio.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      STS 458/2025
+                    </span>
+                  </div>
+                  <div className="flex items-center text-sm text-emerald-400 font-medium group-hover:translate-x-1 transition-transform">
+                    Abrir prescripción <ChevronRight className="w-4 h-4 ml-1" />
+                  </div>
+                </Link>
+              )}
               <Link
                 to={`/cases/${caseId}/estrategias/excepcion-acumulacion?returnTo=${encodeURIComponent(returnTo)}`}
                 className="group block w-full rounded-2xl border border-sky-500/30 bg-gradient-to-br from-sky-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-sky-500/60 hover:shadow-lg hover:shadow-sky-500/10 active:scale-[0.99]"
@@ -1189,6 +1191,7 @@ function TabEstrategia({ strategies, caseId }: any) {
                   Abrir inversión mercantil <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
               </Link>
+              {isPicassent && (
               <Link
                 to={`/analytics/anti-sts-458-2025?caseId=${caseId}&returnTo=${encodeURIComponent(returnTo)}`}
                 className="group block w-full rounded-2xl border border-rose-500/30 bg-gradient-to-br from-rose-900/20 to-slate-900/60 p-5 text-left transition-all hover:border-rose-500/60 hover:shadow-lg hover:shadow-rose-500/10 active:scale-[0.99]"
@@ -1209,6 +1212,7 @@ function TabEstrategia({ strategies, caseId }: any) {
                   Abrir anti-STS <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
               </Link>
+              )}
             </div>
           </div>
 
