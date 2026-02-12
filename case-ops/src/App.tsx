@@ -9,8 +9,8 @@ import { seedDatabase } from './db/seed';
 import './index.css';
 
 const AUTH_SESSION_KEY = 'caseops.authenticated';
-const AUTH_USERNAME = import.meta.env.VITE_APP_USERNAME ?? 'admin';
-const AUTH_PASSWORD = import.meta.env.VITE_APP_PASSWORD ?? 'CaseOps2026!';
+const AUTH_USERNAME = import.meta.env.VITE_APP_USERNAME ?? 'lajodienda';
+const AUTH_PASSWORD = import.meta.env.VITE_APP_PASSWORD ?? 'notieneenmienda';
 
 function App() {
   const [initialized, setInitialized] = useState(false);
