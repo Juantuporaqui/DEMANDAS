@@ -509,7 +509,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
             <p className="text-[11px] text-slate-400">Crear tarjeta táctica y volver aquí.</p>
           </Link>
           <Link
-            to={`/analytics/prescripcion?caseId=picassent`}
+            to={`/analytics/prescripcion?caseId=${caseId}`}
             className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 transition hover:border-amber-400/60"
           >
             <div className="text-xs font-bold text-amber-300 mb-1">Prescripción</div>

@@ -7,7 +7,7 @@ import { PrescripcionPlaybookPage } from '../prescripcion/PrescripcionPlaybookPa
 export function PrescripcionPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const requestedCaseId = (searchParams.get('caseId') || 'picassent').toLowerCase();
+  const requestedCaseId = (searchParams.get('caseId') || '').toLowerCase();
   const caseIdAliases: Record<string, string> = {
     picassent: 'picassent',
     cas001: 'picassent',
