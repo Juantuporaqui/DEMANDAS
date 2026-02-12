@@ -23,7 +23,7 @@ export const prescripcionPicassent = {
     title: 'Prescripción — P.O. 715/2024 (Picassent)',
     subtitle: 'Estrategia operativa para Audiencia Previa (AP)',
     metaReal:
-      'Meta real: ganar la AP obligando a la actora a depurar el objeto y a venir con una tabla verificable por bloques/partidas.',
+      'Objetivo procesal en AP: obtener la depuración del objeto y que la actora presente tabla verificable por bloques/partidas.',
     metaRealNote:
       'Sin individualización y soporte documental, no existe crédito verificable a efectos de contradicción y control de prescripción.',
   },
@@ -79,7 +79,7 @@ export const prescripcionPicassent = {
       'Sin identificación de la acción y su base jurídica, no puede determinarse el plazo aplicable.',
       'Sin explicación de exigibilidad y dies a quo por partida, no puede practicarse control de prescripción.',
       'Si se invoca interrupción, debe precisarse y acreditarse el acto interruptivo, con fecha, contenido y destinatario identificables.',
-      `Si ${PICASSENT_FACTS.reclamacionExtrajudicial.short} → no hay interrupción; se aplica prescripción por tramos y, además, refuerza retraso desleal (art. 7 CC).`,
+      `Si ${PICASSENT_FACTS.reclamacionExtrajudicial.short}, no resulta acreditada la interrupción; procede aplicar prescripción por tramos y, además, se refuerza el retraso desleal (art. 7 CC).`,
       'No mezclar: cuotas ≠ gastos ≠ inversiones.',
     ],
   },
@@ -209,7 +209,7 @@ export const prescripcionPicassent = {
         id: 'escenario-1',
         title: 'Escenario 1 — STS 458/2025 no invocada; aplicación de regla general de actio nata por pago (H1)',
         sostener:
-          'Prescripción por exigibilidad real: cada partida/bloque reclamable era ejercitable en su momento; lo no reclamado en plazo no puede sobrevivir como “deuda viva”.',
+          'Prescripción por exigibilidad real: cada partida/bloque reclamable era ejercitable en su momento; lo no reclamado en plazo no puede mantenerse como crédito exigible verificable.',
         pedir: [
           'Estimar prescripción por tramos/bloques temporales (fuera lo remoto).',
           'Depuración del objeto + tabla verificable (sin tabla: desestimación de lo no individualizado).',
@@ -223,7 +223,7 @@ export const prescripcionPicassent = {
         sostener:
           'STS 458/2025 no autoriza mezclar acciones ni sustituye la prueba: como mínimo obliga a delimitar alcance y resolver por bloques homogéneos.',
         pedir: [
-          'Resolución por BLOQUES con cuantía separada (A/B/C).',
+          'Resolución por bloques con cuantía separada (A/B/C).',
           'Motivación expresa del dies a quo por bloque + punto de corte cierto si lo fijan al final.',
         ],
         riesgo: 'Extensión indiscriminada “a todo”.',
@@ -246,7 +246,7 @@ export const prescripcionPicassent = {
         sostener:
           'Aunque el tribunal considere aplicable la STS 458/2025 para un bloque concreto, no procede convertir A+B+C en crédito único ni desplazar el dies a quo sin motivación específica por bloque.',
         pedir: [
-          'Decisión por BLOQUES A/B/C con base jurídica y cuantía separada.',
+          'Decisión por bloques A/B/C con base jurídica y cuantía separada.',
           'Para cada bloque: dies a quo motivado + prueba + (si alegan) interrupción acreditada. Sin eso: desestimación de lo no probado.',
         ],
         riesgo: 'Reactivación masiva de partidas antiguas.',
@@ -391,20 +391,21 @@ export const prescripcionPicassent = {
     ],
   },
   toc: [
-    { id: 'panel-rapido', label: 'Panel de preparación' },
+    { id: 'panel-rapido', label: 'Resumen y preparación', group: true },
     { id: 'resumen-60s', label: 'Resumen 60s' },
-    { id: 'marco-normativo', label: 'Marco normativo' },
-    { id: 'peticion-prioritaria', label: 'Petición prioritaria' },
-    { id: 'tabla-partidas', label: 'Tabla por partidas (A/B/C)' },
-    { id: 'regla-de-oro', label: 'Reglas operativas de contradicción y prueba' },
-    { id: 'como-te-la-intentan-colar', label: 'Patrones habituales de articulación' },
-    { id: 'cronologia-prescripcion', label: 'Cronología (H1/H2)' },
-    { id: 'distinguishing', label: 'Distinguishing' },
-    { id: 'selector-escenarios', label: 'Selector de escenarios' },
+    { id: 'resumen-peticiones', label: 'Modo sala', group: true },
+    { id: 'guion-2-min', label: 'Guion 2 min' },
+    { id: 'peticion-prioritaria', label: 'Petición y reglas', group: true },
+    { id: 'regla-de-oro', label: 'Reglas operativas' },
+    { id: 'como-te-la-intentan-colar', label: 'Patrones habituales' },
+    { id: 'selector-escenarios', label: 'Estrategia y escenarios', group: true },
     { id: 'plan-a', label: 'Plan A' },
     { id: 'plan-b', label: 'Plan B' },
-    { id: 'guion-2-min', label: 'Guion 2 min' },
-    { id: 'checklist-24-72', label: 'Checklist 24–72h' },
+    { id: 'distinguishing', label: 'Distinguishing' },
+    { id: 'marco-normativo', label: 'Análisis técnico', group: true },
+    { id: 'tabla-partidas', label: 'Tabla por partidas (A/B/C)' },
+    { id: 'cronologia-prescripcion', label: 'Cronología (H1/H2)' },
+    { id: 'checklist-24-72', label: 'Herramientas y checklist', group: true },
     { id: 'plantillas', label: 'Plantillas' },
     { id: 'errores-fatales', label: 'Errores críticos' },
   ],
