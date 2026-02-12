@@ -74,6 +74,19 @@ export function ToolsPage() {
             </Link>
           </div>
         </article>
+        <article className="card-base card-subtle flex flex-col gap-3 p-5">
+          <h2 className="text-lg font-semibold text-slate-100">
+            Integridad de datos
+          </h2>
+          <p className="text-sm text-slate-400">
+            Detecta duplicados por autos, estrategias huérfanas y permite reparaciones seguras.
+          </p>
+          <div className="mt-auto">
+            <Link className="btn btn-primary" to="/tools/integridad">
+              Abrir
+            </Link>
+          </div>
+        </article>
       </section>
 
       {/* Quick Nav - Botones estilo app móvil */}

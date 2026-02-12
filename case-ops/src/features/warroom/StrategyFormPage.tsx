@@ -6,16 +6,14 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { strategiesRepo, casesRepo } from '../../db/repositories';
 import type { Case } from '../../types';
+import { getCaseKey } from '../../utils/caseKey';
 
 type CaseKey = 'picassent' | 'mislata' | 'quart';
 
 function inferCaseKey(caseId: string, cases: Case[]): CaseKey | null {
   const c = cases.find((x) => x.id === caseId);
-  const hay = `${caseId} ${c?.title ?? ''} ${c?.autosNumber ?? ''} ${c?.court ?? ''}`.toLowerCase();
-  if (hay.includes('picassent') || hay.includes('715')) return 'picassent';
-  if (hay.includes('mislata') || hay.includes('1185')) return 'mislata';
-  if (hay.includes('quart') || hay.includes('1428')) return 'quart';
-  return null;
+  const key = getCaseKey(c);
+  return key === 'other' ? null : key;
 }
 
 export function StrategyFormPage() {

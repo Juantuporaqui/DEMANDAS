@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { casesRepo, strategiesRepo } from '../../db/repositories';
+import { getCaseKey } from '../../utils/caseKey';
 import type { Strategy } from '../../types';
 import {
   Shield, Copy, Target, Plus, ArrowLeft, Search, ExternalLink,
@@ -148,10 +149,10 @@ export function WarRoomPage() {
         if (!mounted) return;
         const next = { ...FALLBACK_CASE_IDS };
         cases.forEach((caseItem) => {
-          const haystack = `${caseItem.id} ${caseItem.title ?? ''} ${caseItem.autosNumber ?? ''} ${caseItem.court ?? ''}`.toLowerCase();
-          if (haystack.includes('picassent')) next.picassent = caseItem.id;
-          if (haystack.includes('mislata')) next.mislata = caseItem.id;
-          if (haystack.includes('quart')) next.quart = caseItem.id;
+          const key = getCaseKey(caseItem);
+          if (key !== 'other') {
+            next[key] = caseItem.id;
+          }
         });
         setCaseIds(next);
       })

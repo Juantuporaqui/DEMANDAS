@@ -128,6 +128,12 @@ export interface Settings {
   updatedAt: number;
 }
 
+export interface MetaRecord {
+  id: string;
+  value: unknown;
+  updatedAt: number;
+}
+
 export interface Counter {
   id: string; // table name
   prefix: string;

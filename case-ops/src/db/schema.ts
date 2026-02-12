@@ -22,12 +22,127 @@ import type {
   Rule,
   ScenarioModel,
   ScenarioNode,
+  MetaRecord,
 } from '../types';
+import { normalizeAutosNumber } from '../utils/caseKey';
 
 // Database Schema Version
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
-// Database class extending Dexie
+const storesV4 = {
+  settings: 'id',
+  counters: 'id',
+  cases: 'id, title, court, type, status, parentCaseId, updatedAt, *tags',
+  documents: 'id, caseId, title, docType, hashSha256, fileId, annexCode, updatedAt, *tags',
+  docFiles: 'id, hashSha256',
+  spans: 'id, documentId, caseId, label, updatedAt, *tags',
+  facts: 'id, caseId, title, status, burden, risk, strength, updatedAt, *tags',
+  issues: 'id, caseId, title, updatedAt, *tags',
+  partidas: 'id, caseId, date, amountCents, state, updatedAt, *tags',
+  events: 'id, caseId, date, type, updatedAt, *tags',
+  strategies: 'id, caseId, updatedAt, *tags',
+  tasks: 'id, caseId, dueDate, priority, status, updatedAt',
+  links: 'id, fromType, fromId, toType, toId, [fromType+fromId], [toType+toId], updatedAt',
+  rules: 'id, caseId, title, updatedAt, *appliesToTags',
+  scenario_models: 'id, caseId, name, updatedAt',
+  scenario_nodes: 'id, scenarioId, nodeType, nodeId, updatedAt, [scenarioId+nodeType+nodeId]',
+  auditLogs: 'id, at, action, entityType, entityId',
+  analytics_meta: 'id, updatedAt',
+};
+
+const storesV5 = {
+  ...storesV4,
+  cases: 'id, autosNumber, title, court, type, status, parentCaseId, updatedAt, *tags',
+  meta: 'id, updatedAt',
+};
+
+type MigratableRow = { id: string; caseId: string; updatedAt?: number | string };
+
+function migratedUpdatedAt(value: number | string | undefined): number | string | undefined {
+  if (typeof value === 'number') return Date.now();
+  if (typeof value === 'string') return new Date().toISOString();
+  return undefined;
+}
+
+async function repairDuplicatesInUpgrade(tx: Dexie.Transaction): Promise<void> {
+  const casesTable = tx.table('cases');
+  const allCases = await casesTable.toArray();
+  const grouped = new Map<string, typeof allCases>();
+
+  allCases.forEach((caseItem) => {
+    const key = normalizeAutosNumber((caseItem as { autosNumber?: string }).autosNumber);
+    if (!key) return;
+    grouped.set(key, [...(grouped.get(key) ?? []), caseItem]);
+  });
+
+  const linkTables = [
+    'documents',
+    'spans',
+    'facts',
+    'issues',
+    'partidas',
+    'events',
+    'strategies',
+    'tasks',
+    'rules',
+    'scenario_models',
+  ];
+
+  const movedCounts: Record<string, number> = Object.fromEntries(linkTables.map((tableName) => [tableName, 0]));
+  const mergedGroups: Array<{ autosNumber: string; canonicalCaseId: string; duplicateCaseIds: string[] }> = [];
+
+  for (const [autosNumber, group] of grouped.entries()) {
+    if (group.length < 2) continue;
+
+    const scoreEntries = await Promise.all(
+      group.map(async (caseItem) => {
+        let related = 0;
+        for (const tableName of linkTables) {
+          related += await tx.table(tableName).where('caseId').equals((caseItem as { id: string }).id).count();
+        }
+        const tCase = caseItem as { id: string; updatedAt?: number; createdAt?: number };
+        return { caseId: tCase.id, related, updatedAt: tCase.updatedAt ?? tCase.createdAt ?? 0 };
+      }),
+    );
+
+    scoreEntries.sort((a, b) => {
+      if (b.related !== a.related) return b.related - a.related;
+      return b.updatedAt - a.updatedAt;
+    });
+
+    const canonicalCaseId = scoreEntries[0].caseId;
+    const duplicateCaseIds = scoreEntries.slice(1).map((entry) => entry.caseId);
+    if (duplicateCaseIds.length === 0) continue;
+
+    for (const tableName of linkTables) {
+      const table = tx.table(tableName);
+      const rows = (await table.where('caseId').anyOf(duplicateCaseIds).toArray()) as MigratableRow[];
+      for (const row of rows) {
+        await table.update(row.id, {
+          caseId: canonicalCaseId,
+          updatedAt: migratedUpdatedAt(row.updatedAt),
+        });
+      }
+      movedCounts[tableName] += rows.length;
+    }
+
+    await casesTable.bulkDelete(duplicateCaseIds);
+    mergedGroups.push({ autosNumber, canonicalCaseId, duplicateCaseIds });
+  }
+
+  await tx.table('meta').put({
+    id: 'integrity:lastRepairReport',
+    value: {
+      executedAt: Date.now(),
+      mergedGroups,
+      movedCounts,
+      deletedDuplicateCases: mergedGroups.reduce((sum, item) => sum + item.duplicateCaseIds.length, 0),
+      source: 'schema-upgrade',
+    },
+    updatedAt: Date.now(),
+  });
+}
+
 class CaseOpsDB extends Dexie {
   settings!: EntityTable<Settings, 'id'>;
   counters!: EntityTable<Counter, 'id'>;
@@ -47,70 +162,15 @@ class CaseOpsDB extends Dexie {
   scenario_nodes!: EntityTable<ScenarioNode, 'id'>;
   auditLogs!: EntityTable<AuditLog, 'id'>;
   analytics_meta!: EntityTable<AnalyticsMeta, 'id'>;
+  meta!: EntityTable<MetaRecord, 'id'>;
 
   constructor() {
     super('CaseOpsDB');
 
-    this.version(SCHEMA_VERSION).stores({
-      // Settings table - singleton
-      settings: 'id',
-
-      // Counters for sequential IDs
-      counters: 'id',
-
-      // Cases - main litigation containers
-      cases: 'id, title, court, type, status, parentCaseId, updatedAt, *tags',
-
-      // Documents - metadata only (blobs in docFiles)
-      documents: 'id, caseId, title, docType, hashSha256, fileId, annexCode, updatedAt, *tags',
-
-      // Document files - actual blobs stored here
-      docFiles: 'id, hashSha256',
-
-      // Spans - page ranges within documents
-      spans: 'id, documentId, caseId, label, updatedAt, *tags',
-
-      // Facts - legal facts to prove/defend
-      facts: 'id, caseId, title, status, burden, risk, strength, updatedAt, *tags',
-
-      // Issues - debated items for scenarios
-      issues: 'id, caseId, title, updatedAt, *tags',
-
-      // Partidas - economic items
-      partidas: 'id, caseId, date, amountCents, state, updatedAt, *tags',
-
-      // Events - timeline entries
-      events: 'id, caseId, date, type, updatedAt, *tags',
-
-      // Strategies - war room entries
-      strategies: 'id, caseId, updatedAt, *tags',
-
-      // Tasks - action items
-      tasks: 'id, caseId, dueDate, priority, status, updatedAt',
-
-      // Links - generic entity relationships
-      links: 'id, fromType, fromId, toType, toId, [fromType+fromId], [toType+toId], updatedAt',
-
-      // Rules - legal modifiers for scenarios
-      rules: 'id, caseId, title, updatedAt, *appliesToTags',
-
-      // Scenario models - alternative assumptions
-      scenario_models: 'id, caseId, name, updatedAt',
-
-      // Scenario nodes - overrides per scenario
-      scenario_nodes: 'id, scenarioId, nodeType, nodeId, updatedAt, [scenarioId+nodeType+nodeId]',
-
-      // Audit log - optional tracking
-      auditLogs: 'id, at, action, entityType, entityId',
-
-      // Analytics meta - singleton configuration
-      analytics_meta: 'id, updatedAt',
-    });
+    this.version(4).stores(storesV4);
+    this.version(5).stores(storesV5).upgrade(repairDuplicatesInUpgrade);
   }
 }
 
-// Singleton database instance
 export const db = new CaseOpsDB();
-
-// Export for type inference
 export type { CaseOpsDB };
