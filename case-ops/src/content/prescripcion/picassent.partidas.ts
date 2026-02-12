@@ -10,6 +10,8 @@ export type PicassentPartida = {
   interrupcion: string;
   estadoH1: string;
   estadoH2: string;
+  estadoProbatorio?: 'Pendiente' | 'Acreditado' | 'Discutido';
+  docRequerido?: string;
   notas?: string;
   fuente?: string;
 };

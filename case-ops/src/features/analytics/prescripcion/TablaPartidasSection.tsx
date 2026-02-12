@@ -17,6 +17,12 @@ const estadoBadgeMap: Record<string, string> = {
   'Controvertida (condicionada)': 'bg-amber-500/20 text-amber-200 border-amber-500/40',
 };
 
+const estadoProbatorioBadgeMap: Record<string, string> = {
+  Pendiente: 'bg-amber-500/20 text-amber-200 border-amber-500/40',
+  Acreditado: 'bg-emerald-500/20 text-emerald-200 border-emerald-500/40',
+  Discutido: 'bg-sky-500/20 text-sky-200 border-sky-500/40',
+};
+
 const bloqueLabels: Record<Exclude<BloqueFiltro, 'ALL'>, string> = {
   A: 'Bloque A — Cuotas/Pagos',
   B: 'Bloque B — Gastos/Transferencias',
@@ -34,6 +40,8 @@ const formatPartida = (partida: PicassentPartida) =>
     `Interrupción: ${partida.interrupcion}`,
     `Estado H1: ${partida.estadoH1}`,
     `Estado H2: ${partida.estadoH2}`,
+    `Estado probatorio: ${partida.estadoProbatorio ?? 'Pendiente'}`,
+    `Doc requerido: ${partida.docRequerido ?? partida.documento}`,
     partida.notas ? `Notas: ${partida.notas}` : null,
     partida.fuente ? `Fuente: ${partida.fuente}` : null,
   ]
@@ -139,6 +147,8 @@ export function TablaPartidasSection({ id, title, subtitle, onCopied }: TablaPar
               <th className="px-3 py-2">Importe</th>
               <th className="px-3 py-2">H1</th>
               <th className="px-3 py-2">H2</th>
+              <th className="px-3 py-2">Estado probatorio</th>
+              <th className="px-3 py-2">Doc requerido</th>
               <th className="px-3 py-2">Acciones</th>
             </tr>
           </thead>
@@ -169,6 +179,17 @@ export function TablaPartidasSection({ id, title, subtitle, onCopied }: TablaPar
                     </span>
                   </td>
                   <td className="px-3 py-3">
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${
+                        estadoProbatorioBadgeMap[partida.estadoProbatorio ?? 'Pendiente'] ??
+                        'border-slate-600/60 bg-slate-800/60 text-slate-200'
+                      }`}
+                    >
+                      {partida.estadoProbatorio ?? 'Pendiente'}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3 text-slate-300">{partida.docRequerido ?? partida.documento}</td>
+                  <td className="px-3 py-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
@@ -178,12 +199,25 @@ export function TablaPartidasSection({ id, title, subtitle, onCopied }: TablaPar
                         {expandedId === partida.id ? 'Cerrar' : 'Ver'}
                       </button>
                       <CopyButton text={formatPartida(partida)} label="Copiar" onCopied={onCopied} />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onCopied(
+                            `Exigir soporte documental de ${partida.concepto} (${partida.fecha}): ${
+                              partida.docRequerido ?? partida.documento
+                            }`
+                          )
+                        }
+                        className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100"
+                      >
+                        Exigir soporte
+                      </button>
                     </div>
                   </td>
                 </tr>
                 {expandedId === partida.id ? (
                   <tr className="bg-slate-900/40">
-                    <td colSpan={7} className="px-4 py-3">
+                    <td colSpan={9} className="px-4 py-3">
                       <div className="grid gap-3 md:grid-cols-2">
                         <div>
                           <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Documento</p>

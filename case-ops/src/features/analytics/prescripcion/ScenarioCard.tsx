@@ -23,6 +23,8 @@ export function ScenarioCard({
   const copyText = [
     title,
     '',
+    'P0 (inicio obligatorio): depuración del objeto + tabla verificable + carga de la prueba (art. 217 LEC).',
+    '',
     'Qué sostener:',
     sostener,
     '',
@@ -43,6 +45,12 @@ export function ScenarioCard({
           <h3 className="text-sm font-semibold text-white">{title}</h3>
         </div>
         <div className="space-y-3">
+          <div>
+            <div className="text-xs font-semibold text-indigo-300">Inicio obligatorio (P0)</div>
+            <p className="text-xs break-words text-slate-300">
+              <LegalReferenceText text="Depuración del objeto, tabla verificable por bloques A/B/C y carga de la prueba conforme al art. 217 LEC." />
+            </p>
+          </div>
           <div>
             <div className="text-xs font-semibold text-emerald-300">Qué sostener</div>
             <p className="text-xs break-words text-slate-300"><LegalReferenceText text={sostener} /></p>
