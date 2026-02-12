@@ -52,7 +52,7 @@ const salaTemplates = {
   interrupcion:
     'Para el caso de que la actora alegue interrupción, se interesa su concreción y acreditación: acto interruptivo concreto, fecha, contenido, destinatario y soporte fehaciente, a fin de permitir la contradicción y su valoración jurídica.',
   cierre:
-    'La cuestión no es “relato contra relato”: es acción aplicable, exigibilidad, dies a quo, prueba por partidas y, en su caso, interrupción acreditada. Sin eso, no existe un crédito verificable.',
+    'La cuestión exige identificar acción aplicable, exigibilidad, dies a quo, prueba por partidas y, en su caso, interrupción acreditada. Sin ello no existe crédito verificable.',
 };
 
 export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageProps) {
@@ -268,7 +268,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
           <TablaPartidasSection
             id="tabla-partidas"
             title="Tabla verificable por partidas (A/B/C)"
-            subtitle="Fuente única: seed DB Picassent. Completar con documento/base/exigibilidad cuando se acrediten."
+            subtitle="Fuente: relación interna de partidas (pendiente de soporte documental)."
             onCopied={handleCopied}
           />
 

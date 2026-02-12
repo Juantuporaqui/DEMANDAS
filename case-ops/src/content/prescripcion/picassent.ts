@@ -9,7 +9,7 @@ export const prescripcionPicassent = {
     status: 'ACTIVO',
     cuantia: '212.677,00 €',
     audienciaPrevia: '10/03/2026 09:45',
-    version: 'v3.0 DEFINITIVA',
+    version: 'Versión 3.0',
     tags: [
       'prescripción',
       'dies a quo',
@@ -25,10 +25,10 @@ export const prescripcionPicassent = {
     metaReal:
       'Meta real: ganar la AP obligando a la actora a depurar el objeto y a venir con una tabla verificable por bloques/partidas.',
     metaRealNote:
-      'Si no hay fecha + concepto + documento + base jurídica + exigibilidad, no hay “deuda viva”; hay relato.',
+      'Sin individualización y soporte documental, no existe crédito verificable a efectos de contradicción y control de prescripción.',
   },
   panelRapido: {
-    title: 'Panel rápido (para ti)',
+    title: 'Panel de preparación',
     bullets: [
       'Caso: CAS001 · Cuantía: 212.677,00 € · AP: 10/03/2026 09:45',
       `Matrimonio: ${PICASSENT_FACTS.matrimonio.human}`,
@@ -45,11 +45,11 @@ export const prescripcionPicassent = {
     ],
     riesgoIntro: 'El riesgo es que intenten:',
     riesgos: [
-      '“Reempaquetar” conceptos heterogéneos como crédito único, y',
+      'agrupar conceptos heterogéneos y presentarlos como crédito único, y',
       'usar STS 458/2025 para desplazar el dies a quo al final (ruptura/disolución) y reactivar partidas antiguas.',
     ],
-    solucionIntro: 'Solución definitiva:',
-    solucion: '✅ exigir depuración del objeto, bloques homogéneos, tabla verificable y motivación del dies a quo por bloque. Sin eso: indefensión + incontrolabilidad + desestimación de lo no probado.',
+    solucionIntro: 'Respuesta procesal:',
+    solucion: 'Se interesa depuración del objeto, bloques homogéneos, tabla verificable y motivación del dies a quo por bloque. En defecto de ello, la pretensión queda insuficientemente individualizada para su adecuado control contradictorio.',
   },
   peticionPrioritaria: {
     title: 'Petición prioritaria (siempre, antes de discutir prescripción)',
@@ -60,7 +60,7 @@ export const prescripcionPicassent = {
       'Bloque B — Gastos ordinarios / transferencias / consumo (si pretende “deuda”, que explique causa y pacto)',
       'Bloque C — Inversiones / mejoras / aportaciones patrimoniales (régimen distinto; no mezclable con cuotas)',
     ],
-    matrizTitle: 'Matriz mínima por bloque/partida (sin esto NO hay debate serio):',
+    matrizTitle: 'Matriz mínima por bloque/partida (requisito para una contradicción efectiva):',
     matriz: [
       'Fecha',
       'Concepto',
@@ -78,7 +78,7 @@ export const prescripcionPicassent = {
       'Sin fecha y sin documento, la alegación carece de individualización suficiente para su contradicción.',
       'Sin identificación de la acción y su base jurídica, no puede determinarse el plazo aplicable.',
       'Sin explicación de exigibilidad y dies a quo por partida, no puede practicarse control de prescripción.',
-      'Si se invoca interrupción, debe concretarse y acreditarse: acto, fecha, contenido, destinatario y soporte fehaciente.',
+      'Si se invoca interrupción, debe precisarse y acreditarse el acto interruptivo, con fecha, contenido y destinatario identificables.',
       `Si ${PICASSENT_FACTS.reclamacionExtrajudicial.short} → no hay interrupción; se aplica prescripción por tramos y, además, refuerza retraso desleal (art. 7 CC).`,
       'No mezclar: cuotas ≠ gastos ≠ inversiones.',
     ],
@@ -113,8 +113,8 @@ export const prescripcionPicassent = {
       {
         id: 'cc-1973',
         norma: 'Art. 1973 CC',
-        texto: 'Interrupción de prescripción solo por actos válidos, acreditados y dirigidos.',
-        uso: 'Si alegan interrupción, pedir acto + fecha + contenido + destinatario.',
+        texto: 'La interrupción exige acto idóneo acreditado y susceptible de contradicción.',
+        uso: 'Si se invoca interrupción, exigir identificación del acto, fecha, contenido y destinatario.',
       },
       {
         id: 'dt-5-ley-42-2015',
@@ -163,8 +163,8 @@ export const prescripcionPicassent = {
         rango: 'Pre 07/10/2015',
         descripcion:
           'Periodo pre-reforma (07/10/2015): acciones nacidas antes de esa fecha quedan sujetas a la DT 5ª de la Ley 42/2015 y exigen depuración por partidas/bloques.',
-        estadoH1: 'PRESCRITO',
-        estadoH2: 'PRESCRITO',
+        estadoH1: 'Prescrita',
+        estadoH2: 'Prescrita',
         nota: `DT 5ª (Ley 42/2015) y segmentación por bloques. Si existen partidas anteriores al matrimonio (${PICASSENT_FACTS.matrimonio.human}), se tratan como sub-bloque separado; no procede crédito único.`,
       },
       {
@@ -172,25 +172,25 @@ export const prescripcionPicassent = {
         rango: '07/10/2015 – 24/06/2019',
         descripcion:
           'Bajo H1, prescripción por pago (actio nata). Bajo H2, exige verificar presupuestos fácticos de STS 458/2025; en todo caso, depuración y prueba por partidas.',
-        estadoH1: 'PRESCRITO',
-        estadoH2: 'CAMPO DE BATALLA',
+        estadoH1: 'Prescrita',
+        estadoH2: 'Controvertida (condicionada)',
         nota: 'Solo podría salvarse si hay tabla y motivación de dies a quo por bloque.',
       },
       {
         id: 'tramo-2019-06-24-2022-08',
         rango: '24/06/2019 – ago. 2022',
         descripcion:
-          'Normalmente dentro de plazo. La pelea real es de prueba, exceso, trazabilidad y posibles interrupciones válidas.',
-        estadoH1: 'NO PRESCRITO',
-        estadoH2: 'NO PRESCRITO',
+          'Normalmente dentro de plazo. La cuestión central se desplaza a la prueba, cuantificación y trazabilidad, junto con las eventuales interrupciones alegadas.',
+        estadoH1: 'No prescrita',
+        estadoH2: 'No prescrita',
       },
       {
         id: 'tramo-2022-08-2023-10',
         rango: 'ago. 2022 – oct. 2023',
         descripcion:
           'Post-separación: dentro de plazo, foco en compensaciones y pagos posteriores; la STS 458 no suple prueba.',
-        estadoH1: 'NO PRESCRITO',
-        estadoH2: 'NO PRESCRITO',
+        estadoH1: 'No prescrita',
+        estadoH2: 'No prescrita',
       },
     ],
   },
@@ -203,7 +203,7 @@ export const prescripcionPicassent = {
   },
   escenarios: {
     title: 'Selector de escenarios (decisión rápida)',
-    subtitle: 'En AP no gana el más listo: gana el que impone el marco y fuerza la depuración.',
+    subtitle: 'En Audiencia Previa resulta decisivo delimitar el objeto y fijar la carga probatoria por bloques.',
     items: [
       {
         id: 'escenario-1',
@@ -244,7 +244,7 @@ export const prescripcionPicassent = {
         id: 'escenario-4',
         title: 'Escenario 4 — STS 458/2025 considerada aplicable; aplicación parcial y por bloques homogéneos',
         sostener:
-          'Aunque el juez asuma STS 458/2025 para un bloque concreto, NO puede: convertir A+B+C en un crédito único, extenderla a gastos/inversiones sin depuración, fijar dies a quo “al final” sin punto de corte probado y motivación por bloque.',
+          'Aunque el tribunal considere aplicable la STS 458/2025 para un bloque concreto, no procede convertir A+B+C en crédito único ni desplazar el dies a quo sin motivación específica por bloque.',
         pedir: [
           'Decisión por BLOQUES A/B/C con base jurídica y cuantía separada.',
           'Para cada bloque: dies a quo motivado + prueba + (si alegan) interrupción acreditada. Sin eso: desestimación de lo no probado.',
@@ -286,22 +286,22 @@ export const prescripcionPicassent = {
       'Enfoque: distinguir nuestro caso del supuesto de hecho de la STS 458/2025 con un enfoque procesal de inversión/explotación patrimonial, ausencia de desequilibrio y retraso desleal, más la llave del art. 426.4 LEC.',
     frasesTitle: 'Los 4 argumentos (en orden de fuerza):',
     frases: [
-      `ARG 1 — Negocio, no vivienda: inversión turística (${PICASSENT_FACTS.alquilerTuristico.canal} + licencia de alojamiento turístico).`,
-      'ARG 2 — Sin desequilibrio probado: sueldos comparables y cuentas conjuntas.',
+      `ARG 1 — Activo patrimonial no destinado a vivienda habitual, según consta en documental sobre inversión turística (${PICASSENT_FACTS.alquilerTuristico.canal} + licencia de alojamiento turístico).`,
+      'ARG 2 — No consta acreditado desequilibrio patrimonial con trazabilidad suficiente en cuentas conjuntas.',
       `ARG 3 — Retraso desleal: cotitularidad + ${PICASSENT_FACTS.formacionActora} + ${PICASSENT_FACTS.reclamacionExtrajudicial.short}`,
       'ARG 4 — Llave procesal: art. 426.4 LEC (doctrina sobrevenida).',
     ],
     filtrosTitle: 'Diferencias fácticas clave vs. STS 458/2025:',
     filtros: [
       `STS: vivienda habitual → Nosotros: negocio inmobiliario / segunda residencia / ${PICASSENT_FACTS.alquilerTuristico.canal} + licencia de alojamiento turístico`,
-      'STS: cuenta nutrida casi exclusivamente por ella → Nosotros: 2 sueldos comparables, 2 cuentas conjuntas, 0 privativos',
-      'STS: desequilibrio probado → Nosotros: ningún euro privativo identificable',
-      'STS: hipoteca de domicilio = carga familiar implícita → Nosotros: inversión especulativa = comunidad ordinaria (392 CC)',
-      `STS: cónyuge sin formación financiera / sin visibilidad → Nosotros: policía + ${PICASSENT_FACTS.formacionActora} + cotitular + ${PICASSENT_FACTS.reclamacionExtrajudicial.short}`,
+      'STS: cuenta nutrida casi exclusivamente por ella → Aquí: no consta acreditación trazable de aportaciones privativas exclusivas; constan cuentas conjuntas.',
+      'STS: desequilibrio probado → Aquí: no consta acreditación de aportaciones privativas identificables con trazabilidad suficiente',
+      'STS: hipoteca de domicilio como carga familiar implícita → Aquí: operación de inversión inmobiliaria en el ámbito de la comunidad ordinaria (art. 392 CC)',
+      `STS: cónyuge sin formación financiera / sin visibilidad → Aquí, según consta en autos: policía + ${PICASSENT_FACTS.formacionActora} + cotitular + ${PICASSENT_FACTS.reclamacionExtrajudicial.short}`,
     ],
   },
   erroresFatales: {
-    title: 'Errores fatales (evitarlos en sala)',
+    title: 'Errores críticos a evitar en sala',
     subtitle: 'Checklist rápido para no regalar la prescripción ni el marco probatorio.',
     items: [
       {
@@ -319,7 +319,7 @@ export const prescripcionPicassent = {
       {
         id: 'error-458-rotundo',
         title: 'Negar la 458 apodícticamente',
-        mal: 'Decir “no aplica y punto” sin distinguir hechos ni ofrecer subsidiaria.',
+        mal: 'Negar la aplicabilidad sin distinguir hechos ni articular una tesis subsidiaria.',
         bien: 'Distinguishing claro + subsidiaria: si aplica, que sea por bloques.',
       },
       {
@@ -357,15 +357,15 @@ export const prescripcionPicassent = {
   guion: {
     title: 'Guion de sala (2 minutos)',
     text:
-      `Señoría, solicitamos depuración del objeto: la actora formula una reclamación global con hechos y pagos antiguos sin aportar, por bloques/partidas, fecha, concepto, documento, base jurídica, exigibilidad y, en su caso, actos interruptivos. Además, ${PICASSENT_FACTS.reclamacionExtrajudicial.short}, lo que excluye la interrupción del art. 1973 CC y refuerza la buena fe (art. 7 CC). Nuestra posición es técnica: (1) prescripción de lo exigible y no reclamado en plazo; (2) falta de prueba de un crédito exigible y vigente; y (3) subsidiariamente, si se menciona STS 458/2025, limitar estrictamente su alcance: decisión por bloques homogéneos con cuantía separada y motivación del dies a quo por bloque, sin extensión automática a gastos o inversiones. Además, el inmueble se explotó como ${PICASSENT_FACTS.alquilerTuristico.canal} con licencia de alojamiento turístico y responde a una ${PICASSENT_FACTS.dinamicaPatrimonial}`,
+      `Señoría, solicitamos depuración del objeto: la actora formula una reclamación global con hechos y pagos antiguos sin aportar, por bloques/partidas, fecha, concepto, documento, base jurídica, exigibilidad y, en su caso, actos interruptivos. Además, ${PICASSENT_FACTS.reclamacionExtrajudicial.short}, lo que excluye la interrupción del art. 1973 CC y refuerza la buena fe (art. 7 CC). Nuestra posición es técnica: (1) prescripción de lo exigible y no reclamado en plazo; (2) falta de prueba de un crédito exigible y vigente; y (3) subsidiariamente, si se menciona STS 458/2025, se interesa delimitar estrictamente su alcance: decisión por bloques homogéneos con cuantía separada y motivación del dies a quo por bloque, sin extensión automática a gastos o inversiones. Además, según consta en la documental aportada, el inmueble se explotó como ${PICASSENT_FACTS.alquilerTuristico.canal} con licencia de alojamiento turístico y responde a una ${PICASSENT_FACTS.dinamicaPatrimonial}`,
   },
   checklist: {
-    title: 'Checklist 24–72h (solo lo que mueve la aguja)',
+    title: 'Checklist 24–72h (actuaciones prioritarias)',
     items: [
-      'Convertir todo a tabla: fecha → importe → concepto → doc → bloque → base → exigibilidad → prescripción',
+      'Convertir la pretensión en tabla por partidas: fecha, importe, concepto, documento, bloque, base, exigibilidad y prescripción.',
       'Preparar petición/guion de “decisión por bloques A/B/C”',
       'Identificar 3–5 documentos “matrices” que desmonten el relato (si existen)',
-      'Preparar petición de exhibición/oficios SOLO si falta un documento esencial y concreto',
+      'Preparar petición de exhibición/oficios solo si falta un documento esencial y concreto',
     ],
   },
   plantillas: {
@@ -387,11 +387,11 @@ export const prescripcionPicassent = {
     peticiones: [
       'P1: Depuración del objeto + resolución por bloques A/B/C con cuantías separadas.',
       'P2: Tabla verificable por bloque/partida con soporte y motivación del dies a quo.',
-      'P3 (condicional): Si invocan interrupción, identificación y aportación documental del acto concreto.',
+      'P3 (condicional): Si se invoca interrupción, identificación y aportación del acto interruptivo con fecha, contenido y destinatario.',
     ],
   },
   toc: [
-    { id: 'panel-rapido', label: 'Panel rápido' },
+    { id: 'panel-rapido', label: 'Panel de preparación' },
     { id: 'resumen-60s', label: 'Resumen 60s' },
     { id: 'marco-normativo', label: 'Marco normativo' },
     { id: 'peticion-prioritaria', label: 'Petición prioritaria' },
@@ -406,6 +406,6 @@ export const prescripcionPicassent = {
     { id: 'guion-2-min', label: 'Guion 2 min' },
     { id: 'checklist-24-72', label: 'Checklist 24–72h' },
     { id: 'plantillas', label: 'Plantillas' },
-    { id: 'errores-fatales', label: 'Errores fatales' },
+    { id: 'errores-fatales', label: 'Errores críticos' },
   ],
 } as const;
