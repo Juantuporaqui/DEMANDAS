@@ -1,4 +1,5 @@
 import { CopyButton } from './CopyButton';
+import { LegalReferenceText } from './LegalReferenceText';
 
 interface ScenarioCardProps {
   title: string;
@@ -44,23 +45,23 @@ export function ScenarioCard({
         <div className="space-y-3">
           <div>
             <div className="text-xs font-semibold text-emerald-300">Qué sostener</div>
-            <p className="text-xs break-words text-slate-300">{sostener}</p>
+            <p className="text-xs break-words text-slate-300"><LegalReferenceText text={sostener} /></p>
           </div>
           <div>
             <div className="text-xs font-semibold text-amber-300">Qué pedir (2 peticiones exactas)</div>
             <ul className="list-decimal space-y-1 pl-4 text-xs text-slate-300">
               {pedir.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}><LegalReferenceText text={item} /></li>
               ))}
             </ul>
           </div>
           <div>
             <div className="text-xs font-semibold text-rose-300">Riesgo</div>
-            <p className="text-xs break-words text-slate-300">{riesgo}</p>
+            <p className="text-xs break-words text-slate-300"><LegalReferenceText text={riesgo} /></p>
           </div>
           <div>
             <div className="text-xs font-semibold text-slate-300">Contramedida</div>
-            <p className="text-xs break-words text-slate-300">{contramedida}</p>
+            <p className="text-xs break-words text-slate-300"><LegalReferenceText text={contramedida} /></p>
           </div>
         </div>
       </div>
