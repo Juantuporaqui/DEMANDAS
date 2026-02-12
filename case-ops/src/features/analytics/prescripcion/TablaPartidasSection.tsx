@@ -12,9 +12,9 @@ interface TablaPartidasSectionProps {
 }
 
 const estadoBadgeMap: Record<string, string> = {
-  PRESCRITO: 'bg-red-500/20 text-red-200 border-red-500/40',
-  'NO PRESCRITO': 'bg-emerald-500/20 text-emerald-200 border-emerald-500/40',
-  'CAMPO DE BATALLA': 'bg-amber-500/20 text-amber-200 border-amber-500/40',
+  Prescrita: 'bg-red-500/20 text-red-200 border-red-500/40',
+  'No prescrita': 'bg-emerald-500/20 text-emerald-200 border-emerald-500/40',
+  'Controvertida (condicionada)': 'bg-amber-500/20 text-amber-200 border-amber-500/40',
 };
 
 const bloqueLabels: Record<Exclude<BloqueFiltro, 'ALL'>, string> = {
