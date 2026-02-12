@@ -1,5 +1,6 @@
 import { antiSts458 } from '../../../content/prescripcion/antiSts458';
 import { CopyButton } from './CopyButton';
+import { LegalReferenceText } from './LegalReferenceText';
 
 type HypothesisValue = 'H1' | 'H2';
 
@@ -45,7 +46,7 @@ export function DistinguishingSection({
           Abrir versión extendida
         </a>
       </div>
-      {intro ? <p className="mt-3 break-words text-sm text-slate-300">{intro}</p> : null}
+      {intro ? <p className="mt-3 break-words text-sm text-slate-300"><LegalReferenceText text={intro} /></p> : null}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {antiSts458.argumentos.map((argumento) => (
           <div
@@ -63,10 +64,10 @@ export function DistinguishingSection({
                 {activeHypothesis === 'H2' ? 'Plan B activo' : 'Plan A activo'}
               </span>
             </div>
-            {argumento.summary ? <p className="mt-3 text-sm text-slate-300">{argumento.summary}</p> : null}
+            {argumento.summary ? <p className="mt-3 text-sm text-slate-300"><LegalReferenceText text={argumento.summary} /></p> : null}
             <div className="mt-3 space-y-2 text-xs text-slate-300">
               {argumento.paragraphs.slice(0, 2).map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
+                <p key={paragraph}><LegalReferenceText text={paragraph} /></p>
               ))}
             </div>
             {argumento.fraseSala ? (
@@ -77,7 +78,7 @@ export function DistinguishingSection({
                   </p>
                   <CopyButton text={argumento.fraseSala} label="Copiar" onCopied={onCopied} />
                 </div>
-                <p className="mt-2 text-xs italic text-emerald-200">{argumento.fraseSala}</p>
+                <p className="mt-2 text-xs italic text-emerald-200"><LegalReferenceText text={argumento.fraseSala} /></p>
               </div>
             ) : null}
           </div>
@@ -103,7 +104,7 @@ export function DistinguishingSection({
                 <tr key={`${row[0]}-${rowIndex}`} className="align-top">
                   {row.map((cell, cellIndex) => (
                     <td key={`${cell}-${cellIndex}`} className="px-3 py-3 text-slate-200">
-                      {cell}
+                      <LegalReferenceText text={cell} />
                     </td>
                   ))}
                 </tr>
