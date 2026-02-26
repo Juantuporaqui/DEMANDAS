@@ -1,5 +1,5 @@
 @media print {
-  /* 1. RESET DE ESTRUCTURA: Vital para evitar PDFs en blanco o con espacios gigantes */
+  /* 1. RESET DE ESTRUCTURA */
   html,
   body,
   #root,
@@ -7,17 +7,16 @@
     height: auto !important;
     min-height: 100% !important;
     overflow: visible !important;
-    display: block !important; /* Anula Flex/Grid que rompen la paginación */
+    display: block !important;
     position: static !important;
   }
 
-  /* 2. EVITAR QUE LAS TARJETAS SE PARTAN POR LA MITAD */
+  /* 2. EVITAR QUE ELEMENTOS PEQUEÑOS SE PARTAN (pero permitirlo en contenedores grandes) */
   .card,
   .print-card,
   .card-base,
   .case-card,
-  section,
-  article {
+  p, h1, h2, h3, h4, h5, li, tr {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
@@ -26,17 +25,18 @@
   #root {
     background: #ffffff !important;
     color: #1a202c !important;
-    font-size: 12pt !important;
-    line-height: 1.6 !important;
+    font-size: 10.5pt !important; /* Letra un poco más pequeña para papel */
+    line-height: 1.4 !important;
   }
 
-  /* Hide UI chrome */
+  /* Ocultar UI que no debe imprimirse */
   aside,
   header,
   footer,
   nav,
   .bottom-nav,
-  .print-hidden {
+  .print-hidden,
+  button {
     display: none !important;
   }
 
@@ -44,19 +44,31 @@
   main {
     padding: 0 !important;
     margin: 0 !important;
-    padding-left: 0 !important;
+  }
+
+  /* Reducir los espacios gigantes de Tailwind en papel */
+  .space-y-6 > * + * { margin-top: 1rem !important; }
+  .space-y-4 > * + * { margin-top: 0.5rem !important; }
+  .gap-6 { gap: 1rem !important; }
+  .gap-4 { gap: 0.5rem !important; }
+  .p-6 { padding: 1rem !important; }
+  .p-5 { padding: 0.75rem !important; }
+  .p-4 { padding: 0.5rem !important; }
+
+  /* Si usamos Grid de 2 columnas, a veces en PDF queda apretado, lo pasamos a bloque si hace falta */
+  .xl\:grid-cols-2 {
+    display: block !important;
+  }
+  .xl\:grid-cols-2 > * {
+    margin-bottom: 1rem !important;
   }
 
   /* Print surface */
   .print-surface {
     background: #ffffff !important;
     color: #1a202c !important;
-    border-color: #d1d5db !important;
+    border: none !important;
     box-shadow: none !important;
-  }
-
-  .print-surface * {
-    color: inherit !important;
   }
 
   /* Cards in print */
@@ -67,10 +79,7 @@
     background: #ffffff !important;
     border: 1px solid #d1d5db !important;
     box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
     color: #1a202c !important;
-    break-inside: avoid;
   }
 
   /* Badges in print */
@@ -81,31 +90,10 @@
     color: #374151 !important;
   }
 
-  /* Links */
-  a {
-    color: #1a202c !important;
-    text-decoration: underline !important;
-  }
-
-  /* Page breaks */
   h1, h2, h3 {
     break-after: avoid;
+    page-break-after: avoid;
     color: #111827 !important;
-  }
-
-  /* Table styling */
-  table {
-    border-collapse: collapse !important;
-  }
-
-  thead th {
-    background: #f3f4f6 !important;
-    color: #374151 !important;
-    border: 1px solid #d1d5db !important;
-  }
-
-  tbody td {
-    color: #4b5563 !important;
-    border: 1px solid #e5e7eb !important;
+    margin-bottom: 0.5rem !important;
   }
 }
