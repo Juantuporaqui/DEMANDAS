@@ -5,62 +5,78 @@ interface PrintElementOptions {
 
 const BASE_PRINT_STYLES = `
   @page { margin: 14mm; }
-  body {
+  /* Reglas de seguridad extra inyectadas en el iframe */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
     margin: 0;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    color: #111827;
+    font-family: Inter, system-ui, -apple-system, sans-serif;
     background: #ffffff;
-    line-height: 1.5;
+    color: #111827;
   }
-  * {
-    box-sizing: border-box;
-  }
-  a {
-    color: #1f2937;
-    text-decoration: underline;
-  }
-  button, input, textarea, select, nav {
-    display: none !important;
-  }
-  .print-hidden {
-    display: none !important;
-  }
+  * { box-sizing: border-box; }
+  .print-hidden, button, nav, header, footer, aside { display: none !important; }
+
+  /* Protección contra elementos cortados */
+  img, table, .card-base { break-inside: avoid; }
 `;
 
 export function printElementAsDocument({ element, title }: PrintElementOptions): void {
-  const printWindow = window.open('', '_blank', 'noopener,noreferrer');
-  if (!printWindow) {
-    window.print();
+  // 1. Crear Iframe invisible (Evita el bug de 0 KB de Chrome en window.open)
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'absolute';
+  iframe.style.width = '0px';
+  iframe.style.height = '0px';
+  iframe.style.border = 'none';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentWindow?.document;
+  if (!doc) {
+    window.print(); // Fallback
     return;
   }
 
-  const cloned = element.cloneNode(true) as HTMLElement;
-
+  // 2. Extraer los estilos de la ventana principal (Tailwind + tu print.css)
   const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
     .map((styleNode) => styleNode.outerHTML)
     .join('\n');
 
-  printWindow.document.open();
-  printWindow.document.write(`
+  // 3. Clonar el DOM objetivo
+  const cloned = element.cloneNode(true) as HTMLElement;
+
+  // 4. Inyectar todo en el Iframe
+  doc.open();
+  doc.write(`
     <!doctype html>
     <html lang="es">
       <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>${title}</title>
         ${styles}
         <style>${BASE_PRINT_STYLES}</style>
       </head>
       <body>
-        <main class="print-surface">${cloned.innerHTML}</main>
+        <main class="print-surface block h-auto overflow-visible">${cloned.innerHTML}</main>
       </body>
     </html>
   `);
-  printWindow.document.close();
+  doc.close();
 
-  printWindow.focus();
-
+  // 5. Esperar 1 segundo para que el navegador dibuje el DOM y calcule la paginación
   setTimeout(() => {
-    printWindow.print();
-  }, 500);
+    try {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+    } catch (error) {
+      console.error('Error al imprimir el documento', error);
+    } finally {
+      // Limpiar memoria borrando el iframe 2 segundos después
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 2000);
+    }
+  }, 1000);
 }

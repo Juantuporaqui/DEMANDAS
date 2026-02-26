@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AnalyticsLayout } from '../layout/AnalyticsLayout';
 import { SectionCard } from '../components/SectionCard';
@@ -388,12 +387,16 @@ export function ExcepcionAcumulacionPage() {
     document.getElementById('sala')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    if (printContainerRef.current) {
+      printElementAsDocument({
+        element: printContainerRef.current,
+        title: 'Excepción procesal · Acumulación',
+      });
+      return;
+    }
 
-  const openArticleByKey = (key: string) => {
-    const article = ARTICLES.find((item) => item.key === key) || null;
-    setArticleModal(article);
-    setShowMoreArticles(false);
+    window.print();
   };
 
   return (
@@ -410,16 +413,29 @@ export function ExcepcionAcumulacionPage() {
         </button>
       }
     >
-      <main lang="es">
-        {!isPicassent ? (
-          <SectionCard title="Excepción procesal" subtitle="Estado del caso">
-            <div className="space-y-4 text-sm text-slate-300">
-              <p>Contenido todavía no preparado para este caso.</p>
-              {returnToParam && (
-                <button
-                  type="button"
-                  onClick={() => navigate(returnTo)}
-                  className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
+      {!isPicassent ? (
+        <SectionCard title="Excepción procesal" subtitle="Estado del caso">
+          <div className="space-y-4 text-sm text-slate-300">
+            <p>Contenido todavía no preparado para este caso.</p>
+            {returnToParam && (
+              <button
+                type="button"
+                onClick={() => navigate(returnTo)}
+                className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
+              >
+                Volver al Caso
+              </button>
+            )}
+          </div>
+        </SectionCard>
+      ) : (
+        <div ref={printContainerRef} className="space-y-6">
+          <SectionCard title="Excepción procesal / Saneamiento: objeto híbrido por acumulación de acciones (división de cosa común + reclamación económica)">
+            <div className="flex flex-wrap gap-2">
+              {['PICASSENT · P.O. 715/2024', 'Audiencia previa', 'Objetivo: ordenar el objeto', '4 escenarios'].map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-slate-600/60 bg-slate-800/50 px-3 py-1 text-xs font-semibold text-slate-200"
                 >
                   Volver al Caso
                 </button>
@@ -436,55 +452,17 @@ export function ExcepcionAcumulacionPage() {
                   </span>
                 ))}
               </div>
-              <p className="mt-4 text-sm text-slate-300">
-                Solicitamos al tribunal que controle el objeto litigioso y evite la mezcla de debates y cuantificaciones, garantizando el derecho de defensa: 1) declarando la inadecuación del procedimiento por acumulación de cauces incompatibles; 2) subsidiariamente, saneando el objeto por bloques A/B (hechos–prueba–cuantificación).
-              </p>
-            </SectionCard>
-
-            <div className="sticky top-3 z-20 rounded-2xl border border-white/10 bg-black/30 p-3 backdrop-blur">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  {PRIMARY_ARTICLE_KEYS.map((key) => {
-                    const article = ARTICLES.find((item) => item.key === key);
-                    if (!article) return null;
-                    return (
-                      <button
-                        key={article.key}
-                        type="button"
-                        onClick={() => openArticleByKey(article.key)}
-                        className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10"
-                      >
-                        {article.chipLabel}
-                      </button>
-                    );
-                  })}
-                  <button
-                    type="button"
-                    onClick={() => setShowMoreArticles(true)}
-                    className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10"
-                  >
-                    + Más artículos
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setJurisHubOpen(true)}
-                    className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10"
-                  >
-                    Jurisprudencia
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={handlePrint}
-                    className="rounded-full border border-amber-400/50 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100 transition hover:border-amber-300/70 hover:bg-amber-500/20"
-                  >
-                    Imprimir / PDF
-                  </button>
-                  <CopyButton text={TEXT_GUION_90} label="Copiar Guion 90s" />
-                  <CopyButton text={TEXT_PETICION_PRINCIPAL} label="Copiar Petición Principal" />
-                  <CopyButton text={PETICIONES_TODAS} label="Copiar Peticiones" />
-                </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="rounded-full border border-amber-400/50 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100 transition hover:border-amber-300/70 hover:bg-amber-500/20"
+                >
+                  Imprimir / PDF
+                </button>
+                <CopyButton text={TEXT_GUION_90} label="Copiar Guion 90s" />
+                <CopyButton text={PETICION_PRINCIPAL} label="Copiar Petición Principal" />
+                <CopyButton text={REPLICAS} label="Copiar Réplicas" />
               </div>
             </div>
 
