@@ -1,41 +1,65 @@
 @media print {
-  /* Limpiar la base para que el JS de impresión tome el control */
-  html,
-  body,
-  #root,
-  main {
+  /* 1. ROMPER LAS JAULAS DE ALTURA (Soluciona el bug de páginas en blanco) */
+  html, body, #root, main, 
+  .app-layout, .page-shell, 
+  .overflow-y-auto, .overflow-hidden, .overflow-auto,
+  .h-screen, .min-h-screen, .max-h-screen, .h-full,
+  .fixed, .absolute, .sticky {
     height: auto !important;
-    min-height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
     overflow: visible !important;
-    background: #ffffff !important;
+    display: block !important; 
+    position: static !important;
   }
 
-  /* Ocultar explícitamente UI que no va en papel */
-  aside,
-  header,
-  footer,
-  nav,
-  .bottom-nav,
-  .print-hidden,
-  button {
+  /* 2. ELIMINAR EL HUECO FANTASMA SUPERIOR (El salto de la 1ª página) */
+  /* Quitamos el padding que Tailwind reserva para el Topbar */
+  main, .pt-16, .pt-20, .mt-16, .mt-20 {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* 3. OCULTAR MENÚS Y BOTONES (Solo imprimimos el contenido) */
+  aside, header, footer, nav, 
+  .sidebar, .topbar, .bottom-nav, 
+  button, .print-hidden {
     display: none !important;
   }
 
-  /* Permitir que todo fluya naturalmente y se parta entre páginas */
-  .card,
-  .print-card,
-  .card-base,
-  .case-card,
-  .rounded-2xl,
-  .rounded-xl {
+  /* 4. MODO OSCURO A MODO PAPEL (Blanco y negro puro) */
+  * {
+    color: #000000 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  /* Mantener bordes grises para que se vean las tarjetas */
+  .border, .border-slate-700\/50, .border-slate-700\/40, .border-white\/10 {
+    border-color: #cbd5e1 !important; 
+  }
+
+  /* 5. CORTES DE PÁGINA FLUIDOS */
+  div, section, article, .rounded-2xl, .rounded-xl, .card {
     page-break-inside: auto !important;
     break-inside: auto !important;
   }
 
-  /* Reducir espacios de Tailwind drásticamente en papel */
-  .space-y-6 > * + * { margin-top: 0.5rem !important; }
-  .space-y-4 > * + * { margin-top: 0.25rem !important; }
-  .p-6 { padding: 0.5rem !important; }
-  .p-5 { padding: 0.5rem !important; }
-  .p-4 { padding: 0.5rem !important; }
+  h1, h2, h3, h4, h5, summary {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  /* 6. APLANAR COLUMNAS (Para que no se aplaste el texto a los lados) */
+  .grid, .md\:grid-cols-2, .lg\:grid-cols-2, .xl\:grid-cols-2, .xl\:grid-cols-4, .xl\:grid-cols-5 {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* Transformar los huecos del grid en márgenes normales */
+  .grid > *, .space-y-6 > * + *, .space-y-4 > * + * {
+    margin-top: 0 !important;
+    margin-bottom: 1.5rem !important;
+  }
 }
