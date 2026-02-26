@@ -1,4 +1,27 @@
 @media print {
+  /* 1. RESET DE ESTRUCTURA: Vital para evitar PDFs en blanco o con espacios gigantes */
+  html,
+  body,
+  #root,
+  main {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+    display: block !important; /* Anula Flex/Grid que rompen la paginación */
+    position: static !important;
+  }
+
+  /* 2. EVITAR QUE LAS TARJETAS SE PARTAN POR LA MITAD */
+  .card,
+  .print-card,
+  .card-base,
+  .case-card,
+  section,
+  article {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
   body,
   #root {
     background: #ffffff !important;
