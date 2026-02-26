@@ -15,7 +15,7 @@ const SUBNAV_ITEMS = [
 
 const LEGAL_CHIPS = ['416.1.4 LEC', '250.1.16 LEC', '73.1.2ª LEC', '73.2 LEC', '249.2 LEC'];
 
-const GUION_90S = `Señoría, en este trámite de Audiencia Previa, al amparo del artículo 416.1.4ª LEC, interesamos la depuración del procedimiento porque la demanda acumula dos bloques de naturaleza y cauce incompatibles.
+const TEXT_GUION_90 = `Señoría, en este trámite de Audiencia Previa, al amparo del artículo 416.1.4ª LEC, interesamos la depuración del procedimiento porque la demanda acumula dos bloques de naturaleza y cauce incompatibles.
 
 La acción de división de cosa común debe tramitarse por juicio verbal especial por razón de la materia conforme al artículo 250.1.16 LEC. Sin embargo, la reclamación económica / reembolso por pagos y periodos se corresponde con el juicio ordinario por cuantía del artículo 249.2 LEC.
 
@@ -23,20 +23,29 @@ Esa mezcla infringe el artículo 73.1.2ª LEC, que impide la acumulación cuando
 
 Además, la acumulación no es inocua: la complejidad contable de la reclamación económica está bloqueando la resolución de la división de cosa común, que el legislador ha configurado como verbal especial por materia para dotarla de agilidad. Tras casi dos años de tramitación y sucesivos aplazamientos, la acción divisoria ha quedado subordinada a un debate económico que la desnaturaliza.
 
+Y esta depuración no es una cuestión de conveniencia de parte: en Audiencia Previa corresponde al tribunal asegurar la adecuación del cauce y la regularidad del proceso.
+
 Por ello, con carácter principal, solicitamos que se declare la inadecuación del procedimiento por indebida acumulación de acciones de cauce incompatible, acordando la separación o reconducción procedente.
 
 Y subsidiariamente, para el caso de mantenerse la acumulación, pedimos saneamiento estricto del objeto para evitar indefensión: fijación de hechos controvertidos por bloques A (división) y B (reclamación económica), admisión de prueba vinculada a cada bloque y cuantificación separada por periodos, excluyendo lo impertinente. Esta audiencia existe precisamente para depurar y fijar el objeto litigioso.`;
 
-const GUION_30S = `Señoría, solicitamos depuración en Audiencia Previa (art. 416.1.4ª LEC) porque se acumulan acciones de cauce incompatible: división de cosa común por verbal especial de materia (art. 250.1.16 LEC) y reclamación económica por ordinario (art. 249.2 LEC), infringiendo el art. 73.1.2ª LEC. No opera la absorción del 73.2 LEC al ser verbal por materia. Principalmente pedimos separación/reconducción; subsidiariamente, saneamiento del objeto por bloques A/B y prueba estrictamente vinculada.`;
+const TEXT_GUION_30 = `Señoría, solicitamos depuración en Audiencia Previa (art. 416.1.4ª LEC) porque se acumulan acciones de cauce incompatible: división de cosa común por verbal especial de materia (art. 250.1.16 LEC) y reclamación económica por ordinario (art. 249.2 LEC), infringiendo el art. 73.1.2ª LEC. No opera la absorción del 73.2 LEC al ser verbal por materia. Principalmente pedimos separación/reconducción; subsidiariamente, saneamiento del objeto por bloques A/B y prueba estrictamente vinculada.`;
 
 const PETICION_PRINCIPAL = `Que, al amparo del art. 416.1.4ª LEC, se declare la inadecuación del procedimiento por indebida acumulación de acciones de cauce incompatible, por corresponder la división de cosa común al juicio verbal del art. 250.1.16 LEC y la reclamación económica al juicio ordinario del art. 249.2 LEC, en infracción del art. 73.1.2ª LEC, acordando la separación o reconducción procedente, apreciable incluso de oficio por el tribunal en este trámite de Audiencia Previa, al afectar a la correcta constitución y tramitación del procedimiento.`;
 const PETICION_SUBSIDIARIA_1 = `Subsidiariamente, que se acuerde el saneamiento del objeto litigioso: delimitación expresa por bloques A/B de hechos controvertidos, prueba y cuantificación (hechos–prueba–cuantías por periodos), excluyendo lo impertinente, para evitar indefensión.`;
 const PETICION_SUBSIDIARIA_2 = `Que la admisión de prueba se realice por bloques, exigiendo para cada medio de prueba su conexión directa con el bloque A (división) o el bloque B (reclamación económica), rechazando lo genérico o no vinculado.`;
 const PETICIONES_TODAS = `Principal\n${PETICION_PRINCIPAL}\n\nSubsidiaria 1 (saneamiento del objeto)\n${PETICION_SUBSIDIARIA_1}\n\nSubsidiaria 2 (prueba por bloques)\n${PETICION_SUBSIDIARIA_2}`;
 
+const TEXT_PROTESTA = `Para el supuesto de que no se estime la depuración solicitada (inadecuación/indebida acumulación) o no se acuerde separación estricta por bloques A/B, esta parte formula expresa PROTESTA y solicita que conste en acta, a los efectos del art. 446 LEC y de los recursos procedentes.`;
+
 const REPLICAS = `No se pide un privilegio ni un ‘truco’: se pide depuración para evitar indefensión y garantizar contradicción. Si el tribunal no entra a estimar la excepción por preclusión, debe, como mínimo, ordenar el objeto por bloques A/B (hechos–prueba–cuantificación) y excluir lo impertinente.
 
 La economía procesal no habilita a mezclar cauces imperativos. Si se mantiene la acumulación, se impone saneamiento estricto: periodos, cuantías y prueba por bloques, con pertinencia controlada.`;
+
+const TEXT_JURISPRUDENCIA = `- STS 79/2015, 27/02/2015 (ECLI: ES:TS:2015:79) — Inadecuación por materia = orden público; apreciable de oficio aunque no se alegue.
+- AAP Tarragona, Secc. 3ª, Auto 185/2024 (23/05/2024) — Control en AP incluso tras admisión; apoyo en arts. 419 y 425 LEC.
+- SAP Baleares, Secc. 3ª, 18/09/2018 (ROJ SAP IB 1884/2018) — Examen judicial en AP aunque no se detectara en admisión.
+- SAP A Coruña, Secc. 5ª, 11/06/2009 (ROJ SAP C 1749/2009) — Art. 416 no es lista cerrada; art. 425 permite resolver cuestiones análogas.`;
 
 function CopyButton({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
@@ -77,15 +86,16 @@ export function ExcepcionAcumulacionPage() {
       },
       {
         title: 'Escenario 2 — “No la admite por preclusión (no se alegó en contestación)”',
-        resultado:
-          'Plan B: reconducir a ordenación del objeto: inadecuación/defecto legal/claridad + fijación por bloques.',
-        pedir: 'Objetivo real: que el juicio no sea un “cajón desastre”. Petición inmediata: ordenar bloques A/B + pertinencia estricta.',
+        resultado: 'Plan B: reconducir a ordenación del objeto: inadecuación/defecto legal/claridad + fijación por bloques.',
+        pedir:
+          'Objetivo real: que el juicio no sea un “cajón desastre”. Petición inmediata: ordenar bloques A/B + pertinencia estricta. Si no lo estima: formular PROTESTA y pedir que conste en acta (art. 446 LEC).',
       },
       {
         title: 'Escenario 3 — “Dice que la acumulación es correcta”',
         resultado:
           'Plan B reforzado: separación funcional total dentro del mismo pleito (hechos–prueba–cuantías por bloques) + exclusión de hechos impertinentes.',
-        pedir: 'Insistir en control del objeto y prueba estrictamente vinculada. Repetir cortafuegos 73.2 (no aplica por materia).',
+        pedir:
+          'Insistir en control del objeto y prueba estrictamente vinculada. Repetir cortafuegos 73.2 (no aplica por materia). Si no lo estima: formular PROTESTA y pedir que conste en acta (art. 446 LEC).',
       },
       {
         title: 'Escenario 4 — “Solución intermedia del juez”',
@@ -96,6 +106,10 @@ export function ExcepcionAcumulacionPage() {
     ],
     []
   );
+
+  const scrollToSala = () => {
+    document.getElementById('sala')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <AnalyticsLayout
@@ -154,21 +168,21 @@ export function ExcepcionAcumulacionPage() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
-                <CopyButton text={GUION_90S} label="Copiar Guion 90s" />
+                <CopyButton text={TEXT_GUION_90} label="Copiar Guion 90s" />
                 <CopyButton text={PETICION_PRINCIPAL} label="Copiar Petición Principal" />
                 <CopyButton text={REPLICAS} label="Copiar Réplicas" />
               </div>
             </div>
           </div>
 
-          <div className="grid gap-4 sm:gap-6 xl:grid-cols-12">
+          <div id="sala" className="grid gap-4 sm:gap-6 xl:grid-cols-12 scroll-mt-24">
             <div className="space-y-4 sm:space-y-6 xl:col-span-7">
               <SectionCard title="SALA · Guion 90 segundos" subtitle="Lectura directa, sin improvisar">
                 <div className="space-y-4 text-sm leading-relaxed text-slate-200">
-                  {GUION_90S.split('\n\n').map((paragraph) => (
+                  {TEXT_GUION_90.split('\n\n').map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
-                  <CopyButton text={GUION_90S} label="Copiar" />
+                  <CopyButton text={TEXT_GUION_90} label="Copiar" />
                 </div>
               </SectionCard>
 
@@ -198,13 +212,20 @@ export function ExcepcionAcumulacionPage() {
                   <CopyButton text={PETICIONES_TODAS} label="Copiar todo" />
                 </div>
               </SectionCard>
+
+              <SectionCard title="PROTESTA (para acta y recursos)">
+                <div className="space-y-4 text-sm text-slate-200">
+                  <p className="text-slate-300">{TEXT_PROTESTA}</p>
+                  <CopyButton text={TEXT_PROTESTA} label="Copiar protesta" />
+                </div>
+              </SectionCard>
             </div>
 
             <div className="space-y-4 sm:space-y-6 xl:col-span-5">
               <SectionCard title="SALA · Guion 30 segundos">
                 <div className="space-y-4 text-sm text-slate-200">
-                  <p>{GUION_30S}</p>
-                  <CopyButton text={GUION_30S} label="Copiar" />
+                  <p>{TEXT_GUION_30}</p>
+                  <CopyButton text={TEXT_GUION_30} label="Copiar" />
                 </div>
               </SectionCard>
 
@@ -240,9 +261,7 @@ export function ExcepcionAcumulacionPage() {
                     <li>
                       1) Que se declare la inadecuación del procedimiento por acumulación de cauces incompatibles (416.1.4, 250.1.16, 73.1.2ª y 249.2 LEC), sin absorción por 73.2.
                     </li>
-                    <li>
-                      2) Subsidiariamente: saneamiento por bloques A/B (hechos–prueba–cuantificación), excluyendo lo impertinente.
-                    </li>
+                    <li>2) Subsidiariamente: saneamiento por bloques A/B (hechos–prueba–cuantificación), excluyendo lo impertinente.</li>
                     <li>3) Admisión y control de prueba por bloques, con conexión directa a cada bloque.</li>
                   </ol>
                 </SectionCard>
@@ -322,13 +341,14 @@ export function ExcepcionAcumulacionPage() {
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                       <h3 className="text-base font-semibold text-white">Jurisprudencia relevante (control en Audiencia Previa)</h3>
                       <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-slate-300">
-                        <li>AAP Tarragona, Auto 185/2024 (23/05/2024): admite el control de la acumulación en Audiencia Previa incluso cuando no fue advertida en admisión.</li>
-                        <li>SAP Baleares (ROJ SAP IB 1884/2018): la indebida acumulación puede ser examinada por el tribunal en fase de depuración procesal.</li>
-                        <li>SAP A Coruña (ROJ SAP C 1749/2009): el tribunal puede resolver cuestiones procesales que afecten a la válida prosecución del procedimiento aunque no estén expresamente tasadas.</li>
+                        <li>STS 79/2015, 27/02/2015 (ECLI: ES:TS:2015:79) — Inadecuación por materia = orden público; apreciable de oficio aunque no se alegue.</li>
+                        <li>AAP Tarragona, Secc. 3ª, Auto 185/2024 (23/05/2024) — Control en AP incluso tras admisión; apoyo en arts. 419 y 425 LEC.</li>
+                        <li>SAP Baleares, Secc. 3ª, 18/09/2018 (ROJ SAP IB 1884/2018) — Examen judicial en AP aunque no se detectara en admisión.</li>
+                        <li>SAP A Coruña, Secc. 5ª, 11/06/2009 (ROJ SAP C 1749/2009) — Art. 416 no es lista cerrada; art. 425 permite resolver cuestiones análogas.</li>
                       </ul>
-                      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-                        Enlace a repositorio interno de sentencias.
-                      </p>
+                      <div className="mt-3">
+                        <CopyButton text={TEXT_JURISPRUDENCIA} label="Copiar jurisprudencia" />
+                      </div>
                     </div>
                   </div>
                 </SectionCard>
@@ -356,11 +376,15 @@ export function ExcepcionAcumulacionPage() {
 
               <div id="estrategia-oral" className="scroll-mt-24">
                 <SectionCard title="Guion 90 segundos (copiable)">
-                  <div className="space-y-4 text-sm text-slate-200">
-                    {GUION_90S.split('\n\n').map((paragraph) => (
-                      <p key={`estrategia-${paragraph}`}>{paragraph}</p>
-                    ))}
-                    <CopyButton text={GUION_90S} label="Copiar" />
+                  <div className="space-y-3 text-sm text-slate-300">
+                    <p>Para evitar duplicidades de lectura, usa el bloque superior SALA como fuente única del guion.</p>
+                    <button
+                      type="button"
+                      onClick={scrollToSala}
+                      className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15"
+                    >
+                      Ir a SALA
+                    </button>
                   </div>
                 </SectionCard>
               </div>
@@ -408,12 +432,16 @@ export function ExcepcionAcumulacionPage() {
             </div>
 
             <div className="space-y-4">
-              <SectionCard title="Guion 90 segundos (copiable)" subtitle="Resumen que se pueda leer en sala" className="sticky top-24">
-                <div className="space-y-3 text-sm text-slate-200">
-                  {GUION_90S.split('\n\n').map((paragraph) => (
-                    <p key={`side-${paragraph}`}>{paragraph}</p>
-                  ))}
-                  <CopyButton text={GUION_90S} label="Copiar" />
+              <SectionCard title="Resumen que se pueda leer en sala" className="sticky top-24">
+                <div className="space-y-3 text-sm text-slate-300">
+                  <p>Fuente única: SALA · Guion 90 segundos.</p>
+                  <button
+                    type="button"
+                    onClick={scrollToSala}
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15"
+                  >
+                    Ir a SALA
+                  </button>
                 </div>
               </SectionCard>
             </div>
