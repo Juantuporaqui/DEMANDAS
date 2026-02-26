@@ -13,9 +13,6 @@ const SUBNAV_ITEMS = [
   { label: 'Anexos', href: '#anexos' },
 ];
 
-const LEGAL_CHIPS = ['416.1.4ª LEC', '250.1.16 LEC', '73.1.2ª LEC', '73.2 LEC', '249.2 LEC'] as const;
-type LegalChip = (typeof LEGAL_CHIPS)[number];
-
 const TEXT_GUION_90 = `Señoría, en este trámite de Audiencia Previa, al amparo del artículo 416.1.4ª LEC, interesamos la depuración del procedimiento porque la demanda acumula dos bloques de naturaleza y cauce incompatibles.
 
 La acción de división de cosa común debe tramitarse por juicio verbal especial por razón de la materia conforme al artículo 250.1.16 LEC. Sin embargo, la reclamación económica / reembolso por pagos y periodos se corresponde con el juicio ordinario por cuantía del artículo 249.2 LEC.
@@ -40,21 +37,171 @@ const TEXT_PETICION_SUB2 = `Que la admisión de prueba se realice por bloques, e
 
 const TEXT_PROTESTA = `Para el supuesto de que no se estime la depuración solicitada (inadecuación/indebida acumulación) o no se acuerde separación estricta por bloques A/B, esta parte formula expresa PROTESTA y solicita que conste en acta, a los efectos del art. 446 LEC y de los recursos procedentes.`;
 
-const TEXT_JURISPRUDENCIA = [
-  'STS 79/2015, 27/02/2015 (ECLI: ES:TS:2015:79) — Inadecuación por materia = orden público; apreciable de oficio aunque no se alegue.',
-  'AAP Tarragona, Secc. 3ª, Auto 185/2024 (23/05/2024) — Control en AP incluso tras admisión; apoyo en arts. 419 y 425 LEC.',
-  'SAP Baleares, Secc. 3ª, 18/09/2018 (ROJ SAP IB 1884/2018) — Examen judicial en AP aunque no se detectara en admisión.',
-  'SAP A Coruña, Secc. 5ª, 11/06/2009 (ROJ SAP C 1749/2009) — Art. 416 no es lista cerrada; art. 425 permite resolver cuestiones análogas.',
-  'AAP Valencia, Secc. 10ª, Auto 137/2025, 03/03/2025 (ROJ: AAP V 308/2025; ECLI:ES:APV:2025:308A) — División de cosa común por verbal de materia (art. 250.1.16 LEC) con independencia del valor.',
+const ARTICLES = [
+  {
+    key: '416.1.4',
+    chipLabel: '416.1.4 LEC',
+    title: 'Art. 416 LEC — Cuestiones procesales en AP (incluye inadecuación)',
+    boeExcerpt: [
+      'Artículo 416. Examen y resolución de cuestiones procesales, con exclusión de las relativas a jurisdicción y competencia.',
+      '1. ... el tribunal resolverá ... y, en especial, sobre las siguientes:',
+      '4.ª Inadecuación del procedimiento;',
+      '5.ª Defecto legal en el modo de proponer la demanda ... por falta de claridad o precisión ...',
+    ].join('\n'),
+    useInCase: [
+      'Puerta de entrada en AP para pedir depuración del cauce y ordenar el objeto del pleito.',
+      'Base para el PLAN A (inadecuación) y PLAN B (defecto legal/ordenación por bloques).',
+    ].join('\n'),
+  },
+  {
+    key: '250.1.16',
+    chipLabel: '250.1.16 LEC',
+    title: 'Art. 250.1.16 LEC — División cosa común = verbal por materia',
+    boeExcerpt: [
+      'Artículo 250. Ámbito del juicio verbal.',
+      '1. Se decidirán en juicio verbal, cualquiera que sea su cuantía, las demandas siguientes:',
+      '16.º Aquéllas en las que se ejercite la acción de división de cosa común.',
+    ].join('\n'),
+    useInCase: [
+      'Ancla el carácter imperativo del verbal por MATERIA (no por cuantía).',
+      'Refuerza que la acción divisoria no debe quedar subordinada a un macrodebate contable.',
+    ].join('\n'),
+  },
+  {
+    key: '249.2',
+    chipLabel: '249.2 LEC',
+    title: 'Art. 249.2 LEC — Ordinario por cuantía (superior a 15.000 / indeterminada)',
+    boeExcerpt: [
+      'Artículo 249. Ámbito del juicio ordinario.',
+      '2. Se decidirán también en el juicio ordinario las demandas cuya cuantía exceda de quince mil euros y aquéllas cuyo interés económico resulte imposible de calcular, ni siquiera de modo relativo.',
+    ].join('\n'),
+    useInCase: [
+      'Encaje del bloque de reclamación económica/reembolso si supera umbral o es indeterminada.',
+      'Sirve para reforzar incompatibilidad de cauces con la divisoria (250.1.16).',
+    ].join('\n'),
+  },
+  {
+    key: '73',
+    chipLabel: '73 LEC',
+    title: 'Art. 73 LEC — Requisitos de acumulación (incluye 73.1.2ª y 73.2)',
+    boeExcerpt: [
+      'Artículo 73. Admisibilidad por motivos procesales de la acumulación de acciones.',
+      '1. Para que sea admisible la acumulación de acciones será preciso:',
+      '1.º ... Sin embargo, a la acción que haya de sustanciarse en juicio ordinario podrá acumularse la acción que, por sí sola, se habría de ventilar, por razón de su cuantía, en juicio verbal.',
+      '2.º Que las acciones acumuladas no deban, por razón de su materia, ventilarse en juicios de diferente tipo.',
+      '2. También se acumularán en una misma demanda distintas acciones cuando así lo dispongan las leyes, para casos determinados.',
+    ].join('\n'),
+    useInCase: [
+      'Tu cortafuegos: 73.1.1 solo ‘salva’ acumulación cuando el verbal sería por CUANTÍA.',
+      'Aquí el verbal de la división viene por MATERIA (250.1.16), por lo que el eje es 73.1.2ª: no mezclar materias/cauces.',
+      '73.2: solo permite acumulación si una ley lo dispone para casos determinados (no por ‘economía procesal’).',
+    ].join('\n'),
+  },
+  {
+    key: '419',
+    chipLabel: '419 LEC',
+    title: 'Art. 419 LEC — Decisión sobre acumulación en AP (si hubo oposición en contestación)',
+    boeExcerpt: [
+      'Artículo 419. Admisión de la acumulación de acciones.',
+      'Si en la demanda se hubiesen acumulado diversas acciones y el demandado en su contestación se hubiera opuesto motivadamente..., el tribunal... resolverá oralmente sobre la procedencia y admisibilidad de la acumulación...',
+    ].join('\n'),
+    useInCase: [
+      'Sirve como ‘canal natural’ cuando la cuestión se planteó formalmente en contestación.',
+      'Si el juez te objeta preclusión, úsalo como soporte de ordenación/depuración en AP junto con 425.',
+    ].join('\n'),
+  },
+  {
+    key: '425',
+    chipLabel: '425 LEC',
+    title: 'Art. 425 LEC — Circunstancias procesales análogas (de oficio)',
+    boeExcerpt: [
+      'Artículo 425. Decisión judicial en casos de circunstancias procesales análogas a las expresamente previstas.',
+      'La resolución de circunstancias alegadas o puestas de manifiesto de oficio, que no se hallen comprendidas en el artículo 416, se acomodará a las reglas establecidas en estos preceptos para las análogas.',
+    ].join('\n'),
+    useInCase: [
+      'Plan B: aunque el juez no quiera ‘excepción formal’, puede ordenar objeto/cauce y pertinencia probatoria por analogía funcional.',
+      'Refuerza el deber de ordenar el proceso en AP.',
+    ].join('\n'),
+  },
+  {
+    key: '446',
+    chipLabel: '446 LEC',
+    title: 'Art. 446 LEC — Protesta para 2ª instancia (resoluciones sobre prueba)',
+    boeExcerpt: [
+      'Artículo 446. Resoluciones sobre la prueba y recursos.',
+      'Contra las resoluciones ... sobre admisión o inadmisión de pruebas ... solo cabrá reposición ... y, si se desestimare, la parte podrá formular protesta ... en la segunda instancia.',
+    ].join('\n'),
+    useInCase: [
+      'Ancla legal clara para que tu ‘PROTESTA’ tenga sentido procesal y conste en acta.',
+      'Aplicarlo especialmente a decisiones de admisión/inadmisión de prueba y a la ordenación probatoria por bloques.',
+    ].join('\n'),
+  },
 ] as const;
 
-const ARTICLE_SUMMARIES: Record<LegalChip, string> = {
-  '416.1.4ª LEC': 'En AP permite depurar inadecuación del procedimiento: el tribunal decide si el cauce seguido es idóneo.',
-  '250.1.16 LEC': 'División cosa común: juicio verbal por razón de la materia, con independencia de cuantía.',
-  '73.1.2ª LEC': 'No cabe acumulación cuando las acciones deban ventilarse en procedimientos de diferente tipo.',
-  '73.2 LEC': 'Absorción solo cuando la diferencia sea por cuantía; no aplica si el verbal es por materia.',
-  '249.2 LEC': 'Acciones de reclamación económica por cuantía: cauce ordinario cuando proceda.',
-};
+type ArticleItem = (typeof ARTICLES)[number];
+
+const PRIMARY_ARTICLE_KEYS = ['416.1.4', '250.1.16', '73', '249.2'] as const;
+const EXTRA_ARTICLE_KEYS = ['419', '425', '446'] as const;
+
+const JURIS_ITEMS = [
+  {
+    key: 'sts79_2015',
+    title: 'STS 79/2015, 27/02/2015',
+    meta: 'ECLI: ES:TS:2015:79',
+    oneLiner: 'Inadecuación por materia = orden público; apreciable de oficio aunque no se alegue.',
+    expandedBullets: [
+      'Qué aporta: refuerza que la adecuación del cauce cuando viene impuesta por materia no es disponible por las partes.',
+      'Uso en tu caso: soporte para enmarcar ‘de oficio’ como función de depuración/ordenación del proceso, no como ruego.',
+      'Cómo citarlo: solo para ‘orden público/depuración’, no como caso idéntico de acumulación híbrida.',
+    ],
+  },
+  {
+    key: 'aap_tarragona_185_2024',
+    title: 'AAP Tarragona, Secc. 3ª, Auto 185/2024',
+    meta: '23/05/2024',
+    oneLiner: 'Control en AP incluso tras admisión; apoyo en arts. 419 y 425 LEC.',
+    expandedBullets: [
+      'Qué aporta: admite revisión/ordenación del encaje procesal en fase de AP aun cuando el pleito haya sido admitido.',
+      'Uso en tu caso: munición contra la objeción ‘preclusión’: el tribunal puede ordenar el objeto y el cauce en AP si afecta a estructura y defensa.',
+      'Cómo citarlo: para pedir ordenación/depuración y separación funcional por bloques.',
+    ],
+  },
+  {
+    key: 'sap_baleares_1884_2018',
+    title: 'SAP Baleares, Secc. 3ª, 18/09/2018',
+    meta: 'ROJ SAP IB 1884/2018',
+    oneLiner: 'Examen judicial en AP aunque no se detectara en admisión.',
+    expandedBullets: [
+      'Qué aporta: la admisión a trámite no ‘convalida’ un objeto procesal defectuoso; en AP puede corregirse.',
+      'Uso en tu caso: refuerza la idea de que el juez conserva potestad/deber de ordenar el pleito y evitar híbridos.',
+      'Cómo citarlo: como apoyo a depuración y control de pertinencia probatoria.',
+    ],
+  },
+  {
+    key: 'sap_acoruna_1749_2009',
+    title: 'SAP A Coruña, Secc. 5ª, 11/06/2009',
+    meta: 'ROJ SAP C 1749/2009',
+    oneLiner: 'Art. 416 no es lista cerrada; art. 425 permite resolver cuestiones análogas.',
+    expandedBullets: [
+      'Qué aporta: lectura funcional de la AP: permite resolver incidencias procesales relevantes aunque no encajen rígidamente.',
+      'Uso en tu caso: Plan B si el juez no entra a excepción: ordenar objeto por bloques A/B, pertinencia estricta y cuantificación por periodos.',
+      'Cómo citarlo: para justificar que el tribunal ordene y depure por analogía (art. 425 LEC).',
+    ],
+  },
+  {
+    key: 'aap_valencia_308_2025',
+    title: 'AAP Valencia, Secc. 10ª, Auto 137/2025',
+    meta: '03/03/2025 — ROJ: AAP V 308/2025 — ECLI:ES:APV:2025:308A',
+    oneLiner: 'División de cosa común por verbal de materia (250.1.16) con independencia del valor.',
+    expandedBullets: [
+      'Qué aporta: AP Valencia (territorialmente muy relevante) reafirma el encaje imperativo del art. 250.1.16 LEC.',
+      'Uso en tu caso: refuerza que el verbal de la división es por MATERIA y no debe quedar subordinado a un debate contable de reembolso.',
+      'Cómo citarlo: como apoyo de 250.1.16 (cauce imperativo) y del ‘bloqueo/dilación’ por objeto híbrido.',
+    ],
+  },
+] as const;
+
+type JurisItem = (typeof JURIS_ITEMS)[number];
 
 const QUICK_REPLICAS = [
   {
@@ -163,9 +310,11 @@ export function ExcepcionAcumulacionPage() {
     const stored = localStorage.getItem('cas001_excepcion_mode');
     return stored === 'sala' ? 'sala' : 'operativo';
   });
-  const [articleModal, setArticleModal] = useState<LegalChip | null>(null);
-  const [caseModal, setCaseModal] = useState<number | null>(null);
-  const [notes, setNotes] = useState<Record<number, string>>({});
+  const [articleModal, setArticleModal] = useState<ArticleItem | null>(null);
+  const [showMoreArticles, setShowMoreArticles] = useState(false);
+  const [jurisModal, setJurisModal] = useState<JurisItem | null>(null);
+  const [jurisHubOpen, setJurisHubOpen] = useState(false);
+  const [notes, setNotes] = useState<Record<string, string>>({});
   const [subsidiariasOpen, setSubsidiariasOpen] = useState(false);
   const [openReplica, setOpenReplica] = useState<number | null>(0);
 
@@ -174,9 +323,9 @@ export function ExcepcionAcumulacionPage() {
   }, [mode]);
 
   useEffect(() => {
-    const loaded: Record<number, string> = {};
-    TEXT_JURISPRUDENCIA.forEach((_, index) => {
-      loaded[index] = localStorage.getItem(`cas001_excepcion_juris_note_${index}`) || '';
+    const loaded: Record<string, string> = {};
+    JURIS_ITEMS.forEach((item) => {
+      loaded[item.key] = localStorage.getItem(`cas001_excepcion_juris_note_${item.key}`) || '';
     });
     setNotes(loaded);
   }, []);
@@ -185,7 +334,9 @@ export function ExcepcionAcumulacionPage() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setArticleModal(null);
-        setCaseModal(null);
+        setJurisModal(null);
+        setJurisHubOpen(false);
+        setShowMoreArticles(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -218,11 +369,20 @@ export function ExcepcionAcumulacionPage() {
     []
   );
 
+  const shortJurisText = JURIS_ITEMS.map((item) => `${item.title}\n${item.meta}\n${item.oneLiner}`).join('\n\n');
+  const expandedJurisText = JURIS_ITEMS.map((item) => `${item.title}\n${item.meta}\n- ${item.expandedBullets.join('\n- ')}`).join('\n\n');
+
   const scrollToSala = () => {
     document.getElementById('sala')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handlePrint = () => window.print();
+
+  const openArticleByKey = (key: string) => {
+    const article = ARTICLES.find((item) => item.key === key) || null;
+    setArticleModal(article);
+    setShowMoreArticles(false);
+  };
 
   return (
     <AnalyticsLayout
@@ -271,17 +431,35 @@ export function ExcepcionAcumulacionPage() {
 
             <div className="sticky top-3 z-20 rounded-2xl border border-white/10 bg-black/30 p-3 backdrop-blur">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap gap-2">
-                  {LEGAL_CHIPS.map((chip) => (
-                    <button
-                      key={chip}
-                      type="button"
-                      onClick={() => setArticleModal(chip)}
-                      className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10"
-                    >
-                      {chip}
-                    </button>
-                  ))}
+                <div className="flex flex-wrap items-center gap-2">
+                  {PRIMARY_ARTICLE_KEYS.map((key) => {
+                    const article = ARTICLES.find((item) => item.key === key);
+                    if (!article) return null;
+                    return (
+                      <button
+                        key={article.key}
+                        type="button"
+                        onClick={() => openArticleByKey(article.key)}
+                        className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10"
+                      >
+                        {article.chipLabel}
+                      </button>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    onClick={() => setShowMoreArticles(true)}
+                    className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10"
+                  >
+                    + Más artículos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setJurisHubOpen(true)}
+                    className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10"
+                  >
+                    Jurisprudencia
+                  </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -364,11 +542,9 @@ export function ExcepcionAcumulacionPage() {
 
                 <SectionCard title="SALA · Guion 30 segundos">
                   <div className="space-y-4 text-sm text-slate-200">
-                    {TEXT_GUION_30.split('\n\n').map((paragraph) => (
-                      <p key={paragraph} className="justify-pro" style={{ textAlignLast: 'left' }}>
-                        {paragraph}
-                      </p>
-                    ))}
+                    <p className="justify-pro" style={{ textAlignLast: 'left' }}>
+                      {TEXT_GUION_30}
+                    </p>
                     <CopyButton text={TEXT_GUION_30} label="Copiar" />
                   </div>
                 </SectionCard>
@@ -417,12 +593,12 @@ export function ExcepcionAcumulacionPage() {
                     <div id="base-legal" className="scroll-mt-24">
                       <SectionCard title="Base legal (anclaje exacto)">
                         <div className="space-y-3 text-sm text-slate-200">
-                          {LEGAL_CHIPS.map((chip) => (
-                            <div key={chip} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                              <button type="button" onClick={() => setArticleModal(chip)} className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10">
-                                {chip}
+                          {ARTICLES.map((item) => (
+                            <div key={item.key} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                              <button type="button" onClick={() => setArticleModal(item)} className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10">
+                                {item.chipLabel}
                               </button>
-                              <p className="mt-2 text-sm text-slate-300">{ARTICLE_SUMMARIES[chip]}</p>
+                              <p className="mt-2 text-sm text-slate-300">{item.title}</p>
                             </div>
                           ))}
                           <div className="rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4">
@@ -442,12 +618,18 @@ export function ExcepcionAcumulacionPage() {
                         <div className="space-y-4 text-sm text-slate-200">
                           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                             <h3 className="text-base font-semibold text-white">Jurisprudencia relevante</h3>
-                            <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-slate-300">
-                              {TEXT_JURISPRUDENCIA.map((item, index) => (
-                                <li key={item}>
-                                  {item}
-                                  <button type="button" onClick={() => setCaseModal(index)} className="ml-2 rounded-lg border border-white/10 bg-white/10 px-2 py-1 text-xs text-white hover:bg-white/15">
-                                    Ver
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <CopyButton text={shortJurisText} label="Copiar jurisprudencia (línea corta)" />
+                              <CopyButton text={expandedJurisText} label="Copiar jurisprudencia (ampliado)" />
+                            </div>
+                            <ul className="mt-3 space-y-3 text-sm text-slate-300">
+                              {JURIS_ITEMS.map((item) => (
+                                <li key={item.key} className="rounded-xl border border-white/10 bg-slate-950/50 p-3">
+                                  <p className="font-semibold text-white">{item.title}</p>
+                                  <p className="text-xs text-slate-400">{item.meta}</p>
+                                  <p className="mt-1">{item.oneLiner}</p>
+                                  <button type="button" onClick={() => setJurisModal(item)} className="mt-2 rounded-lg border border-white/10 bg-white/10 px-2 py-1 text-xs text-white hover:bg-white/15">
+                                    Resumen ampliado
                                   </button>
                                 </li>
                               ))}
@@ -522,13 +704,37 @@ export function ExcepcionAcumulacionPage() {
               </>
             )}
 
+            {showMoreArticles && (
+              <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4" onClick={() => setShowMoreArticles(false)}>
+                <div className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-5" onClick={(e) => e.stopPropagation()}>
+                  <h3 className="text-lg font-semibold text-white">Más artículos</h3>
+                  <div className="mt-3 space-y-2">
+                    {EXTRA_ARTICLE_KEYS.map((key) => {
+                      const article = ARTICLES.find((item) => item.key === key);
+                      if (!article) return null;
+                      return (
+                        <button key={article.key} type="button" onClick={() => openArticleByKey(article.key)} className="w-full rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-left text-sm text-white hover:bg-white/15">
+                          {article.chipLabel} — {article.title}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {articleModal && (
               <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4" onClick={() => setArticleModal(null)}>
-                <div className="w-full max-w-xl rounded-2xl border border-white/10 bg-slate-900 p-5" onClick={(e) => e.stopPropagation()}>
-                  <h3 className="text-lg font-semibold text-white">Artículo {articleModal}</h3>
-                  <p className="mt-2 text-sm text-slate-300">{ARTICLE_SUMMARIES[articleModal]}</p>
-                  <div className="mt-4 flex justify-end gap-2">
-                    <CopyButton text={ARTICLE_SUMMARIES[articleModal]} label="Copiar artículo (resumen)" />
+                <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-slate-900 p-5" onClick={(e) => e.stopPropagation()}>
+                  <h3 className="text-lg font-semibold text-white">{articleModal.title}</h3>
+                  <h4 className="mt-4 text-sm font-semibold text-slate-100">Texto legal (extracto BOE)</h4>
+                  <pre className="mt-2 whitespace-pre-wrap rounded-xl border border-white/10 bg-slate-950 p-3 text-left font-mono text-xs text-slate-200">{articleModal.boeExcerpt}</pre>
+                  <h4 className="mt-4 text-sm font-semibold text-slate-100">Uso en mi caso</h4>
+                  <div className="mt-2 whitespace-pre-wrap rounded-xl border border-white/10 bg-slate-950 p-3 text-left text-sm text-slate-200">{articleModal.useInCase}</div>
+                  <div className="mt-4 flex flex-wrap justify-end gap-2">
+                    <CopyButton text={articleModal.boeExcerpt} label="Copiar extracto" />
+                    <CopyButton text={articleModal.useInCase} label="Copiar uso" />
+                    <CopyButton text={`${articleModal.title}\n\n${articleModal.boeExcerpt}\n\n${articleModal.useInCase}`} label="Copiar todo" />
                     <button type="button" onClick={() => setArticleModal(null)} className="rounded-xl border border-white/10 px-3 py-2 text-sm text-white">
                       Cerrar
                     </button>
@@ -537,25 +743,56 @@ export function ExcepcionAcumulacionPage() {
               </div>
             )}
 
-            {caseModal !== null && (
-              <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4" onClick={() => setCaseModal(null)}>
+            {jurisHubOpen && (
+              <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4" onClick={() => setJurisHubOpen(false)}>
+                <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-slate-900 p-5" onClick={(e) => e.stopPropagation()}>
+                  <h3 className="text-lg font-semibold text-white">Jurisprudencia</h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <CopyButton text={shortJurisText} label="Copiar jurisprudencia (línea corta)" />
+                    <CopyButton text={expandedJurisText} label="Copiar jurisprudencia (ampliado)" />
+                  </div>
+                  <ul className="mt-4 space-y-3 text-sm text-slate-300">
+                    {JURIS_ITEMS.map((item) => (
+                      <li key={item.key} className="rounded-xl border border-white/10 bg-slate-950/50 p-3">
+                        <p className="font-semibold text-white">{item.title}</p>
+                        <p className="text-xs text-slate-400">{item.meta}</p>
+                        <p className="mt-1">{item.oneLiner}</p>
+                        <button type="button" onClick={() => setJurisModal(item)} className="mt-2 rounded-lg border border-white/10 bg-white/10 px-2 py-1 text-xs text-white hover:bg-white/15">
+                          Resumen ampliado
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {jurisModal && (
+              <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4" onClick={() => setJurisModal(null)}>
                 <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-slate-900 p-5" onClick={(e) => e.stopPropagation()}>
-                  <h3 className="text-lg font-semibold text-white">Sentencia / Auto</h3>
-                  <p className="mt-2 text-sm text-slate-300">{TEXT_JURISPRUDENCIA[caseModal]}</p>
-                  <p className="mt-3 text-sm text-slate-300">Para qué sirve: {TEXT_JURISPRUDENCIA[caseModal].split('— ')[1] || ''}</p>
-                  <label className="mt-4 block text-sm text-slate-200">Notas</label>
+                  <h3 className="text-lg font-semibold text-white">{jurisModal.title}</h3>
+                  <p className="mt-1 text-xs text-slate-400">{jurisModal.meta}</p>
+                  <p className="mt-2 text-sm text-slate-300">{jurisModal.oneLiner}</p>
+                  <h4 className="mt-4 text-sm font-semibold text-slate-100">Resumen ampliado</h4>
+                  <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-slate-300">
+                    {jurisModal.expandedBullets.map((bullet) => (
+                      <li key={bullet}>{bullet}</li>
+                    ))}
+                  </ul>
+                  <label className="mt-4 block text-sm text-slate-200">Notas personales</label>
                   <textarea
-                    value={notes[caseModal] || ''}
+                    value={notes[jurisModal.key] || ''}
                     onChange={(event) => {
                       const value = event.target.value;
-                      setNotes((current) => ({ ...current, [caseModal]: value }));
-                      localStorage.setItem(`cas001_excepcion_juris_note_${caseModal}`, value);
+                      setNotes((current) => ({ ...current, [jurisModal.key]: value }));
+                      localStorage.setItem(`cas001_excepcion_juris_note_${jurisModal.key}`, value);
                     }}
                     rows={4}
                     className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950 p-3 text-sm text-slate-200"
                   />
-                  <div className="mt-4 flex justify-end">
-                    <button type="button" onClick={() => setCaseModal(null)} className="rounded-xl border border-white/10 px-3 py-2 text-sm text-white">
+                  <div className="mt-4 flex justify-end gap-2">
+                    <CopyButton text={`${jurisModal.title}\n${jurisModal.meta}\n- ${jurisModal.expandedBullets.join('\n- ')}`} label="Copiar resumen ampliado" />
+                    <button type="button" onClick={() => setJurisModal(null)} className="rounded-xl border border-white/10 px-3 py-2 text-sm text-white">
                       Cerrar
                     </button>
                   </div>
