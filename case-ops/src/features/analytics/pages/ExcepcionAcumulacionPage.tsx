@@ -402,15 +402,6 @@ export function ExcepcionAcumulacionPage() {
   const returnToCaseButtonClassName =
     'rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200';
 
-  const returnToCaseButton = returnToParam ? (
-    <button
-      type="button"
-      onClick={() => navigate(returnTo)}
-      className={returnToCaseButtonClassName}
-    >
-      Volver al Caso
-    </button>
-  ) : null;
 
   return (
     <AnalyticsLayout
@@ -430,7 +421,15 @@ export function ExcepcionAcumulacionPage() {
         <SectionCard title="Excepción procesal" subtitle="Estado del caso">
           <div className="space-y-4 text-sm text-slate-300">
             <p>Contenido todavía no preparado para este caso.</p>
-            {returnToCaseButton}
+            {returnToParam && (
+              <button
+                type="button"
+                onClick={() => navigate(returnTo)}
+                className={returnToCaseButtonClassName}
+              >
+                Volver al Caso
+              </button>
+            )}
           </div>
         </SectionCard>
       ) : (
