@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AnalyticsLayout } from '../layout/AnalyticsLayout';
 import { SectionCard } from '../components/SectionCard';
+import { printElementAsDocument } from '../../../utils/printDocument';
 
 const SUBNAV_ITEMS = [
   { label: 'Resumen', href: '#resumen' },
@@ -112,6 +113,14 @@ export function ExcepcionAcumulacionPage() {
   };
 
   const handlePrint = () => {
+    if (printContainerRef.current) {
+      printElementAsDocument({
+        element: printContainerRef.current,
+        title: 'Excepción procesal · Acumulación',
+      });
+      return;
+    }
+
     window.print();
   };
 
@@ -145,7 +154,7 @@ export function ExcepcionAcumulacionPage() {
           </div>
         </SectionCard>
       ) : (
-        <div className="space-y-6">
+        <div ref={printContainerRef} className="space-y-6">
           <SectionCard title="Excepción procesal / Saneamiento: objeto híbrido por acumulación de acciones (división de cosa común + reclamación económica)">
             <div className="flex flex-wrap gap-2">
               {['PICASSENT · P.O. 715/2024', 'Audiencia previa', 'Objetivo: ordenar el objeto', '4 escenarios'].map((item) => (
