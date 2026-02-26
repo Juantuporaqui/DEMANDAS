@@ -113,7 +113,7 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
         if (document.body.contains(iframe)) {
           document.body.removeChild(iframe);
         }
-      }, 5000);
+      }, 8000);
     }
-  }, 3000);
+  }, 12000);
 }
