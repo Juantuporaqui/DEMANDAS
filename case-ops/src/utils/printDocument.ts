@@ -9,14 +9,16 @@ const BASE_PRINT_STYLES = `
     size: auto;
   }
   
-  /* 1. EL ARREGLO DEL MODO OSCURO (DARK MODE FIX) */
-  /* Forzar texto negro y fondo transparente para TODO. Adiós al texto invisible. */
+  /* 1. ANULAR POSICIONAMIENTOS ABSOLUTOS QUE ROMPEN LA PAGINACIÓN */
   * {
-    color: #000000 !important;
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important; /* Corregido: auto no es válido aquí */
+    color: black !important;
     background-color: transparent !important;
-    border-color: #d1d5db !important; /* Gris medio para los bordes */
     box-shadow: none !important;
-    text-shadow: none !important;
   }
 
   html, body {
@@ -27,38 +29,49 @@ const BASE_PRINT_STYLES = `
     line-height: 1.5 !important;
   }
 
-  /* 2. EL TRUCO PARA QUE NO SE CORTEN LAS PÁGINAS NI SALGAN EN BLANCO */
-  .print-surface, .print-surface * {
-    overflow: visible !important;
-    height: auto !important;
-    min-height: auto !important;
-    max-height: none !important;
-    position: static !important; /* Evita que elementos flotantes salgan del papel */
+  /* 2. LA CURA CONTRA EL BUG DE CHROME (PÁGINAS EN BLANCO) */
+  /* Tenemos que transformar TODO contenedor flex o grid en bloque puro */
+  .flex, .inline-flex, .grid, [class*="flex"], [class*="grid"], .print-surface {
+    display: block !important;
+    width: 100% !important;
   }
 
-  /* 3. MANTENER LA ESTRUCTURA PERO ADAPTADA A PAPEL */
-  .flex {
-    flex-wrap: wrap !important;
+  /* Convertir los huecos de Grid/Flex en márgenes clásicos */
+  .gap-2 > *, .gap-4 > *, .gap-6 > * {
+    margin-bottom: 0.5rem !important;
   }
 
-  /* 4. PERMITIR QUE LAS TARJETAS SE PARTAN POR LA MITAD ENTRE DOS PÁGINAS */
+  /* 3. RESPETAR ELEMENTOS DE TEXTO EN LÍNEA */
+  span, a, strong, b, i, em {
+    display: inline !important;
+  }
+
+  /* 4. PERMITIR CORTES POR LA MITAD PARA QUE FLUYA EL TEXTO */
   div, section, article, .card-base, .rounded-2xl, .card {
     page-break-inside: auto !important;
     break-inside: auto !important;
+    margin-bottom: 1rem !important;
   }
 
-  /* 5. PROTEGER TÍTULOS (para que no queden sueltos al final de la página) */
+  /* 5. PROTEGER TÍTULOS DE QUEDAR HUÉRFANOS */
   h1, h2, h3, h4, h5, .text-lg, .text-xl { 
     page-break-after: avoid !important;
     break-after: avoid !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+    margin-top: 1.5rem !important;
     margin-bottom: 0.5rem !important;
   }
 
-  /* 6. OCULTAR BOTONES E INTERFAZ INNECESARIA */
+  /* 6. OCULTAR INTERFAZ */
   button, nav, header, footer, .print-hidden { 
     display: none !important; 
+  }
+  
+  /* Bordes suaves para no perder la estructura visual de las tarjetas */
+  .border, .border-white\\/10 {
+    border: 1px solid #d1d5db !important;
+    padding: 1rem !important;
   }
 `;
 
@@ -76,12 +89,10 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
     return;
   }
 
-  // Extraer todos los estilos (Tailwind)
   const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
     .map((styleNode) => styleNode.outerHTML)
     .join('\n');
 
-  // Clonar el DOM. Usamos outerHTML para asegurarnos de no perder las clases del contenedor padre.
   const cloned = element.cloneNode(true) as HTMLElement;
 
   doc.open();
@@ -101,7 +112,6 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
   `);
   doc.close();
 
-  // Mantenemos 2 segundos de tiempo para que Tailwind asigne los estilos antes de imprimir
   setTimeout(() => {
     try {
       iframe.contentWindow?.focus();
@@ -113,7 +123,7 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
         if (document.body.contains(iframe)) {
           document.body.removeChild(iframe);
         }
-      }, 8000);
+      }, 5000);
     }
-  }, 6000);
+  }, 2000);
 }
