@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   BookOpen,
@@ -22,6 +22,7 @@ import { StickyTOC } from './StickyTOC';
 import { TablaPartidasSection } from './TablaPartidasSection';
 import { APStackSection } from './APStackSection';
 import { AP_STACK_ITEMS } from './apStack';
+import { printElementAsDocument } from '../../../utils/printDocument';
 
 interface PrescripcionPlaybookPageProps {
   returnTo: string;
@@ -74,6 +75,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
   const [hypothesis, setHypothesis] = useState<'H1' | 'H2'>(defaultHypothesis);
   const [expandAllCards, setExpandAllCards] = useState(false);
   const [printingInProgress, setPrintingInProgress] = useState(false);
+  const printContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setHypothesis(defaultHypothesis);
@@ -96,7 +98,14 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
   const handlePrint = () => {
     setPrintingInProgress(true);
     requestAnimationFrame(() => {
-      window.print();
+      if (printContainerRef.current) {
+        printElementAsDocument({
+          element: printContainerRef.current,
+          title: `${content.meta.caseCode} · Prescripción`,
+        });
+      } else {
+        window.print();
+      }
       setPrintingInProgress(false);
     });
   };
@@ -121,7 +130,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
   };
 
   return (
-    <div className="relative space-y-6">
+    <div ref={printContainerRef} className="relative space-y-6">
       {copiedText && (
         <div className="fixed top-4 right-4 z-50 max-w-[calc(100vw-2rem)] rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-lg animate-pulse sm:px-4 sm:text-sm">
           Copiado al portapapeles
