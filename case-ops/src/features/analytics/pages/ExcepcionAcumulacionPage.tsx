@@ -21,13 +21,15 @@ La acción de división de cosa común debe tramitarse por juicio verbal especia
 
 Esa mezcla infringe el artículo 73.1.2ª LEC, que impide la acumulación cuando las acciones deban ventilarse en procedimientos de diferente tipo. Y no es aplicable la absorción del artículo 73.2 LEC, porque aquí el juicio verbal no viene impuesto por cuantía, sino por materia (art. 250.1.16 LEC).
 
+Además, la acumulación no es inocua: la complejidad contable de la reclamación económica está bloqueando la resolución de la división de cosa común, que el legislador ha configurado como verbal especial por materia para dotarla de agilidad. Tras casi dos años de tramitación y sucesivos aplazamientos, la acción divisoria ha quedado subordinada a un debate económico que la desnaturaliza.
+
 Por ello, con carácter principal, solicitamos que se declare la inadecuación del procedimiento por indebida acumulación de acciones de cauce incompatible, acordando la separación o reconducción procedente.
 
 Y subsidiariamente, para el caso de mantenerse la acumulación, pedimos saneamiento estricto del objeto para evitar indefensión: fijación de hechos controvertidos por bloques A (división) y B (reclamación económica), admisión de prueba vinculada a cada bloque y cuantificación separada por periodos, excluyendo lo impertinente. Esta audiencia existe precisamente para depurar y fijar el objeto litigioso.`;
 
 const GUION_30S = `Señoría, solicitamos depuración en Audiencia Previa (art. 416.1.4ª LEC) porque se acumulan acciones de cauce incompatible: división de cosa común por verbal especial de materia (art. 250.1.16 LEC) y reclamación económica por ordinario (art. 249.2 LEC), infringiendo el art. 73.1.2ª LEC. No opera la absorción del 73.2 LEC al ser verbal por materia. Principalmente pedimos separación/reconducción; subsidiariamente, saneamiento del objeto por bloques A/B y prueba estrictamente vinculada.`;
 
-const PETICION_PRINCIPAL = `Que, al amparo del art. 416.1.4ª LEC, se declare la inadecuación del procedimiento por indebida acumulación de acciones de cauce incompatible, por corresponder la división de cosa común al juicio verbal del art. 250.1.16 LEC y la reclamación económica al juicio ordinario del art. 249.2 LEC, en infracción del art. 73.1.2ª LEC, acordando la separación o reconducción procedente.`;
+const PETICION_PRINCIPAL = `Que, al amparo del art. 416.1.4ª LEC, se declare la inadecuación del procedimiento por indebida acumulación de acciones de cauce incompatible, por corresponder la división de cosa común al juicio verbal del art. 250.1.16 LEC y la reclamación económica al juicio ordinario del art. 249.2 LEC, en infracción del art. 73.1.2ª LEC, acordando la separación o reconducción procedente, apreciable incluso de oficio por el tribunal en este trámite de Audiencia Previa, al afectar a la correcta constitución y tramitación del procedimiento.`;
 const PETICION_SUBSIDIARIA_1 = `Subsidiariamente, que se acuerde el saneamiento del objeto litigioso: delimitación expresa por bloques A/B de hechos controvertidos, prueba y cuantificación (hechos–prueba–cuantías por periodos), excluyendo lo impertinente, para evitar indefensión.`;
 const PETICION_SUBSIDIARIA_2 = `Que la admisión de prueba se realice por bloques, exigiendo para cada medio de prueba su conexión directa con el bloque A (división) o el bloque B (reclamación económica), rechazando lo genérico o no vinculado.`;
 const PETICIONES_TODAS = `Principal\n${PETICION_PRINCIPAL}\n\nSubsidiaria 1 (saneamiento del objeto)\n${PETICION_SUBSIDIARIA_1}\n\nSubsidiaria 2 (prueba por bloques)\n${PETICION_SUBSIDIARIA_2}`;
@@ -284,6 +286,20 @@ export function ExcepcionAcumulacionPage() {
                         <p className="mt-1 text-sm text-slate-300">{item.text}</p>
                       </div>
                     ))}
+                    <div className="rounded-2xl border border-sky-400/30 bg-sky-500/10 p-4">
+                      <h3 className="text-base font-semibold text-sky-100">Control judicial de oficio</h3>
+                      <div className="mt-2 space-y-2 text-sm text-sky-50/90">
+                        <p>
+                          La indebida acumulación que afecta al cauce procesal no es una mera cuestión dispositiva entre partes, sino un problema de correcta constitución y prosecución del procedimiento.
+                        </p>
+                        <p>
+                          En la Audiencia Previa el tribunal no solo resuelve lo alegado, sino que debe velar por la adecuación del procedimiento y la regularidad del proceso (arts. 416 y ss. LEC).
+                        </p>
+                        <p>
+                          Cuando la acumulación determina la tramitación por un cauce no idóneo o impide el correcto enjuiciamiento, el tribunal puede apreciarlo incluso de oficio en este trámite, al afectar a la estructura del proceso y a la tutela judicial efectiva.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </SectionCard>
               </div>
@@ -304,11 +320,36 @@ export function ExcepcionAcumulacionPage() {
                       </p>
                     </div>
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                      <h3 className="text-base font-semibold text-white">Anti-preclusión: fuentes internas</h3>
-                      <span className="mt-2 inline-flex items-center rounded-full border border-amber-300/40 bg-amber-300/10 px-3 py-1 text-xs font-semibold text-amber-200">
-                        NO CONSTA EN REPO
-                      </span>
+                      <h3 className="text-base font-semibold text-white">Jurisprudencia relevante (control en Audiencia Previa)</h3>
+                      <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-slate-300">
+                        <li>AAP Tarragona, Auto 185/2024 (23/05/2024): admite el control de la acumulación en Audiencia Previa incluso cuando no fue advertida en admisión.</li>
+                        <li>SAP Baleares (ROJ SAP IB 1884/2018): la indebida acumulación puede ser examinada por el tribunal en fase de depuración procesal.</li>
+                        <li>SAP A Coruña (ROJ SAP C 1749/2009): el tribunal puede resolver cuestiones procesales que afecten a la válida prosecución del procedimiento aunque no estén expresamente tasadas.</li>
+                      </ul>
+                      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                        Enlace a repositorio interno de sentencias.
+                      </p>
                     </div>
+                  </div>
+                </SectionCard>
+              </div>
+
+              <div className="scroll-mt-24">
+                <SectionCard title="Dilación estructural y secuestro de la acción de división">
+                  <div className="space-y-3 text-sm text-slate-300">
+                    <p>La acumulación no es neutra.</p>
+                    <p>
+                      La acción de división de cosa común, configurada por el legislador como juicio verbal especial por razón de la materia (art. 250.1.16 LEC), responde a una finalidad de agilidad y desbloqueo de situaciones de copropiedad.
+                    </p>
+                    <p>
+                      Sin embargo, la acumulación con una reclamación económica de carácter contable y plurianual ha generado una dilación estructural del procedimiento, con múltiples aplazamientos y una prolongación temporal incompatible con la finalidad propia de la acción divisoria.
+                    </p>
+                    <p>
+                      La complejidad probatoria y cuantificadora del bloque de reembolso está absorbiendo y retrasando la resolución de la división, convirtiendo el proceso en un litigio híbrido que frustra la naturaleza ágil que el legislador quiso imprimir a este tipo de acciones.
+                    </p>
+                    <p>
+                      Esta situación no es una mera cuestión estratégica entre partes, sino un efecto procesal objetivo que el tribunal debe valorar al ejercer su función de ordenación y depuración.
+                    </p>
                   </div>
                 </SectionCard>
               </div>
