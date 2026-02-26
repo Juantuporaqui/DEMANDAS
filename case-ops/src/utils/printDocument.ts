@@ -6,45 +6,42 @@ interface PrintElementOptions {
 const BASE_PRINT_STYLES = `
   @page { 
     margin: 15mm; 
+    size: auto;
   }
   
-  /* Resetear por completo la página para formato documento clásico */
   html, body {
-    height: auto !important;
-    min-height: auto !important;
-    overflow: visible !important;
-    display: block !important;
-    margin: 0 !important;
-    padding: 0 !important;
     background: white !important;
     color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
     font-size: 11pt !important;
-    line-height: 1.5 !important;
-  }
-  
-  /* DESTRUIR Flexbox y Grid: son los culpables de los espacios raros en PDF */
-  .flex, .grid, .grid-cols-1, .md\\:grid-cols-2, .xl\\:grid-cols-2 {
-    display: block !important;
-    width: 100% !important;
-  }
-  
-  /* Ajustar márgenes gigantes de Tailwind */
-  .space-y-6 > * + *, .space-y-4 > * + * { 
-    margin-top: 1rem !important; 
-  }
-  
-  /* PERMITIR QUE LAS TARJETAS SE PARTAN POR LA MITAD */
-  /* Esta es la clave para eliminar los huecos blancos gigantes */
-  div, section, article, .card-base, .rounded-2xl, .p-4, .p-5, .p-6 {
-    page-break-inside: auto !important;
-    break-inside: auto !important;
-    margin-bottom: 1rem !important;
   }
 
-  /* Solo protegeremos de saltos a los títulos para que no queden solos al final de la hoja */
-  h1, h2, h3, h4, .text-lg, .text-base { 
-    break-after: avoid !important; 
-    page-break-after: avoid !important; 
+  /* EL TRUCO MAGICO: Desactivar cualquier límite de altura y scroll oculto 
+     Esto evita que las páginas salgan en blanco a partir de la 3 o 4 */
+  .print-surface, .print-surface * {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* MANTENEMOS FLEX Y GRID, PERO PERMITIMOS QUE HAGAN WRAP (salto de línea) */
+  .flex {
+    flex-wrap: wrap !important;
+  }
+
+  /* PERMITIR QUE LAS CAJAS SE CORTEN POR LA MITAD ENTRE PÁGINAS */
+  div, section, article, .card-base, .rounded-2xl {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+
+  /* PROTEGER SOLO LOS TÍTULOS PARA QUE NO QUEDEN HUÉRFANOS AL FINAL DE LA HOJA */
+  h1, h2, h3, h4, h5, .text-lg, .text-xl { 
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   /* Ocultar botones e interfaz */
@@ -83,6 +80,7 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
     .map((styleNode) => styleNode.outerHTML)
     .join('\n');
 
+  // Clonar el DOM
   const cloned = element.cloneNode(true) as HTMLElement;
 
   doc.open();
@@ -96,12 +94,13 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
         <style>${BASE_PRINT_STYLES}</style>
       </head>
       <body>
-        <main class="block h-auto overflow-visible p-0 m-0">${cloned.innerHTML}</main>
+        <main class="print-surface block h-auto overflow-visible p-0 m-0">${cloned.innerHTML}</main>
       </body>
     </html>
   `);
   doc.close();
 
+  // Mantenemos los 2 segundos de cortesía para que el navegador dibuje bien la estructura
   setTimeout(() => {
     try {
       iframe.contentWindow?.focus();
@@ -113,7 +112,7 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
         if (document.body.contains(iframe)) {
           document.body.removeChild(iframe);
         }
-      }, 8000);
+      }, 5000);
     }
-  }, 12000);
+  }, 2000);
 }
