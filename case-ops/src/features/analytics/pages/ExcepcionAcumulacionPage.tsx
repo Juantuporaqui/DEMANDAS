@@ -154,7 +154,7 @@ export function ExcepcionAcumulacionPage() {
               ))}
             </div>
             <p className="mt-4 text-sm text-slate-300">
-              Solicitamos al tribunal que controle el objeto litigioso y evite la mezcla de debates y cuantificaciones, garantizando el derecho de defensa: (i) declarando la inadecuación del procedimiento por acumulación de cauces incompatibles; o, subsidiariamente, (ii) saneando el objeto por bloques A/B (hechos–prueba–cuantificación).
+              Solicitamos al tribunal que controle el objeto litigioso y evite la mezcla de debates y cuantificaciones, garantizando el derecho de defensa: 1) declarando la inadecuación del procedimiento por acumulación de cauces incompatibles; 2) subsidiariamente, saneando el objeto por bloques A/B (hechos–prueba–cuantificación).
             </p>
           </SectionCard>
 
@@ -229,15 +229,6 @@ export function ExcepcionAcumulacionPage() {
                 </div>
               </SectionCard>
 
-              <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-5">
-                <h3 className="text-lg font-semibold text-white">Higiene (no dispararse al pie)</h3>
-                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-amber-100">
-                  <li>En sala NO decir ‘Ley 8/2021’. Decir: ‘vigente art. 250.1.16 LEC’. Si preguntan: ‘RDL 6/2023’.</li>
-                  <li>No anclar el argumento en el art. 422 LEC. El ancla es 416.1.4ª LEC (depuración/inadecuación).</li>
-                  <li>No citar sentencias sin ECLI/ROJ verificable en tu repositorio.</li>
-                  <li>Si el juez menciona ‘absorción’ (73.2), responder: ‘absorción solo por cuantía; aquí verbal por materia (250.1.16)’.</li>
-                </ul>
-              </div>
             </div>
           </div>
 
@@ -370,6 +361,17 @@ export function ExcepcionAcumulacionPage() {
                     <p>
                       Esta situación no es una mera cuestión estratégica entre partes, sino un efecto procesal objetivo que el tribunal debe valorar al ejercer su función de ordenación y depuración.
                     </p>
+                  </div>
+                </SectionCard>
+              </div>
+
+              <div className="scroll-mt-24">
+                <SectionCard title="Justificación de formato y legibilidad">
+                  <div className="space-y-3 text-sm text-slate-300">
+                    <p>1) Párrafos breves y separados: cada idea se lee de un vistazo y reduce errores en lectura oral rápida.</p>
+                    <p>2) Bloques escalonados (guion, peticiones, protesta, jurisprudencia): facilitan localizar contenido sin desplazamientos innecesarios.</p>
+                    <p>3) Enumeraciones numéricas (1, 2, 3): mejor escaneo visual que símbolos romanos y mayor consistencia en sala.</p>
+                    <p>4) Botones de copiado por bloque: minimizan fricción al reutilizar texto exacto en notas, chat o preparación de vista.</p>
                   </div>
                 </SectionCard>
               </div>
