@@ -298,7 +298,8 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
 
   const handlePrint = () => {
     setPrintingInProgress(true);
-    requestAnimationFrame(() => {
+
+    window.setTimeout(() => {
       if (printContainerRef.current) {
         printElementAsDocument({
           element: printContainerRef.current,
@@ -308,7 +309,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
         window.print();
       }
       setPrintingInProgress(false);
-    });
+    }, 800);
   };
 
   const audienciaDateLabel = useMemo(() => {

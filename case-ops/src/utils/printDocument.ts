@@ -93,12 +93,13 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
   const iframe = document.createElement('iframe');
   iframe.setAttribute('aria-hidden', 'true');
   iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '1px';
-  iframe.style.height = '1px';
+  iframe.style.top = '0';
+  iframe.style.left = '0';
+  iframe.style.width = '100vw';
+  iframe.style.height = '100vh';
   iframe.style.opacity = '0';
   iframe.style.pointerEvents = 'none';
+  iframe.style.zIndex = '-9999';
   iframe.style.border = '0';
 
   document.body.appendChild(iframe);
