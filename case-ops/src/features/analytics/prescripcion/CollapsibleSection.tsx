@@ -10,6 +10,7 @@ interface CollapsibleSectionProps {
   defaultOpen?: boolean;
   children: ReactNode;
   variant?: 'default' | 'highlight' | 'warning' | 'danger';
+  forceOpen?: boolean;
 }
 
 const variantStyles = {
@@ -28,8 +29,10 @@ export function CollapsibleSection({
   defaultOpen = false,
   children,
   variant = 'default',
+  forceOpen = false,
 }: CollapsibleSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const isOpen = forceOpen || open;
 
   return (
     <section
@@ -40,7 +43,7 @@ export function CollapsibleSection({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between gap-3 p-4 sm:p-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
-        aria-expanded={open}
+        aria-expanded={isOpen}
       >
         <div className="flex min-w-0 items-center gap-3">
           {icon && <span className="shrink-0 text-slate-400">{icon}</span>}
@@ -57,10 +60,10 @@ export function CollapsibleSection({
           </div>
         </div>
         <ChevronDown
-          className={`h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
-      {open && <div className="border-t border-slate-700/40 p-4 sm:p-5">{children}</div>}
+      {isOpen && <div className="border-t border-slate-700/40 p-4 sm:p-5">{children}</div>}
     </section>
   );
 }
