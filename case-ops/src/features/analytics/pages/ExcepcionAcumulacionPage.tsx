@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AnalyticsLayout } from '../layout/AnalyticsLayout';
 import { SectionCard } from '../components/SectionCard';
+import { printElementAsDocument } from '../../../utils/printDocument';
 
 const SUBNAV_ITEMS = [
   { label: 'Resumen', href: '#resumen' },
