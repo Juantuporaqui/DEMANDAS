@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AnalyticsLayout } from '../layout/AnalyticsLayout';
 import { SectionCard } from '../components/SectionCard';
@@ -263,6 +264,17 @@ function CopyButton({ text, label }: { text: string; label: string }) {
     >
       {copied ? 'Copiado ✓' : label}
     </button>
+  );
+}
+
+
+
+function ModalShell({ children, onClose }: { children: ReactNode; onClose: () => void }) {
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4" onClick={onClose}>
+      {children}
+    </div>,
+    document.body
   );
 }
 
@@ -705,7 +717,7 @@ export function ExcepcionAcumulacionPage() {
             )}
 
             {showMoreArticles && (
-              <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4" onClick={() => setShowMoreArticles(false)}>
+              <ModalShell onClose={() => setShowMoreArticles(false)}>
                 <div className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-5" onClick={(e) => e.stopPropagation()}>
                   <h3 className="text-lg font-semibold text-white">Más artículos</h3>
                   <div className="mt-3 space-y-2">
@@ -720,11 +732,11 @@ export function ExcepcionAcumulacionPage() {
                     })}
                   </div>
                 </div>
-              </div>
+              </ModalShell>
             )}
 
             {articleModal && (
-              <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4" onClick={() => setArticleModal(null)}>
+              <ModalShell onClose={() => setArticleModal(null)}>
                 <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-slate-900 p-5" onClick={(e) => e.stopPropagation()}>
                   <h3 className="text-lg font-semibold text-white">{articleModal.title}</h3>
                   <h4 className="mt-4 text-sm font-semibold text-slate-100">Texto legal (extracto BOE)</h4>
@@ -740,11 +752,11 @@ export function ExcepcionAcumulacionPage() {
                     </button>
                   </div>
                 </div>
-              </div>
+              </ModalShell>
             )}
 
             {jurisHubOpen && (
-              <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4" onClick={() => setJurisHubOpen(false)}>
+              <ModalShell onClose={() => setJurisHubOpen(false)}>
                 <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-slate-900 p-5" onClick={(e) => e.stopPropagation()}>
                   <h3 className="text-lg font-semibold text-white">Jurisprudencia</h3>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -764,11 +776,11 @@ export function ExcepcionAcumulacionPage() {
                     ))}
                   </ul>
                 </div>
-              </div>
+              </ModalShell>
             )}
 
             {jurisModal && (
-              <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4" onClick={() => setJurisModal(null)}>
+              <ModalShell onClose={() => setJurisModal(null)}>
                 <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-slate-900 p-5" onClick={(e) => e.stopPropagation()}>
                   <h3 className="text-lg font-semibold text-white">{jurisModal.title}</h3>
                   <p className="mt-1 text-xs text-slate-400">{jurisModal.meta}</p>
@@ -797,7 +809,7 @@ export function ExcepcionAcumulacionPage() {
                     </button>
                   </div>
                 </div>
-              </div>
+              </ModalShell>
             )}
           </div>
         )}
