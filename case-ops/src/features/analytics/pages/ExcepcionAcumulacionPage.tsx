@@ -124,11 +124,14 @@ export function ExcepcionAcumulacionPage() {
     window.print();
   };
 
+  const returnToCaseButtonClassName =
+    'rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200';
+
   const returnToCaseButton = returnToParam ? (
     <button
       type="button"
       onClick={() => navigate(returnTo)}
-      className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
+      className={returnToCaseButtonClassName}
     >
       Volver al Caso
     </button>
@@ -142,7 +145,7 @@ export function ExcepcionAcumulacionPage() {
         <button
           type="button"
           onClick={() => navigate(returnTo)}
-          className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
+          className={returnToCaseButtonClassName}
         >
           VOLVER AL CASO
         </button>
