@@ -111,6 +111,10 @@ export function ExcepcionAcumulacionPage() {
     document.getElementById('sala')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <AnalyticsLayout
       title="Excepción procesal: acumulación indebida / objeto híbrido"
@@ -168,6 +172,13 @@ export function ExcepcionAcumulacionPage() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="rounded-full border border-amber-400/50 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100 transition hover:border-amber-300/70 hover:bg-amber-500/20"
+                >
+                  Imprimir / PDF
+                </button>
                 <CopyButton text={TEXT_GUION_90} label="Copiar Guion 90s" />
                 <CopyButton text={PETICION_PRINCIPAL} label="Copiar Petición Principal" />
                 <CopyButton text={REPLICAS} label="Copiar Réplicas" />
