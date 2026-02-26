@@ -5,27 +5,62 @@ interface PrintElementOptions {
 
 const BASE_PRINT_STYLES = `
   @page { 
-    margin: 12mm 15mm; /* Márgenes estándar de folio A4 */
+    margin: 15mm; 
   }
+  
+  /* Resetear por completo la página para formato documento clásico */
   html, body {
     height: auto !important;
+    min-height: auto !important;
     overflow: visible !important;
     display: block !important;
-    margin: 0;
-    padding: 0;
-    font-family: Inter, system-ui, -apple-system, sans-serif;
-    background: #ffffff;
-    color: #111827;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    color: black !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
   }
-  * { box-sizing: border-box; }
   
-  /* Forzar ocultación de botones y navegación */
-  .print-hidden, button, nav, header, footer, aside { display: none !important; }
+  /* DESTRUIR Flexbox y Grid: son los culpables de los espacios raros en PDF */
+  .flex, .grid, .grid-cols-1, .md\\:grid-cols-2, .xl\\:grid-cols-2 {
+    display: block !important;
+    width: 100% !important;
+  }
+  
+  /* Ajustar márgenes gigantes de Tailwind */
+  .space-y-6 > * + *, .space-y-4 > * + * { 
+    margin-top: 1rem !important; 
+  }
+  
+  /* PERMITIR QUE LAS TARJETAS SE PARTAN POR LA MITAD */
+  /* Esta es la clave para eliminar los huecos blancos gigantes */
+  div, section, article, .card-base, .rounded-2xl, .p-4, .p-5, .p-6 {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    margin-bottom: 1rem !important;
+  }
 
-  /* Protección contra elementos cortados (sólo interiores, no contenedores padre) */
-  img, table, .card-base, .rounded-2xl { 
-    break-inside: avoid; 
-    page-break-inside: avoid;
+  /* Solo protegeremos de saltos a los títulos para que no queden solos al final de la hoja */
+  h1, h2, h3, h4, .text-lg, .text-base { 
+    break-after: avoid !important; 
+    page-break-after: avoid !important; 
+  }
+
+  /* Ocultar botones e interfaz */
+  button, nav, header, footer, .print-hidden { 
+    display: none !important; 
+  }
+  
+  /* Limpiar fondos oscuros para ahorrar tinta y leer mejor */
+  * {
+    box-shadow: none !important;
+    background-color: transparent !important;
+  }
+  
+  /* Mantener bordes finos grises para separar secciones */
+  .border, .border-white\\/10 {
+    border: 1px solid #d1d5db !important;
   }
 `;
 
@@ -43,6 +78,7 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
     return;
   }
 
+  // Extraer estilos base
   const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
     .map((styleNode) => styleNode.outerHTML)
     .join('\n');
@@ -60,13 +96,12 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
         <style>${BASE_PRINT_STYLES}</style>
       </head>
       <body>
-        <main class="print-surface block h-auto overflow-visible">${cloned.innerHTML}</main>
+        <main class="block h-auto overflow-visible p-0 m-0">${cloned.innerHTML}</main>
       </body>
     </html>
   `);
   doc.close();
 
-  // Aumentamos ligeramente el tiempo de espera para asegurar que carga tipografías y CSS
   setTimeout(() => {
     try {
       iframe.contentWindow?.focus();
@@ -80,5 +115,5 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
         }
       }, 2000);
     }
-  }, 1200);
+  }, 1000);
 }
