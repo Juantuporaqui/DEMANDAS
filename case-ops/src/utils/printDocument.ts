@@ -4,150 +4,92 @@ interface PrintElementOptions {
 }
 
 const BASE_PRINT_STYLES = `
-  @page { size: A4; margin: 12mm; }
+  @page { 
+    size: A4; 
+    margin: 15mm; 
+  }
 
   html, body {
     margin: 0 !important;
     padding: 0 !important;
-    color: #111827 !important;
-    background: #fff !important;
-    font-size: 11pt;
-    line-height: 1.45;
+    background: #ffffff !important;
+    font-size: 10.5pt !important;
+    line-height: 1.5 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  .print-root {
-    width: 190mm !important;
-    max-width: 190mm !important;
-    margin: 0 auto !important;
-  }
-
-  .print-root * { box-sizing: border-box; }
-
   @media print {
-    * { box-shadow: none !important; text-shadow: none !important; filter: none !important; }
+    /* 1. LA MAGIA: Forzar que TODO el texto sea negro y los fondos transparentes */
+    /* Esto sobreescribe el text-white de Tailwind */
+    * { 
+      color: #000000 !important; 
+      background-color: transparent !important;
+      box-shadow: none !important; 
+      text-shadow: none !important; 
+      border-color: #cbd5e1 !important; /* Gris claro para las tarjetas */
+    }
 
-    html, body, .print-root {
+    /* 2. EVITAR QUE SE CORTEN LAS PÁGINAS EN BLANCO */
+    html, body, .print-root, .print-root * {
       height: auto !important;
       min-height: 0 !important;
       max-height: none !important;
       overflow: visible !important;
-    }
-
-    .h-screen, .min-h-screen, .max-h-screen {
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
-    }
-
-    .overflow-hidden, .overflow-auto, .overflow-scroll { overflow: visible !important; }
-
-    .sticky, .fixed {
       position: static !important;
-      top: auto !important; left: auto !important; right: auto !important; bottom: auto !important;
     }
 
-    /* Permitir partir contenedores grandes */
-    .card, .print-card, .card-base, .case-card, .kpi-card, section, article, div {
+    /* 3. APLANAR FLEX Y GRID PARA QUE EL TEXTO FLUYA HACIA ABAJO */
+    .flex, .grid, [class*="flex"], [class*="grid"] {
+      display: block !important;
+      width: 100% !important;
+    }
+
+    /* Reducir márgenes gigantes */
+    .gap-2 > *, .gap-3 > *, .gap-4 > *, .gap-6 > * {
+      margin-bottom: 0.5rem !important;
+    }
+
+    /* 4. PERMITIR QUE LAS TARJETAS SE PARTAN POR LA MITAD PARA NO DEJAR HUECOS */
+    div, section, article, .rounded-2xl, .rounded-xl, .p-4 {
       break-inside: auto !important;
       page-break-inside: auto !important;
+      margin-bottom: 1rem !important;
     }
 
-    .print-hidden, button, nav, footer, .bottom-nav { display: none !important; }
+    /* Ocultar interfaz */
+    .print-hidden, button, nav, footer, aside, .bottom-nav { 
+      display: none !important; 
+    }
 
-    h1, h2, h3, h4, h5 { break-after: avoid-page !important; page-break-after: avoid !important; }
-
-    img, svg, canvas, figure, table, pre, blockquote, tr, thead, tfoot {
-      break-inside: avoid !important;
+    /* Proteger que los títulos no se queden solos a final de página */
+    h1, h2, h3, h4, h5, .font-semibold { 
+      break-after: avoid !important; 
+      page-break-after: avoid !important; 
       page-break-inside: avoid !important;
     }
 
-    img, svg, canvas { max-width: 100% !important; height: auto !important; }
-
-    p, li, blockquote { orphans: 3; widows: 3; }
-
-    .print-page-break { break-before: page !important; page-break-before: always !important; }
-    .print-keep-with-next { break-after: avoid-page !important; page-break-after: avoid !important; }
+    /* Respetar elementos inline */
+    span, a, strong, b, i, em {
+      display: inline !important;
+    }
   }
 `;
 
-
-const CLEANUP_DELAY_MS = 1500;
-
-function waitForImages(doc: Document): Promise<void> {
-  const images = Array.from(doc.images);
-
-  if (images.length === 0) {
-    return Promise.resolve();
-  }
-
-  return Promise.all(
-    images.map((img) => {
-      if (img.complete) {
-        return Promise.resolve();
-      }
-
-      return new Promise<void>((resolve) => {
-        img.addEventListener('load', () => resolve(), { once: true });
-        img.addEventListener('error', () => resolve(), { once: true });
-      });
-    }),
-  ).then(() => undefined);
-}
-
-async function waitForPrintableResources(doc: Document): Promise<void> {
-  await waitForImages(doc);
-
-  if ('fonts' in doc) {
-    try {
-      await (doc as Document & { fonts: FontFaceSet }).fonts.ready;
-    } catch {
-      // Ignorar si la API de fuentes falla en algún navegador.
-    }
-  }
-}
-
-const CLEANUP_DELAY_MS = 1500;
-
-function waitForImages(doc: Document): Promise<void> {
-  const images = Array.from(doc.images);
-  if (images.length === 0) return Promise.resolve();
-
-  return Promise.all(
-    images.map((img) => {
-      if (img.complete) return Promise.resolve();
-      return new Promise<void>((resolve) => {
-        img.addEventListener('load', () => resolve(), { once: true });
-        img.addEventListener('error', () => resolve(), { once: true });
-      });
-    }),
-  ).then(() => undefined);
-}
-
-async function waitForPrintableResources(doc: Document): Promise<void> {
-  await waitForImages(doc);
-  if ('fonts' in doc) {
-    try {
-      await (doc as Document & { fonts: FontFaceSet }).fonts.ready;
-    } catch {
-      // Ignorar si la API de fuentes falla.
-    }
-  }
-}
+const CLEANUP_DELAY_MS = 2000;
 
 export function printElementAsDocument({ element, title }: PrintElementOptions): void {
   const iframe = document.createElement('iframe');
-  iframe.setAttribute('aria-hidden', 'true');
+  
+  // ARREGLO VITAL: El iframe no puede ser 0x0
   iframe.style.position = 'fixed';
   iframe.style.top = '0';
   iframe.style.left = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
-  iframe.style.visibility = 'hidden';
-  iframe.style.opacity = '1';
+  iframe.style.width = '100vw';
+  iframe.style.height = '100vh';
+  iframe.style.opacity = '0'; // Lo hacemos invisible pero con tamaño real
   iframe.style.pointerEvents = 'none';
-  iframe.style.zIndex = '2147483647';
+  iframe.style.zIndex = '-9999';
   iframe.style.border = '0';
 
   document.body.appendChild(iframe);
@@ -157,9 +99,7 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
 
   if (!doc || !printWindow) {
     window.print();
-    if (document.body.contains(iframe)) {
-      document.body.removeChild(iframe);
-    }
+    if (document.body.contains(iframe)) document.body.removeChild(iframe);
     return;
   }
 
@@ -169,21 +109,12 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
 
   const cloned = element.cloneNode(true) as HTMLElement;
 
-  const cleanup = () => {
-    window.setTimeout(() => {
-      if (document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
-      }
-    }, CLEANUP_DELAY_MS);
-  };
-
   doc.open();
   doc.write(`
     <!doctype html>
     <html lang="es">
       <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>${title}</title>
         ${styles}
         <style>${BASE_PRINT_STYLES}</style>
@@ -195,18 +126,19 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
   `);
   doc.close();
 
-  void waitForPrintableResources(doc).finally(() => {
+  // Damos 1 segundo para que Chrome calcule las 11 páginas correctamente
+  window.setTimeout(() => {
     printWindow.focus();
-    printWindow.addEventListener('afterprint', cleanup, { once: true });
-
-    // Fallback: algunos navegadores no disparan afterprint en iframes ocultos.
-    window.setTimeout(cleanup, 10000);
-
     try {
       printWindow.print();
     } catch (error) {
-      console.error('Error al imprimir el documento', error);
-      cleanup();
+      console.error('Error al imprimir', error);
+    } finally {
+      window.setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, CLEANUP_DELAY_MS);
     }
-  });
+  }, 1000);
 }
