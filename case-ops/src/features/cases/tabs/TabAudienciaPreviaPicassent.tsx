@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertCircle,
@@ -14,6 +14,7 @@ import {
 import { eventsRepo } from '../../../db/repositories';
 import type { Event } from '../../../types';
 import { formatDateTime } from '../../../utils/dates';
+import { printElementAsDocument } from '../../../utils/printDocument';
 import { SectionCard } from '../../analytics/components/SectionCard';
 import { CopyButton } from '../../analytics/prescripcion/CopyButton';
 import { PICASSENT_AP } from '../../../data/PO-715-2024-picassent/audienciaPrevia.picassent';
@@ -180,6 +181,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   const [salaMode, setSalaMode] = useState(false);
   const [expandAllCards, setExpandAllCards] = useState(false);
   const [printingInProgress, setPrintingInProgress] = useState(false);
+  const printContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -297,7 +299,14 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   const handlePrint = () => {
     setPrintingInProgress(true);
     requestAnimationFrame(() => {
-      window.print();
+      if (printContainerRef.current) {
+        printElementAsDocument({
+          element: printContainerRef.current,
+          title: 'Audiencia previa · Picassent',
+        });
+      } else {
+        window.print();
+      }
       setPrintingInProgress(false);
     });
   };
@@ -460,7 +469,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 print:bg-white print:text-slate-900">
+    <div ref={printContainerRef} className="space-y-6 animate-in fade-in duration-500 print:bg-white print:text-slate-900">
       <SectionCard
         title="Audiencia Previa — Centro de mando"
         subtitle={`Picassent · ${audienciaDateLabel}${audienciaCountdownLabel ? ` · ${audienciaCountdownLabel}` : ''} · Objetivo: saneamiento, hechos, prueba`}

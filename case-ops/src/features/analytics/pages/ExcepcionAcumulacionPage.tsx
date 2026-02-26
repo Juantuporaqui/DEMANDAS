@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AnalyticsLayout } from '../layout/AnalyticsLayout';
 import { SectionCard } from '../components/SectionCard';
+import { printElementAsDocument } from '../../../utils/printDocument';
 
 const SUBNAV_ITEMS = [
   { label: 'Resumen', href: '#resumen' },
