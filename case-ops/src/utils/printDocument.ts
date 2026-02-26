@@ -9,13 +9,13 @@ const BASE_PRINT_STYLES = `
     size: auto;
   }
   
-  /* 1. ANULAR POSICIONAMIENTOS ABSOLUTOS QUE ROMPEN LA PAGINACIÓN */
+  /* 1. ANULAR POSICIONAMIENTOS Y ALTURAS */
   * {
     position: static !important;
     overflow: visible !important;
     height: auto !important;
     max-height: none !important;
-    min-height: 0 !important; /* Corregido: auto no es válido aquí */
+    min-height: 0 !important;
     color: black !important;
     background-color: transparent !important;
     box-shadow: none !important;
@@ -29,19 +29,29 @@ const BASE_PRINT_STYLES = `
     line-height: 1.5 !important;
   }
 
-  /* 2. LA CURA CONTRA EL BUG DE CHROME (PÁGINAS EN BLANCO) */
-  /* Tenemos que transformar TODO contenedor flex o grid en bloque puro */
-  .flex, .inline-flex, .grid, [class*="flex"], [class*="grid"], .print-surface {
+  /* 2. MATAR EL HUECO GIGANTE DE LA PRIMERA PÁGINA (PADDING FANTASMA) */
+  .print-surface, 
+  .print-surface > * {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  
+  /* Evitar que el primer bloque se asuste y salte a la página 2 */
+  .print-surface > *:first-child {
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+  }
+
+  /* 3. LA CURA CONTRA EL BUG DE CHROME (PÁGINAS EN BLANCO) */
+  .flex, .inline-flex, .grid, [class*="flex"], [class*="grid"] {
     display: block !important;
     width: 100% !important;
   }
 
-  /* Convertir los huecos de Grid/Flex en márgenes clásicos */
   .gap-2 > *, .gap-4 > *, .gap-6 > * {
     margin-bottom: 0.5rem !important;
   }
 
-  /* 3. RESPETAR ELEMENTOS DE TEXTO EN LÍNEA */
   span, a, strong, b, i, em {
     display: inline !important;
   }
@@ -64,11 +74,11 @@ const BASE_PRINT_STYLES = `
   }
 
   /* 6. OCULTAR INTERFAZ */
-  button, nav, header, footer, .print-hidden { 
+  button, nav, header, footer, aside, .print-hidden, .bottom-nav { 
     display: none !important; 
   }
   
-  /* Bordes suaves para no perder la estructura visual de las tarjetas */
+  /* Bordes suaves */
   .border, .border-white\\/10 {
     border: 1px solid #d1d5db !important;
     padding: 1rem !important;
@@ -123,7 +133,7 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
         if (document.body.contains(iframe)) {
           document.body.removeChild(iframe);
         }
-      }, 5000);
+      }, 8000);
     }
-  }, 2000);
+  }, 5000);
 }
