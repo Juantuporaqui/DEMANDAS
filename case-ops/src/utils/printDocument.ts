@@ -108,6 +108,34 @@ async function waitForPrintableResources(doc: Document): Promise<void> {
   }
 }
 
+const CLEANUP_DELAY_MS = 1500;
+
+function waitForImages(doc: Document): Promise<void> {
+  const images = Array.from(doc.images);
+  if (images.length === 0) return Promise.resolve();
+
+  return Promise.all(
+    images.map((img) => {
+      if (img.complete) return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        img.addEventListener('load', () => resolve(), { once: true });
+        img.addEventListener('error', () => resolve(), { once: true });
+      });
+    }),
+  ).then(() => undefined);
+}
+
+async function waitForPrintableResources(doc: Document): Promise<void> {
+  await waitForImages(doc);
+  if ('fonts' in doc) {
+    try {
+      await (doc as Document & { fonts: FontFaceSet }).fonts.ready;
+    } catch {
+      // Ignorar si la API de fuentes falla.
+    }
+  }
+}
+
 export function printElementAsDocument({ element, title }: PrintElementOptions): void {
   const iframe = document.createElement('iframe');
   iframe.setAttribute('aria-hidden', 'true');
