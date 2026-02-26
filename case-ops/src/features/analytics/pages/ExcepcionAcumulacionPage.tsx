@@ -421,15 +421,6 @@ export function ExcepcionAcumulacionPage() {
         <SectionCard title="Excepción procesal" subtitle="Estado del caso">
           <div className="space-y-4 text-sm text-slate-300">
             <p>Contenido todavía no preparado para este caso.</p>
-            {returnToParam && (
-              <button
-                type="button"
-                onClick={() => navigate(returnTo)}
-                className={returnToCaseButtonClassName}
-              >
-                Volver al Caso
-              </button>
-            )}
           </div>
         </SectionCard>
       ) : (
