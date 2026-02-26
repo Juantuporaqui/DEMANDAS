@@ -80,7 +80,8 @@ export function ExcepcionAcumulacionPage() {
     () => [
       {
         title: 'Escenario 1 — “Admite la excepción (rompe la acumulación)”',
-        resultado: 'Resultado esperado: el procedimiento continúa solo con la acción admitida; la otra se canaliza aparte.',
+        resultado:
+          'Resultado esperado: el procedimiento continúa solo con la acción admitida; la otra se canaliza aparte.',
         pedir: 'Qué pides inmediatamente: calendario procesal y delimitación del bloque que sigue.',
       },
       {
