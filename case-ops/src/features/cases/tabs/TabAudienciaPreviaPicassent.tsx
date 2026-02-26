@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertCircle,
@@ -14,6 +14,7 @@ import {
 import { eventsRepo } from '../../../db/repositories';
 import type { Event } from '../../../types';
 import { formatDateTime } from '../../../utils/dates';
+import { printElementAsDocument } from '../../../utils/printDocument';
 import { SectionCard } from '../../analytics/components/SectionCard';
 import { CopyButton } from '../../analytics/prescripcion/CopyButton';
 import { PICASSENT_AP } from '../../../data/PO-715-2024-picassent/audienciaPrevia.picassent';
@@ -178,6 +179,9 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   const [filterPrueba, setFilterPrueba] = useState<FilterPrueba>('todos');
   const [filterRiesgo, setFilterRiesgo] = useState<FilterRiesgo>('todos');
   const [salaMode, setSalaMode] = useState(false);
+  const [expandAllCards, setExpandAllCards] = useState(false);
+  const [printingInProgress, setPrintingInProgress] = useState(false);
+  const printContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -274,6 +278,38 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   }, [salaMode]);
 
   const salaHiddenClass = salaMode ? 'hidden print:block' : '';
+  const forceExpandedView = expandAllCards || printingInProgress;
+
+  const handleToggleExpandAll = () => {
+    setExpandAllCards((prev) => {
+      const next = !prev;
+      if (next) {
+        setOpenChecklist(Object.fromEntries(PICASSENT_AP.checklist.map((item) => [item.id, true])));
+        setOpenAlegaciones(Object.fromEntries(PICASSENT_AP.alegacionesComplementarias.map((item) => [String(item.id), true])));
+        setOpenBloques(Object.fromEntries(PICASSENT_AP.bloques.map((item) => [item.id, true])));
+      } else {
+        setOpenChecklist({});
+        setOpenAlegaciones({});
+        setOpenBloques({});
+      }
+      return next;
+    });
+  };
+
+  const handlePrint = () => {
+    setPrintingInProgress(true);
+    requestAnimationFrame(() => {
+      if (printContainerRef.current) {
+        printElementAsDocument({
+          element: printContainerRef.current,
+          title: 'Audiencia previa · Picassent',
+        });
+      } else {
+        window.print();
+      }
+      setPrintingInProgress(false);
+    });
+  };
 
   const audienciaDateLabel = useMemo(() => {
     if (!audienciaEvent) {
@@ -433,7 +469,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 print:bg-white print:text-slate-900">
+    <div ref={printContainerRef} className="space-y-6 animate-in fade-in duration-500 print:bg-white print:text-slate-900">
       <SectionCard
         title="Audiencia Previa — Centro de mando"
         subtitle={`Picassent · ${audienciaDateLabel}${audienciaCountdownLabel ? ` · ${audienciaCountdownLabel}` : ''} · Objetivo: saneamiento, hechos, prueba`}
@@ -467,7 +503,14 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
             </button>
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={handleToggleExpandAll}
+              className="inline-flex items-center gap-2 rounded-full border border-sky-400/50 bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-100 transition hover:border-sky-300/70 hover:bg-sky-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300 print:hidden"
+            >
+              {expandAllCards ? 'Contraer menús' : 'Expandir menús'}
+            </button>
+            <button
+              type="button"
+              onClick={handlePrint}
               className="inline-flex items-center gap-2 rounded-full border border-amber-400/50 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100 transition hover:border-amber-300/70 hover:bg-amber-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300 print:hidden"
             >
               Imprimir AP
@@ -696,7 +739,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
             )}
           </div>
 
-          <details className="rounded-2xl border border-dashed border-slate-700/60 bg-slate-900/30 p-4">
+          <details open={forceExpandedView} className="rounded-2xl border border-dashed border-slate-700/60 bg-slate-900/30 p-4">
             <summary className="cursor-pointer text-xs font-semibold text-slate-200">
               {PICASSENT_AP.excepcionesProcesales.jurisprudenciaPendiente.titulo}
             </summary>
@@ -835,7 +878,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
                                 [item.id]: !prev[item.id],
                               }))
                             }
-                            aria-expanded={openChecklist[item.id] ?? false}
+                            aria-expanded={forceExpandedView || (openChecklist[item.id] ?? false)}
                             aria-controls={`checklist-panel-${item.id}`}
                             className="text-left text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
                           >
@@ -850,7 +893,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
                     </div>
                     <div
                       id={`checklist-panel-${item.id}`}
-                      className={`mt-3 space-y-3 text-xs text-slate-200 ${openChecklist[item.id] ? '' : 'hidden print:block'}`}
+                      className={`mt-3 space-y-3 text-xs text-slate-200 ${forceExpandedView || openChecklist[item.id] ? '' : 'hidden print:block'}`}
                     >
                       {!salaMode && (
                         <>
@@ -1016,7 +1059,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
         <div className="space-y-3">
           {PICASSENT_AP.alegacionesComplementarias.map((alegacion) => {
             const state = alegacionesState[String(alegacion.id)] ?? { done: false, notas: '' };
-            const isOpen = openAlegaciones[String(alegacion.id)] ?? false;
+            const isOpen = forceExpandedView || (openAlegaciones[String(alegacion.id)] ?? false);
             return (
                 <div
                   key={alegacion.id}
@@ -1096,7 +1139,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
         <div className="space-y-3">
           {PICASSENT_AP.bloques.map((bloque) => {
             const state = bloquesState[bloque.id] ?? { done: false, notas: '' };
-            const isOpen = openBloques[bloque.id] ?? false;
+            const isOpen = forceExpandedView || (openBloques[bloque.id] ?? false);
             return (
               <div
                 key={bloque.id}
