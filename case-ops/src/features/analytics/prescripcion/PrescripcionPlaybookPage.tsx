@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   BookOpen,
@@ -22,6 +22,7 @@ import { StickyTOC } from './StickyTOC';
 import { TablaPartidasSection } from './TablaPartidasSection';
 import { APStackSection } from './APStackSection';
 import { AP_STACK_ITEMS } from './apStack';
+import { printElementAsDocument } from '../../../utils/printDocument';
 
 interface PrescripcionPlaybookPageProps {
   returnTo: string;
@@ -72,6 +73,9 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
   const content = prescripcionPicassent;
   const defaultHypothesis = searchParams.get('hyp') === 'H2' ? 'H2' : 'H1';
   const [hypothesis, setHypothesis] = useState<'H1' | 'H2'>(defaultHypothesis);
+  const [expandAllCards, setExpandAllCards] = useState(false);
+  const [printingInProgress, setPrintingInProgress] = useState(false);
+  const printContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setHypothesis(defaultHypothesis);
@@ -88,6 +92,23 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
     ],
     [content.meta, hypothesis]
   );
+
+  const forceExpandedView = expandAllCards || printingInProgress;
+
+  const handlePrint = () => {
+    setPrintingInProgress(true);
+    requestAnimationFrame(() => {
+      if (printContainerRef.current) {
+        printElementAsDocument({
+          element: printContainerRef.current,
+          title: `${content.meta.caseCode} · Prescripción`,
+        });
+      } else {
+        window.print();
+      }
+      setPrintingInProgress(false);
+    });
+  };
 
   const handleCopied = (text: string) => {
     setCopiedText(text);
@@ -109,7 +130,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
   };
 
   return (
-    <div className="relative space-y-6">
+    <div ref={printContainerRef} className="relative space-y-6">
       {copiedText && (
         <div className="fixed top-4 right-4 z-50 max-w-[calc(100vw-2rem)] rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-lg animate-pulse sm:px-4 sm:text-sm">
           Copiado al portapapeles
@@ -147,7 +168,14 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
             </Link>
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={() => setExpandAllCards((value) => !value)}
+              className="rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-sky-200 transition hover:border-sky-400/70 hover:bg-sky-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.2em]"
+            >
+              {expandAllCards ? 'Contraer menús' : 'Expandir menús'}
+            </button>
+            <button
+              type="button"
+              onClick={handlePrint}
               className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-emerald-200 transition hover:border-emerald-400/70 hover:bg-emerald-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.2em]"
             >
               Imprimir / PDF
@@ -201,7 +229,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
         </p>
         <div className="mt-3 grid gap-2 md:grid-cols-2">
           {AP_STACK_ITEMS.filter((item) => ['P3', 'P4', 'P5', 'P6', 'P7'].includes(item.id)).map((item) => (
-            <details key={item.id} className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-3">
+            <details key={item.id} open={forceExpandedView} className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-3">
               <summary className="cursor-pointer text-sm font-semibold text-white">{item.id} — {item.title}</summary>
               <p className="mt-2 text-xs text-slate-300"><LegalReferenceText text={item.tesis} /></p>
             </details>
@@ -369,6 +397,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
 
           {/* ═══════ GRUPO 1: RESUMEN Y PREPARACIÓN (abierto por defecto) ═══════ */}
           <CollapsibleSection
+            forceOpen={forceExpandedView}
             id="panel-rapido"
             title="Resumen y preparación"
             subtitle="Panel rápido + resumen ejecutivo"
@@ -512,6 +541,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
 
           {/* ═══════ GRUPO 3: PETICIÓN PRIORITARIA + REGLAS (abierto por defecto) ═══════ */}
           <CollapsibleSection
+            forceOpen={forceExpandedView}
             id="peticion-prioritaria"
             title="Petición prioritaria y reglas de contradicción"
             subtitle="Depuración del objeto + tabla obligatoria"
@@ -606,6 +636,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
 
           {/* ═══════ GRUPO 4: ESTRATEGIA Y ESCENARIOS (cerrado por defecto) ═══════ */}
           <CollapsibleSection
+            forceOpen={forceExpandedView}
             id="selector-escenarios"
             title="Estrategia y escenarios"
             subtitle="Planes A/B, escenarios de decisión y distinguishing"
@@ -723,6 +754,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
 
           {/* ═══════ GRUPO 5: ANÁLISIS TÉCNICO (cerrado por defecto) ═══════ */}
           <CollapsibleSection
+            forceOpen={forceExpandedView}
             id="marco-normativo"
             title="Análisis técnico"
             subtitle="Marco normativo, cronología y tabla de partidas"
@@ -774,6 +806,7 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
 
           {/* ═══════ GRUPO 6: HERRAMIENTAS Y CHECKLIST (cerrado por defecto) ═══════ */}
           <CollapsibleSection
+            forceOpen={forceExpandedView}
             id="checklist-24-72"
             title="Herramientas y checklist"
             subtitle="Checklist pre-audiencia, plantillas y errores a evitar"
