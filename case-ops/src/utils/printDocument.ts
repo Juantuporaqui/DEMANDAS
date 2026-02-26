@@ -36,6 +36,10 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
 
   const cloned = element.cloneNode(true) as HTMLElement;
 
+  const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+    .map((styleNode) => styleNode.outerHTML)
+    .join('\n');
+
   printWindow.document.open();
   printWindow.document.write(`
     <!doctype html>
@@ -44,15 +48,19 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>${title}</title>
+        ${styles}
         <style>${BASE_PRINT_STYLES}</style>
       </head>
       <body>
-        <main>${cloned.innerHTML}</main>
+        <main class="print-surface">${cloned.innerHTML}</main>
       </body>
     </html>
   `);
   printWindow.document.close();
 
   printWindow.focus();
-  printWindow.print();
+
+  setTimeout(() => {
+    printWindow.print();
+  }, 500);
 }
