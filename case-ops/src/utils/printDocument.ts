@@ -21,119 +21,36 @@ const BASE_PRINT_STYLES = `
   }
 
   .print-root {
-    width: 190mm !important;
-    max-width: 190mm !important;
-    margin: 0 auto !important;
+    width: 100%;
   }
 
   .print-root * {
     box-sizing: border-box;
   }
 
-  @media print {
-    * {
-      box-shadow: none !important;
-      text-shadow: none !important;
-      filter: none !important;
-    }
+  .print-hidden,
+  button,
+  nav,
+  footer,
+  .bottom-nav {
+    display: none !important;
+  }
 
-    html,
-    body,
-    #root,
-    main {
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
-      overflow: visible !important;
-    }
+  h1, h2, h3, h4, h5 {
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
 
-    .h-screen,
-    .min-h-screen,
-    .max-h-screen {
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
-    }
+  img, canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 
-    .overflow-hidden,
-    .overflow-auto,
-    .overflow-scroll {
-      overflow: visible !important;
-    }
-
-    .sticky,
-    .fixed {
-      position: static !important;
-      top: auto !important;
-      left: auto !important;
-      right: auto !important;
-      bottom: auto !important;
-    }
-
-    .grid,
-    .flex {
-      display: block !important;
-    }
-
-    .card,
-    .print-card,
-    .card-base,
-    .case-card,
-    .kpi-card,
-    section,
-    article,
-    div {
-      break-inside: auto !important;
-      page-break-inside: auto !important;
-    }
-
-    .print-hidden,
-    button,
-    nav,
-    footer,
-    .bottom-nav {
-      display: none !important;
-    }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5 {
-      break-after: avoid-page !important;
-      page-break-after: avoid !important;
-    }
-
-    img,
-    svg,
-    canvas,
-    figure,
-    table,
-    pre,
-    blockquote,
-    tr,
-    thead,
-    tfoot {
-      break-inside: avoid !important;
-      page-break-inside: avoid !important;
-    }
-
-    p,
-    li,
-    blockquote {
-      orphans: 3;
-      widows: 3;
-    }
-
-    .print-page-break {
-      break-before: page !important;
-      page-break-before: always !important;
-    }
-
-    .print-keep-with-next {
-      break-after: avoid-page !important;
-      page-break-after: avoid !important;
-    }
+  p, li, blockquote {
+    orphans: 3;
+    widows: 3;
   }
 `;
 
@@ -178,12 +95,11 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
   iframe.style.position = 'fixed';
   iframe.style.top = '0';
   iframe.style.left = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
-  iframe.style.visibility = 'hidden';
-  iframe.style.opacity = '1';
+  iframe.style.width = '100vw';
+  iframe.style.height = '100vh';
+  iframe.style.opacity = '0';
   iframe.style.pointerEvents = 'none';
-  iframe.style.zIndex = '2147483647';
+  iframe.style.zIndex = '-9999';
   iframe.style.border = '0';
 
   document.body.appendChild(iframe);
