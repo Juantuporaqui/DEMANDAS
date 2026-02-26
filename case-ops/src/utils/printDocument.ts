@@ -126,7 +126,7 @@ export function printElementAsDocument({ element, title }: PrintElementOptions):
   `);
   doc.close();
 
-  // Damos 1 segundo para que Chrome calcule las 11 páginas correctamente
+  // Damos 1 segundo para que Chrome calcule las páginas correctamente
   window.setTimeout(() => {
     printWindow.focus();
     try {
