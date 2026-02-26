@@ -2,6 +2,8 @@
   base = "case-ops"
   command = "npm run build"
   publish = "dist"
+  # Disable Netlify builds/deploys from the repo side (always skip)
+  ignore = "echo 'Netlify deploy disabled for this repo'"
 
 [build.environment]
   NODE_VERSION = "20"
