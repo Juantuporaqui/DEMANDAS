@@ -1,5 +1,5 @@
 @media print {
-  /* 1. RESET DE ESTRUCTURA */
+  /* Limpiar la base para que el JS de impresión tome el control */
   html,
   body,
   #root,
@@ -7,29 +7,10 @@
     height: auto !important;
     min-height: 100% !important;
     overflow: visible !important;
-    display: block !important;
-    position: static !important;
-  }
-
-  /* 2. EVITAR QUE ELEMENTOS PEQUEÑOS SE PARTAN (pero permitirlo en contenedores grandes) */
-  .card,
-  .print-card,
-  .card-base,
-  .case-card,
-  p, h1, h2, h3, h4, h5, li, tr {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-
-  body,
-  #root {
     background: #ffffff !important;
-    color: #1a202c !important;
-    font-size: 10.5pt !important; /* Letra un poco más pequeña para papel */
-    line-height: 1.4 !important;
   }
 
-  /* Ocultar UI que no debe imprimirse */
+  /* Ocultar explícitamente UI que no va en papel */
   aside,
   header,
   footer,
@@ -40,60 +21,21 @@
     display: none !important;
   }
 
-  /* Reset layout */
-  main {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Reducir los espacios gigantes de Tailwind en papel */
-  .space-y-6 > * + * { margin-top: 1rem !important; }
-  .space-y-4 > * + * { margin-top: 0.5rem !important; }
-  .gap-6 { gap: 1rem !important; }
-  .gap-4 { gap: 0.5rem !important; }
-  .p-6 { padding: 1rem !important; }
-  .p-5 { padding: 0.75rem !important; }
-  .p-4 { padding: 0.5rem !important; }
-
-  /* Si usamos Grid de 2 columnas, a veces en PDF queda apretado, lo pasamos a bloque si hace falta */
-  .xl\:grid-cols-2 {
-    display: block !important;
-  }
-  .xl\:grid-cols-2 > * {
-    margin-bottom: 1rem !important;
-  }
-
-  /* Print surface */
-  .print-surface {
-    background: #ffffff !important;
-    color: #1a202c !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  /* Cards in print */
+  /* Permitir que todo fluya naturalmente y se parta entre páginas */
+  .card,
   .print-card,
   .card-base,
   .case-card,
-  .kpi-card {
-    background: #ffffff !important;
-    border: 1px solid #d1d5db !important;
-    box-shadow: none !important;
-    color: #1a202c !important;
+  .rounded-2xl,
+  .rounded-xl {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
   }
 
-  /* Badges in print */
-  .badge,
-  .badge-estado {
-    border: 1px solid #9ca3af !important;
-    background: transparent !important;
-    color: #374151 !important;
-  }
-
-  h1, h2, h3 {
-    break-after: avoid;
-    page-break-after: avoid;
-    color: #111827 !important;
-    margin-bottom: 0.5rem !important;
-  }
+  /* Reducir espacios de Tailwind drásticamente en papel */
+  .space-y-6 > * + * { margin-top: 0.5rem !important; }
+  .space-y-4 > * + * { margin-top: 0.25rem !important; }
+  .p-6 { padding: 0.5rem !important; }
+  .p-5 { padding: 0.5rem !important; }
+  .p-4 { padding: 0.5rem !important; }
 }
