@@ -389,9 +389,9 @@ export function ExcepcionAcumulacionPage() {
     document.getElementById('sala')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     if (printContainerRef.current) {
-      printElementAsDocument({
+      await printElementAsDocument({
         element: printContainerRef.current,
         title: 'Excepción procesal · Acumulación',
       });

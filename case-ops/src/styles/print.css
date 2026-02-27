@@ -1,65 +1,27 @@
+/* Fallback print styles for direct window.print() calls (e.g. HechoExpandible.tsx).
+   The primary print path uses printElementAsDocument() with an isolated iframe,
+   which does not rely on these styles. */
 @media print {
-  /* 1. ROMPER LAS JAULAS DE ALTURA (Soluciona el bug de páginas en blanco) */
-  html, body, #root, main, 
-  .app-layout, .page-shell, 
-  .overflow-y-auto, .overflow-hidden, .overflow-auto,
-  .h-screen, .min-h-screen, .max-h-screen, .h-full,
-  .fixed, .absolute, .sticky {
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    overflow: visible !important;
-    display: block !important; 
-    position: static !important;
-  }
-
-  /* 2. ELIMINAR EL HUECO FANTASMA SUPERIOR (El salto de la 1ª página) */
-  /* Quitamos el padding que Tailwind reserva para el Topbar */
-  main, .pt-16, .pt-20, .mt-16, .mt-20 {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-  }
-
-  /* 3. OCULTAR MENÚS Y BOTONES (Solo imprimimos el contenido) */
-  aside, header, footer, nav, 
-  .sidebar, .topbar, .bottom-nav, 
-  button, .print-hidden {
+  /* Hide chrome UI */
+  aside, header, footer, nav,
+  .sidebar, .topbar, .bottom-nav,
+  .ambient-bg, .noise-overlay,
+  .print-hidden {
     display: none !important;
   }
 
-  /* 4. MODO OSCURO A MODO PAPEL (Blanco y negro puro) */
+  /* Paper baseline */
+  body {
+    background: #fff;
+    color: #1e293b;
+  }
+
   * {
-    color: #000000 !important;
-    background-color: transparent !important;
     box-shadow: none !important;
     text-shadow: none !important;
   }
-  
-  /* Mantener bordes grises para que se vean las tarjetas */
-  .border, .border-slate-700\/50, .border-slate-700\/40, .border-white\/10 {
-    border-color: #cbd5e1 !important; 
-  }
 
-  /* 5. CORTES DE PÁGINA FLUIDOS */
-  div, section, article, .rounded-2xl, .rounded-xl, .card {
-    page-break-inside: auto !important;
-    break-inside: auto !important;
-  }
-
-  h1, h2, h3, h4, h5, summary {
-    page-break-after: avoid !important;
-    break-after: avoid !important;
-  }
-
-  /* 6. APLANAR COLUMNAS (Para que no se aplaste el texto a los lados) */
-  .grid, .md\:grid-cols-2, .lg\:grid-cols-2, .xl\:grid-cols-2, .xl\:grid-cols-4, .xl\:grid-cols-5 {
-    display: block !important;
-    width: 100% !important;
-  }
-
-  /* Transformar los huecos del grid en márgenes normales */
-  .grid > *, .space-y-6 > * + *, .space-y-4 > * + * {
-    margin-top: 0 !important;
-    margin-bottom: 1.5rem !important;
+  @page {
+    margin: 1.5cm;
   }
 }

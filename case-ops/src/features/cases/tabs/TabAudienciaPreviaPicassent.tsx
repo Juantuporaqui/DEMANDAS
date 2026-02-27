@@ -296,20 +296,21 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
     });
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     setPrintingInProgress(true);
-
-    window.setTimeout(() => {
+    await new Promise<void>((r) => requestAnimationFrame(() => r()));
+    try {
       if (printContainerRef.current) {
-        printElementAsDocument({
+        await printElementAsDocument({
           element: printContainerRef.current,
           title: 'Audiencia previa · Picassent',
         });
       } else {
         window.print();
       }
+    } finally {
       setPrintingInProgress(false);
-    }, 800);
+    }
   };
 
   const audienciaDateLabel = useMemo(() => {

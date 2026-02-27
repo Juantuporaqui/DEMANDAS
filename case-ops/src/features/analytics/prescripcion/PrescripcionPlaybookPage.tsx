@@ -95,19 +95,21 @@ export function PrescripcionPlaybookPage({ returnTo }: PrescripcionPlaybookPageP
 
   const forceExpandedView = expandAllCards || printingInProgress;
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     setPrintingInProgress(true);
-    requestAnimationFrame(() => {
+    await new Promise<void>((r) => requestAnimationFrame(() => r()));
+    try {
       if (printContainerRef.current) {
-        printElementAsDocument({
+        await printElementAsDocument({
           element: printContainerRef.current,
           title: `${content.meta.caseCode} · Prescripción`,
         });
       } else {
         window.print();
       }
+    } finally {
       setPrintingInProgress(false);
-    });
+    }
   };
 
   const handleCopied = (text: string) => {
