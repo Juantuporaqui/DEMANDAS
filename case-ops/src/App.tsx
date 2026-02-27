@@ -12,6 +12,12 @@ const AUTH_SESSION_KEY = 'caseops.authenticated';
 const AUTH_USERNAME = import.meta.env.VITE_APP_USERNAME ?? 'lajodienda';
 const AUTH_PASSWORD = import.meta.env.VITE_APP_PASSWORD ?? 'notieneenmienda';
 
+const AUTH_CREDENTIALS = [
+  { username: AUTH_USERNAME, password: AUTH_PASSWORD },
+  { username: 'oscar', password: 'benita' },
+  { username: 'ruth', password: 'martinez' },
+];
+
 function App() {
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,7 +92,11 @@ function LoginGate({ onAuthenticated }: { onAuthenticated: () => void }) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (username === AUTH_USERNAME && password === AUTH_PASSWORD) {
+    const isValidUser = AUTH_CREDENTIALS.some(
+      (credential) => credential.username === username && credential.password === password,
+    );
+
+    if (isValidUser) {
       setError(null);
       onAuthenticated();
       return;
