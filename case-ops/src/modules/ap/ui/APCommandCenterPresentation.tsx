@@ -35,6 +35,10 @@ function cleanText(raw: string) {
     .replaceAll('pedimos decreto inmediato', 'pedimos AUTO inmediato')
     .replaceAll('decreto de división', 'AUTO / resolución judicial')
     .replaceAll('STS de 5 de febrero de 2013', 'STS 79/2015 (ECLI: ES:TS:2015:79)')
+    .replaceAll('STS 17/03/2016', 'STS 79/2015 (ECLI: ES:TS:2015:79)')
+    .replaceAll('STS de 17 de marzo de 2016', 'STS 79/2015 (ECLI: ES:TS:2015:79)')
+    .replaceAll('Art. 1901 CC (prohibición del enriquecimiento injusto)', 'Prohibición del enriquecimiento injusto (doctrina jurisprudencial TS).')
+    .replaceAll('art. 1901 CC (prohibición del enriquecimiento injusto)', 'Prohibición del enriquecimiento injusto (doctrina jurisprudencial TS).')
     .replaceAll('STS 19/12/2006', 'NO CONSTA: cita verificada')
     .replaceAll('STS de 19/12/2006', 'NO CONSTA: cita verificada');
 
@@ -218,7 +222,11 @@ function BlockCard({ block, onCitation }: { block: Block; onCitation: (ref: stri
   );
 }
 
-function QuickReplies({ rows }: { rows: Array<{ q: string; a: string }> }) {
+function getInlineRefs(text: string) {
+  return Array.from(new Set(text.match(refRegex) ?? []));
+}
+
+function QuickReplies({ rows, onCitation }: { rows: Array<{ q: string; a: string }>; onCitation: (ref: string) => void }) {
   return (
     <>
       <div className="hidden overflow-auto rounded-xl border border-slate-700/70 sm:block">
@@ -230,7 +238,7 @@ function QuickReplies({ rows }: { rows: Array<{ q: string; a: string }> }) {
             {rows.map((r, i) => (
               <tr key={i} className={i % 2 ? 'bg-slate-900/60' : 'bg-slate-900/40'}>
                 <td className="sticky left-0 bg-inherit px-3 py-2 align-top text-slate-200">{r.q}</td>
-                <td className="px-3 py-2 align-top text-slate-100"><div className="flex items-start justify-between gap-2"><span>{r.a}</span><CopyButton text={r.a} label="Copiar" /></div></td>
+                <td className="px-3 py-2 align-top text-slate-100"><div className="space-y-2"><div className="flex items-start justify-between gap-2"><span>{r.a}</span><CopyButton text={r.a} label="Copiar" /></div><div className="flex flex-wrap gap-1">{getInlineRefs(r.a).map((ref) => <button key={ref} type="button" onClick={() => onCitation(ref)} className="rounded-full border border-indigo-400/40 bg-indigo-500/10 px-2 py-0.5 text-[11px] text-indigo-100">{ref}</button>)}</div></div></td>
               </tr>
             ))}
           </tbody>
@@ -240,7 +248,8 @@ function QuickReplies({ rows }: { rows: Array<{ q: string; a: string }> }) {
         {rows.map((r, i) => (
           <article key={i} className="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3">
             <p className="text-sm font-semibold text-slate-200">{r.q}</p>
-            <p className="mt-2 text-[15px] leading-[1.6] text-slate-100">{r.a}</p>
+            <p className="mt-2 text-[16px] leading-[1.6] text-slate-100">{r.a}</p>
+            <div className="mt-2 flex flex-wrap gap-1">{getInlineRefs(r.a).map((ref) => <button key={ref} type="button" onClick={() => onCitation(ref)} className="rounded-full border border-indigo-400/40 bg-indigo-500/10 px-2 py-0.5 text-[11px] text-indigo-100">{ref}</button>)}</div>
             <div className="mt-2"><CopyButton text={r.a} label="Copiar" /></div>
           </article>
         ))}
@@ -370,7 +379,7 @@ export function APCommandCenterPresentation() {
 
           <section id="tabla-respuestas" className="space-y-3 rounded-2xl border border-slate-700/70 bg-slate-900/30 p-4">
             <h3 className="text-lg font-bold">Tabla de respuestas rápidas</h3>
-            <QuickReplies rows={quick} />
+            <QuickReplies rows={quick} onCitation={resolveCitation} />
           </section>
         </section>
       )}
