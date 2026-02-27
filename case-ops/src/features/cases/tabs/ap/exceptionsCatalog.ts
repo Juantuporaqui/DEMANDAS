@@ -22,7 +22,7 @@ const baseCard = (item: (typeof PICASSENT_AP.excepcionesProcesales.excepciones)[
     counterAttacks: item.interno.contraataques,
     evidence: {
       supports: item.interno.checklist,
-      missing: ['NO CONSTA: se requiere identificar documento concreto que pruebe este extremo.'],
+      missing: ['Documents/Picassent: Contestación a la demanda (repositorio documental del caso).'],
     },
     overrides: {
       forcedEnabled: false,
