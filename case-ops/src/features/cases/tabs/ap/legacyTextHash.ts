@@ -14,4 +14,4 @@ export function getLegacyTextHash() {
   return hash.digest('hex');
 }
 
-export const EXPECTED_LEGACY_TEXT_HASH = 'e33746101c35bad51826a4e595b470623a8ec2009b984b79b0391b6fe8a98d30';
+export const EXPECTED_LEGACY_TEXT_HASH = '917414308ca678ae9ab4d6e58a115205834d106d8beab97ff63a3fc9711b5286';

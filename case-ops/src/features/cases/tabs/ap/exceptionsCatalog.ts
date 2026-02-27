@@ -2,8 +2,8 @@ import { PICASSENT_AP } from '../../../../data/PO-715-2024-picassent/audienciaPr
 import type { APExceptionCard } from './types.ts';
 
 const legacyCopy = {
-  actaPrincipal: PICASSENT_AP.guionActa.sala.principal,
-  actaSubsidiario: PICASSENT_AP.guionActa.sala.subsidiario,
+  actaPrincipal: PICASSENT_AP.excepcionesProcesales.guionActa.sala.principal,
+  actaSubsidiario: PICASSENT_AP.excepcionesProcesales.guionActa.sala.subsidiario,
   s90: PICASSENT_AP.guiones.s90,
   m3: PICASSENT_AP.guiones.m3,
   m5: PICASSENT_AP.guiones.m5,
@@ -45,7 +45,7 @@ export const AP_EXCEPTIONS_CATALOG: APExceptionCard[] = PICASSENT_AP.excepciones
 
 export const LEGACY_AUDIENCIA_BLOCKS = {
   guiones: PICASSENT_AP.guiones,
-  guionActa: PICASSENT_AP.guionActa,
+  guionActa: PICASSENT_AP.excepcionesProcesales.guionActa,
   checklist: PICASSENT_AP.checklist,
   contraataques: PICASSENT_AP.excepcionesProcesales.excepciones.map((item) => item.interno.contraataques),
   bloques: PICASSENT_AP.bloques,
