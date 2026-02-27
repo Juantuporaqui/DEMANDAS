@@ -36,8 +36,8 @@ export function computePreclusionStatus(
 
   if (cardId === 'prescripcion') {
     return apInputs.raisedInContestacion
-      ? { status: 'OK', why: ['Excepción preservada en contestación.'] }
-      : { status: 'RISK_HIGH', why: ['No consta alegación en contestación: riesgo alto/preclusión según delimitación del debate.'] };
+      ? { status: 'OK', why: ['Excepción preservada en contestación (art. 1964.2 CC + no interrupción).'] }
+      : { status: 'RISK_MED', why: ['Requiere validación manual de soporte documental de contestación para mantener prescripción en AP.'] };
   }
 
   if (cardId === 'defecto_demanda') {
@@ -52,7 +52,8 @@ export function computePreclusionStatus(
 }
 
 export function computeAvailability(result: { status: PreclusionStatus; why: string[] }, card: APExceptionCard) {
-  const defaultEnabled = result.status === 'OK' || result.status === 'EX_OFFICIO_ONLY';
+  const isDiagnosticCompetencia = card.id === 'competencia_territorial' || card.id === 'competencia_objetiva_funcional';
+  const defaultEnabled = !isDiagnosticCompetencia && result.status === 'OK';
   const warnings = [...result.why];
   if (result.status === 'PRECLUDED' || result.status === 'UNKNOWN') {
     warnings.push('Bloqueada por defecto. Solo habilitar con “Force enable” + motivo obligatorio.');
