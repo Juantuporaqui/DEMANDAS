@@ -18,6 +18,9 @@ import { printElementAsDocument } from '../../../utils/printDocument';
 import { SectionCard } from '../../analytics/components/SectionCard';
 import { CopyButton } from '../../analytics/prescripcion/CopyButton';
 import { PICASSENT_AP } from '../../../data/PO-715-2024-picassent/audienciaPrevia.picassent';
+import { AP_EXCEPTIONS_CATALOG } from './ap/exceptionsCatalog';
+import { computeAvailability, computePreclusionStatus } from './ap/preclusionEngine';
+import type { APInputs } from './ap/types';
 import type {
   EstadoHechoControvertido,
   TipoPrueba
@@ -32,6 +35,7 @@ type ChecklistState = Record<string, boolean>;
 type HechoState = Record<string, { done: boolean; notas: string; prioridad: 'baja' | 'media' | 'alta' }>;
 type AlegacionState = Record<string, { done: boolean; notas: string }>;
 type BloqueState = Record<string, { done: boolean; notas: string }>;
+type OverrideState = Record<string, { forcedEnabled: boolean; reason: string }>;
 
 type FilterEstado = 'todos' | EstadoHechoControvertido;
 type FilterPrueba = 'todos' | TipoPrueba;
@@ -42,6 +46,8 @@ const hechosStorageKey = 'ap.picassent.hechos.v1';
 const alegacionesStorageKey = 'ap.picassent.alegaciones.v1';
 const bloquesStorageKey = 'ap.picassent.bloques.v1';
 const salaStorageKey = 'ap.picassent.sala.v1';
+const apInputsStorageKey = 'ap.picassent.inputs.v1';
+const apOverridesStorageKey = 'ap.picassent.overrides.v1';
 
 const estadoConfig: Record<EstadoHechoControvertido, { bg: string; border: string; text: string; icon: typeof Clock }> = {
   pendiente: {
@@ -179,6 +185,13 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   const [filterPrueba, setFilterPrueba] = useState<FilterPrueba>('todos');
   const [filterRiesgo, setFilterRiesgo] = useState<FilterRiesgo>('todos');
   const [salaMode, setSalaMode] = useState(false);
+  const [copyVariant, setCopyVariant] = useState<'legacy' | 'improved'>('legacy');
+  const [apInputs, setApInputs] = useState<APInputs>({
+    raisedInContestacion: false,
+    declinatoriaFiled: false,
+    fueroImperativoApplies: false,
+  });
+  const [apOverrides, setApOverrides] = useState<OverrideState>({});
   const [expandAllCards, setExpandAllCards] = useState(false);
   const [printingInProgress, setPrintingInProgress] = useState(false);
   const printContainerRef = useRef<HTMLDivElement | null>(null);
@@ -212,6 +225,12 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
     const storedAlegaciones = safeParse<AlegacionState>(localStorage.getItem(alegacionesStorageKey), {});
     const storedBloques = safeParse<BloqueState>(localStorage.getItem(bloquesStorageKey), {});
     const storedSala = safeParse<boolean>(localStorage.getItem(salaStorageKey), false);
+    const storedApInputs = safeParse<APInputs>(localStorage.getItem(apInputsStorageKey), {
+      raisedInContestacion: false,
+      declinatoriaFiled: false,
+      fueroImperativoApplies: false,
+    });
+    const storedApOverrides = safeParse<OverrideState>(localStorage.getItem(apOverridesStorageKey), {});
 
     const checklistDefaults = PICASSENT_AP.checklist.reduce<ChecklistState>((acc, item) => {
       acc[item.id] = false;
@@ -250,6 +269,8 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
       ...storedBloques,
     }));
     setSalaMode(storedSala);
+    setApInputs(storedApInputs);
+    setApOverrides(storedApOverrides);
   }, []);
 
   useEffect(() => {
@@ -276,6 +297,16 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
     if (typeof window === 'undefined') return;
     localStorage.setItem(salaStorageKey, JSON.stringify(salaMode));
   }, [salaMode]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(apInputsStorageKey, JSON.stringify(apInputs));
+  }, [apInputs]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(apOverridesStorageKey, JSON.stringify(apOverrides));
+  }, [apOverrides]);
 
   const salaHiddenClass = salaMode ? 'hidden print:block' : '';
   const forceExpandedView = expandAllCards || printingInProgress;
@@ -368,6 +399,17 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
     media: Object.values(hechosState).filter((item) => item?.prioridad === 'media').length,
     alta: Object.values(hechosState).filter((item) => item?.prioridad === 'alta').length,
   }), [hechosState]);
+
+
+  const preclusionCards = useMemo(() => {
+    return AP_EXCEPTIONS_CATALOG.map((card) => {
+      const result = computePreclusionStatus(card.id, apInputs, { hasAdmisisionDecretoCompetencia: true });
+      const availability = computeAvailability(result, card);
+      const override = apOverrides[card.id] ?? { forcedEnabled: false, reason: '' };
+      const enabled = availability.defaultEnabled || override.forcedEnabled;
+      return { card, result, availability, override, enabled };
+    });
+  }, [apInputs, apOverrides]);
 
   const handleNavClick = (id: string) => {
     const target = document.getElementById(id);
@@ -517,7 +559,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
             >
               Imprimir AP
             </button>
-            <CopyButton text={PICASSENT_AP.guiones.s90} label="Copiar guion 90s" />
+            <CopyButton text={copyVariant === 'legacy' ? PICASSENT_AP.guiones.s90 : PICASSENT_AP.guiones.s90} label="Copiar guion 90s" />
           </div>
         )}
       >
@@ -749,6 +791,56 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
               {PICASSENT_AP.excepcionesProcesales.jurisprudenciaPendiente.nota}
             </p>
           </details>
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Motor de preclusión y activación (diagnóstico operativo)" className="print:break-inside-avoid">
+        <div className="grid gap-3 md:grid-cols-3 print:hidden">
+          <label className="rounded-xl border border-slate-700/50 bg-slate-900/40 p-3 text-xs text-slate-200">
+            <input type="checkbox" className="mr-2" checked={apInputs.raisedInContestacion} onChange={(event) => setApInputs((prev) => ({ ...prev, raisedInContestacion: event.target.checked }))} />
+            Opuesta en contestación
+          </label>
+          <label className="rounded-xl border border-slate-700/50 bg-slate-900/40 p-3 text-xs text-slate-200">
+            <input type="checkbox" className="mr-2" checked={apInputs.declinatoriaFiled} onChange={(event) => setApInputs((prev) => ({ ...prev, declinatoriaFiled: event.target.checked }))} />
+            Declinatoria presentada
+          </label>
+          <label className="rounded-xl border border-slate-700/50 bg-slate-900/40 p-3 text-xs text-slate-200">
+            <input type="checkbox" className="mr-2" checked={apInputs.fueroImperativoApplies} onChange={(event) => setApInputs((prev) => ({ ...prev, fueroImperativoApplies: event.target.checked }))} />
+            Aplica fuero imperativo
+          </label>
+        </div>
+        <div className="mt-4 flex items-center gap-2 print:hidden">
+          <span className="text-xs text-slate-300">Variante:</span>
+          <button type="button" onClick={() => setCopyVariant('legacy')} className={`rounded-full border px-3 py-1 text-xs ${copyVariant === 'legacy' ? 'border-emerald-400/60 text-emerald-200' : 'border-slate-700/60 text-slate-300'}`}>Legacy v1</button>
+          <button type="button" onClick={() => setCopyVariant('improved')} className={`rounded-full border px-3 py-1 text-xs ${copyVariant === 'improved' ? 'border-emerald-400/60 text-emerald-200' : 'border-slate-700/60 text-slate-300'}`}>Improved v2</button>
+        </div>
+        <div className="mt-4 space-y-3">
+          {preclusionCards.map(({ card, result, availability, override, enabled }) => (
+            <div key={card.id} className="rounded-xl border border-slate-700/50 bg-slate-900/40 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-sm font-semibold text-white">{card.title}</div>
+                <div className="text-xs text-amber-200">{result.status}</div>
+              </div>
+              <ul className="mt-2 list-disc pl-4 text-xs text-slate-200">
+                {availability.warnings.map((line) => <li key={line}>{line}</li>)}
+              </ul>
+              <div className="mt-2 text-xs text-slate-300">PRUEBA soporte: {card.evidence.supports[0] ?? 'NO CONSTA'} · Falta: {card.evidence.missing[0] ?? 'NO CONSTA'}</div>
+              <div className="mt-2 flex flex-wrap gap-2 print:hidden">
+                <CopyButton text={copyVariant === 'legacy' ? card.copyBlocks.legacy.s90 : (card.copyBlocks.improved?.s90 ?? card.copyBlocks.legacy.s90)} label="Copiar 90s" />
+                <CopyButton text={copyVariant === 'legacy' ? card.copyBlocks.legacy.actaPrincipal : (card.copyBlocks.improved?.actaPrincipal ?? card.copyBlocks.legacy.actaPrincipal)} label="Copiar acta" />
+              </div>
+              {(result.status === 'PRECLUDED' || result.status === 'UNKNOWN') && (
+                <div className="mt-3 rounded-lg border border-rose-500/30 bg-rose-500/5 p-2 print:hidden">
+                  <label className="text-xs text-rose-200">
+                    <input type="checkbox" className="mr-2" checked={override.forcedEnabled} onChange={(event) => setApOverrides((prev) => ({ ...prev, [card.id]: { ...override, forcedEnabled: event.target.checked } }))} />
+                    Force enable
+                  </label>
+                  <input value={override.reason} onChange={(event) => setApOverrides((prev) => ({ ...prev, [card.id]: { ...override, reason: event.target.value } }))} placeholder="Motivo obligatorio" className="mt-2 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-white" />
+                </div>
+              )}
+              <div className="mt-2 text-xs text-emerald-200">{enabled ? 'Activada en compositor' : 'No activada en compositor'}</div>
+            </div>
+          ))}
         </div>
       </SectionCard>
 

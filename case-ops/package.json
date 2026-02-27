@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node --test --experimental-strip-types src/db/integrityCore.test.ts"
+    "test": "node --test --experimental-strip-types src/db/integrityCore.test.ts src/features/cases/tabs/ap/preclusionEngine.test.ts"
   },
   "dependencies": {
     "dexie": "^4.2.1",
