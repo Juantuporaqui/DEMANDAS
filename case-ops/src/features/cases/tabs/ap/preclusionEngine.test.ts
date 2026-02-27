@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { computePreclusionStatus } from './preclusionEngine.ts';
 import { EXPECTED_LEGACY_TEXT_HASH, getLegacyTextHash } from './legacyTextHash.ts';
+import { AP_V5_FLOW } from './apV5Blocks.ts';
+import { citationMap, CITATIONS_DATASET } from './citationsDataset.ts';
 
 const ctx = { hasAdmisisionDecretoCompetencia: true };
 
@@ -57,9 +59,25 @@ test('forbidden strings do not appear in AP UI and AP snapshot modules', () => {
   const source = files.map((file) => readFileSync(file, 'utf8')).join('\n');
 
   assert.equal(/Ley\s+8\/2021/i.test(source), false);
+  assert.equal(/STS\s+17\/03\/2016/i.test(source), false);
   assert.equal(/1901\s*CC[\s\S]{0,80}enriquecimiento\s+injusto/i.test(source), false);
   assert.equal(/21\.2\s*LEC[\s\S]{0,80}decreto/i.test(source), false);
 
   const unsupportedJurisId = /\b(?:STS|SAP|ECLI|ROJ)\b(?!\s*458\/2025)/;
   assert.equal(unsupportedJurisId.test(source), false);
+});
+
+
+test('citation integrity: every visible citation token has dataset entry and jurisprudence has ECLI/ROJ', () => {
+  for (const card of AP_V5_FLOW) {
+    for (const token of card.citations) {
+      const entry = citationMap.get(token);
+      assert.ok(entry, `Missing citation dataset entry for token: ${token}`);
+      if (entry?.type === 'JURIS') {
+        assert.equal(Boolean(entry.ecli || entry.roj), true, `Jurisprudence token without ECLI/ROJ: ${token}`);
+      }
+    }
+  }
+  const visibleJuris = CITATIONS_DATASET.filter((c) => c.type === 'JURIS' && AP_V5_FLOW.some((card) => card.citations.includes(c.label)));
+  assert.equal(visibleJuris.every((c) => Boolean(c.ecli || c.roj)), true);
 });
