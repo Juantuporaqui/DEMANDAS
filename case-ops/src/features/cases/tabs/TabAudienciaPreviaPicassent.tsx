@@ -20,7 +20,7 @@ import { CopyButton } from '../../analytics/prescripcion/CopyButton';
 import { PICASSENT_AP } from '../../../data/PO-715-2024-picassent/audienciaPrevia.picassent';
 import { AP_EXCEPTIONS_CATALOG } from './ap/exceptionsCatalog';
 import { computeAvailability, computePreclusionStatus } from './ap/preclusionEngine';
-import { APFlowV5 } from './ap/APFlowV5';
+import { APV5CommandCenter } from '../../../modules/ap/APV5CommandCenter';
 import type { APInputs } from './ap/types';
 import type {
   EstadoHechoControvertido,
@@ -570,7 +570,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
       </SectionCard>
 
 
-      <APFlowV5 />
+      <APV5CommandCenter />
 
       {/* Atajos operativos */}
       <SectionCard id="atajos" title="Atajos operativos">
