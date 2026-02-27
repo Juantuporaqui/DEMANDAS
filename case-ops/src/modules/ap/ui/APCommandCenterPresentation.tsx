@@ -35,12 +35,11 @@ function cleanText(raw: string) {
     .replaceAll('pedimos decreto inmediato', 'pedimos AUTO inmediato')
     .replaceAll('decreto de división', 'AUTO / resolución judicial')
     .replaceAll('STS de 5 de febrero de 2013', 'STS 79/2015 (ECLI: ES:TS:2015:79)')
+    .replaceAll('Art. 21.2 LEC • STS 19 de diciembre de 2006', 'Art. 21.2 LEC')
     .replaceAll('STS 17/03/2016', 'STS 79/2015 (ECLI: ES:TS:2015:79)')
     .replaceAll('STS de 17 de marzo de 2016', 'STS 79/2015 (ECLI: ES:TS:2015:79)')
     .replaceAll('Art. 1901 CC (prohibición del enriquecimiento injusto)', 'Prohibición del enriquecimiento injusto (doctrina jurisprudencial TS).')
-    .replaceAll('art. 1901 CC (prohibición del enriquecimiento injusto)', 'Prohibición del enriquecimiento injusto (doctrina jurisprudencial TS).')
-    .replaceAll('STS 19/12/2006', 'NO CONSTA: cita verificada')
-    .replaceAll('STS de 19/12/2006', 'NO CONSTA: cita verificada');
+    .replaceAll('art. 1901 CC (prohibición del enriquecimiento injusto)', 'Prohibición del enriquecimiento injusto (doctrina jurisprudencial TS).');
 
   text = text.replace(
     '2.3 — IMPUGNACIÓN DOCUMENTAL SELECTIVA',
@@ -120,7 +119,7 @@ function extractRefs(text: string, number: string) {
   if (number.includes('2.2 BIS')) {
     return Array.from(new Set([...refs, 'LEC 217', 'LEC 219', 'CE 24']));
   }
-  return refs.map((r) => (r.includes('STS 19 de diciembre de 2006') ? 'NO CONSTA: cita verificada' : r));
+  return refs;
 }
 
 function extractSection(label: string) {
