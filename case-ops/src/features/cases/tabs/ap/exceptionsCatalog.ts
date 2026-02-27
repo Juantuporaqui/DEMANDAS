@@ -9,31 +9,40 @@ const legacyCopy = {
   m5: PICASSENT_AP.guiones.m5,
 };
 
-const baseCard = (item: (typeof PICASSENT_AP.excepcionesProcesales.excepciones)[number], id = item.id, title = item.titulo): APExceptionCard => ({
-  id,
-  title,
-  phase: 'SANEAMIENTO',
-  status: 'UNKNOWN',
-  why: [],
-  ask: item.sala.pedir,
-  legalBasis: item.sala.base,
-  checklist: item.interno.checklist,
-  counterAttacks: item.interno.contraataques,
-  evidence: {
-    supports: item.interno.checklist,
-    missing: ['NO CONSTA: se requiere identificar documento concreto que pruebe este extremo.'],
-  },
-  overrides: {
-    forcedEnabled: false,
-    reason: '',
-  },
-  userInputs: {
-    raisedInContestacion: false,
-    declinatoriaFiled: false,
-    fueroImperativoApplies: false,
-  },
-  copyBlocks: { legacy: legacyCopy },
-});
+const baseCard = (item: (typeof PICASSENT_AP.excepcionesProcesales.excepciones)[number], id = item.id, title = item.titulo): APExceptionCard => {
+  const card: APExceptionCard = {
+    id,
+    title,
+    phase: 'SANEAMIENTO',
+    status: 'UNKNOWN',
+    why: [],
+    ask: item.sala.pedir,
+    legalBasis: item.sala.base,
+    checklist: item.interno.checklist,
+    counterAttacks: item.interno.contraataques,
+    evidence: {
+      supports: item.interno.checklist,
+      missing: ['Documents/Picassent: Contestación a la demanda (repositorio documental del caso).'],
+    },
+    overrides: {
+      forcedEnabled: false,
+      reason: '',
+    },
+    userInputs: {
+      raisedInContestacion: true,
+      declinatoriaFiled: false,
+      fueroImperativoApplies: false,
+    },
+    copyBlocks: { legacy: legacyCopy },
+  };
+  if (id === 'prescripcion') {
+    card.evidence.supports = [
+      'Contestación a la demanda: excepción de prescripción (art. 1964.2 CC + no interrupción).',
+      ...card.evidence.supports,
+    ];
+  }
+  return card;
+};
 
 export const AP_EXCEPTIONS_CATALOG: APExceptionCard[] = PICASSENT_AP.excepcionesProcesales.excepciones.flatMap((item) => {
   if (item.id !== 'competencia') return [baseCard(item)];
