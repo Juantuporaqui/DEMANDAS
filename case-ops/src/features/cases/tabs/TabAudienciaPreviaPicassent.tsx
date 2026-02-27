@@ -514,7 +514,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   };
 
   return (
-    <div ref={printContainerRef} className="ap-justify space-y-6 animate-in fade-in duration-500 print:bg-white print:text-slate-900">
+    <div ref={printContainerRef} className="ap-content ap-justify space-y-6 animate-in fade-in duration-500 print:bg-white print:text-slate-900">
       <SectionCard
         title="Audiencia Previa — Centro de mando"
         subtitle={`Picassent · ${audienciaDateLabel}${audienciaCountdownLabel ? ` · ${audienciaCountdownLabel}` : ''} · Objetivo: saneamiento, hechos, prueba`}
