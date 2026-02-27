@@ -188,7 +188,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   const [salaMode, setSalaMode] = useState(false);
   const [copyVariant, setCopyVariant] = useState<'legacy' | 'improved'>('legacy');
   const [apInputs, setApInputs] = useState<APInputs>({
-    raisedInContestacion: false,
+    raisedInContestacion: true,
     declinatoriaFiled: false,
     fueroImperativoApplies: false,
   });
@@ -227,7 +227,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
     const storedBloques = safeParse<BloqueState>(localStorage.getItem(bloquesStorageKey), {});
     const storedSala = safeParse<boolean>(localStorage.getItem(salaStorageKey), false);
     const storedApInputs = safeParse<APInputs>(localStorage.getItem(apInputsStorageKey), {
-      raisedInContestacion: false,
+      raisedInContestacion: true,
       declinatoriaFiled: false,
       fueroImperativoApplies: false,
     });
