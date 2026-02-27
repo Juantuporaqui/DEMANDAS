@@ -20,7 +20,7 @@ import { CopyButton } from '../../analytics/prescripcion/CopyButton';
 import { PICASSENT_AP } from '../../../data/PO-715-2024-picassent/audienciaPrevia.picassent';
 import { AP_EXCEPTIONS_CATALOG } from './ap/exceptionsCatalog';
 import { computeAvailability, computePreclusionStatus } from './ap/preclusionEngine';
-import { APFlowV5 } from './ap/APFlowV5';
+import { APCommandCenterPresentation } from '../../../modules/ap/ui/APCommandCenterPresentation';
 import type { APInputs } from './ap/types';
 import type {
   EstadoHechoControvertido,
@@ -188,7 +188,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   const [salaMode, setSalaMode] = useState(false);
   const [copyVariant, setCopyVariant] = useState<'legacy' | 'improved'>('legacy');
   const [apInputs, setApInputs] = useState<APInputs>({
-    raisedInContestacion: false,
+    raisedInContestacion: true,
     declinatoriaFiled: false,
     fueroImperativoApplies: false,
   });
@@ -227,7 +227,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
     const storedBloques = safeParse<BloqueState>(localStorage.getItem(bloquesStorageKey), {});
     const storedSala = safeParse<boolean>(localStorage.getItem(salaStorageKey), false);
     const storedApInputs = safeParse<APInputs>(localStorage.getItem(apInputsStorageKey), {
-      raisedInContestacion: false,
+      raisedInContestacion: true,
       declinatoriaFiled: false,
       fueroImperativoApplies: false,
     });
@@ -514,7 +514,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
   };
 
   return (
-    <div ref={printContainerRef} className="space-y-6 animate-in fade-in duration-500 print:bg-white print:text-slate-900">
+    <div ref={printContainerRef} className="ap-justify space-y-6 animate-in fade-in duration-500 print:bg-white print:text-slate-900">
       <SectionCard
         title="Audiencia Previa — Centro de mando"
         subtitle={`Picassent · ${audienciaDateLabel}${audienciaCountdownLabel ? ` · ${audienciaCountdownLabel}` : ''} · Objetivo: saneamiento, hechos, prueba`}
@@ -570,7 +570,7 @@ export function TabAudienciaPreviaPicassent({ caseId, isReadMode = false }: TabA
       </SectionCard>
 
 
-      <APFlowV5 />
+      <APCommandCenterPresentation />
 
       {/* Atajos operativos */}
       <SectionCard id="atajos" title="Atajos operativos">
