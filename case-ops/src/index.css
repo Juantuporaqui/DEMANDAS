@@ -1227,3 +1227,23 @@ tbody tr:last-child td {
   word-break: normal;
   line-height: 1.65;
 }
+
+.ap-readable {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.65;
+}
+
+@media print {
+  .ap-readable {
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    hyphens: auto !important;
+    line-height: 1.55 !important;
+    overflow: visible !important;
+  }
+}
