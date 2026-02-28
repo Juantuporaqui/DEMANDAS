@@ -19,3 +19,11 @@ export const matrizRefutacion: RefutacionItem[] = [
     documentTitle: 'extracto',
   },
 ];
+
+export {
+  PGASEN_AP_SCRIPTS,
+  PGASEN_ISSUES,
+  PGASEN_LAW_REFS,
+  PGASEN_PARTIDAS,
+  PGASEN_TIMELINE_LOGICAL,
+} from './inconcreciones';

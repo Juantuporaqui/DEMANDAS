@@ -14,16 +14,31 @@ import {
 } from './repositories';
 import { eurosToCents } from '../utils/validators';
 
+let seedInFlight: Promise<boolean> | null = null;
+
+const isConstraintError = (error: unknown) => {
+  if (!error || typeof error !== 'object') return false;
+  const name = 'name' in error ? String((error as { name?: unknown }).name) : '';
+  const message = 'message' in error ? String((error as { message?: unknown }).message) : '';
+  return name.includes('ConstraintError') || message.includes('ConstraintError') || message.includes('Key already exists');
+};
+
+
 export async function seedDatabase(): Promise<boolean> {
-  const settings = await settingsRepo.get();
-  if (settings) {
-    console.log('Database already initialized');
-    return false;
+  if (seedInFlight) {
+    return seedInFlight;
   }
 
-  console.log('Seeding database with EXTENDED REAL CASE DATA (FIXED VISUALIZATIONS)...');
+  seedInFlight = (async () => {
+    const settings = await settingsRepo.get();
+    if (settings) {
+      console.log('Database already initialized');
+      return false;
+    }
 
-  try {
+    console.log('Seeding database with EXTENDED REAL CASE DATA (FIXED VISUALIZATIONS)...');
+
+    try {
     // 1. Configuración Inicial
     await settingsRepo.init('Desktop');
     const counters = [
@@ -592,8 +607,17 @@ export async function seedDatabase(): Promise<boolean> {
 
     console.log('Database seeded successfully with REAL DATA');
     return true;
-  } catch (error) {
-    console.error('Error seeding database:', error);
-    throw error;
-  }
+    } catch (error) {
+      if (isConstraintError(error)) {
+        console.warn('Seed skipped due to duplicate key (idempotent guard).');
+        return false;
+      }
+      console.error('Error seeding database:', error);
+      throw error;
+    } finally {
+      seedInFlight = null;
+    }
+  })();
+
+  return seedInFlight;
 }
