@@ -13,8 +13,8 @@ const AUTH_USERNAME = import.meta.env.VITE_APP_USERNAME ?? 'lajodienda';
 const AUTH_PASSWORD = import.meta.env.VITE_APP_PASSWORD ?? 'notieneenmienda';
 const AUTH_USERS = [
   { username: AUTH_USERNAME, password: AUTH_PASSWORD },
-  { username: 'oscar-benita', password: AUTH_PASSWORD },
-  { username: 'ruth-martinez', password: AUTH_PASSWORD },
+  { username: 'oscar', password: 'benita' },
+  { username: 'ruth', password: 'martinez' },
 ];
 
 function App() {
