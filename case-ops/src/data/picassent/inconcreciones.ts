@@ -4,6 +4,7 @@
 export type Severity = "P1" | "P2" | "P3";
 export type SourceSide = "DEMANDA" | "CONTESTACION" | "DOC_RELACION";
 export type IssueCategory =
+  | "DEFECTO_LEGAL_416_1_5"
   | "PLUSPETICION"
   | "CRONOLOGIA"
   | "PETITUM_IMPRECISO"
@@ -32,7 +33,7 @@ export type Issue = {
   demandRef?: string;
   responseRef?: string;
   quoteShort?: string;
-  source: { side: SourceSide; docName: string; note?: string; docNumbers?: string[] };
+  source: { side: SourceSide; docName: string; note?: string; docNumbers?: string[]; anchorLabel?: string; refId?: string };
   rebuttalOneLiner: string;
   apAsk: string;
   tags: string[];
@@ -41,6 +42,55 @@ export type Issue = {
 };
 
 export const PGASEN_ISSUES: Issue[] = [
+  {
+    id: "I-011",
+    severity: "P1",
+    category: "DEFECTO_LEGAL_416_1_5",
+    topic: "PROCEDIMIENTO",
+    title:
+      "Defecto legal: cuantía global y petitum por remisión al Hecho Cuarto sin cuadro aritmético completo por partidas",
+    summary:
+      "La demanda fija cuantía total y remite a conceptos del Hecho Cuarto, pero no aporta en el suplico una base aritmética cerrada por subpartidas.",
+    demandRef:
+      "Demanda: fundamento de cuantía + suplico con remisión a Hecho Cuarto",
+    quoteShort:
+      "“...cuantía... 212.677,08 euros...” / “...según conceptos del Hecho Cuarto...”",
+    source: {
+      side: "DEMANDA",
+      docName: "Demanda_picassent_Transcrita.docx",
+      anchorLabel: "Cuantía y suplico por remisión",
+      refId: "demanda-hecho4-cuantia-suplico",
+    },
+    rebuttalOneLiner:
+      "Sin desglose aritmético autosuficiente del petitum, el objeto no queda suficientemente determinado para contradicción plena.",
+    apAsk:
+      "Solicitar subsanación/clarificación en AP: cuadro por partidas, dies a quo y criterio de intereses por cada subpartida.",
+    tags: ["HECHO_4", "PARTIDAS_H4", "defecto_legal", "cuantia"],
+  },
+  {
+    id: "I-012",
+    severity: "P1",
+    category: "DEFECTO_LEGAL_416_1_5",
+    topic: "PROCEDIMIENTO",
+    title:
+      "Defecto legal: mención de capitalización/intereses sin bases individualizadas ni dies a quo por subpartidas",
+    summary:
+      "Se identifica petición económica con referencia a intereses legales, pero no constan bases diferenciadas de cálculo temporal por cada concepto reclamado.",
+    demandRef: "Demanda: suplico/intereses",
+    quoteShort:
+      "“...intereses legales...” sin desglose de base y fecha inicial por cada partida.",
+    source: {
+      side: "DEMANDA",
+      docName: "Demanda_picassent_Transcrita.docx",
+      anchorLabel: "Suplico e intereses legales",
+      refId: "demanda-suplico-intereses",
+    },
+    rebuttalOneLiner:
+      "Pedir intereses sin base/dies a quo por partida impide control de congruencia y defensa eficaz.",
+    apAsk:
+      "Requerir concreción de intereses por subpartida o, en su defecto, exclusión de pretensiones indeterminadas.",
+    tags: ["HECHO_4", "PARTIDAS_H4", "defecto_legal", "intereses"],
+  },
   {
     id: "I-001",
     severity: "P1",
@@ -57,7 +107,7 @@ export const PGASEN_ISSUES: Issue[] = [
       "Si el préstamo es solidario y para bienes comunes, no puede presentarse como ‘hipoteca del demandado’ para fabricar un crédito unilateral.",
     apAsk:
       "Que se depure como hecho controvertido la premisa ‘hipoteca privativa del demandado’ y se exija trazabilidad/justificación íntegra por periodos.",
-    tags: ["hipoteca", "premisa_falsa", "cuentas_comunes"],
+    tags: ["hipoteca", "premisa_falsa", "cuentas_comunes", "HECHO_4", "PARTIDAS_H4"],
     dateHint: "2009-06-18 / 2009–2023",
   },
   {
@@ -76,7 +126,7 @@ export const PGASEN_ISSUES: Issue[] = [
       "No es liquidación: es doble cómputo del mismo marco hipotecario (cuotas + amortización previa) para inflar saldo.",
     apAsk:
       "Que se obligue a la actora a un cuadro único de préstamo (origen→subrogación→destino→cuotas) y se excluya cualquier duplicidad.",
-    tags: ["pluspeticion", "duplicidad", "hipoteca"],
+    tags: ["pluspeticion", "duplicidad", "hipoteca", "HECHO_4", "PARTIDAS_H4"],
   },
   {
     id: "I-003",
@@ -99,7 +149,7 @@ export const PGASEN_ISSUES: Issue[] = [
       "Sin extractos íntegros y recibos certificables, esas capturas no sirven para fijar quién paga ni con qué fondos.",
     apAsk:
       "Impugnación documental; requerir extractos completos/recibos/ certificación del ordenante y cuenta de cargo.",
-    tags: ["capturas", "bbva", "ordenante", "impugnacion"],
+    tags: ["capturas", "bbva", "ordenante", "impugnacion", "HECHO_4", "PARTIDAS_H4"],
   },
   {
     id: "I-004",
@@ -290,7 +340,16 @@ export const PGASEN_TIMELINE_LOGICAL: TimelineEvent[] = [
   { id:"T-2024-07", date:"2024-07", label:"Cancelación cuenta común BBVA (según contestación)", detail:"Tras generar capturas; se invoca dificultad de verificación.", source:{side:"CONTESTACION", docName:"Contestacion_picassent_transcrita.docx"}, tags:["prueba","bbva"] }
 ];
 
-export type LawRef = { id:string; kind:"NORMA"|"JURIS"; ref:string; where:string; note?:string };
+export type LawRef = {
+  id:string;
+  kind:"NORMA"|"JURIS";
+  ref:string;
+  where:string;
+  note?:string;
+  literal?: string;
+  sourceDoc?: string;
+  sourceAnchor?: string;
+};
 export const PGASEN_LAW_REFS: LawRef[] = [
   { id:"L-CC-400", kind:"NORMA", ref:"CC art. 400", where:"Demanda (Fondo) — división cosa común" },
   { id:"L-CC-404", kind:"NORMA", ref:"CC art. 404", where:"Demanda (Fondo) y Suplico" },
@@ -298,6 +357,10 @@ export const PGASEN_LAW_REFS: LawRef[] = [
   { id:"L-LEC-250-1-16", kind:"NORMA", ref:"LEC art. 250.1.16", where:"Demanda (Procedimiento)" },
   { id:"L-LEC-249-2", kind:"NORMA", ref:"LEC art. 249.2", where:"Demanda (Procedimiento)" },
   { id:"L-LEC-73", kind:"NORMA", ref:"LEC art. 73", where:"Demanda (Procedimiento)" },
+  { id:"L-LEC-399", kind:"NORMA", ref:"LEC art. 399", where:"Referencia procesal para claridad/precisión del petitum", literal:"NO_CONSTA", note:"Referencia normativa añadida; literal no consta en dataset PGASEN." },
+  { id:"L-LEC-416-1-5", kind:"NORMA", ref:"LEC art. 416.1.5ª", where:"Defecto legal por falta de claridad/precisión", literal:"NO_CONSTA", note:"Referencia normativa añadida; literal no consta en dataset PGASEN." },
+  { id:"L-LEC-424", kind:"NORMA", ref:"LEC art. 424", where:"Aclaración/subsanación en audiencia previa", literal:"NO_CONSTA", note:"Referencia normativa añadida; literal no consta en dataset PGASEN." },
+  { id:"L-LEC-219", kind:"NORMA", ref:"LEC art. 219", where:"Condena dineraria: cuantía o bases aritméticas", literal:"NO_CONSTA", note:"Referencia normativa añadida; literal no consta en dataset PGASEN." },
   { id:"L-LEC-394", kind:"NORMA", ref:"LEC art. 394", where:"Demanda (Costas) y Contestación (Costas)" },
   { id:"L-CC-1964-2", kind:"NORMA", ref:"CC art. 1964.2", where:"Contestación (Prescripción)", note:"Citado literalmente en contestación" },
   { id:"L-CC-1358", kind:"NORMA", ref:"CC art. 1358", where:"Contestación (inaplicabilidad/argumentación)" },
