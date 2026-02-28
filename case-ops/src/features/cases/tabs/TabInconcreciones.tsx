@@ -100,7 +100,13 @@ export function TabInconcreciones({ documents, onGoToView }: TabInconcrecionesPr
   }, [apMode, filters, scopedIssues]);
 
   const selectedIssue = filteredIssues.find((item) => item.id === selectedIssueId) ?? filteredIssues[0] ?? null;
-  const sourceIssue = filteredIssues.find((item) => item.id === sourceIssueId) ?? selectedIssue;
+  const sourceIssue = sourceIssueId ? filteredIssues.find((item) => item.id === sourceIssueId) ?? null : null;
+
+  useEffect(() => {
+    if (!sourceIssueId) return;
+    const stillExists = filteredIssues.some((item) => item.id === sourceIssueId);
+    if (!stillExists) setSourceIssueId(null);
+  }, [filteredIssues, sourceIssueId]);
 
   const resolveDoc = (docName: string) => {
     const lower = docName.toLowerCase();
