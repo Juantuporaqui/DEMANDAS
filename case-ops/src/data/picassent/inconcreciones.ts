@@ -340,33 +340,92 @@ export const PGASEN_TIMELINE_LOGICAL: TimelineEvent[] = [
   { id:"T-2024-07", date:"2024-07", label:"Cancelación cuenta común BBVA (según contestación)", detail:"Tras generar capturas; se invoca dificultad de verificación.", source:{side:"CONTESTACION", docName:"Contestacion_picassent_transcrita.docx"}, tags:["prueba","bbva"] }
 ];
 
-export type LawRef = {
-  id:string;
-  kind:"NORMA"|"JURIS";
-  ref:string;
-  where:string;
-  note?:string;
-  literal?: string;
-  sourceDoc?: string;
-  sourceAnchor?: string;
+export type SourceKind = 'PGASEN' | 'EXTERNO_OFICIAL';
+
+export type NormRef = {
+  id: string;
+  kind: 'NORMA' | 'JURIS';
+  title: string;
+  contextTag: string;
+  sourceKind: SourceKind;
+  literalSnippets: { text: string; max25w: true }[];
+  source: { label: string; url?: string; note?: string };
+  usageInCourt: string;
+  linkedFrom: string[];
 };
-export const PGASEN_LAW_REFS: LawRef[] = [
-  { id:"L-CC-400", kind:"NORMA", ref:"CC art. 400", where:"Demanda (Fondo) — división cosa común" },
-  { id:"L-CC-404", kind:"NORMA", ref:"CC art. 404", where:"Demanda (Fondo) y Suplico" },
-  { id:"L-CC-1062", kind:"NORMA", ref:"CC art. 1062", where:"Demanda (Fondo)" },
-  { id:"L-LEC-250-1-16", kind:"NORMA", ref:"LEC art. 250.1.16", where:"Demanda (Procedimiento)" },
-  { id:"L-LEC-249-2", kind:"NORMA", ref:"LEC art. 249.2", where:"Demanda (Procedimiento)" },
-  { id:"L-LEC-73", kind:"NORMA", ref:"LEC art. 73", where:"Demanda (Procedimiento)" },
-  { id:"L-LEC-399", kind:"NORMA", ref:"LEC art. 399", where:"Referencia procesal para claridad/precisión del petitum", literal:"NO_CONSTA", note:"Referencia normativa añadida; literal no consta en dataset PGASEN." },
-  { id:"L-LEC-416-1-5", kind:"NORMA", ref:"LEC art. 416.1.5ª", where:"Defecto legal por falta de claridad/precisión", literal:"NO_CONSTA", note:"Referencia normativa añadida; literal no consta en dataset PGASEN." },
-  { id:"L-LEC-424", kind:"NORMA", ref:"LEC art. 424", where:"Aclaración/subsanación en audiencia previa", literal:"NO_CONSTA", note:"Referencia normativa añadida; literal no consta en dataset PGASEN." },
-  { id:"L-LEC-219", kind:"NORMA", ref:"LEC art. 219", where:"Condena dineraria: cuantía o bases aritméticas", literal:"NO_CONSTA", note:"Referencia normativa añadida; literal no consta en dataset PGASEN." },
-  { id:"L-LEC-394", kind:"NORMA", ref:"LEC art. 394", where:"Demanda (Costas) y Contestación (Costas)" },
-  { id:"L-CC-1964-2", kind:"NORMA", ref:"CC art. 1964.2", where:"Contestación (Prescripción)", note:"Citado literalmente en contestación" },
-  { id:"L-CC-1358", kind:"NORMA", ref:"CC art. 1358", where:"Contestación (inaplicabilidad/argumentación)" },
-  { id:"L-CC-1195-ss", kind:"NORMA", ref:"CC arts. 1195 y ss.", where:"Contestación (compensación)" },
-  { id:"J-STS-2004-03-12", kind:"JURIS", ref:"STS n.º 212, 12/03/2004 (rec. 1379/1998)", where:"Demanda (Fondo) — cita jurisprudencia" },
-  { id:"J-STS-2018-06-12", kind:"JURIS", ref:"STS 12/06/2018 (mencionada en contestación)", where:"Contestación (maquinaria/fondos comunes)" }
+
+export const PGASEN_LAW_REFS: NormRef[] = [
+  {
+    id: 'LEC-399',
+    kind: 'NORMA',
+    title: 'LEC art. 399',
+    contextTag: 'Defecto legal / claridad petitum',
+    sourceKind: 'EXTERNO_OFICIAL',
+    literalSnippets: [{ text: 'El juicio principiará por demanda, en la que se consignarán los datos y circunstancias de identificación del actor.', max25w: true }],
+    source: { label: 'BOE-A-2000-323 · art. 399', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2000-323#a399', note: 'Referencia externa oficial; no forma parte de PGASEN.' },
+    usageInCourt: 'Anclar que la demanda debe venir correctamente identificada y estructurada desde inicio, sin remisiones indeterminadas.',
+    linkedFrom: ['I-011', 'I-012'],
+  },
+  {
+    id: 'LEC-416-1-5', kind: 'NORMA', title: 'LEC art. 416.1.5ª', contextTag: 'Defecto legal / claridad petitum', sourceKind: 'EXTERNO_OFICIAL',
+    literalSnippets: [{ text: 'En la audiencia, examinadas las alegaciones, se resolverá sobre defectos procesales que impidan la válida prosecución y término del proceso.', max25w: true }],
+    source: { label: 'BOE-A-2000-323 · art. 416', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2000-323#a416', note: 'Referencia externa oficial; no forma parte de PGASEN.' },
+    usageInCourt: 'Fundamentar la depuración en AP cuando falta concreción apta para contradicción y prueba útil.', linkedFrom: ['I-011', 'I-012'],
+  },
+  {
+    id: 'LEC-424', kind: 'NORMA', title: 'LEC art. 424', contextTag: 'Subsanación en audiencia previa', sourceKind: 'EXTERNO_OFICIAL',
+    literalSnippets: [{ text: 'Cuando no se hubiese formulado con claridad y precisión lo alegado, las partes podrán realizar aclaraciones y precisiones oportunas.', max25w: true }],
+    source: { label: 'BOE-A-2000-323 · art. 424', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2000-323#a424', note: 'Referencia externa oficial; no forma parte de PGASEN.' },
+    usageInCourt: 'Pedir aclaración material del petitum y de bases de cálculo sin reabrir hechos nuevos.', linkedFrom: ['I-011', 'I-012'],
+  },
+  {
+    id: 'LEC-219', kind: 'NORMA', title: 'LEC art. 219', contextTag: 'Condena dineraria / bases aritméticas', sourceKind: 'EXTERNO_OFICIAL',
+    literalSnippets: [{ text: 'Cuando se reclame cantidad de dinero, la demanda deberá fijarla con claridad o establecer con precisión las bases para su liquidación.', max25w: true }],
+    source: { label: 'BOE-A-2000-323 · art. 219', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2000-323#a219', note: 'Referencia externa oficial; no forma parte de PGASEN.' },
+    usageInCourt: 'Reforzar que no basta cuantía global: se exige cifra o bases concretas liquidables.', linkedFrom: ['I-011', 'I-007'],
+  },
+  {
+    id: 'LEC-250-1-16', kind: 'NORMA', title: 'LEC art. 250.1.16', contextTag: 'Procedimiento', sourceKind: 'EXTERNO_OFICIAL',
+    literalSnippets: [{ text: 'Se decidirán en juicio verbal, cualquiera que sea su cuantía, las demandas que pretendan la división judicial de patrimonios.', max25w: true }],
+    source: { label: 'BOE-A-2000-323 · art. 250.1.16', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2000-323#a250', note: 'Referencia externa oficial; no forma parte de PGASEN.' },
+    usageInCourt: 'Separar cauce especial por materia frente a reclamaciones dinerarias por cuantía.', linkedFrom: ['I-010'],
+  },
+  {
+    id: 'LEC-249-2', kind: 'NORMA', title: 'LEC art. 249.2', contextTag: 'Procedimiento', sourceKind: 'EXTERNO_OFICIAL',
+    literalSnippets: [{ text: 'Se decidirán también en juicio ordinario las demandas cuya cuantía exceda de quince mil euros.', max25w: true }],
+    source: { label: 'BOE-A-2000-323 · art. 249.2', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2000-323#a249', note: 'Referencia externa oficial; no forma parte de PGASEN.' },
+    usageInCourt: 'Oponer el tramo de reintegro por cuantía para evidenciar incompatibilidad con el verbal por materia.', linkedFrom: ['I-010'],
+  },
+  {
+    id: 'LEC-73', kind: 'NORMA', title: 'LEC art. 73', contextTag: 'Acumulación de acciones', sourceKind: 'EXTERNO_OFICIAL',
+    literalSnippets: [{ text: 'Para la acumulación de acciones será preciso que no sean incompatibles entre sí y que corresponda su conocimiento al mismo tribunal.', max25w: true }],
+    source: { label: 'BOE-A-2000-323 · art. 73', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2000-323#a73', note: 'Referencia externa oficial; no forma parte de PGASEN.' },
+    usageInCourt: 'Sostener la incompatibilidad de mezclar acciones de cauce heterogéneo en una sola tramitación.', linkedFrom: ['I-010'],
+  },
+  {
+    id: 'LEC-394', kind: 'NORMA', title: 'LEC art. 394', contextTag: 'Costas', sourceKind: 'EXTERNO_OFICIAL',
+    literalSnippets: [{ text: 'En los procesos declarativos, las costas de la primera instancia se impondrán a la parte que haya visto rechazadas todas sus pretensiones.', max25w: true }],
+    source: { label: 'BOE-A-2000-323 · art. 394', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2000-323#a394', note: 'Referencia externa oficial; no forma parte de PGASEN.' },
+    usageInCourt: 'Cerrar petición de costas con referencia breve en caso de estimación íntegra de objeciones procesales.', linkedFrom: [],
+  },
+  {
+    id: 'CC-1964-2', kind: 'NORMA', title: 'CC art. 1964.2', contextTag: 'Prescripción', sourceKind: 'PGASEN',
+    literalSnippets: [{ text: 'Citado literalmente en contestación; verificar en visor interno para reproducción íntegra.', max25w: true }],
+    source: { label: 'Contestacion_picassent_transcrita.docx · Prescripción', note: 'Fuente interna PGASEN.' },
+    usageInCourt: 'Usar solo para bloque de prescripción si se abre debate de fondo sobre partidas antiguas.', linkedFrom: ['I-009'],
+  },
+  {
+    id: 'J-STS-280-2022', kind: 'JURIS', title: 'STS 280/2022', contextTag: 'Jurisprudencia procesal', sourceKind: 'EXTERNO_OFICIAL',
+    literalSnippets: [{ text: 'ROJ STS 1387/2022 · ECLI:ES:TS:2022:1387 · CENDOJ 28079110012022100291 (literal pendiente de inserción verificable).', max25w: true }],
+    source: { label: 'CENDOJ / CGPJ · STS 280/2022', url: 'https://www.poderjudicial.es/search/indexAN.jsp', note: 'Referencia externa oficial; no forma parte de PGASEN.' },
+    usageInCourt: 'Cita de refuerzo solo con identificador completo; si no se abre documento oficial, no leer literal.', linkedFrom: ['I-010'],
+  },
+  {
+    id: 'J-ATS-8529-2023', kind: 'JURIS', title: 'ATS 8529/2023', contextTag: 'Jurisprudencia procesal', sourceKind: 'EXTERNO_OFICIAL',
+    literalSnippets: [{ text: 'NO_CONSTA: falta ROJ/CENDOJ completo verificable en este repositorio.', max25w: true }],
+    source: { label: 'CENDOJ / CGPJ', url: 'https://www.poderjudicial.es/search/indexAN.jsp', note: 'Referencia externa oficial; no forma parte de PGASEN.' },
+    usageInCourt: 'No citar literal en sala sin resolución oficial completa y contrastada.', linkedFrom: ['I-010'],
+  },
 ];
 
 export const PGASEN_AP_SCRIPTS = {
