@@ -3,7 +3,7 @@
 // ============================================
 
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams, type NavigateFunction } from 'react-router-dom';
 import {
   Scale,
   FileText,
@@ -39,12 +39,12 @@ import { getCaseAmounts } from '../../utils/moneyCase';
 // Análisis financiero específico para Quart
 import { QuartFinancialAnalysis } from './QuartFinancialAnalysis';
 // Registro de PDFs
-import { getPDFsByCaso, getPDFUrl, tipoDocIcons, tipoDocColors, type PDFDocument } from '../../data/pdfRegistry';
+import { getPDFsByCaso, getPDFUrl, tipoDocIcons, tipoDocColors } from '../../data/pdfRegistry';
 // Visor PDF embebido (evita que React Router intercepte las URLs)
 import { EmbeddedPDFViewer } from '../../components/EmbeddedPDFViewer';
 import { Modal } from '../../components';
 // Timeline específico para Picassent
-import { PicassentHechosReclamados, PicassentHipotecaResumen, PicassentTimeline } from './PicassentTimeline';
+import { PicassentHechosReclamados, PicassentTimeline } from './PicassentTimeline';
 import CaseTimelineBase from './CaseTimelineBase';
 import { MislataTimeline } from './MislataTimeline';
 import { QuartTimeline } from './QuartTimeline';
@@ -64,20 +64,24 @@ import {
 // ============================================
 // 1. DASHBOARD EJECUTIVO (Tab Resumen) - DINÁMICO
 // ============================================
-function TabResumen({ caseData, strategies, events, facts, partidas, documents, navigate, setActiveTab, isReadMode }: any) {
+type TabResumenProps = {
+  caseData: Case;
+  strategies: Strategy[];
+  events: Event[];
+  facts: Fact[];
+  partidas: Partida[];
+  documents: Document[];
+  navigate: NavigateFunction;
+  setActiveTab: (tabId: string) => void;
+  isReadMode: boolean;
+};
+
+function TabResumen({ caseData, strategies, events, facts, partidas, documents, navigate, setActiveTab, isReadMode }: TabResumenProps) {
   // Motor de cuantías (Anti-Fantasmas)
   const amounts = getCaseAmounts(caseData, partidas);
-  const totalPartidas = amounts.analytic;
-
-  // Hechos ordenados por riesgo
-  const factsByRisk = [...facts].sort((a: Fact, b: Fact) => {
-    const riskOrder: Record<string, number> = { alto: 0, medio: 1, bajo: 2 };
-    return (riskOrder[a.risk || 'bajo'] || 2) - (riskOrder[b.risk || 'bajo'] || 2);
-  });
-  const topFacts = factsByRisk.slice(0, 4);
 
   const nextEvent = events
-    .filter((e: Event) => new Date(e.date).getTime() >= Date.now())
+    .filter((e: Event) => new Date(e.date).getTime() >= new Date().getTime())
     .sort((a: Event, b: Event) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
 
   // Contadores por estado de hechos
@@ -108,13 +112,11 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
     e.title?.toLowerCase().includes('audiencia') ||
     e.title?.toLowerCase().includes('juicio')
   );
-  const diasHastaVista = vistaEvent ? Math.ceil((new Date(vistaEvent.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+  const diasHastaVista = vistaEvent
+    ? Math.ceil((new Date(vistaEvent.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+    : null;
 
-  // TODO: Indicadores probatorios - pendiente implementar enlaces
-  // Por ahora contamos hechos sin evidencia como aquellos sin enlaces (simplificado)
   const hechosCount = facts.length;
-  const hechosSinEvidencia = facts.length; // TODO: filtrar por enlaces reales
-  const partidasSinSoporte = partidas.length; // TODO: filtrar por enlaces reales
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -408,7 +410,7 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
           </div>
 
           <div className="space-y-2">
-            {strategies.slice(0, 3).map((s: Strategy, i: number) => (
+            {strategies.slice(0, 3).map((s: Strategy) => (
               <div key={s.id} className={`p-3 rounded-xl border ${
                 s.risk === 'Alto' ? 'bg-rose-500/10 border-rose-500/30' :
                 s.risk === 'Medio' ? 'bg-amber-500/10 border-amber-500/30' :
@@ -500,7 +502,12 @@ function TabResumen({ caseData, strategies, events, facts, partidas, documents, 
 // ============================================
 // 2. TAB DOCUMENTOS (El Lector Inteligente - MÓVIL FULLSCREEN)
 // ============================================
-function TabDocs({ documents, caseData }: any) {
+type TabDocsProps = {
+  documents: Document[];
+  caseData: Case;
+};
+
+function TabDocs({ documents, caseData }: TabDocsProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedDocKey = searchParams.get('doc');
 
@@ -936,7 +943,13 @@ function TabEconomico({ caseId, facts, caseData }: { caseId: string, facts: Fact
   );
 }
 
-function TabEstrategia({ strategies, caseId, caseData }: any) {
+type TabEstrategiaProps = {
+  strategies: Strategy[];
+  caseId?: string;
+  caseData: Case;
+};
+
+function TabEstrategia({ strategies, caseId, caseData }: TabEstrategiaProps) {
   const caseKey = getCaseKey(caseData);
   const isPicassent = caseKey === 'picassent';
   const isMislata = caseKey === 'mislata';
@@ -1594,21 +1607,14 @@ export function CaseDetailPage() {
     })();
   }, [id, navigate]);
 
-  // Si cambia la URL (por ejemplo al volver de ver un documento), actualizar el tab
-  useEffect(() => {
-    if (!tabParam) return;
-    if (tabParam === 'actuaciones') {
-      setActiveTab('cronologia');
-      setCronologiaView('actuaciones');
-      return;
-    }
-    if (resolvedTabParam) {
-      setActiveTab(resolvedTabParam);
-      if (resolvedTabParam === 'cronologia') {
-        setCronologiaView('cronologia');
-      }
-    }
-  }, [tabParam, resolvedTabParam]);
+  const displayedTab = tabParam === 'actuaciones'
+    ? 'cronologia'
+    : resolvedTabParam || activeTab;
+  const displayedCronologiaView = tabParam === 'actuaciones'
+    ? 'actuaciones'
+    : resolvedTabParam === 'cronologia'
+      ? 'cronologia'
+      : cronologiaView;
 
   const handleTabChange = (tabId: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -1706,7 +1712,7 @@ export function CaseDetailPage() {
               ...(isPicassent ? [{ id: 'audiencia', label: '⚖️ Sala (AP)', shortLabel: '⚖️' }] : []),
               ...(isMislata ? [{ id: 'defensa1145', label: '🛡️ Defensa 1145', shortLabel: '🛡️' }] : []),
               ...(isQuart ? [{ id: 'defensa360', label: '🛡️ Defensa 360', shortLabel: '🛡️' }] : []),
-              { id: 'escenarios', label: '🧠 Escenarios (Grafo)', shortLabel: '🧠' },
+              { id: 'escenarios', label: '⚖️ Inconcreciones', shortLabel: '⚖️' },
               { id: 'economico', label: '💰 Económico', shortLabel: '💰' },
               { id: 'docs', label: '📂 Documentos', shortLabel: '📂' },
             ].map(tab => (
@@ -1714,7 +1720,7 @@ export function CaseDetailPage() {
                 key={tab.id}
                 data-tab={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`pb-2 sm:pb-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                className={`pb-2 sm:pb-3 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${displayedTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
               >
                 <span className="hidden sm:inline">{tab.label}</span>
                 <span className="sm:hidden">
@@ -1745,15 +1751,15 @@ export function CaseDetailPage() {
 
       {/* CONTENIDO */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {activeTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} partidas={partidas} documents={docs} navigate={navigate} setActiveTab={setActiveTab} isReadMode={isReadMode} />}
-        {activeTab === 'cronologia' && (
+        {displayedTab === 'resumen' && <TabResumen caseData={currentCase} strategies={strategies} events={events} facts={facts} partidas={partidas} documents={docs} navigate={navigate} setActiveTab={setActiveTab} isReadMode={isReadMode} />}
+        {displayedTab === 'cronologia' && (
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => handleCronologiaViewChange('cronologia')}
                 className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
-                  cronologiaView === 'cronologia'
+                  displayedCronologiaView === 'cronologia'
                     ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-200'
                     : 'border-white/10 text-slate-200 hover:bg-white/5'
                 }`}
@@ -1764,7 +1770,7 @@ export function CaseDetailPage() {
                 type="button"
                 onClick={() => handleCronologiaViewChange('actuaciones')}
                 className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
-                  cronologiaView === 'actuaciones'
+                  displayedCronologiaView === 'actuaciones'
                     ? 'border-amber-400/60 bg-amber-500/10 text-amber-200'
                     : 'border-white/10 text-slate-200 hover:bg-white/5'
                 }`}
@@ -1772,7 +1778,7 @@ export function CaseDetailPage() {
                 Hitos
               </button>
             </div>
-            {cronologiaView === 'cronologia' ? (
+            {displayedCronologiaView === 'cronologia' ? (
               isPicassent ? (
                 <div className="animate-in fade-in duration-500">
                   <PicassentTimeline />
@@ -1815,7 +1821,7 @@ export function CaseDetailPage() {
                 {[...events].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(e => {
                   const eventDate = new Date(e.date);
                   const isPast = eventDate < new Date();
-                  const isSoon = !isPast && (eventDate.getTime() - Date.now()) < 7 * 24 * 60 * 60 * 1000;
+                  const isSoon = !isPast && (eventDate.getTime() - new Date().getTime()) < 7 * 24 * 60 * 60 * 1000;
 
                   return (
                     <Link
@@ -1875,15 +1881,15 @@ export function CaseDetailPage() {
             )}
           </div>
         )}
-        {activeTab === 'audiencia' && isPicassent && <TabAudienciaPreviaPicassent caseId={id!} isReadMode={isReadMode} />}
-        {activeTab === 'defensa360' && isQuart && <TabDefensa360Quart />}
-        {activeTab === 'defensa1145' && isMislata && <TabDefensa360Mislata />}
-        {activeTab === 'escenarios' && (
+        {displayedTab === 'audiencia' && isPicassent && <TabAudienciaPreviaPicassent caseId={id!} isReadMode={isReadMode} />}
+        {displayedTab === 'defensa360' && isQuart && <TabDefensa360Quart />}
+        {displayedTab === 'defensa1145' && isMislata && <TabDefensa360Mislata />}
+        {displayedTab === 'escenarios' && (
           <TabEscenarios caseId={currentCase.id} facts={facts} partidas={partidas} documents={docs} />
         )}
-        {activeTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
-        {activeTab === 'docs' && <TabDocs documents={docs} caseData={currentCase} />}
-        {activeTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} caseData={currentCase} />}
+        {displayedTab === 'economico' && <TabEconomico caseId={id!} facts={facts} caseData={currentCase} />}
+        {displayedTab === 'docs' && <TabDocs documents={docs} caseData={currentCase} />}
+        {displayedTab === 'estrategia' && <TabEstrategia strategies={strategies} caseId={id} caseData={currentCase} />}
       </main>
     </div>
   );

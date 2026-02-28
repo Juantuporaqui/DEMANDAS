@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { Document, Fact, Partida } from '../../../types';
 import type { EscenarioVista, RefutacionItem } from '../../../data/escenarios/types';
 import { AnalisisTecnico, type MonteCarloSummary } from './AnalisisTecnico';
+import { TabInconcreciones } from './TabInconcreciones';
 
 type TabEscenariosProps = {
   caseId: string;
@@ -48,8 +49,8 @@ const tipoBadgeStyles: Record<EscenarioVista['tipo'], string> = {
 };
 
 export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenariosProps) {
-  const [viewMode, setViewMode] = useState<'estrategia' | 'laboratorio'>('estrategia');
-  const [selectedEscenarioIndex, setSelectedEscenarioIndex] = useState(0);
+  const [viewMode, setViewMode] = useState<'inconcreciones' | 'estrategia' | 'laboratorio'>('inconcreciones');
+  const [selectedEscenarioIndexByCase, setSelectedEscenarioIndexByCase] = useState<Record<string, number>>({});
   const [checkedPoints, setCheckedPoints] = useState<Record<string, boolean>>({});
   const [monteCarloSummary, setMonteCarloSummary] = useState<MonteCarloSummary | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -58,12 +59,9 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
   const caseKey = useMemo(() => getCaseKey(caseId), [caseId]);
   const escenarios = escenariosByCase[caseKey] ?? [];
   const refutacion = refutacionByCase[caseKey] ?? [];
+  const selectedEscenarioIndex = selectedEscenarioIndexByCase[caseKey] ?? 0;
   const selectedEscenario = escenarios[selectedEscenarioIndex] ?? escenarios[0];
   const isPicassent = caseKey === 'picassent';
-
-  useEffect(() => {
-    setSelectedEscenarioIndex(0);
-  }, [caseKey]);
 
   useEffect(() => {
     const handler = () => setIsFullscreen(Boolean(document.fullscreenElement));
@@ -116,6 +114,17 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
             <div className="flex items-center rounded-full border border-slate-700 bg-slate-950/60 p-1 text-[11px] text-slate-300">
               <button
                 type="button"
+                onClick={() => setViewMode('inconcreciones')}
+                className={`rounded-full px-3 py-1 transition ${
+                  viewMode === 'inconcreciones'
+                    ? 'bg-emerald-500/20 text-emerald-200'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                ⚖️ Inconcreciones
+              </button>
+              <button
+                type="button"
                 onClick={() => setViewMode('estrategia')}
                 className={`rounded-full px-3 py-1 transition ${
                   viewMode === 'estrategia'
@@ -148,6 +157,16 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         </div>
       </div>
 
+      {viewMode === 'inconcreciones' && (
+        <TabInconcreciones
+          caseId={caseId}
+          facts={facts}
+          partidas={partidas}
+          documents={documents}
+          onGoToView={setViewMode}
+        />
+      )}
+
       {viewMode === 'estrategia' && (
         <div className="space-y-6">
           <div className="rounded-3xl border border-slate-800 bg-[#1a202c] p-6 text-slate-100 shadow-[0_20px_60px_-40px_rgba(0,0,0,0.6)]">
@@ -178,7 +197,9 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
                   <button
                     key={`${escenario.titulo}-${index}`}
                     type="button"
-                    onClick={() => setSelectedEscenarioIndex(index)}
+                    onClick={() =>
+                      setSelectedEscenarioIndexByCase((prev) => ({ ...prev, [caseKey]: index }))
+                    }
                     className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
                       index === selectedEscenarioIndex
                         ? 'border-[#f9ca24] bg-[#f9ca24]/20 text-[#f9ca24]'
@@ -381,7 +402,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
         </div>
       )}
 
-      <div className={viewMode === 'laboratorio' ? '' : 'hidden'} aria-hidden={viewMode !== 'laboratorio'}>
+      {viewMode === 'laboratorio' && (
         <AnalisisTecnico
           caseId={caseId}
           facts={facts}
@@ -389,7 +410,7 @@ export function TabEscenarios({ caseId, facts, partidas, documents }: TabEscenar
           documents={documents}
           onMonteCarloSummary={setMonteCarloSummary}
         />
-      </div>
+      )}
     </div>
   );
 }
