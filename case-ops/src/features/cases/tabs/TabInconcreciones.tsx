@@ -19,6 +19,8 @@ type TabInconcrecionesProps = {
 
 type InternalTab = 'vista-rapida' | 'partidas' | 'cronologia' | 'guion' | 'normativa';
 type ScriptMode = '60s' | '3-4' | 'full' | 'asks' | 'protests';
+type NormKindFilter = 'all' | 'NORMA' | 'JURIS';
+type SourceKindFilter = 'all' | 'PGASEN' | 'EXTERNO_OFICIAL';
 
 type Filters = {
   search: string;
@@ -49,6 +51,10 @@ export function TabInconcreciones({ documents, onGoToView }: TabInconcrecionesPr
   const [apMode, setApMode] = useState(false);
   const [scriptMode, setScriptMode] = useState<ScriptMode>('60s');
   const [copyFeedback, setCopyFeedback] = useState<string>('');
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [normKind, setNormKind] = useState<NormKindFilter>('all');
+  const [normSourceKind, setNormSourceKind] = useState<SourceKindFilter>('all');
+  const [normSearch, setNormSearch] = useState('');
   const [filters, setFilters] = useState<Filters>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -179,6 +185,30 @@ export function TabInconcreciones({ documents, onGoToView }: TabInconcrecionesPr
     return blocks;
   }, [filteredIssues]);
 
+  const normRefs = useMemo(() => {
+    const q = normSearch.trim().toLowerCase();
+    return PGASEN_LAW_REFS.filter((item) => (normKind === 'all' ? true : item.kind === normKind))
+      .filter((item) => (normSourceKind === 'all' ? true : item.sourceKind === normSourceKind))
+      .filter((item) => {
+        if (!q) return true;
+        return [item.id, item.title, item.contextTag, item.usageInCourt, item.source.label, item.source.note, ...item.literalSnippets.map((s) => s.text)]
+          .join(' ')
+          .toLowerCase()
+          .includes(q);
+      });
+  }, [normKind, normSearch, normSourceKind]);
+
+  const insertFundamentos = (group: 'defecto' | 'procedimiento') => {
+    const refIds = group === 'defecto'
+      ? ['LEC-399', 'LEC-416-1-5', 'LEC-424', 'LEC-219']
+      : ['LEC-250-1-16', 'LEC-249-2', 'LEC-73'];
+    const payload = PGASEN_LAW_REFS
+      .filter((item) => refIds.includes(item.id))
+      .map((item) => `• ${item.title} [${item.sourceKind}]`)
+      .join('\n');
+    void copyText(payload, `fundamentos ${group}`);
+  };
+
   const printableNode = activeTab === 'guion' ? scriptRef.current : detailRef.current;
 
   const handlePrintPanel = async () => {
@@ -227,34 +257,12 @@ export function TabInconcreciones({ documents, onGoToView }: TabInconcrecionesPr
       </div>
 
       {activeTab === 'vista-rapida' && (
-        <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
-          <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/60">
-            <table className="min-w-full text-xs text-slate-200">
-              <thead className="bg-slate-950 text-[11px] uppercase text-slate-400"><tr><th className="px-2 py-2 text-left">ID</th><th className="px-2 py-2 text-left">Sev.</th><th className="px-2 py-2 text-left">Categoría</th><th className="px-2 py-2 text-left">Tema</th><th className="px-2 py-2 text-left">Qué está mal</th><th className="px-2 py-2 text-left">Dónde</th><th className="px-2 py-2 text-left">Impacto</th><th className="px-2 py-2 text-right">Acción</th></tr></thead>
-              <tbody>{filteredIssues.map((item) => <tr key={item.id} className="border-t border-slate-800"><td className="px-2 py-2 font-mono">{item.id}</td><td className="px-2 py-2">{item.severity}</td><td className="px-2 py-2">{item.category}</td><td className="px-2 py-2">{item.topic}</td><td className="px-2 py-2">{item.summary}</td><td className="px-2 py-2">{item.source.docName} · {item.source.anchorLabel ?? item.source.docNumbers?.join(', ') ?? 'NO_CONSTA'}</td><td className="px-2 py-2">{item.rebuttalOneLiner}</td><td className="px-2 py-2 text-right"><button type="button" onClick={() => setSelectedIssueId(item.id)} className="rounded-full border border-emerald-500/50 px-2 py-1 text-[11px] text-emerald-200">Ver</button></td></tr>)}</tbody>
+        <div className="min-w-0">
+          <div className="min-w-0 overflow-x-hidden rounded-2xl border border-slate-800 bg-slate-900/60">
+            <table className="w-full table-fixed text-xs text-slate-200">
+              <thead className="bg-slate-950 text-[11px] uppercase text-slate-400"><tr><th className="w-[10rem] px-2 py-2 text-left">ID / Sev</th><th className="w-[15rem] px-2 py-2 text-left">Categoría / Tema</th><th className="px-2 py-2 text-left">Qué está mal</th><th className="w-[15rem] px-2 py-2 text-left">Dónde</th><th className="w-[6rem] px-2 py-2 text-right">Acción</th></tr></thead>
+              <tbody>{filteredIssues.map((item) => <tr key={item.id} className="border-t border-slate-800 align-top"><td className="px-2 py-2 whitespace-normal break-words align-top"><div className="font-mono">{item.id}</div><div className="text-[11px] text-amber-200">{item.severity}</div></td><td className="px-2 py-2 whitespace-normal break-words align-top"><div>{item.category}</div><div className="text-[11px] text-slate-400">{item.topic}</div></td><td className="px-2 py-2 whitespace-normal break-words align-top"><p className="line-clamp-2">{item.summary}</p><p className="mt-1 line-clamp-1 text-[11px] text-slate-400">Impacto: {item.rebuttalOneLiner}</p></td><td className="px-2 py-2 whitespace-normal break-words align-top">{item.source.docName} · {item.source.anchorLabel ?? item.source.docNumbers?.join(', ') ?? 'NO_CONSTA'}</td><td className="px-2 py-2 text-right align-top"><button type="button" onClick={() => { setSelectedIssueId(item.id); setDetailOpen(true); }} className="rounded-full border border-emerald-500/50 px-2 py-1 text-[11px] text-emerald-200">Ver</button></td></tr>)}</tbody>
             </table>
-          </div>
-
-          <div ref={detailRef} className="ap-readable rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-200">
-            <div className="mb-2 text-sm font-semibold text-white">Detalle</div>
-            {!selectedIssue ? <p className="text-slate-400">NO_CONSTA</p> : (
-              <div className="space-y-2">
-                {selectedIssue.category === 'DEFECTO_LEGAL_416_1_5' ? <div className="rounded border border-amber-600/60 bg-amber-950/30 p-2 text-amber-100">Defecto legal (LEC 416.1.5ª): prioridad de saneamiento.</div> : null}
-                <div><span className="text-slate-400">Descripción:</span> {selectedIssue.summary || 'NO_CONSTA'}</div>
-                <div><span className="text-slate-400">Cita corta:</span> {selectedIssue.quoteShort || 'NO_CONSTA'}</div>
-                <div>
-                  <span className="text-slate-400">Fuente:</span> {selectedIssue.source.docName || 'NO_CONSTA'} · {selectedIssue.source.anchorLabel ?? selectedIssue.source.docNumbers?.join(' · ') ?? selectedIssue.source.refId ?? 'NO_CONSTA'}
-                  {(() => {
-                    const doc = resolveDoc(selectedIssue.source.docName);
-                    if (!doc) return <span className="text-slate-500"> · NO_CONSTA (falta documento en índice de visor)</span>;
-                    const hash = selectedIssue.source.refId ? `?ref=${encodeURIComponent(selectedIssue.source.refId)}` : '';
-                    return <Link className="ml-2 text-emerald-300 hover:text-emerald-200" to={`/documents/${doc.id}/view${hash}`}>Abrir en fuente</Link>;
-                  })()}
-                </div>
-                <div><span className="text-slate-400">Qué pedir en AP:</span> {selectedIssue.apAsk || 'NO_CONSTA'}</div>
-                <button type="button" onClick={() => setSourceIssueId(selectedIssue.id)} className="rounded-full border border-slate-600 px-3 py-1 text-[11px]">Ver extracto fuente</button>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -293,6 +301,8 @@ export function TabInconcreciones({ documents, onGoToView }: TabInconcrecionesPr
               ['protests', 'Protestas'],
             ] as const).map(([id, label]) => <button key={id} type="button" onClick={() => setScriptMode(id)} className={`rounded-full border px-3 py-1 ${scriptMode === id ? 'border-emerald-500 text-emerald-200' : 'border-slate-700 text-slate-300'}`}>{label}</button>)}
             <button type="button" onClick={() => void copyText(guionBlocks[scriptMode].join('\n'), `guión ${scriptMode}`)} className="rounded-full border border-slate-600 px-3 py-1">Copiar</button>
+            <button type="button" onClick={() => insertFundamentos('defecto')} className="rounded-full border border-indigo-500/60 px-3 py-1 text-indigo-200">Insertar fundamentos (defecto legal)</button>
+            <button type="button" onClick={() => insertFundamentos('procedimiento')} className="rounded-full border border-indigo-500/60 px-3 py-1 text-indigo-200">Insertar fundamentos (procedimiento)</button>
           </div>
           <ol className="space-y-2 list-decimal pl-4">{guionBlocks[scriptMode].map((line, idx) => <li key={`${scriptMode}-${idx}`}>{line}</li>)}</ol>
         </div>
@@ -300,18 +310,60 @@ export function TabInconcreciones({ documents, onGoToView }: TabInconcrecionesPr
 
       {activeTab === 'normativa' && (
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+          <div className="mb-3 grid gap-2 sm:grid-cols-3">
+            <select value={normKind} onChange={(e) => setNormKind(e.target.value as NormKindFilter)} className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100"><option value="all">Tipo</option><option value="NORMA">NORMA</option><option value="JURIS">JURIS</option></select>
+            <select value={normSourceKind} onChange={(e) => setNormSourceKind(e.target.value as SourceKindFilter)} className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100"><option value="all">Origen</option><option value="PGASEN">PGASEN</option><option value="EXTERNO_OFICIAL">EXTERNO_OFICIAL</option></select>
+            <input value={normSearch} onChange={(e) => setNormSearch(e.target.value)} placeholder="Buscar referencia…" className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100" />
+          </div>
           <ul className="space-y-2 text-xs text-slate-200">
-            {PGASEN_LAW_REFS.map((item) => (
+            {normRefs.map((item) => (
               <li key={item.id} className="rounded-lg border border-slate-800/70 bg-slate-950/40 p-2">
-                <span className="font-semibold text-emerald-200">{item.kind}</span> · {item.ref} · {item.where}
-                <div className="mt-1 text-slate-300">Literal: {item.literal ?? 'NO_CONSTA'}</div>
-                <div className="text-slate-400">Fuente: {item.sourceDoc ?? 'NO_CONSTA'} {item.sourceAnchor ? `· ${item.sourceAnchor}` : ''}</div>
-                {item.note ? <span className="text-slate-400">Nota: {item.note}</span> : null}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-emerald-200">{item.kind}</span>
+                  <span>· {item.title}</span>
+                  <span className={`rounded-full border px-2 py-0.5 text-[10px] ${item.sourceKind === 'PGASEN' ? 'border-cyan-500/50 text-cyan-200' : 'border-violet-500/50 text-violet-200'}`}>{item.sourceKind}</span>
+                  <span className="text-slate-400">· {item.contextTag}</span>
+                </div>
+                <ul className="mt-1 space-y-1 text-slate-300">
+                  {item.literalSnippets.map((snippet, idx) => <li key={`${item.id}-${idx}`}>Literal {idx + 1}: {snippet.text}</li>)}
+                </ul>
+                <div className="mt-1 text-slate-400">Uso en sala: {item.usageInCourt}</div>
+                <div className="text-slate-400">Fuente: {item.source.label}</div>
+                {item.source.note ? <div className="text-slate-500">Nota: {item.source.note}</div> : null}
+                {item.linkedFrom.length ? <div className="mt-1 text-slate-400">Relacionadas: {item.linkedFrom.join(', ')}</div> : null}
+                {item.source.url ? <a className="mt-2 inline-block text-emerald-300 hover:text-emerald-200" href={item.source.url} target="_blank" rel="noreferrer">Abrir fuente</a> : null}
               </li>
             ))}
           </ul>
         </div>
       )}
+
+      {detailOpen ? (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true">
+          <div ref={detailRef} className="ap-readable w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-900 p-4 text-xs text-slate-200">
+            <div className="mb-2 flex items-center justify-between"><h4 className="text-sm font-semibold text-white">Detalle</h4><button aria-label="Cerrar panel detalle" type="button" onClick={() => setDetailOpen(false)} className="rounded-full border border-slate-600 px-2 py-1">Cerrar</button></div>
+            {!selectedIssue ? <p className="text-slate-400">NO_CONSTA</p> : (
+              <div className="space-y-2">
+                {selectedIssue.category === 'DEFECTO_LEGAL_416_1_5' ? <div className="rounded border border-amber-600/60 bg-amber-950/30 p-2 text-amber-100">Defecto legal (LEC 416.1.5ª): prioridad de saneamiento.</div> : null}
+                <div><span className="text-slate-400">Descripción:</span> {selectedIssue.summary || 'NO_CONSTA'}</div>
+                <div><span className="text-slate-400">Impacto en sala:</span> {selectedIssue.rebuttalOneLiner || 'NO_CONSTA'}</div>
+                <div><span className="text-slate-400">Cita corta:</span> {selectedIssue.quoteShort || 'NO_CONSTA'}</div>
+                <div>
+                  <span className="text-slate-400">Fuente:</span> {selectedIssue.source.docName || 'NO_CONSTA'} · {selectedIssue.source.anchorLabel ?? selectedIssue.source.docNumbers?.join(' · ') ?? selectedIssue.source.refId ?? 'NO_CONSTA'}
+                  {(() => {
+                    const doc = resolveDoc(selectedIssue.source.docName);
+                    if (!doc) return <span className="text-slate-500"> · NO_CONSTA (falta documento en índice de visor)</span>;
+                    const hash = selectedIssue.source.refId ? `?ref=${encodeURIComponent(selectedIssue.source.refId)}` : '';
+                    return <Link className="ml-2 text-emerald-300 hover:text-emerald-200" to={`/documents/${doc.id}/view${hash}`}>Abrir en fuente</Link>;
+                  })()}
+                </div>
+                <div><span className="text-slate-400">Qué pedir en AP:</span> {selectedIssue.apAsk || 'NO_CONSTA'}</div>
+                <button type="button" onClick={() => setSourceIssueId(selectedIssue.id)} className="rounded-full border border-slate-600 px-3 py-1 text-[11px]">Ver extracto fuente</button>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
 
       {sourceIssue ? (
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true">
