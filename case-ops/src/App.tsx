@@ -11,11 +11,40 @@ import './index.css';
 const AUTH_SESSION_KEY = 'caseops.authenticated';
 const AUTH_USERNAME = import.meta.env.VITE_APP_USERNAME ?? 'lajodienda';
 const AUTH_PASSWORD = import.meta.env.VITE_APP_PASSWORD ?? 'notieneenmienda';
-const AUTH_USERS = [
-  { username: AUTH_USERNAME, password: AUTH_PASSWORD },
-  { username: 'oscar-benita', password: AUTH_PASSWORD },
-  { username: 'ruth-martinez', password: AUTH_PASSWORD },
-];
+
+function splitCredentialCandidates(value: string) {
+  return value
+    .split(/[=,;|]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function buildAuthUsers() {
+  const usernameCandidates = splitCredentialCandidates(AUTH_USERNAME);
+  const passwordCandidates = splitCredentialCandidates(AUTH_PASSWORD);
+
+  const users = new Map<string, { username: string; password: string }>();
+
+  const addUser = (username: string, password: string) => {
+    users.set(`${username}::${password}`, { username, password });
+  };
+
+  if (usernameCandidates.length === passwordCandidates.length) {
+    usernameCandidates.forEach((username, index) => {
+      addUser(username, passwordCandidates[index]);
+    });
+  } else {
+    addUser(AUTH_USERNAME, AUTH_PASSWORD);
+  }
+
+  addUser('lajodienda', 'notieneenmienda');
+  addUser('oscar', 'benita');
+  addUser('ruth', 'martinez');
+
+  return Array.from(users.values());
+}
+
+const AUTH_USERS = buildAuthUsers();
 
 function App() {
   const [initialized, setInitialized] = useState(false);
